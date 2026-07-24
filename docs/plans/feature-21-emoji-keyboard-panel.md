@@ -1,22 +1,32 @@
 # Feature 21 — On a phone the emoji picker takes the keyboard's place
 
-**Status: superseded except for slice 1** (2026-07-24, the same day it shipped).
-On a real handset the founder's call was that a phone needs no emoji button at
-all — the on-screen keyboard has a native emoji picker. The **phone dock built
-here (slices 2–3) was removed** that morning and the student composer now hides
-its emoji button on touch
-([chat-behavior.md](../decisions/chat-behavior.md#on-a-phone-the-students-message-box-has-no-emoji-button)).
-The **teacher's bottom sheet (slice 4) went the same afternoon**, along with the
-`bottom-sheet` variant of `ui/dialog` it was the only caller of: the teacher's
-separate emoji field was folded into the character name, so there is no mobile
-picker left to shape
-([teacher-setup.md](../decisions/teacher-setup.md#a-characters-emoji-is-typed-into-its-name)).
+**Status: DONE — closed 2026-07-24.** No work is outstanding. Read the title as
+history, not as behavior: the phone panel this feature set out to build was
+built, judged on a real handset, and then removed. What closed the feature was
+deciding a phone needs no emoji picker at all.
+
+The arc, all on 2026-07-24, the day after it shipped:
+
+1. **The student's phone dock (slices 2–3) came out** that morning. On a
+   handset the founder's call was that the on-screen keyboard already has a
+   native emoji picker, so a second one is redundant. The composer now hides
+   its emoji button on touch
+   ([chat-behavior.md](../decisions/chat-behavior.md#on-a-phone-the-students-message-box-has-no-emoji-button)).
+2. **The teacher's bottom sheet (slice 4) went that afternoon**, along with the
+   `bottom-sheet` variant of `ui/dialog` it was the only caller of. The
+   teacher's separate emoji field was folded into the character name, so
+   nothing was left to shape for a phone
+   ([teacher-setup.md](../decisions/teacher-setup.md#a-characters-emoji-is-typed-into-its-name)).
 
 **What survives:** slice 1 alone — the picker-level fixes that made the desktop
 popover work well (`autoFocusSearch={false}`, the clamped popover reading
 `--radix-popper-available-height`, the `--epr-category-padding` fix,
-`transition: none`, `prefetchEmojiPicker`). Every emoji picker in the app is now
-a desktop-only popover. The record below describes the dock as originally built.
+`transition: none`, `prefetchEmojiPicker`). Slice 1 is why the picker is worth
+keeping on desktop at all, and it is the reason this feature was not a wash.
+
+**Where it ended:** every emoji picker in the app is a desktop-only popover,
+and none exists on touch anywhere. The record below describes the dock as
+originally built.
 
 ## The problem
 
@@ -80,12 +90,18 @@ machinery. Build it only if the settle reads as a jump on a real device.
 
 ## Decisions recorded
 
-- [On a phone the emoji panel takes the keyboard's place](../decisions/chat-behavior.md#on-a-phone-the-emoji-panel-takes-the-keyboards-place)
-- [On a phone, picking a character's emoji is a bottom sheet, not a popover](../decisions/teacher-setup.md#on-a-phone-picking-a-characters-emoji-is-a-bottom-sheet-not-a-popover)
-- Amended: "The composer's emoji picker stays open across inserts" (the phone
-  dismissal contract and the real cause of the focus steal) and "While a
-  student types on a phone, the world's chrome gets out of the way" (the second
-  signal).
+Both of this feature's own decisions have since been superseded — the links go
+to their Superseded entries, which name what replaced them. Neither is in
+force.
+
+- ~~[On a phone the emoji panel takes the keyboard's place](../decisions/chat-behavior.md#on-a-phone-the-emoji-panel-takes-the-keyboards-place)~~
+  → [On a phone, the student's message box has no emoji button](../decisions/chat-behavior.md#on-a-phone-the-students-message-box-has-no-emoji-button)
+- ~~[On a phone, picking a character's emoji is a bottom sheet, not a popover](../decisions/teacher-setup.md#on-a-phone-picking-a-characters-emoji-is-a-bottom-sheet-not-a-popover)~~
+  → [A character's emoji is typed into its name](../decisions/teacher-setup.md#a-characters-emoji-is-typed-into-its-name)
+- Amended at the time: "The composer's emoji picker stays open across inserts"
+  and "While a student types on a phone, the world's chrome gets out of the
+  way". The phone-specific halves of both amendments were reverted with the
+  dock; the composer-focus chrome collapse still stands.
 
 ## Verification
 
@@ -100,7 +116,16 @@ machinery. Build it only if the settle reads as a jump on a real device.
   `tools/verify/scratch/emoji-teacher.mjs` (18 checks — sheet docks to the
   bottom edge full width and names the row on a phone, popover on a laptop, no
   phantom keyboard, Remove works).
-- **Not yet run — a real handset.** Headless Chrome has no software keyboard,
-  so the composer-doesn't-move promise and the iOS pan-back caveat can only be
-  judged on a device. Recorded in
-  [docs/pending-manual-tests.md](../pending-manual-tests.md).
+- **A real handset was the verification that mattered, and it closed the
+  feature.** Headless Chrome has no software keyboard, so the
+  composer-doesn't-move promise could only be judged on a device. It was, the
+  next morning: the verdict was that a phone wants no emoji button at all. The
+  pending-manual-test entry this had open was deleted along with the dock —
+  there is nothing left to test on a handset.
+- **What replaced all of the above:**
+  `tools/verify/scratch/emoji-desktop-only.mjs` (7 checks — the composer's
+  button is present and inserts on desktop, absent on touch, for both the
+  student chat and the homepage hero) and
+  `tools/verify/scratch/character-name-emoji.mjs` (20 checks — the teacher's
+  one-input row, caret insertion, the code-point counter, and an
+  emoji-bearing name reaching a student's roster and chat header).
