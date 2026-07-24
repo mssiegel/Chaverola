@@ -5,6 +5,41 @@ area. Entries are newest-first; add new ones at the top, and add a matching line
 to the index in the same change. Replaced decisions move to Superseded at the
 bottom of this file.
 
+### A click in the live settings panel commits alone and immediately
+
+_2026-07-24_
+
+**Decision:** The live settings panel's commit gate splits by input kind.
+Clicks — the three settings switches, the auto-match seconds stepper, and a
+character row's remove button — commit the moment they happen, each carrying
+only its own change: the commit spreads from the committed activity, so a
+half-typed name, scene, or email elsewhere in the panel can neither hold the
+click back nor ride along with it. Typed fields keep the 2026-07-15 rule
+verbatim: they commit on the 1-second pause and only while the whole draft is
+valid, with the inline field error as the only signal that an edit is being
+held (founder call, 2026-07-24 — no extra "waiting" copy). Removal commits
+even while another field is invalid (same call); the Live-dot guard on a
+character in a live chat still blocks those removals.
+
+**Why:** One all-or-nothing gate froze the four controls that are wired to
+the server end to end. A teacher with `ms.cohen@` half-typed could flip
+auto-match off in the panel and nothing would happen — the rail's switch,
+the same setting a few inches away, stayed on and the class kept being
+paired, falsifying the "two switches can never disagree" guarantee. Worse
+for transcripts: a corrected email couldn't reach the server while any other
+field had a problem, so sends kept going to the old address with nothing on
+screen to say so. And a remove click with any unrelated field invalid made
+the row vanish from the panel while the roster still counted it — a phantom
+slot. The typing half of the 2026-07-15 rule stands because it protects
+students from half-typed names flashing across chat cards; a switch, a
+stepper, or a remove button has no invalid in-between state to protect
+anyone from.
+
+_Implemented in
+[LiveSettingsPanel](../../client/src/components/Teacher/HostActivity/LiveSettingsPanel.tsx)
+(`changeSettings`, `removeCharacter`); amends
+[Live edits propagate after a 1-second pause, and invalid states never do](#live-edits-propagate-after-a-1-second-pause-and-invalid-states-never-do)._
+
 ### The live settings panel only claims the edits that actually travel
 
 _2026-07-23_
@@ -1258,6 +1293,13 @@ even while the teacher is mid-edit.
 **Update (2026-07-16):** the in-use row's disabled remove control became
 the Live dot with a hint that names the character — see
 [A character in a live chat shows the Live dot, and its hint says who](#a-character-in-a-live-chat-shows-the-live-dot-and-its-hint-says-who).
+
+**Update (2026-07-24):** "invalid states never propagate" narrowed to the
+fields the teacher types in. Clicks — the settings switches, the seconds
+stepper, a row's remove button — now commit alone and immediately, valid
+draft or not; see
+[A click in the live settings panel commits alone and immediately](#a-click-in-the-live-settings-panel-commits-alone-and-immediately).
+The 1-second debounce and last-valid-wins for typed fields are unchanged.
 
 _Implemented in
 [LiveSettingsPanel](../../client/src/components/Teacher/HostActivity/LiveSettingsPanel.tsx)

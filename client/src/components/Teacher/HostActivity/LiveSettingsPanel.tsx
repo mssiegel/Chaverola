@@ -17,7 +17,7 @@ import {
   type LiveActivityDraft,
 } from "@/lib/hostActivity";
 import { useLatestRef } from "@/lib/useLatestRef";
-import type { HostedActivity } from "@/types/activity";
+import type { ActivitySettings, HostedActivity } from "@/types/activity";
 
 import { CollapsibleSection } from "./CollapsibleSection";
 
@@ -40,9 +40,13 @@ interface LiveSettingsPanelProps {
 /**
  * Everything from setup, editable mid-activity — the same flat layout the
  * teacher learned on the setup form, built from the same field components
- * and validation. Edits propagate on a 1-second typing pause; an invalid
- * in-between state (an emptied name, a duplicate, a bad email) shows its
- * inline error while the last valid value stays in effect everywhere.
+ * and validation. Typed edits propagate on a 1-second typing pause, and
+ * only while the whole draft is valid: an invalid in-between state (an
+ * emptied name, a duplicate, a bad email) shows its inline error while the
+ * last valid value stays in effect everywhere. Clicks — the settings
+ * switches, the seconds stepper, a row's remove button — commit alone and
+ * immediately: they have no invalid in-between state, so a half-typed
+ * field elsewhere never holds them back and never rides along with them.
  * See DECISIONS.md → "Teacher live activity page".
  */
 export function LiveSettingsPanel({
@@ -109,18 +113,37 @@ export function LiveSettingsPanel({
   const { patch, patchSettings, updateCharacter, addCharacter } =
     makeDraftPatches(setDraft, mintLiveCharacterId);
 
+  // A settings control is a click, not typing: it commits alone and
+  // immediately, spread from the committed activity — never rebuilt
+  // through activityFromLiveDraft — so a half-typed name, scene, or email
+  // can neither hold the click back nor ride along with it. The rail's
+  // idiom (setAutoMatch in index.tsx). The later debounce tick re-commits
+  // the same settings and the page diffs before emitting, so nothing extra
+  // goes out; the merge effect above sees the draft already agreeing and
+  // bails.
+  const changeSettings = (changes: Partial<ActivitySettings>) => {
+    patchSettings(changes);
+    onActivityChange({
+      ...activity,
+      settings: { ...draft.settings, ...changes },
+    });
+  };
+
   const removeCharacter = (id: string) => {
     const next: LiveActivityDraft = {
       ...draft,
       characters: draft.characters.filter((row) => row.id !== id),
     };
     setDraft(next);
-    // Removal is a click, not typing: a removed character must stop being
-    // offered to future pairings immediately, not a debounce later. (The
-    // debounce tick re-commits the same draft afterwards — harmless.)
-    if (validateLiveDraft(next, committedIds).length === 0) {
-      onActivityChange(activityFromLiveDraft(next, activity));
-    }
+    // Removal is a click too: it commits alone and immediately, filtered
+    // from the committed roster, so a problem in some other field can't
+    // strand the row half-removed — gone from the panel but still counted
+    // by the roster and offered to pairings. A row that was only ever
+    // local filters to a no-op here; the draft still loses it.
+    onActivityChange({
+      ...activity,
+      characters: activity.characters.filter((c) => c.id !== id),
+    });
   };
 
   const hostNameError = problemFor("hostName");
@@ -212,7 +235,7 @@ export function LiveSettingsPanel({
               bare
               settings={draft.settings}
               paused={paused}
-              onChange={patchSettings}
+              onChange={changeSettings}
             />
           </div>
         </div>

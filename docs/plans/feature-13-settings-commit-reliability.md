@@ -70,7 +70,7 @@ no deploy race in either direction. It ends green (`pnpm typecheck` + `pnpm test
   push on its own. Run `pnpm format` before committing and record the amended
   decision in `DECISIONS.md` + `docs/decisions/teacher-live.md`.
 
-* [ ] Prompt — A click commits now; typing keeps the debounce
+* [x] Prompt — A click commits now; typing keeps the debounce
 
 ---
 
