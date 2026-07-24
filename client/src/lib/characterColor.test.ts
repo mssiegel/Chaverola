@@ -4,6 +4,7 @@ import type { Participant } from "@/types/chat";
 
 import {
   assignCharacterColors,
+  rosterCharacterColors,
   selfFirstCharacterColors,
 } from "./characterColor";
 
@@ -27,6 +28,29 @@ describe("assignCharacterColors", () => {
     const keys = ["k1", "k2", "k3", "k4", "k5", "k6", "k7", "k8", "k9"];
     const colors = assignCharacterColors(keys);
     expect(colors.get("k9")).toBe("var(--char-1)");
+  });
+});
+
+describe("rosterCharacterColors", () => {
+  it("gives a character the same color in chats with opposite cast order", () => {
+    const roster = [
+      { id: "hero", name: "hero" },
+      { id: "rival", name: "rival" },
+    ];
+    const chatA = rosterCharacterColors(roster, [
+      participant("hero"),
+      participant("rival"),
+    ]);
+    const chatB = rosterCharacterColors(roster, [
+      participant("rival"),
+      participant("hero"),
+    ]);
+    // The rule the teacher's grid rests on: roster order wins, so `dealCast`
+    // shuffling a chat's cast never flips a character's color between cards.
+    expect(chatA.get("hero")).toBe("var(--char-1)");
+    expect(chatA.get("rival")).toBe("var(--char-2)");
+    expect(chatB.get("hero")).toBe("var(--char-1)");
+    expect(chatB.get("rival")).toBe("var(--char-2)");
   });
 });
 

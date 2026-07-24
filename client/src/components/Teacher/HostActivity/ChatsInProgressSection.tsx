@@ -167,6 +167,7 @@ export function ChatsInProgressSection({
                 reconnectingParticipantIds={
                   new Set(chat.reconnectingStudentIds ?? [])
                 }
+                roster={activity.characters}
                 onRemoveParticipant={(participant) =>
                   onRequestRemoveParticipant(chat, participant)
                 }

@@ -7,22 +7,13 @@
   purplish, then extra distinct hues after that.
 
   From the student's view the caller passes their own character first, so "you"
-  are always green. See DECISIONS.md → "Character-name colors" for the rule and
-  the reasoning behind it.
+  are always green. The teacher's grid instead seeds the activity roster, so a
+  character holds one color across every chat card. See DECISIONS.md →
+  "Character-name colors" for the rules and the reasoning behind them.
 */
 
+import { CHARACTER_COLOR_VARS, type Character } from "@chaverola/shared";
 import type { Participant } from "@/types/chat";
-
-const CHAR_COLOR_VARS = [
-  "--char-1",
-  "--char-2",
-  "--char-3",
-  "--char-4",
-  "--char-5",
-  "--char-6",
-  "--char-7",
-  "--char-8",
-] as const;
 
 /**
  * Assigns a color to every key in the order it first appears. The first key
@@ -36,8 +27,8 @@ export function assignCharacterColors(keys: string[]): Map<string, string> {
 
   for (const key of keys) {
     if (result.has(key)) continue;
-    const index = next % CHAR_COLOR_VARS.length;
-    result.set(key, `var(${CHAR_COLOR_VARS[index]})`);
+    const index = next % CHARACTER_COLOR_VARS.length;
+    result.set(key, `var(${CHARACTER_COLOR_VARS[index]})`);
     next += 1;
   }
 
@@ -55,6 +46,23 @@ export function selfFirstCharacterColors(
 ): Map<string, string> {
   return assignCharacterColors([
     self.character.id,
+    ...participants.map((p) => p.character.id),
+  ]);
+}
+
+/**
+ * Room colors from the teacher's seat: seeds the activity roster first, so a
+ * character keeps one color across every chat card no matter how `dealCast`
+ * shuffled it. A character removed from the roster mid-activity (whose
+ * completed cards still render) picks up the next free color instead of
+ * colliding with a roster color.
+ */
+export function rosterCharacterColors(
+  roster: Character[],
+  participants: Participant[]
+): Map<string, string> {
+  return assignCharacterColors([
+    ...roster.map((c) => c.id),
     ...participants.map((p) => p.character.id),
   ]);
 }

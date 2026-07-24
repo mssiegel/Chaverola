@@ -52,6 +52,7 @@ export function CompletedChatsSection({
               // (the below-2 rule), and the blank box needs to say so.
               emptyHint="This chat ended before anyone said anything."
               inactiveParticipantIds={new Set(chat.inactiveStudentIds)}
+              roster={activity.characters}
             />
           ))}
         </div>

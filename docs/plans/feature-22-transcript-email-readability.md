@@ -75,7 +75,7 @@ skill on new user-facing copy — the email body counts. The prompts are
 sequential (2 imports the palette 1 adds), but 1 ships a visible improvement on
 its own.
 
-- [ ] Prompt 1 — One palette, one color per character
+- [x] Prompt 1 — One palette, one color per character
 - [ ] Prompt 2 — The transcript email in HTML
 
 ---

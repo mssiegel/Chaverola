@@ -5,7 +5,12 @@ import { CHAT_FRAME_CLASS } from "@/components/chat/ChatFrame";
 import { ConversationLines } from "@/components/chat/ConversationLines";
 import { EndChatConfirmationModal } from "@/components/chat/EndChatConfirmationModal";
 import { Button } from "@/components/ui/button";
-import { assignCharacterColors } from "@/lib/characterColor";
+import type { Character } from "@chaverola/shared";
+
+import {
+  assignCharacterColors,
+  rosterCharacterColors,
+} from "@/lib/characterColor";
 import { cn } from "@/lib/utils";
 import type { ChatMessage, Participant } from "@/types/chat";
 
@@ -37,6 +42,10 @@ export interface ChatCardProps {
   reconnectingParticipantIds?: ReadonlySet<string>;
   /** When set, each active participant row gets a remove control (live only). */
   onRemoveParticipant?: (participant: Participant) => void;
+  /** The activity's character roster. When set, colors follow roster order so
+   *  a character keeps one color across every card; omit (homepage preview)
+   *  to fall back to participant order. */
+  roster?: Character[];
 }
 
 /**
@@ -56,17 +65,20 @@ export function ChatCard({
   inactiveParticipantIds,
   reconnectingParticipantIds,
   onRemoveParticipant,
+  roster,
 }: ChatCardProps) {
   const [expanded, setExpanded] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const wasExpanded = useRef(false);
 
-  // The teacher has no "self" in the room, so colors simply follow participant
-  // order — same palette the student chatbox draws from.
-  const characterColors = assignCharacterColors(
-    participants.map((p) => p.character.id)
-  );
+  // Colors follow roster order when the roster is known, so a character holds
+  // the same color on every card of the grid — same palette the student
+  // chatbox draws from. Without a roster (homepage preview) they follow
+  // participant order.
+  const characterColors = roster
+    ? rosterCharacterColors(roster, participants)
+    : assignCharacterColors(participants.map((p) => p.character.id));
 
   const hiddenCount = Math.max(0, messages.length - COLLAPSED_LINE_COUNT);
   const visibleMessages = expanded

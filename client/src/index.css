@@ -62,12 +62,15 @@
   --brand-gradient-from: #8a6bff;
   --brand-gradient-to: #6c4be0;
 
-  /* Character-name palette — assigned by speaking order within a room.
-     The student's own character is always #1 (green); the 2nd speaker is
-     golden, 3rd bluish, 4th purplish. Orange was dropped (too close to the
-     golden). See DECISIONS.md → "Character-name colors". */
-  --char-1: #1f9d55; /* green  — you */
-  --char-2: #b7791f; /* golden — 2nd character */
+  /* Character-name palette. Students see it self-first ("you" are always
+     green); the teacher's grid and the transcript email key it to roster
+     order, so a character holds one color across every chat. Green and
+     golden are darkened to clear 4.5:1 AA contrast on white. Orange was
+     dropped (too close to the golden). Mirrored by both arrays in
+     shared/src/colors.ts — update together. See DECISIONS.md →
+     "Character-name colors". */
+  --char-1: #14804a; /* green  — you */
+  --char-2: #96690f; /* golden — 2nd character */
   --char-3: #2563eb; /* bluish — 3rd character */
   --char-4: #7c3aed; /* purplish — 4th character */
   --char-5: #0d9488; /* teal */

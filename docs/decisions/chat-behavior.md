@@ -829,10 +829,23 @@ your own seat. A given character is therefore not guaranteed the same color acro
 different students' screens; recognizability from each student's own perspective was
 chosen over global consistency.
 
+**Amended 2026-07-24 (feature 22):** the **teacher's view is roster-ordered** — character
+#1 on the setup roster is always green, #2 golden, #3 bluish, #4 purplish, the same color
+in every chat card of the activity (and in the transcript email). Before this, colors
+followed each chat's cast order, and `dealCast` shuffles the cast, so the same character
+flipped color from card to card — unnoticeable one card at a time, noise across a grid or
+an emailed page of fifteen. A character removed from the roster mid-activity keeps
+rendering in its completed cards; it picks up the next free color after the roster's.
+The student view is untouched. In the same change, the light-mode **green and golden were
+darkened** (`#1f9d55` → `#14804a`, `#b7791f` → `#96690f`) to clear the 4.5:1 AA contrast
+bar on white; dark mode was already fine.
+
 _Colors live in the `--char-*` tokens in [index.css](../../client/src/index.css) (with brighter
-dark-mode variants); assignment is in
-[characterColor.ts](../../client/src/lib/characterColor.ts). Pass the viewer's own character
-first so it lands on green._
+dark-mode variants), mirrored by the palette arrays in
+[shared/src/colors.ts](../../shared/src/colors.ts); assignment is in
+[characterColor.ts](../../client/src/lib/characterColor.ts). Students pass their own
+character first so it lands on green; the teacher's grid passes the roster first
+(`rosterCharacterColors`) so colors hold steady across cards._
 
 ## Superseded
 

@@ -2,6 +2,7 @@
 // here. (A package boundary, not a client-internal barrel.)
 export * from "./types";
 export * from "./api";
+export * from "./colors";
 export * from "./constants";
 export * from "./socket";
 export * from "./random";
