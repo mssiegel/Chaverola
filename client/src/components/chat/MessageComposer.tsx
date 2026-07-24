@@ -197,7 +197,7 @@ export function MessageComposer({
                     // keyboard has its own emoji picker, so a second one here
                     // is redundant. A desktop's fine pointer (no native emoji
                     // key) keeps it.
-                    "grid size-9 shrink-0 place-items-center self-end rounded-full transition-colors pointer-coarse:hidden hover:bg-accent hover:text-foreground disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-muted-foreground",
+                    "grid size-9 shrink-0 place-items-center self-end rounded-full transition-colors hover:bg-accent hover:text-foreground disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-muted-foreground pointer-coarse:hidden",
                     pickerOpen && !disabled
                       ? "bg-accent text-foreground"
                       : "text-muted-foreground"

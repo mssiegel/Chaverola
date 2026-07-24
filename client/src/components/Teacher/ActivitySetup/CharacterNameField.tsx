@@ -88,7 +88,7 @@ export function CharacterNameField({
             // Blink focuses a button on mousedown, before any handler —
             // preventing it leaves the caret where the teacher left it.
             onMouseDown={(event) => event.preventDefault()}
-            className="absolute top-1/2 left-1.5 grid size-9 -translate-y-1/2 place-items-center rounded-full text-muted-foreground transition-colors pointer-coarse:hidden hover:bg-accent hover:text-foreground"
+            className="absolute top-1/2 left-1.5 grid size-9 -translate-y-1/2 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-accent hover:text-foreground pointer-coarse:hidden"
           >
             <SmilePlus className="size-5" />
           </button>
