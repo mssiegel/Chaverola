@@ -49,7 +49,7 @@ email is deliberately out of scope — it syncs with **no** echo and
 last-write-wins, a separate 2026-07-23 call
 ([`teacher-live.md:8-38`](../decisions/teacher-live.md)).
 
-- [ ] Prompt — Settings ride the reconnect snapshot (end to end)
+- [x] Prompt — Settings ride the reconnect snapshot (end to end)
 
 ---
 

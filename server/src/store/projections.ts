@@ -1,5 +1,6 @@
 import type {
   Activity,
+  ActivitySettings,
   Character,
   ChatLine,
   ChatPeer,
@@ -47,6 +48,19 @@ export function toHostedActivity(stored: StoredActivity): HostedActivity {
     activity.teacherEmail = stored.teacherEmail;
   }
   return activity;
+}
+
+/** The settings as they ride chats:snapshot (teacher-room only). Handing
+ *  `stored.settings` to the emit would work today, but a field-by-field
+ *  literal is what keeps a future server-only settings field private until
+ *  someone adds it here on purpose. */
+export function toActivitySettings(stored: StoredActivity): ActivitySettings {
+  return {
+    revealNames: stored.settings.revealNames,
+    rematchWarning: stored.settings.rematchWarning,
+    autoMatch: stored.settings.autoMatch,
+    autoMatchSeconds: stored.settings.autoMatchSeconds,
+  };
 }
 
 /** Waiting seats' previous partners, for the teacher's rematch heads-up:

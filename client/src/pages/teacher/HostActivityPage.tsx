@@ -227,10 +227,11 @@ function ConnectedHostActivityView({
   const engine = useHostActivityLive({
     hostKey,
     onActivityGone,
-    // Another host device edited the settings — fold the server's copy into
-    // our activity state. The settings panel's own merge effect then folds
-    // it into any open draft (mergeExternalSettings), so a half-typed edit
-    // survives. Deliberately NOT routed through handleActivityChange: a
+    // Another host device edited the settings, or this device reconnected
+    // and its first snapshot carried server truth — fold the server's copy
+    // into our activity state. The settings panel's own merge effect then
+    // folds it into any open draft (mergeExternalSettings), so a half-typed
+    // edit survives. Deliberately NOT routed through handleActivityChange: a
     // sync must never echo back as another settings:update.
     onSettingsSync: (settings) =>
       setActivity((prev) => ({ ...prev, settings })),

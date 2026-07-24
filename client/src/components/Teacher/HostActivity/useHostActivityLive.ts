@@ -106,8 +106,10 @@ function activeParticipantsOf(chat: HostedChat) {
  * reacts by falling back to its friendly not-found.
  *
  * `onSettingsSync` fires when ANOTHER of the teacher's devices edits the
- * settings (`settings:changed` excludes the sender) — the page folds the
- * server's copy into its local activity state.
+ * settings (`settings:changed` excludes the sender), and once per connect
+ * from the first `chats:snapshot` — a device that slept through the echo
+ * re-syncs to server truth before it can commit anything stale. Either way
+ * the page folds the server's copy into its local activity state.
  */
 export function useHostActivityLive({
   hostKey,
@@ -146,8 +148,16 @@ export function useHostActivityLive({
     const socket = createLobbySocket(() => ({ role: "teacher", hostKey }));
     socketRef.current = socket;
 
+    // Fold server settings only from the FIRST chats:snapshot after each
+    // connect — the catch-up this exists for (a woken device that slept
+    // through settings:changed). Unconditional folding would bounce a
+    // locally-flipped switch back whenever an unrelated seat/chat broadcast
+    // was already in flight.
+    let foldSettingsFromSnapshot = false;
+
     socket.on("connect", () => {
       setConnection("connected");
+      foldSettingsFromSnapshot = true;
     });
     socket.on("disconnect", () => {
       // Terminal latch: once the teacher ended the activity, the server's
@@ -182,6 +192,12 @@ export function useHostActivityLive({
       setPaused(payload.paused === true);
       setLastPartners(payload.lastPartners ?? {});
       setRematchNotice(payload.rematchNotice ?? null);
+      if (foldSettingsFromSnapshot) {
+        foldSettingsFromSnapshot = false;
+        // Presence check: an older server's snapshot has no settings field
+        // yet — skip the fold (today's behavior) instead of folding undefined.
+        if (payload.settings) onSettingsSyncRef.current(payload.settings);
+      }
     });
     socket.on("chat:transcript-line", ({ chatId, line }) => {
       // The one delta on the teacher wire (message lines only — a snapshot

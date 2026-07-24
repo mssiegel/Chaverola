@@ -5,6 +5,63 @@ area. Entries are newest-first; add new ones at the top, and add a matching line
 to the index in the same change. Replaced decisions move to Superseded at the
 bottom of this file.
 
+### A woken host device reads the class settings back before it can write them
+
+_2026-07-24_
+
+**Decision:** `chats:snapshot` now carries the stored `ActivitySettings`,
+projected through `toActivitySettings` — an exact-allowlist field literal
+like every other projection, pinned in `projections.test.ts`. The client
+folds that copy into its activity state on the **first** snapshot after each
+socket connect, through the same `onSettingsSync` path `settings:changed`
+uses — never through the commit wrapper, so a fold can't echo back out as an
+edit. Later snapshots in the same connection don't fold: an unconditional
+fold would bounce a just-flipped switch whenever an unrelated seat or chat
+broadcast was already in flight. The sync is silent — no note — matching how
+`settings:changed` already behaves on a second device (founder call,
+2026-07-24).
+
+**Why:** `settings:update` is a full replace, and its echo only reaches
+sockets connected at that instant. A host laptop that slept through a
+settings change woke holding its old copy, and the next thing the teacher
+touched — any switch, the stepper — shipped that whole stale object and
+silently reverted the class (reproduced two-tab, 2026-07-24; auto-match
+flipping back on for everyone was the sharp case). The snapshot is the
+natural carrier: it's already where teacher-wide world truth rides at
+connect (`paused`, `lastPartners`, `rematchNotice`), and the lobby room's
+only members are teacher sockets, so students can't receive it — the
+`toActivity` pin keeps settings off the student wire as before.
+
+**The offline-edit corner, observed and accepted:** an edit made while the
+socket is down does land — socket.io-client buffers the emit and flushes it
+at reconnect (watched on the wire, 2026-07-24: the buffered
+`settings:update` rides the first packet burst at wake; this corrects the
+older working assumption that such an edit is simply lost). The join
+snapshot is built before that flush is applied, so the woken device's own
+screen can briefly show the pre-edit server copy while the server holds the
+edit; the two reconverge on the device's next edit or sync. Making that
+corner deterministic would take a buffer-aware fold; the founder chose
+least-code — keep what naturally happens and record it (2026-07-24).
+[Feature 15](../plans/feature-15-the-panel-respects-a-dropped-connection.md)
+owns the offline settings-panel treatment that makes an offline edit
+reachable at all.
+
+**The demo needs nothing and cannot show this:** `1234` is structurally
+zero-network — there is no socket to drop, so no reconnect exists to fold on
+(re-verified: zero `/socket.io/` traffic).
+
+_Extends
+[Settings edits sync for real; characters, scenario, and host name stay local](#settings-edits-sync-for-real-characters-scenario-and-host-name-stay-local)
+— the whole-object replace and the room-minus-sender echo stand unchanged;
+this only makes sure a reconnecting device holds current settings before it
+can send any. Implemented in
+[projections.ts](../../server/src/store/projections.ts)
+(`toActivitySettings`),
+[lobbyContext.ts](../../server/src/live/lobbyContext.ts) (`chatsPayload`),
+and
+[useHostActivityLive](../../client/src/components/Teacher/HostActivity/useHostActivityLive.ts)
+(the connect-latched fold)._
+
 ### A click in the live settings panel commits alone and immediately
 
 _2026-07-24_
@@ -714,6 +771,12 @@ reveals names at chat-end when the setting is on, see
 _Update (2026-07-23): the teacher's email joined the synced side — see
 [The teacher's email syncs live; the rest of the roster still doesn't](#the-teachers-email-syncs-live-the-rest-of-the-roster-still-doesnt).
 Characters, scenario, and host name are still local-only._
+
+_Update (2026-07-24): extended, not superseded — a reconnecting device now
+reads current settings off its first `chats:snapshot` before it can send
+any, see
+[A woken host device reads the class settings back before it can write them](#a-woken-host-device-reads-the-class-settings-back-before-it-can-write-them).
+The replace and the room-minus-sender echo stand unchanged._
 
 **Why:** Real auto-match forces the question: the switch and its seconds
 must reach the server or the rail lies. Syncing the whole settings object is

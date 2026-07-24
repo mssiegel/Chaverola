@@ -245,6 +245,7 @@ export interface ServerToClientEvents {
     paused: boolean; // the world-level pause — keeps a second host device coherent
     lastPartners: Record<string, string[]>; // waiting seats' previous partners — feeds the rematch heads-up (teacher room only)
     rematchNotice: string | null; // pair-everyone left an exact pair/trio in line — the dismissible rail notice (teacher truth)
+    settings: ActivitySettings; // the stored settings — a woken host device re-syncs from its connect-time snapshot instead of committing its stale copy
   }) => void;
   /** Student only, targeted; re-sent on every resume while matched.
    *  `lines` is the transcript backlog (authoritative on every delivery);
@@ -598,7 +599,11 @@ below.
   zod-validated against the same schema `POST /activities` uses and
   replaces the stored settings wholesale; the server echoes
   `settings:changed` to the teacher's **other** devices (the room minus
-  the sender). Invalid payloads are logged and dropped. `revealNames` now
+  the sender). Invalid payloads are logged and dropped. The stored
+  settings also ride every `chats:snapshot`, and the client folds them in
+  from the first snapshot after each connect — a host device that slept
+  through the echo re-syncs at reconnect instead of shipping its stale
+  object whole on its next edit. `revealNames` now
   acts (feature 10): while it is on, a chat's `chat:ended` reveals each
   peer's real name, read live at end time. Character,
   scenario, and host-name edits stay local to the teacher's page —

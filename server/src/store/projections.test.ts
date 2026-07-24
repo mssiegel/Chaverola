@@ -8,6 +8,7 @@ import type { Seat } from "../live/seats";
 import type { StoredActivity } from "./activityStore";
 import {
   toActivity,
+  toActivitySettings,
   toChatEnded,
   toChatSnapshot,
   toChatStarted,
@@ -97,6 +98,17 @@ describe("toHostedActivity (teacher projection)", () => {
       "scenario",
       "settings",
       "teacherEmail",
+    ]);
+  });
+});
+
+describe("toActivitySettings (settings on chats:snapshot, teacher room)", () => {
+  it("exposes exactly the four settings keys — a future server-only field stays private", () => {
+    expect(Object.keys(toActivitySettings(fullRecord)).sort()).toEqual([
+      "autoMatch",
+      "autoMatchSeconds",
+      "rematchWarning",
+      "revealNames",
     ]);
   });
 });

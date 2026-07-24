@@ -106,6 +106,7 @@ git: `git log -- DECISIONS.md`.
   - [Host the Activity docks to the bottom edge at every breakpoint](docs/decisions/teacher-setup.md#host-the-activity-docks-to-the-bottom-edge-at-every-breakpoint)
   - [Setup sections each carry one brand accent; settings stays the quiet one](docs/decisions/teacher-setup.md#setup-sections-each-carry-one-brand-accent-settings-stays-the-quiet-one)
 - [Teacher live activity page](docs/decisions/teacher-live.md)
+  - [A woken host device reads the class settings back before it can write them](docs/decisions/teacher-live.md#a-woken-host-device-reads-the-class-settings-back-before-it-can-write-them)
   - [A click in the live settings panel commits alone and immediately](docs/decisions/teacher-live.md#a-click-in-the-live-settings-panel-commits-alone-and-immediately)
   - [The live settings panel only claims the edits that actually travel](docs/decisions/teacher-live.md#the-live-settings-panel-only-claims-the-edits-that-actually-travel)
   - [A best-effort fallback emails the transcript if the teacher just closes the laptop](docs/decisions/teacher-live.md#a-best-effort-fallback-emails-the-transcript-if-the-teacher-just-closes-the-laptop)

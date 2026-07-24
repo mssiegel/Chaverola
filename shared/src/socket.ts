@@ -113,6 +113,11 @@ export interface ServerToClientEvents {
     // notice (teacher truth, so a second host device stays coherent). `?? null`
     // on the client tolerates an older server during a deploy.
     rematchNotice: string | null;
+    // The stored settings, teacher-room only — so a host device that slept
+    // through a settings:changed re-syncs from its connect-time snapshot
+    // instead of committing its stale copy later. A presence check on the
+    // client tolerates an older server during a deploy.
+    settings: ActivitySettings;
   }) => void;
   /** Student only, targeted; re-sent on every resume while matched, and
    *  replayed once for a chat the recipient was reaped out of (immediately

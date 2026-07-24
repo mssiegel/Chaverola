@@ -2,6 +2,7 @@ import type { Logger } from "pino";
 import type { Server, Socket } from "socket.io";
 
 import type {
+  ActivitySettings,
   ChatSnapshot,
   ClientToServerEvents,
   QueueEntry,
@@ -12,6 +13,7 @@ import type { Mailer } from "../email/mailer";
 import type { StoredActivity } from "../store/activityStore";
 import {
   graceSecondsLeft,
+  toActivitySettings,
   toChatEnded,
   toChatSnapshot,
   toChatStarted,
@@ -94,6 +96,7 @@ export interface LobbyContext {
     paused: boolean;
     lastPartners: Record<string, string[]>;
     rematchNotice: string | null;
+    settings: ActivitySettings;
   };
   broadcastState(record: StoredActivity): void;
   sendPeerConnection(
@@ -142,6 +145,7 @@ export function createLobbyContext(
       paused: record.pausedAt !== null,
       lastPartners: toRematchPartners(record),
       rematchNotice: record.rematchNotice,
+      settings: toActivitySettings(record),
     };
   }
 
