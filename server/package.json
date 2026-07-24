@@ -9,7 +9,8 @@
     "start": "tsx src/index.ts",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
-    "test": "vitest run"
+    "test": "vitest run",
+    "preview:email": "tsx scripts/emailPreview.ts"
   },
   "dependencies": {
     "@chaverola/shared": "workspace:*",

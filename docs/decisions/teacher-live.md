@@ -5,6 +5,39 @@ area. Entries are newest-first; add new ones at the top, and add a matching line
 to the index in the same change. Replaced decisions move to Superseded at the
 bottom of this file.
 
+### The transcript email is HTML that reads like the app, with plain text riding along
+
+_2026-07-24_
+
+**Decision:** `formatTranscriptEmail` composes two bodies from one record —
+the original plain-text part and an HTML alternative, sent as one multipart
+message through nodemailer's `text` + `html` fields (feature 22). The HTML
+mirrors the teacher's live cards: `(Ana) Herzl 🎩: text`, real name muted
+gray, character name bold in its roster color from `CHARACTER_EMAIL_COLORS`
+(`shared/src/colors.ts`), seeded roster-first by the same rule as the grid's
+`rosterCharacterColors` — so the email and the live page agree on every
+character's color. Chats sit under a hairline `border-top` with a small
+uppercase gray `CHAT 1 OF 3` label where the plain text draws `──────────`;
+a summary line (`3 chats · 6 students` — distinct students across the chats)
+joins the header of **both** bodies so they can't disagree. The quiet notes
+— `(No messages in this chat.)`, `(left partway)`, the 200-message cap —
+render small and gray, never full-weight body copy. Every interpolated value
+passes a local `escapeHtml`; student text is untrusted input meeting markup
+for the first time. **No background color on any element**, inline styles
+only, no images, one 640px container. Log mode keeps logging the text part
+only; the design check is `pnpm preview:email`, which renders a fixture
+class to a temp file and prints the path.
+
+**Why:** Founder calls (2026-07-24). A teacher scanning fifteen stacked
+pairings needs the anchors the live grid already gives them — color and
+weight on character names; the plain-text wall gave every line the same
+weight. No backgrounds because a teacher may print the email, and a page of
+colored blocks is a page of wasted ink. Inline styles because they survive
+more mail clients than `<style>` blocks, and a real class is nowhere near
+Gmail's ~102KB clipping limit anyway. The plain-text part stays as the
+multipart alternative so plain-text clients, screen readers, the dev log,
+and the existing formatter tests all keep working.
+
 ### A woken host device reads the class settings back before it can write them
 
 _2026-07-24_

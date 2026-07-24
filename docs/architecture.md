@@ -211,10 +211,11 @@ or the hostKey by construction. Tests pin the exact key lists.
 
 The one place a stored record leaves the process as anything other than a
 projection is `server/src/email/` (feature 11): a pure formatter turns a
-`StoredActivity` into the plain-text transcript email, a send-once guard
-gates the send, and the mailer sends it over Gmail SMTP (or logs it, with
-no credentials). Built at boot in `index.ts` and threaded onto the lobby
-context; the send fires when a teacher ends an activity.
+`StoredActivity` into the transcript email — a plain-text body plus its
+HTML alternative (feature 22) — a send-once guard gates the send, and the
+mailer sends the multipart message over Gmail SMTP (or logs the text part,
+with no credentials). Built at boot in `index.ts` and threaded onto the
+lobby context; the send fires when a teacher ends an activity.
 
 ### The `app.ts` / `index.ts` seam
 

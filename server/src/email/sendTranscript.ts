@@ -43,9 +43,9 @@ export async function sendTranscriptEmail(
   // on. (existing is null or "failed"; "failed" is the sanctioned one retry.)
   record.transcriptEmail = { to, state: "sending" };
 
-  const { subject, text } = formatTranscriptEmail(record);
+  const { subject, text, html } = formatTranscriptEmail(record);
   try {
-    await mailer.send({ to, subject, text });
+    await mailer.send({ to, subject, text, html });
     record.transcriptEmail = { to, state: "sent" };
     log.info(
       { joinCode: record.joinCode, chats: record.chats.length },

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  CHARACTER_EMAIL_COLORS,
   CHAT_TRANSCRIPT_MAX_LINES,
   DEFAULT_ACTIVITY_SETTINGS,
 } from "@chaverola/shared";
@@ -13,8 +14,10 @@ import { formatTranscriptEmail } from "./transcript";
 // Just the composition rules a bug would make silent — the participant line
 // (including a departed member and an emoji-less character), the established
 // `(name) label: text` line format, the empty-chat line, the cap note, the
-// numbered heading, and the subject. The send-once guard is
-// sendTranscript.test.ts; nothing here touches io.
+// numbered heading, and the subject. On the html part, only the two rules
+// the preview can't prove by looking: student text comes out escaped, and a
+// character keeps one roster-keyed color across chats. The send-once guard
+// is sendTranscript.test.ts; nothing here touches io.
 
 function line(studentId: string, text: string): StoredChatLine {
   return { id: `${studentId}-${text}`, studentId, text, sentAt: 0 };
@@ -151,6 +154,59 @@ describe("formatTranscriptEmail", () => {
     expect(text).toContain(
       `(Showing the most recent ${CHAT_TRANSCRIPT_MAX_LINES} messages.)`
     );
+  });
+
+  it("escapes student text in the html — markup comes out visible and inert", () => {
+    const { html } = formatTranscriptEmail(
+      record([
+        chat({
+          members: [
+            { studentId: "s1", name: "Rachel <QA>", characterId: "brutus" },
+          ],
+          lines: [line("s1", `<script>alert("x")</script> & 1 < 2`)],
+        }),
+      ])
+    );
+    expect(html).not.toContain("<script>");
+    expect(html).toContain(
+      "&lt;script&gt;alert(&quot;x&quot;)&lt;/script&gt; &amp; 1 &lt; 2"
+    );
+    // Names get the same treatment as message text.
+    expect(html).toContain("(Rachel &lt;QA&gt;)");
+  });
+
+  it("keeps one color per character across chats with opposite cast order", () => {
+    const { html } = formatTranscriptEmail(
+      record([
+        chat({
+          members: [
+            { studentId: "s1", name: "Rachel", characterId: "brutus" },
+            { studentId: "s2", name: "Noa", characterId: "caesar" },
+          ],
+          lines: [line("s1", "first")],
+        }),
+        chat({
+          members: [
+            { studentId: "s2", name: "Noa", characterId: "caesar" },
+            { studentId: "s1", name: "Rachel", characterId: "brutus" },
+          ],
+          lines: [line("s2", "second")],
+        }),
+      ])
+    );
+    // Collect every colored name in the html: one color per character, and
+    // the roster picks it — Brutus is roster #1 even where Caesar spoke first.
+    const seen = new Map<string, Set<string>>();
+    for (const match of html.matchAll(
+      /<strong style="color:(#[0-9a-f]{6});">([^<]+)<\/strong>/g
+    )) {
+      // `!` — the regex has both groups, so a match always carries them.
+      const [, color, name] = match;
+      if (!seen.has(name!)) seen.set(name!, new Set());
+      seen.get(name!)!.add(color!);
+    }
+    expect(seen.get("Brutus 🔪")).toEqual(new Set([CHARACTER_EMAIL_COLORS[0]]));
+    expect(seen.get("Caesar 👑")).toEqual(new Set([CHARACTER_EMAIL_COLORS[1]]));
   });
 
   it("numbers each chat against the total", () => {

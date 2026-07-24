@@ -24,6 +24,10 @@ export interface EmailMessage {
   to: string;
   subject: string;
   text: string;
+  /** The HTML alternative; nodemailer builds the multipart message when both
+   *  parts are present. Log mode ignores it — the text part is the readable
+   *  one, and HTML would drown the dev log. */
+  html?: string;
 }
 
 export interface Mailer {
@@ -49,8 +53,8 @@ export function createMailer(config: Config, logger: Logger): Mailer {
     log.info({ mode: "gmail" }, "mailer ready — sending via Gmail SMTP");
     return {
       mode: "gmail",
-      async send({ to, subject, text }) {
-        await transport.sendMail({ from, to, subject, text });
+      async send({ to, subject, text, html }) {
+        await transport.sendMail({ from, to, subject, text, html });
       },
     };
   }

@@ -20,6 +20,7 @@
     "test": "pnpm -r test",
     "verify:up": "node tools/verify/up.mjs",
     "verify:smoke": "node tools/verify/smoke.mjs",
+    "preview:email": "pnpm --filter @chaverola/server preview:email",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },

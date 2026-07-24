@@ -53,14 +53,21 @@ guard, and the mailer. With either credential missing the mailer runs in
 log-only mode, so dev needs zero env vars. In dev's log mode it logs the
 whole composed email (that's how the format gets eyeballed); in production's
 log mode it logs a warning with the recipient and line count only, never the
-student messages. The body is plain text: a short header, then each chat as a
-numbered block ("Chat 3 of 15") with a participants line that marks anyone
-who left mid-chat, then the lines in the teacher's `(Rachel) Brutus 🔪: text`
-format, an empty-chat line for a silent room, and a "showing the most recent
-200" note at the transcript cap. The subject names the host and join code
-with **no date** (the server runs UTC, so a stamped date is wrong for an
-evening class; Gmail timestamps the message in the reader's own zone). A
-silent activity — chats but not a single message — sends nothing.
+student messages. The body's plain-text part is a short header, then each
+chat as a numbered block ("Chat 3 of 15") with a participants line that
+marks anyone who left mid-chat, then the lines in the teacher's
+`(Rachel) Brutus 🔪: text` format, an empty-chat line for a silent room, and
+a "showing the most recent 200" note at the transcript cap. The subject
+names the host and join code with **no date** (the server runs UTC, so a
+stamped date is wrong for an evening class; Gmail timestamps the message in
+the reader's own zone). A silent activity — chats but not a single message —
+sends nothing.
+
+**Amended 2026-07-24 (feature 22):** the email is now multipart — an HTML
+part that reads like the app rides along with this plain-text body, which
+stays as the alternative
+([teacher-live.md](teacher-live.md#the-transcript-email-is-html-that-reads-like-the-app-with-plain-text-riding-along)).
+Log mode still logs the text part only.
 
 **Why:** Founder call (2026-07-23), realizing the earlier
 [Transcripts wait](#transcripts-wait-feature-1-only-stores-the-teachers-email)

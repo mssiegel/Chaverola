@@ -1,5 +1,17 @@
 # Feature 22 — The transcript email reads like the app
 
+**Status: DONE — closed 2026-07-24.** Both prompts shipped, each as one
+commit to `main`. Prompt 1 keyed the teacher's character colors to roster
+order (one color per character across every chat card), darkened light-mode
+green/golden past the AA contrast bar, and moved the palette to
+`shared/src/colors.ts`. Prompt 2 made the transcript email multipart: an
+HTML part that reads like the app — roster-colored bold character names,
+muted real names, hairlines, no backgrounds — with the plain-text body
+riding along as the alternative, plus `pnpm preview:email` as the standing
+design check. Decisions recorded in
+[chat-behavior.md](../decisions/chat-behavior.md#character-name-colors) and
+[teacher-live.md](../decisions/teacher-live.md#the-transcript-email-is-html-that-reads-like-the-app-with-plain-text-riding-along).
+
 **Look at one:** the email a teacher gets when they end an activity is a wall of
 gray monospace-ish text. Every line is
 `(Ana Fallback) Herzl: Ana here — nobody is going to press End activity`, at the
@@ -76,7 +88,7 @@ sequential (2 imports the palette 1 adds), but 1 ships a visible improvement on
 its own.
 
 - [x] Prompt 1 — One palette, one color per character
-- [ ] Prompt 2 — The transcript email in HTML
+- [x] Prompt 2 — The transcript email in HTML
 
 ---
 
