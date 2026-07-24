@@ -25,16 +25,20 @@ you watch it happen.
 4. Open the panel again. If the address is gone, the bug is real: the page is
    rendering the activity as it was at create time, minutes of edits ago.
 
-**Probe with the email, not a setting.** If
-[feature 14](./feature-14-settings-survive-a-sleeping-host-device.md) has
-shipped, `settings` ride `chats:snapshot` and a remount builds a **new** socket
-(the engine's connection lives in a mount-scoped effect,
-[`useHostActivityLive.ts:137-141`](../../client/src/components/Teacher/HostActivity/useHostActivityLive.ts)),
-so a settings probe self-heals — a false negative that would close this doc
-wrongly. That fold replaces `settings` and nothing else
-([`HostActivityPage.tsx:248-249`](../../client/src/pages/teacher/HostActivityPage.tsx));
+**Probe with the email, not a setting.**
+[Feature 14](./feature-14-settings-survive-a-sleeping-host-device.md) shipped
+on 2026-07-24: `settings` now ride `chats:snapshot`, and the client folds them
+in on the first snapshot after each socket connect. A remount builds a **new**
+socket (the engine's connection lives in a mount-scoped effect in
+[`useHostActivityLive.ts`](../../client/src/components/Teacher/HostActivity/useHostActivityLive.ts)),
+so that first-connect fold always fires on a return navigation and a settings
+probe **self-heals within about a second** — a false negative that would close
+this doc wrongly. The fold replaces `settings` and nothing else (the
+`onSettingsSync` callback in
+[`HostActivityPage.tsx`](../../client/src/pages/teacher/HostActivityPage.tsx));
 the email rides no snapshot and has no echo, by decision
-([`teacher-live.md:8-38`](../decisions/teacher-live.md)).
+([`teacher-live.md:8-38`](../decisions/teacher-live.md)), so it still shows the
+create-time copy honestly.
 
 **The reported mechanism.** The create submit hands the freshly minted activity
 across the navigation through a module-level map —
@@ -59,11 +63,14 @@ seeds `activity` from the lookup, the panel seeds its draft from that
 ([`LiveSettingsPanel.tsx:47-49`](../../client/src/components/Teacher/HostActivity/LiveSettingsPanel.tsx)),
 and the next commit through [`HostActivityPage.tsx:255-270`](../../client/src/pages/teacher/HostActivityPage.tsx)
 sends the whole settings object, which the server stores as a full replace
-([`handlers/teacher.ts:248-263`](../../server/src/live/handlers/teacher.ts)) — so
-flipping _any_ switch after the remount silently undoes every settings edit made
-before it. The email is worse: the diff at `:266` compares the stale value
-against itself, so retyping the address on screen emits nothing at all. That is
-feature 11's whole subject.
+([`handlers/teacher.ts:248-263`](../../server/src/live/handlers/teacher.ts)).
+Before feature 14 that meant flipping _any_ switch after the remount silently
+undid every settings edit made before it; since 2026-07-24 the first-snapshot
+fold heals the settings slice moments after the remount, leaving only the
+sub-second window before the new socket's snapshot lands. The email carries the
+full weight now: it rides no snapshot, so the stale copy persists, and the diff
+at `:266` compares the stale value against itself — retyping the address on
+screen emits nothing at all. That is feature 11's whole subject.
 
 **Decisions this works within, and does not supersede.** "Settings edits sync for
 real; characters, scenario, and host name stay local"
