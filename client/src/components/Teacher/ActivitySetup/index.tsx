@@ -64,9 +64,7 @@ function fromDraft(draft: ActivityDraft): SetupFormState {
 function toDraft(form: SetupFormState): ActivityDraft {
   return {
     ...form,
-    characters: form.characters.map(({ name, emoji }) =>
-      emoji ? { name, emoji } : { name }
-    ),
+    characters: form.characters.map(({ name }) => ({ name })),
   };
 }
 

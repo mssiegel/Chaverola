@@ -27,7 +27,7 @@ export interface QueueEntry {
 
 /** Teacher-only surface (room lobby:${joinCode}) — real names are fine here.
  *  Exact-allowlist-tested: never a token. `character` is the SERVER roster's
- *  copy (id + name + emoji?) so a locally-renamed roster still resolves. */
+ *  copy (id + name) so a locally-renamed roster still resolves. */
 export interface ChatParticipant {
   id: string; // studentId
   name: string; // captured at chat start — survives seat removal

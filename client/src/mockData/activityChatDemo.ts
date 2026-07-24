@@ -12,20 +12,20 @@ import type { ChatScenario, Participant } from "@/types/chat";
 
 const cleopatra: Participant = {
   id: "self-cleopatra",
-  character: { id: "cleopatra", name: "Cleopatra", emoji: "👑" },
+  character: { id: "cleopatra", name: "Cleopatra 👑" },
   // Placeholder — the join flow swaps in the signed-in student's real name.
   realName: "You",
 };
 
 const brutus: Participant = {
   id: "peer-brutus",
-  character: { id: "brutus", name: "Brutus", emoji: "🔪" },
+  character: { id: "brutus", name: "Brutus 🔪" },
   realName: "Daniel Katz",
 };
 
 const caesarsGhost: Participant = {
   id: "peer-caesars-ghost",
-  character: { id: "caesars-ghost", name: "Caesar's ghost", emoji: "👻" },
+  character: { id: "caesars-ghost", name: "Caesar's ghost 👻" },
   realName: "Ella Peretz",
 };
 

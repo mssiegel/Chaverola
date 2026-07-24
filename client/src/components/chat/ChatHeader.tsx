@@ -5,7 +5,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { characterLabel } from "@/lib/characterLabel";
 import type { Participant } from "@/types/chat";
 
 interface ChatHeaderProps {
@@ -48,22 +47,22 @@ export function ChatHeader({
   return (
     // shrink-0 is load-bearing, not tidiness: the Conversation feed below is
     // `h-0 flex-auto`, so its flex base is 0 and it absorbs NONE of an
-    // overflow. Without this the header is what gets crushed when the emoji
-    // dock opens.
+    // overflow. Without this the header is what gets crushed when the card
+    // runs short of room.
     <header className="flex shrink-0 items-center justify-between gap-3 bg-gradient-to-r from-brand-grape to-brand-grape-strong px-4 py-3 text-white">
       {/* Both lines wrap rather than truncate: names are teacher-authored, so
           a single long one can outgrow any width. */}
       <div className="min-w-0 leading-tight">
         <div className="text-[15px] font-semibold">
           <span className="font-normal text-white/70">You're </span>
-          {characterLabel(self)}
+          {self.character.name}
         </div>
 
         {firstPeer && (
           <Popover>
             <PopoverTrigger className="block rounded-md text-left text-sm leading-snug text-white/85 transition-colors hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/70">
               <span className="text-white/60">with </span>
-              {characterLabel(firstPeer)}
+              {firstPeer.character.name}
               {hiddenPeerCount > 0 && (
                 <span className="ms-1.5 inline-block rounded-full bg-white/15 px-2 py-0.5 text-xs font-semibold whitespace-nowrap text-white">
                   and {hiddenPeerCount} other{hiddenPeerCount > 1 ? "s" : ""}
@@ -92,7 +91,7 @@ export function ChatHeader({
                         />
                       )}
                       <span className="min-w-0">
-                        {characterLabel(participant)}
+                        {participant.character.name}
                         {participant.id === self.id && (
                           <span className="font-normal text-muted-foreground">
                             {" "}

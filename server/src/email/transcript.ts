@@ -1,4 +1,4 @@
-import { CHAT_TRANSCRIPT_MAX_LINES, characterLabel } from "@chaverola/shared";
+import { CHAT_TRANSCRIPT_MAX_LINES } from "@chaverola/shared";
 
 import type { StoredChat } from "../live/matching";
 import type { StoredActivity } from "../store/activityStore";
@@ -22,9 +22,7 @@ const DIVIDER = "──────────";
 
 function participantLine(chat: StoredChat, activity: StoredActivity): string[] {
   return chat.members.map((member) => {
-    const label = characterLabel(
-      resolveCharacter(activity, member.characterId)
-    );
+    const label = resolveCharacter(activity, member.characterId).name;
     const left = chat.inactiveStudentIds.includes(member.studentId)
       ? " (left partway)"
       : "";
@@ -44,7 +42,7 @@ function transcriptLines(chat: StoredChat, activity: StoredActivity): string[] {
     // the formatter total anyway.
     const name = member?.name ?? line.studentId;
     const label = member
-      ? characterLabel(resolveCharacter(activity, member.characterId))
+      ? resolveCharacter(activity, member.characterId).name
       : line.studentId;
     return `(${name}) ${label}: ${line.text}`;
   });

@@ -2,7 +2,6 @@ import { EyeOff, RotateCcw } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { SectionLabel } from "@/components/ui/section-label";
-import { characterLabel } from "@/lib/characterLabel";
 import type { ChatEndReason, Participant } from "@/types/chat";
 
 interface ChatEndedSectionProps {
@@ -106,7 +105,7 @@ export function ChatEndedSection({
     : undefined;
   const copy = endedCopy(
     endReason,
-    endedBy ? characterLabel(endedBy) : null,
+    endedBy?.character.name ?? null,
     endedInGroup
   );
 
@@ -150,7 +149,7 @@ export function ChatEndedSection({
                     className="font-semibold"
                     style={{ color: characterColors.get(peer.character.id) }}
                   >
-                    {characterLabel(peer)}
+                    {peer.character.name}
                   </span>
                   <span className="font-medium text-foreground">
                     {peer.realName}

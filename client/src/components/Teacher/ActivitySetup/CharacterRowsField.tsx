@@ -1,6 +1,5 @@
 import { Plus, X } from "lucide-react";
 
-import { Input } from "@/components/ui/input";
 import { LiveDot } from "@/components/ui/live-dot";
 import {
   MAX_CHARACTERS,
@@ -10,9 +9,9 @@ import {
   type CharacterDraft,
   type SetupField,
 } from "@/lib/activitySetup";
-import { charCount, clampChars } from "@/lib/text";
+import { charCount } from "@/lib/text";
 
-import { EmojiSlot } from "./EmojiSlot";
+import { CharacterNameField } from "./CharacterNameField";
 import { FieldError, LimitCounter } from "./FieldFeedback";
 
 /** A character row in form state: a draft plus a stable key for React. */
@@ -46,11 +45,11 @@ interface CharacterRowsFieldProps {
 }
 
 /**
- * The 2–4 character rows. Each reads like a cast-list entry: the round emoji
- * avatar leads (tap it to pick; it's optional), then the name input
- * (hard-capped at 30 characters — names prefix every chat line). The first
- * two rows are permanent (an activity needs two characters anyway); rows 3–4
- * get a remove button, no confirmation — retyping a name is cheap.
+ * The 2–4 character rows. Each is one name field, hard-capped at 30
+ * characters — names prefix every chat line. An emoji, if the teacher wants
+ * one, is simply part of that name. The first two rows are permanent (an
+ * activity needs two characters anyway); rows 3–4 get a remove button, no
+ * confirmation — retyping a name is cheap.
  */
 export function CharacterRowsField({
   rows,
@@ -70,25 +69,15 @@ export function CharacterRowsField({
         const guardMessage = removable ? removeGuard?.(row) : undefined;
         return (
           <div key={row.id} className="flex items-start gap-3">
-            <EmojiSlot
-              emoji={row.emoji}
-              characterName={row.name.trim()}
-              onChange={(emoji) => onUpdate(row.id, { emoji })}
-            />
-
             <div className="min-w-0 flex-1">
-              <Input
-                ref={registerField(`character-${index}`)}
+              <CharacterNameField
                 value={row.name}
-                onChange={(event) =>
-                  onUpdate(row.id, {
-                    name: clampChars(event.target.value, NAME_MAX_CHARS),
-                  })
-                }
+                onChange={(name) => onUpdate(row.id, { name })}
                 placeholder={ROW_PLACEHOLDERS[index] ?? "Another character"}
-                aria-label={`Character ${index + 1} name`}
-                aria-invalid={error ? true : undefined}
-                className="h-12"
+                label={`Character ${index + 1} name`}
+                emojiButtonLabel={`Add an emoji to character ${index + 1}`}
+                invalid={Boolean(error)}
+                registerRef={registerField(`character-${index}`)}
               />
               {(error || guardMessage || count >= NAME_COUNTER_FROM) && (
                 <div className="mt-1.5 flex items-baseline justify-between gap-3">

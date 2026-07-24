@@ -9,7 +9,6 @@ import type { Activity, ActivitySettings, HostedActivity } from "./types";
 /** A character as the client submits it — the server mints character ids. */
 export interface CharacterInput {
   name: string;
-  emoji?: string;
 }
 
 /** Body of `POST /activities`. */

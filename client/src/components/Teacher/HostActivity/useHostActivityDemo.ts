@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "react";
 
 import { isExactRematchIn } from "@chaverola/shared";
 
-import { characterLabel } from "@/lib/characterLabel";
 import { scaledMs } from "@/lib/demoTime";
 import { withCurrentCharacters } from "@/lib/hostActivity";
 import { nextId, randInt, randomFrom } from "@/lib/random";
@@ -204,7 +203,7 @@ export function useHostActivityDemo(
 
     const removed = chat.participants.find((p) => p.id === studentId);
     const label = removed
-      ? characterLabel(withCurrentCharacters([removed], activity)[0]!)
+      ? withCurrentCharacters([removed], activity)[0]!.character.name
       : "Someone";
     commit({
       ...w,

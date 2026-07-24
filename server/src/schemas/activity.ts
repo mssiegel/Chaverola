@@ -24,20 +24,25 @@ import type {
   into range, so anything out of range here is a broken caller, not a user.
 */
 
+/**
+ * Names are capped by CODE POINTS, not UTF-16 units — matching the form's
+ * `clampChars`, so a multi-unit emoji counts as one character on both sides
+ * of the wire (the same rule `chat:send` applies to messages). Since an
+ * emoji is now simply part of a character's name, a plain `.max()` here
+ * would reject names the form happily accepts.
+ */
+const withinNameCap = (value: string) =>
+  Array.from(value).length <= NAME_MAX_CHARS;
+
 const characterInputSchema = z.object({
   name: z
     .string()
     .trim()
     .min(1, "Every character needs a name.")
-    .max(NAME_MAX_CHARS, `Character names max out at ${NAME_MAX_CHARS} chars.`),
-  // A loose length cap, not grapheme validation — ZWJ emoji run long in
-  // UTF-16 units, and a wrong-but-short string renders harmlessly.
-  emoji: z
-    .string()
-    .trim()
-    .min(1, "Omit emoji instead of sending it blank.")
-    .max(32, "That emoji field is too long.")
-    .optional(),
+    .refine(
+      withinNameCap,
+      `Character names max out at ${NAME_MAX_CHARS} chars.`
+    ),
 });
 
 /** Also the socket's settings:update validator — the full-replace payload
@@ -75,7 +80,7 @@ export const createActivityRequestSchema = z.object({
     .string()
     .trim()
     .min(1, "The host name is required.")
-    .max(NAME_MAX_CHARS, `Host names max out at ${NAME_MAX_CHARS} chars.`),
+    .refine(withinNameCap, `Host names max out at ${NAME_MAX_CHARS} chars.`),
   characters: z
     .array(characterInputSchema)
     .min(MIN_CHARACTERS, `At least ${MIN_CHARACTERS} characters.`)

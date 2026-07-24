@@ -282,8 +282,8 @@
    this rule has to sit outside every @layer too. Two of the picker's own class
    hooks (0,2,0) beat its single-class rules (0,1,0), so no !important is
    needed. `auto` drops the permanent scrollbar gutter it hard-codes with
-   `overflow-y: scroll`; `contain` stops Chrome's pull-to-refresh firing when a
-   student flicks the emoji grid at its top edge inside the bottom-most panel. */
+   `overflow-y: scroll`; `contain` stops Chrome's pull-to-refresh firing when
+   the emoji grid gets flicked at its top edge. */
 .EmojiPickerReact .epr-body {
   overflow-y: auto;
   overscroll-behavior: contain;

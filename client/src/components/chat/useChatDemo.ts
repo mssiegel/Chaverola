@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "react";
 
 import { LOBBY_GRACE_SECONDS } from "@chaverola/shared";
 
-import { characterLabel } from "@/lib/characterLabel";
 import { scaledMs } from "@/lib/demoTime";
 import { nextId, randomFrom } from "@/lib/random";
 import { useLatestRef } from "@/lib/useLatestRef";
@@ -122,7 +121,7 @@ export function useChatDemo(
           id: nextId("m"),
           senderId: NOTICE_SENDER_ID,
           kind: "notice",
-          text: `${characterLabel(offline)} couldn't get back in and left the chat`,
+          text: `${offline.character.name} couldn't get back in and left the chat`,
         },
       ]);
     }
@@ -366,7 +365,7 @@ export function useChatDemo(
         id: nextId("m"),
         senderId: NOTICE_SENDER_ID,
         kind: "notice",
-        text: `${characterLabel(leaver)} left the chat`,
+        text: `${leaver.character.name} left the chat`,
       },
     ]);
   };

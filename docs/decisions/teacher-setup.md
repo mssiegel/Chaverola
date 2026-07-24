@@ -5,41 +5,41 @@ area. Entries are newest-first; add new ones at the top, and add a matching line
 to the index in the same change. Replaced decisions move to Superseded at the
 bottom of this file.
 
-### On a phone, picking a character's emoji is a bottom sheet, not a popover
+### A character's emoji is typed into its name
 
 _2026-07-24_
 
-**Decision:** Below `sm`, tapping a character row's emoji avatar opens a
-full-width bottom sheet — docked to the screen's bottom edge, titled with which
-row it's editing, "Remove the emoji" pinned as a footer. Desktop keeps the
-anchored popover. The width is read at tap time (the same `(min-width: 640px)`
-line the rest of the app draws `sm` at), so only one container is ever mounted
-and a rotation is free. The same slot backs the create form and the host page's
-live-settings panel, so both get the sheet.
+**Decision:** A character row is one field, the name. A teacher who wants an
+emoji types it into that name, and it travels as part of the string:
+"Caesar's ghost 👻" is simply what the character is called. No separate emoji
+control, and no separate emoji field anywhere in the product (see
+[characters.md](characters.md#a-characters-emoji-is-part-of-its-name)).
+Tucked inside the input's left edge, desktop gets a picker button that inserts
+at the caret; touch devices get no button at all (`pointer-coarse:hidden`),
+since their keyboard already has an emoji key. The same field backs the create
+form and the host page's live-settings panel.
 
-**Why:** On a phone the old popover was the wrong shape. A ~300px picker
-anchored to a size-12 avatar had nowhere to go: Radix flipped it up over the
-section header, it hung past the card's right edge, and once the row list grew
-it was clipped with no way to scroll. The library's autofocused search also
-opened a phone keyboard over a picker nobody was typing into. A bottom sheet
-sidesteps all of it — it's full width, it can't flip or outdent, it names the
-row (which the popover never could), and it parks focus on the sheet so no
-phantom keyboard appears.
+**Why:** Founder call (2026-07-24), looking at the old two-control row. A lone
+emoji slot beside the name asks a teacher to fill in a field they can't guess
+the purpose of: what is this single emoji for, and where will it show up?
+Folding it into the name answers both questions by showing the answer, since
+what the teacher types is exactly what students read.
 
-**Built from the existing Radix Dialog**, via a `variant="bottom-sheet"` on
-`DialogContent` — deliberately **not** a new `ui/sheet.tsx`. A primitive with a
-single caller is what the lean-dependency policy exists to stop, and Dialog
-already portals cleanly past the form's `overflow-hidden` section and its fixed
-submit dock. Picking still closes on the first tap, the opposite of the
-composer's stay-open picker, because a character has exactly one emoji (see
-[Character rows lead with the emoji avatar](#character-rows-lead-with-the-emoji-avatar)).
+It is also the only version that works on a phone. The picker was the sole way
+to set a separate emoji field, so hiding it on touch (matching
+[the student composer](chat-behavior.md#on-a-phone-the-students-message-box-has-no-emoji-button))
+would have left phone teachers unable to add an emoji at all. Typing one into
+the name needs no picker.
+
+Three consequences, taken on purpose: duplicate-name checks now compare the
+emoji too (`Caesar 👻` and `Caesar` are two names), the 30-character cap counts
+an emoji as one character on both sides of the wire, and a name may be nothing
+but an emoji — it validates, and its id slug falls back to `character`.
 
 _Implemented in
-[EmojiSlot](../../client/src/components/Teacher/ActivitySetup/EmojiSlot.tsx),
-with the `bottom-sheet` variant in
-[ui/dialog.tsx](../../client/src/components/ui/dialog.tsx) and `PopoverAnchor`
-added to [ui/popover.tsx](../../client/src/components/ui/popover.tsx) so the
-avatar can both open the picker and anchor the desktop popover._
+[CharacterNameField](../../client/src/components/Teacher/ActivitySetup/CharacterNameField.tsx),
+with the code-point cap in
+[schemas/activity.ts](../../server/src/schemas/activity.ts)._
 
 ### Setup is one scrolling form, and Host the Activity is never disabled
 
@@ -270,26 +270,6 @@ as an empty shelf running on across the rail column.
 _Implemented in
 [ActivitySetupForm](../../client/src/components/Teacher/ActivitySetup/index.tsx)._
 
-### Character rows lead with the emoji avatar
-
-_2026-07-14_
-
-**Decision:** Each character row starts with a round emoji slot styled as
-the character's avatar — dashed border and a smile-plus when empty, the
-emoji on a soft violet circle when set — followed by the name input. "Add a
-character" is a dashed full-width row in the same rhythm. The emoji stays
-optional; the empty slot is an invitation, not a requirement.
-
-**Why:** Trailing the input, the optional emoji read as an afterthought and
-got missed. Leading with a round avatar matches how characters appear to
-students (roster chips, chat lines) and makes the tap target obvious without
-spending any copy on it. (Product-owner choice, 2026-07-14, over keeping the
-input-first row.)
-
-_Implemented in
-[CharacterRowsField](../../client/src/components/Teacher/ActivitySetup/CharacterRowsField.tsx)
-and [EmojiSlot](../../client/src/components/Teacher/ActivitySetup/EmojiSlot.tsx)._
-
 ### Setup sections each carry one brand accent; settings stays the quiet one
 
 _2026-07-14_
@@ -311,3 +291,41 @@ _Implemented in
 [FormSection](../../client/src/components/Teacher/ActivitySetup/FormSection.tsx)
 (accent map) and
 [CreateActivityPage](../../client/src/pages/teacher/CreateActivityPage.tsx) (glow)._
+
+## Superseded
+
+Replaced decisions, kept for history. Don't apply these; each date line links
+to what replaced it.
+
+### On a phone, picking a character's emoji is a bottom sheet, not a popover
+
+_2026-07-24, superseded the same day by
+[A character's emoji is typed into its name](#a-characters-emoji-is-typed-into-its-name)_
+
+**Decision:** Below `sm`, tapping a character row's emoji avatar opened a
+full-width bottom sheet — docked to the screen's bottom edge, titled with which
+row it was editing, "Remove the emoji" pinned as a footer. Desktop kept the
+anchored popover. Built from the existing Radix Dialog via a
+`variant="bottom-sheet"` on `DialogContent`, deliberately not a new
+`ui/sheet.tsx`.
+
+**Why it went:** the sheet solved the wrong problem. It made a separate
+emoji field reachable on a phone, when the field itself was what confused
+teachers. Once the emoji became part of the name, the phone keyboard covered
+the job and the whole mobile picker path — sheet, `bottom-sheet` variant, and
+all — was deleted.
+
+### Character rows lead with the emoji avatar
+
+_2026-07-14, superseded by
+[A character's emoji is typed into its name](#a-characters-emoji-is-typed-into-its-name)_
+
+**Decision:** Each character row started with a round emoji slot styled as the
+character's avatar — dashed border and a smile-plus when empty, the emoji on a
+soft violet circle when set — followed by the name input. The emoji stayed
+optional; the empty slot was an invitation, not a requirement.
+
+**Why it went:** leading with the avatar did make the control impossible to
+miss, which turned out to be the problem rather than the fix. Teachers saw a
+prominent field without being able to tell what one emoji was for or where it
+would appear. The row is now a single name input.

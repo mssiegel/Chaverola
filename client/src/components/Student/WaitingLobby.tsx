@@ -96,7 +96,6 @@ export function WaitingLobby({
                 key={character.id}
                 className="inline-flex items-center gap-1.5 rounded-full bg-secondary px-3 py-1 text-sm font-medium text-secondary-foreground"
               >
-                {character.emoji && <span aria-hidden>{character.emoji}</span>}
                 {character.name}
               </li>
             ))}

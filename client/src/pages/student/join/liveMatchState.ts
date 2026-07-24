@@ -5,7 +5,6 @@ import {
   type ChatPeer,
 } from "@chaverola/shared";
 
-import { characterLabel } from "@/lib/characterLabel";
 import { nextId } from "@/lib/random";
 import { NOTICE_SENDER_ID } from "@/types/chat";
 import type { ChatMessage, Participant } from "@/types/chat";
@@ -141,8 +140,8 @@ export function shrinkToPeers(prev: LiveMatch, current: ChatPeer[]): LiveMatch {
         // from inside the room, the peer was gone and never came back.
         text:
           prev.offlinePeers[peer.id] !== undefined
-            ? `${characterLabel(peer)} couldn't get back in and left the chat`
-            : `${characterLabel(peer)} left the chat`,
+            ? `${peer.character.name} couldn't get back in and left the chat`
+            : `${peer.character.name} left the chat`,
       })),
     ],
   };

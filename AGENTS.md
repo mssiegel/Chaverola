@@ -130,7 +130,7 @@ Load-bearing — trip over them before you break one:
 
 **Shared chat pieces**
 
-- Files: [client/src/components/chat/](client/src/components/chat/), `client/src/types/chat.ts` (the `ChatRoomState`/`ChatRoomActions` contract), `lib/characterLabel.ts`, `lib/characterColor.ts`. Geography: [architecture.md → Client component geography](docs/architecture.md#client-component-geography).
+- Files: [client/src/components/chat/](client/src/components/chat/), `client/src/types/chat.ts` (the `ChatRoomState`/`ChatRoomActions` contract), `lib/characterColor.ts`. Geography: [architecture.md → Client component geography](docs/architecture.md#client-component-geography).
 - Invariants: the chatbox shell is presentational (props-only) and shared by the student chatbox, the homepage hero, and the teacher cards — one change ripples to all three.
 - Decisions: [chat-behavior.md](docs/decisions/chat-behavior.md), [monitoring.md](docs/decisions/monitoring.md).
 - Verify: a full cross-surface sweep (it's a shared piece), desktop and phone.

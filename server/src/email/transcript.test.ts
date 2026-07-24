@@ -40,8 +40,8 @@ function record(chats: StoredChat[]): StoredActivity {
     hostKey: "AAAAAAAAAAAAAAAAAAAAAAAA",
     hostName: "Ms. Cohen",
     characters: [
-      { id: "brutus", name: "Brutus", emoji: "🔪" },
-      { id: "caesar", name: "Caesar", emoji: "👑" },
+      { id: "brutus", name: "Brutus 🔪" },
+      { id: "caesar", name: "Caesar 👑" },
       { id: "cicero", name: "Cicero" }, // no emoji on purpose
     ],
     scenario: "Rome, 44 BC, the night before the Ides of March.",

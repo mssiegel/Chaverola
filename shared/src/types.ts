@@ -6,14 +6,12 @@
 
 export interface Character {
   id: string;
-  /** Display name, e.g. "Caesar's ghost". */
-  name: string;
   /**
-   * A single emoji shown with the name, e.g. "👻". Optional: the teacher
-   * decides per character whether it gets one, and every label simply
-   * drops it when absent (see lib/characterLabel).
+   * Display name, e.g. "Caesar's ghost 👻". Emoji are simply part of the
+   * name — there is no separate emoji field, so every surface renders this
+   * string as-is (see docs/decisions/characters.md).
    */
-  emoji?: string;
+  name: string;
 }
 
 /**

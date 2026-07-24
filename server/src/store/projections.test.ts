@@ -26,7 +26,7 @@ const fullRecord: StoredActivity = {
   hostKey: "AAAAAAAAAAAAAAAAAAAAAAAA",
   hostName: "Ms. Cohen",
   characters: [
-    { id: "brutus", name: "Brutus", emoji: "🔪" },
+    { id: "brutus", name: "Brutus 🔪" },
     { id: "caesar", name: "Caesar" },
     { id: "cicero", name: "Cicero" },
   ],

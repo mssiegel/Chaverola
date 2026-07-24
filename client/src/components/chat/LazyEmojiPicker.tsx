@@ -1,8 +1,6 @@
 import { lazy, Suspense } from "react";
 import type { EmojiClickData } from "emoji-picker-react";
 
-import type { EmojiPickerVariant } from "./EmojiPickerBody";
-
 // Code-split the (heavy) emoji picker — only loaded when opened. Kept in its
 // own module (not EmojiPickerBody.tsx) so the split point survives.
 const EmojiPickerBody = lazy(() => import("./EmojiPickerBody"));
@@ -18,7 +16,6 @@ export function prefetchEmojiPicker(): void {
 }
 
 interface LazyEmojiPickerProps {
-  variant: EmojiPickerVariant;
   onPick: (data: EmojiClickData) => void;
   autoFocusSearch?: boolean;
 }
@@ -30,7 +27,6 @@ interface LazyEmojiPickerProps {
  * Policy-free — whether picking closes the surface is the caller's call.
  */
 export function LazyEmojiPicker({
-  variant,
   onPick,
   autoFocusSearch,
 }: LazyEmojiPickerProps) {
@@ -42,11 +38,7 @@ export function LazyEmojiPicker({
         </div>
       }
     >
-      <EmojiPickerBody
-        variant={variant}
-        onPick={onPick}
-        autoFocusSearch={autoFocusSearch}
-      />
+      <EmojiPickerBody onPick={onPick} autoFocusSearch={autoFocusSearch} />
     </Suspense>
   );
 }

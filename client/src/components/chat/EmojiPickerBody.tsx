@@ -5,13 +5,7 @@ import EmojiPicker, {
   type EmojiClickData,
 } from "emoji-picker-react";
 
-/** A self-contained box that owns its own chrome — the desktop popover and
- *  the teacher's bottom sheet. The only variant now that the phone dock is
- *  gone; kept as a named prop so both call sites read explicitly. */
-export type EmojiPickerVariant = "box";
-
 interface EmojiPickerBodyProps {
-  variant: EmojiPickerVariant;
   onPick: (data: EmojiClickData) => void;
   /**
    * Let the search field take focus when the picker opens. Off by default,
@@ -58,8 +52,8 @@ const BOX_STYLE = {
 
 /**
  * Emoji-only picker (no stickers, no GIFs — teachers must be able to read
- * chats at a glance). Shared by the student composer's desktop popover and the
- * teacher's character-emoji sheet. Kept in its own module so
+ * chats at a glance). Shared by the student composer's popover and the
+ * teacher's character-name field, both desktop-only. Kept in its own module so
  * `emoji-picker-react` stays code-split: the chunk is ~300 KB raw / 74 KB
  * gzipped, almost all of it the emoji dataset.
  *

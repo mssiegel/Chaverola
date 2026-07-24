@@ -85,19 +85,16 @@ describe("readActivityDraft (sessionStorage sanitizing)", () => {
 });
 
 describe("toCreateActivityRequest", () => {
-  it("trims names, keeps emoji only when set, and sends no ids", () => {
+  it("trims names, keeps any emoji inside them, and sends no ids", () => {
     const request = toCreateActivityRequest(
       draftWith({
-        characters: [
-          { name: " Caesar's Ghost ", emoji: "👻" },
-          { name: "Brutus!" },
-        ],
+        characters: [{ name: " Caesar's Ghost 👻 " }, { name: "Brutus!" }],
       })
     );
     // Exact object equality doubles as the no-ids check: the server mints
-    // character ids, so the wire carries only name and emoji.
+    // character ids, so the wire carries nothing but the name.
     expect(request.characters).toEqual([
-      { name: "Caesar's Ghost", emoji: "👻" },
+      { name: "Caesar's Ghost 👻" },
       { name: "Brutus!" },
     ]);
   });

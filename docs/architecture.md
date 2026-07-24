@@ -69,17 +69,16 @@ pieces those surfaces share.
   (`ConversationLines`), the conversation feed (`Conversation`, with
   `PeerIsTyping` and `PeerReconnectBanner`), and the message input
   (`MessageComposer`, with `LazyEmojiPicker` / `EmojiPickerBody` — shared with
-  the setup form's emoji slots) are shared by the student chatbox, the homepage
-  hero chatbox, and the teacher chat cards
+  the setup form's character-name field) are shared by the student chatbox, the
+  homepage hero chatbox, and the teacher chat cards
   ([client/src/components/Teacher/ChatCard/](../client/src/components/Teacher/ChatCard/)).
-  The picker's container varies by surface: the composer and hero use a
-  `ui/popover` on desktop and hide the emoji button entirely on touch
-  (`pointer-coarse:hidden`, since the on-screen keyboard has its own emoji
-  picker), and the teacher's emoji slot uses a `ui/popover` on desktop / a
-  `ui/dialog` bottom sheet on a phone — see DECISIONS.md → "On a phone, the
-  student's message box has no emoji button".
-  Character display labels come from `characterLabel` / `peerListLabel`
-  ([client/src/lib/characterLabel.ts](../client/src/lib/characterLabel.ts)).
+  Every emoji picker in the app is desktop-only: each one sits in a
+  `ui/popover` and its trigger carries `pointer-coarse:hidden`, because a touch
+  keyboard already has an emoji key — see DECISIONS.md → "On a phone, the
+  student's message box has no emoji button" and "A character's emoji is typed
+  into its name".
+  A character is displayed by rendering `character.name` directly; there is no
+  label formatter, since an emoji is part of the name.
   Every confirmation step renders through
   [`ui/confirm-dialog`](../client/src/components/ui/confirm-dialog.tsx) —
   `EndChatConfirmationModal` is a thin wrapper over it, and the host page's

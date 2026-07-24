@@ -51,8 +51,7 @@ From `shared/src/api.ts` (the activity types are in
 
 ```ts
 export interface CharacterInput {
-  name: string;
-  emoji?: string;
+  name: string; // any emoji is part of the name; 30 chars, counted in code points
 } // the server mints character ids
 
 export interface CreateActivityRequest {
@@ -352,7 +351,7 @@ export interface QueueEntry {
 export interface ChatParticipant {
   id: string; // studentId
   name: string; // captured at chat start — survives seat removal
-  character: Character; // the SERVER roster's copy, id + name + emoji?
+  character: Character; // the SERVER roster's copy, id + name
 }
 
 export interface ChatSnapshot {

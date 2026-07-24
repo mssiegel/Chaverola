@@ -1,7 +1,6 @@
 import { CheckCircle2, Pause, X } from "lucide-react";
 
 import { LiveDot } from "@/components/ui/live-dot";
-import { characterLabel } from "@/lib/characterLabel";
 import { cn } from "@/lib/utils";
 import type { Participant } from "@/types/chat";
 
@@ -66,7 +65,7 @@ export function ChatCardHeader({
                     color: characterColors.get(participant.character.id),
                   }}
                 >
-                  {characterLabel(participant)}
+                  {participant.character.name}
                 </span>
               </span>
               {dropped && (

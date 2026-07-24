@@ -1,16 +1,22 @@
 # Feature 21 — On a phone the emoji picker takes the keyboard's place
 
-**Status: partially superseded** (2026-07-24, the same day it shipped). On a
-real handset the founder's call was that a phone needs no emoji button at all —
-the on-screen keyboard has a native emoji picker — so the **phone dock built
-here (slices 2–3) was removed** and the student composer now hides its emoji
-button on touch. See
-[chat-behavior.md → "On a phone, the student's message box has no emoji button"](../decisions/chat-behavior.md#on-a-phone-the-students-message-box-has-no-emoji-button).
+**Status: superseded except for slice 1** (2026-07-24, the same day it shipped).
+On a real handset the founder's call was that a phone needs no emoji button at
+all — the on-screen keyboard has a native emoji picker. The **phone dock built
+here (slices 2–3) was removed** that morning and the student composer now hides
+its emoji button on touch
+([chat-behavior.md](../decisions/chat-behavior.md#on-a-phone-the-students-message-box-has-no-emoji-button)).
+The **teacher's bottom sheet (slice 4) went the same afternoon**, along with the
+`bottom-sheet` variant of `ui/dialog` it was the only caller of: the teacher's
+separate emoji field was folded into the character name, so there is no mobile
+picker left to shape
+([teacher-setup.md](../decisions/teacher-setup.md#a-characters-emoji-is-typed-into-its-name)).
 
-**What survives:** slice 1 (the picker-level fixes that made the desktop popover
-work well — `autoFocusSearch={false}`, the clamped popover, the
-`--epr-category-padding` fix) and slice 4 (the teacher's bottom sheet, untouched
-for now). The record below describes the dock as originally built.
+**What survives:** slice 1 alone — the picker-level fixes that made the desktop
+popover work well (`autoFocusSearch={false}`, the clamped popover reading
+`--radix-popper-available-height`, the `--epr-category-padding` fix,
+`transition: none`, `prefetchEmojiPicker`). Every emoji picker in the app is now
+a desktop-only popover. The record below describes the dock as originally built.
 
 ## The problem
 

@@ -43,8 +43,9 @@ export type { StepperBounds };
 export const NAME_COUNTER_FROM = 25;
 export const SCENE_COUNTER_FROM = 16;
 
-/** One character row as drafted — may be empty or half-filled while typing. */
-export type CharacterDraft = Omit<Character, "id">;
+/** One character row as drafted — may be empty while typing. Just a name:
+ *  an emoji, if the teacher wants one, is part of that name. */
+export type CharacterDraft = Pick<Character, "name">;
 
 /** The non-character fields every activity draft carries (setup and live). */
 export interface ActivityDraftFields {
@@ -117,11 +118,7 @@ function sanitizeDraft(raw: unknown): ActivityDraft {
           typeof record.name === "string"
             ? clampChars(record.name, NAME_MAX_CHARS)
             : "";
-        const emoji =
-          typeof record.emoji === "string" && record.emoji !== ""
-            ? record.emoji
-            : undefined;
-        return emoji ? { name, emoji } : { name };
+        return { name };
       });
     while (rows.length < MIN_CHARACTERS) rows.push({ name: "" });
     draft.characters = rows;
@@ -245,10 +242,7 @@ export function toCreateActivityRequest(
 ): CreateActivityRequest {
   const characters: CharacterInput[] = draft.characters
     .filter(isFilledCharacter)
-    .map((row) => {
-      const name = row.name.trim();
-      return row.emoji ? { name, emoji: row.emoji } : { name };
-    });
+    .map((row) => ({ name: row.name.trim() }));
 
   const scene = draft.scene.trim();
   const email = draft.teacherEmail.trim();

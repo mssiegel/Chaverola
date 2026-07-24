@@ -42,11 +42,7 @@ export function liveDraftFromActivity(
   activity: HostedActivity
 ): LiveActivityDraft {
   return {
-    characters: activity.characters.map((c) =>
-      c.emoji
-        ? { id: c.id, name: c.name, emoji: c.emoji }
-        : { id: c.id, name: c.name }
-    ),
+    characters: activity.characters.map((c) => ({ id: c.id, name: c.name })),
     hostName: activity.hostName,
     teacherEmail: activity.teacherEmail ?? "",
     scene: activity.scenario ?? "",
@@ -56,9 +52,7 @@ export function liveDraftFromActivity(
 
 function toActivityDraft(draft: LiveActivityDraft): ActivityDraft {
   return {
-    characters: draft.characters.map(({ name, emoji }) =>
-      emoji ? { name, emoji } : { name }
-    ),
+    characters: draft.characters.map(({ name }) => ({ name })),
     hostName: draft.hostName,
     teacherEmail: draft.teacherEmail,
     scene: draft.scene,
@@ -128,7 +122,7 @@ export function mergeExternalSettings(
 /**
  * Re-labels stored participants with the roster's CURRENT characters, by id.
  * Chats capture their characters when they start; rendering through this
- * makes a live rename/emoji edit reach every card instantly. A character
+ * makes a live rename reach every card instantly. A character
  * that's no longer on the roster (removed after its chats ended) falls back
  * to the label it had, so completed cards never lose their names.
  */
@@ -153,11 +147,7 @@ export function activityFromLiveDraft(
 ): HostedActivity {
   const characters: Character[] = draft.characters
     .filter((row) => row.name.trim() !== "")
-    .map((row) => {
-      const character: Character = { id: row.id, name: row.name.trim() };
-      if (row.emoji) character.emoji = row.emoji;
-      return character;
-    });
+    .map((row) => ({ id: row.id, name: row.name.trim() }));
 
   const activity: HostedActivity = {
     joinCode: base.joinCode,

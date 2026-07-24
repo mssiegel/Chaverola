@@ -3,7 +3,6 @@ import { ChatHeader } from "@/components/chat/ChatHeader";
 import { Conversation } from "@/components/chat/Conversation";
 import { MessageComposer } from "@/components/chat/MessageComposer";
 import type { ChatDemo } from "@/components/chat/useChatDemo";
-import { characterLabel } from "@/lib/characterLabel";
 import { selfFirstCharacterColors } from "@/lib/characterColor";
 
 interface HeroChatboxProps {
@@ -52,7 +51,7 @@ export function HeroChatbox({ chat }: HeroChatboxProps) {
 
       <MessageComposer
         onSend={chat.send}
-        selfCharacterLabel={characterLabel(chat.self)}
+        selfCharacterLabel={chat.self.character.name}
       />
     </ChatFrame>
   );

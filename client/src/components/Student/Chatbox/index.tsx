@@ -6,7 +6,6 @@ import { ChatHeader } from "@/components/chat/ChatHeader";
 import { Conversation } from "@/components/chat/Conversation";
 import { MessageComposer } from "@/components/chat/MessageComposer";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
-import { characterLabel } from "@/lib/characterLabel";
 import { selfFirstCharacterColors } from "@/lib/characterColor";
 import type { ChatRoomState } from "@/types/chat";
 
@@ -197,7 +196,7 @@ export function Chatbox({
         <MessageComposer
           onSend={onSend}
           onTyping={onTyping}
-          selfCharacterLabel={characterLabel(self)}
+          selfCharacterLabel={self.character.name}
           disabled={isPaused}
           releaseKeyboardOnSend={releaseKeyboardOnSend}
         />

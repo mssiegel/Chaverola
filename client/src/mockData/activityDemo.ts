@@ -29,11 +29,11 @@ export const demoActivity: Activity = {
     "Rome, on the Ides of March. A rumor is going around the forum, and " +
     "nobody knows who to trust.",
   characters: [
-    { id: "caesars-ghost", name: "Caesar's ghost", emoji: "👻" },
-    { id: "brutus", name: "Brutus", emoji: "🔪" },
-    { id: "cleopatra", name: "Cleopatra", emoji: "👑" },
-    // No emoji on purpose: emojis are per-character optional, and the demo
-    // roster should exercise the name-only path somewhere visible.
+    { id: "caesars-ghost", name: "Caesar's ghost 👻" },
+    { id: "brutus", name: "Brutus 🔪" },
+    { id: "cleopatra", name: "Cleopatra 👑" },
+    // No emoji on purpose: a name is just a name, and the demo roster should
+    // show somewhere visible that not every teacher adds one.
     { id: "marc-antony", name: "Marc Antony" },
   ],
 };

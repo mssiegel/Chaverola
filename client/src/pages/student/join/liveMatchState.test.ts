@@ -33,9 +33,9 @@ afterEach(() => {
 });
 
 const roster: Character[] = [
-  { id: "brutus", name: "Brutus", emoji: "🔪" },
-  { id: "cleo", name: "Cleopatra", emoji: "👑" },
-  // No emoji on purpose — the name-only label path.
+  { id: "brutus", name: "Brutus 🔪" },
+  { id: "cleo", name: "Cleopatra 👑" },
+  // No emoji on purpose — not every teacher adds one.
   { id: "antony", name: "Marc Antony" },
 ];
 
@@ -83,8 +83,7 @@ describe("resolveCharacter", () => {
   it("finds a character in the roster", () => {
     expect(resolveCharacter(roster, "cleo")).toEqual({
       id: "cleo",
-      name: "Cleopatra",
-      emoji: "👑",
+      name: "Cleopatra 👑",
     });
   });
 
@@ -107,7 +106,7 @@ describe("toParticipant", () => {
   it("uses the characterId as the participant id and carries no real name", () => {
     expect(toParticipant(roster, { characterId: "brutus" })).toEqual({
       id: "brutus",
-      character: { id: "brutus", name: "Brutus", emoji: "🔪" },
+      character: { id: "brutus", name: "Brutus 🔪" },
       realName: "",
     });
   });

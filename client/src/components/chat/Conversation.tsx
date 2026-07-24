@@ -1,7 +1,6 @@
 import { useEffect, useRef } from "react";
 
 import { ConversationLines } from "@/components/chat/ConversationLines";
-import { characterLabel } from "@/lib/characterLabel";
 import { participantsById } from "@/lib/participants";
 import type {
   ChatMessage,
@@ -75,10 +74,8 @@ export function Conversation({
   const typingName = typingPeerId
     ? (byId.get(typingPeerId)?.character.name ?? null)
     : null;
-  // Full "name emoji" label: the banner is chat chrome, and the countdown
-  // copy ("Brutus 🔪 lost connection…") should read like the header does.
   const offlinePeer = offlinePeerId ? byId.get(offlinePeerId) : undefined;
-  const offlineName = offlinePeer ? characterLabel(offlinePeer) : null;
+  const offlineName = offlinePeer?.character.name ?? null;
 
   return (
     <div

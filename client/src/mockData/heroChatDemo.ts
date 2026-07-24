@@ -29,13 +29,13 @@ import type { ChatScenario, Participant } from "@/types/chat";
 
 const moon: Participant = {
   id: "self-moon",
-  character: { id: "moon", name: "the Moon", emoji: "🌕" },
+  character: { id: "moon", name: "the Moon 🌕" },
   realName: "Dana K",
 };
 
 const armstrong: Participant = {
   id: "peer-armstrong",
-  character: { id: "armstrong", name: "Neil Armstrong", emoji: "🚀" },
+  character: { id: "armstrong", name: "Neil Armstrong 🚀" },
   realName: "Sam A",
 };
 

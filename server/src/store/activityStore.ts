@@ -84,7 +84,10 @@ const byJoinCode = new Map<string, StoredActivity>();
 const byHostKey = new Map<string, StoredActivity>();
 
 /** Slug a character name into an id, unique within this activity. Ported
- *  from the client's activity setup (it already handles Unicode/Hebrew). */
+ *  from the client's activity setup (it already handles Unicode/Hebrew).
+ *  Emoji fall out of the slug — they're neither letters nor numbers — so a
+ *  name that is only an emoji lands on the "character" fallback and the
+ *  suffix loop keeps it unique. */
 function toCharacterId(name: string, taken: Set<string>): string {
   const slug =
     name
@@ -161,14 +164,10 @@ export function createActivity(
   if (byJoinCode.size >= MAX_ACTIVITIES) throw capacity();
 
   const taken = new Set<string>();
-  const characters: Character[] = input.characters.map((row) => {
-    const character: Character = {
-      id: toCharacterId(row.name, taken),
-      name: row.name,
-    };
-    if (row.emoji !== undefined) character.emoji = row.emoji;
-    return character;
-  });
+  const characters: Character[] = input.characters.map((row) => ({
+    id: toCharacterId(row.name, taken),
+    name: row.name,
+  }));
 
   const record: StoredActivity = {
     joinCode: mintJoinCode(),

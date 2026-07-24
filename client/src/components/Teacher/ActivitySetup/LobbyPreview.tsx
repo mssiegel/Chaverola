@@ -75,9 +75,6 @@ export function LobbyPreview({
                       key={character.id}
                       className="inline-flex items-center gap-1.5 rounded-full bg-secondary px-2.5 py-1 text-xs font-medium text-secondary-foreground"
                     >
-                      {character.emoji && (
-                        <span aria-hidden>{character.emoji}</span>
-                      )}
                       {character.name.trim()}
                     </li>
                   ))}

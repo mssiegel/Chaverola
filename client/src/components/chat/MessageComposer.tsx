@@ -221,7 +221,7 @@ export function MessageComposer({
                 onFocusOutside={(event) => event.preventDefault()}
                 onCloseAutoFocus={(event) => event.preventDefault()}
               >
-                <LazyEmojiPicker variant="box" onPick={insertEmoji} />
+                <LazyEmojiPicker onPick={insertEmoji} />
               </PopoverContent>
             </Popover>
 

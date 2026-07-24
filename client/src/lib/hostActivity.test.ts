@@ -16,7 +16,7 @@ const baseActivity: HostedActivity = {
   joinCode: "4321",
   hostName: "Ms. Cohen",
   characters: [
-    { id: "caesar", name: "Caesar's ghost", emoji: "👻" },
+    { id: "caesar", name: "Caesar's ghost 👻" },
     { id: "brutus", name: "Brutus" },
   ],
   settings: { ...DEFAULT_ACTIVITY_SETTINGS },
@@ -25,7 +25,7 @@ const baseActivity: HostedActivity = {
 function liveDraft(overrides: Partial<LiveActivityDraft>): LiveActivityDraft {
   return {
     characters: [
-      { id: "caesar", name: "Caesar's ghost", emoji: "👻" },
+      { id: "caesar", name: "Caesar's ghost 👻" },
       { id: "brutus", name: "Brutus" },
     ],
     hostName: "Ms. Cohen",
@@ -143,7 +143,7 @@ describe("withCurrentCharacters", () => {
 
   it("re-labels by id from the current roster, falling back for removed ones", () => {
     const relabeled = withCurrentCharacters(participants, baseActivity);
-    expect(relabeled[0]!.character.name).toBe("Caesar's ghost");
+    expect(relabeled[0]!.character.name).toBe("Caesar's ghost 👻");
     expect(relabeled[1]!.character.name).toBe("Removed Character");
   });
 });

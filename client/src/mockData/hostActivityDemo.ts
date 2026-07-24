@@ -68,8 +68,8 @@ export interface HostSeedChat {
 /**
  * The seed chats: two in progress (a 1:1 and a group of 3, so the group
  * paths are exercised) and two completed (a 1:1 and a group of 4 — the
- * four-seat chat puts the whole Rome cast on a card, emoji-less Marc Antony
- * included, so name-only labels stay visibly exercised).
+ * four-seat chat puts the whole Rome cast on a card, plain-named Marc Antony
+ * included, so names without an emoji stay visibly exercised).
  */
 export const HOST_SEED_CHATS: readonly HostSeedChat[] = [
   {

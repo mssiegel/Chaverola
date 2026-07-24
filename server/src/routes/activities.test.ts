@@ -21,7 +21,9 @@ const app = buildApp({
 
 const validBody: CreateActivityRequest = {
   hostName: "Ms. Cohen",
-  characters: [{ name: "Brutus" }, { name: "Caesar", emoji: "👑" }],
+  // One name carries an emoji: they're part of the name now, so this covers
+  // the whole path — the code-point cap, and an id slug that drops the emoji.
+  characters: [{ name: "Brutus" }, { name: "Caesar 👑" }],
   settings: { ...DEFAULT_ACTIVITY_SETTINGS },
 };
 

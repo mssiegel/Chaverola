@@ -1,4 +1,3 @@
-import { characterLabel } from "@/lib/characterLabel";
 import { participantsById } from "@/lib/participants";
 import type { ChatMessage, Participant } from "@/types/chat";
 
@@ -68,7 +67,7 @@ export function ConversationLines({
               className="font-semibold"
               style={{ color: characterColors.get(sender.character.id) }}
             >
-              {characterLabel(sender)}
+              {sender.character.name}
               {isSelf && (
                 <span className="ml-1 align-middle text-[11px] font-medium text-muted-foreground">
                   (you)
