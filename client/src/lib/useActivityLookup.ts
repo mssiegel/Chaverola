@@ -30,7 +30,10 @@ export type ActivityLookup =
  * render-time `handedOff.get(...)` and never observe a later write (it
  * did, during Prompt 5's verification). Entries are only written from a
  * fetch that just succeeded, so staleness is bounded by SPA-session length
- * (a page refresh starts empty and refetches).
+ * (a page refresh starts empty and refetches). Unlike the host-side map,
+ * entries are never consumed, and a remount CAN re-serve one in-session
+ * (home, then Back/Forward into /activity/join/:code, remounts across
+ * layouts) — the hazard feature 16 fixed host-side; accepted here for now.
  */
 const handedOff = new Map<string, Activity>();
 

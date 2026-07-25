@@ -21,9 +21,13 @@ export type HostedActivityLookup =
  * Cross-route hand-off from the create submit, which already holds the
  * activity the server just minted — without it, landing on the host page
  * would flash a loading screen refetching data we got milliseconds ago.
- * Safe to read at render time ONLY on a fresh mount (the navigation from
- * `/activity/create` remounts the page); see useActivityLookup's map for
- * the React Compiler caveat that rules out same-URL hand-offs this way.
+ * An entry serves exactly one mount: the first render reads it (safe at
+ * render time ONLY on a fresh mount — see useActivityLookup's map for the
+ * React Compiler caveat that rules out same-URL hand-offs this way), then
+ * the mount effect settles it into state and deletes it. So create → host
+ * stays fetch-free, and any later remount of the same key (Back to
+ * create, Forward again) refetches server truth instead of serving the
+ * create-time copy forever (feature 16).
  */
 const handedOff = new Map<string, HostedActivity>();
 
@@ -55,7 +59,24 @@ export function useHostedActivityLookup(hostKey: string | undefined): {
 
   useEffect(() => {
     if (hostKey === undefined || !HOST_KEY_PATTERN.test(hostKey)) return;
-    if (attempt === 0 && handedOff.has(hostKey)) return;
+    // Consume the hand-off in the effect, never during render: settle it
+    // into state (which outranks the map below) and drop the entry, so
+    // this mount stays fetch-free and a later remount fetches instead of
+    // reading a stale copy. Dev-only wart: StrictMode's second effect run
+    // finds the map empty and fetches once — one extra GET, not a loop,
+    // and the already-settled state means no loading flash.
+    if (attempt === 0) {
+      const primed = handedOff.get(hostKey);
+      if (primed !== undefined) {
+        handedOff.delete(hostKey);
+        setSettled({
+          key: hostKey,
+          attempt,
+          lookup: { state: "found", activity: primed },
+        });
+        return;
+      }
+    }
     let cancelled = false;
     void getHostedActivity(hostKey).then((result) => {
       if (cancelled) return;

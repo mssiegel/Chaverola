@@ -106,6 +106,7 @@ git: `git log -- DECISIONS.md`.
   - [Host the Activity docks to the bottom edge at every breakpoint](docs/decisions/teacher-setup.md#host-the-activity-docks-to-the-bottom-edge-at-every-breakpoint)
   - [Setup sections each carry one brand accent; settings stays the quiet one](docs/decisions/teacher-setup.md#setup-sections-each-carry-one-brand-accent-settings-stays-the-quiet-one)
 - [Teacher live activity page](docs/decisions/teacher-live.md)
+  - [A return to the host page refetches, behind the normal loading screen](docs/decisions/teacher-live.md#a-return-to-the-host-page-refetches-behind-the-normal-loading-screen)
   - [The transcript email is HTML that reads like the app, with plain text riding along](docs/decisions/teacher-live.md#the-transcript-email-is-html-that-reads-like-the-app-with-plain-text-riding-along)
   - [A woken host device reads the class settings back before it can write them](docs/decisions/teacher-live.md#a-woken-host-device-reads-the-class-settings-back-before-it-can-write-them)
   - [A click in the live settings panel commits alone and immediately](docs/decisions/teacher-live.md#a-click-in-the-live-settings-panel-commits-alone-and-immediately)

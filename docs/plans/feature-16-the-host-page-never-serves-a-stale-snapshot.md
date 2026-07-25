@@ -91,11 +91,31 @@ a React Compiler gotcha from feature 1's verification — the compiler may cache
 render-time `handedOff.get(...)` and never observe a later write. Any fix must
 keep create → host fetch-free and add no render-time write to that map.
 
-- [ ] Prompt — A teacher who navigates away and back sees the live activity, not the create-time copy
+- [x] Prompt — A teacher who navigates away and back sees the live activity, not the create-time copy
 
 ---
 
 ## Prompt — A teacher who navigates away and back sees the live activity, not the create-time copy
+
+> **Shipped 2026-07-25.** Reproduced with the email probe on the local stack,
+> then fixed. What the reproduction actually showed: **Back/Forward is the
+> only reproducing path** — Back to create and Forward again remounted onto
+> the create-time map entry with zero `GET /activities/host/...` and a blank
+> email field. **The language switcher is not a path into this bug**: `/` and
+> `/he` render the same components at the same route-tree positions, so React
+> keeps the page instance across EN⇄HE — no remount, no GET, state and socket
+> intact (so the second founder question never arose, and feature 15's
+> flush-vs-refetch ordering worry dissolves on that path). The fix is the
+> one-shot hand-off in `useHostedActivityLookup` — consume-in-effect, exactly
+> the leading candidate. Founder call: the return refetch shows the normal
+> loading screen (see
+> [teacher-live.md](../decisions/teacher-live.md#a-return-to-the-host-page-refetches-behind-the-normal-loading-screen)).
+> Verified post-fix (`feature16-verify.mjs`, 11/11): email survives
+> Back/Forward at desktop and phone widths, a settings flip + hard reload
+> keeps both the flip and the email, create → host fires only StrictMode's
+> single extra dev GET (remount refetch fires 2 in dev — fixed counts, not a
+> loop; StrictMode double-invocation is dev-only so production stays
+> fetch-free), and the `1234` demo stays at zero socket traffic and zero GETs.
 
 **Goal:** a teacher mid-class who switches language, or taps Back and then
 Forward, returns to a host page showing the settings and email the server

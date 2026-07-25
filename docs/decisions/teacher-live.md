@@ -5,6 +5,46 @@ area. Entries are newest-first; add new ones at the top, and add a matching line
 to the index in the same change. Replaced decisions move to Superseded at the
 bottom of this file.
 
+### A return to the host page refetches, behind the normal loading screen
+
+_2026-07-25_
+
+**Decision:** The create → host hand-off entry is one-shot: the mount that
+receives it renders fetch-free as before, then its mount effect settles the
+activity into hook state and deletes the map entry. Any later mount of the
+same host key — Back to the create page and Forward again is the real path —
+fetches `GET /activities/host/:hostKey` and renders the server's copy, with
+today's "Finding your activity…" screen showing while the fetch is in
+flight. The founder chose that visible beat over rendering the last-known
+copy and folding the fresh one in (2026-07-25): it is the smallest change,
+it is honest, and the stall is brief now that the API is on a paid instance
+that never spins down.
+
+**Why:** The entry used to live forever, and the lookup skipped its fetch
+whenever the entry existed — so a teacher who tapped Back and then Forward
+mid-class remounted onto the create-time copy: zero network, the email field
+blank minutes after they'd set it (the email rides no snapshot, so nothing
+heals it), and the next settings flip based on a stale object could roll the
+class back within the sub-second window before the reconnect fold lands.
+Reproduced in-browser 2026-07-25 (feature 16). The language switcher, the
+audit's suspected path, turned out not to be one: `/` and `/he` render the
+same components at the same positions in the route tree, so React keeps the
+page instance across an EN⇄HE switch — no remount, no socket churn, state
+intact (watched: zero GETs, email survives). One accepted wart: StrictMode's
+second effect run in dev finds the map already consumed and fetches once on
+create → host — one extra dev-only GET, not a loop; production stays
+fetch-free since StrictMode's double-invocation is a development behavior.
+The student-side map keeps the old forever-entry shape for now — its
+reachable remount (home, Back/Forward into the join page) is noted in the
+code and accepted.
+
+_Implemented in
+[useHostedActivityLookup](../../client/src/lib/useHostedActivityLookup.ts)
+(the consume-in-effect); makes
+[Settings edits sync for real; characters, scenario, and host name stay local](#settings-edits-sync-for-real-characters-scenario-and-host-name-stay-local)'s
+no-silent-revert guarantee hold across in-session navigation too. Plan in
+[docs/plans/feature-16](../plans/feature-16-the-host-page-never-serves-a-stale-snapshot.md)._
+
 ### The transcript email is HTML that reads like the app, with plain text riding along
 
 _2026-07-24_
