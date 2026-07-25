@@ -169,10 +169,11 @@ function HostActivityChrome({
   would silently mail the old address. The HOST NAME and STUDENT
   INSTRUCTIONS sync the same way (activity:update-details, feature 17, no
   echo either — a second device is last-write-wins like the email), so the
-  edit survives a refresh and a student joining later gets the current
-  copy; students already sitting in the lobby follow live in prompt 2.
-  CHARACTER edits stay local-only until feature 18 (students' lobbies keep
-  the server's roster, refresh reverts — founder call; see DECISIONS.md).
+  edit survives a refresh, a student joining later gets the current copy,
+  and students sitting in the lobby watch it change live (a silent swap,
+  no announcement — founder call). CHARACTER edits stay local-only until
+  feature 18 (students' lobbies keep the server's roster, refresh reverts
+  — founder call; see DECISIONS.md).
   On the demo everything is local because the whole class is client-side.
 */
 

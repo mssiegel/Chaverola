@@ -5,6 +5,47 @@ area. Entries are newest-first; add new ones at the top, and add a matching line
 to the index in the same change. Replaced decisions move to Superseded at the
 bottom of this file.
 
+### Students' lobbies follow name and instructions edits live, and the swap is silent
+
+_2026-07-26_
+
+**Decision:** A student sitting in the lobby now watches "Hosted by" and the
+Instructions block change when the teacher edits them mid-activity — feature
+17's `activity:details-changed` finally has a client listener. The swap is
+**silent**: the copy re-renders in place with no banner and no highlight, the
+same manner `activity:paused` arrives in (founder call, 2026-07-26). Cleared
+instructions remove the block entirely rather than leaving an empty one. And
+the settings panel's promise line folds the name and instructions into the
+"saves as you type" half **now**, instead of waiting for feature 18 to widen
+it in one pass (founder call, same day): after the server half shipped, the
+old sentence — "refreshing undoes those edits" — was actively false.
+Characters stay this-page-only until feature 18, and the promise line still
+says so.
+
+**Why:** This retires the name-and-instructions half of two standing
+decisions —
+[Settings edits sync for real; characters, scenario, and host name stay local](#settings-edits-sync-for-real-characters-scenario-and-host-name-stay-local)
+and
+[The live-settings panel stays on real activities, editing the teacher's local view](#the-live-settings-panel-stays-on-real-activities-editing-the-teachers-local-view)
+— whose characters half stands for feature 18. An announcement was on the
+table and rejected as the bigger build for a moment students mostly aren't
+watching; a lobby student is waiting, not studying the instructions, and the
+paused banner precedent says world-state changes may just happen. The client
+lands the event by rebuilding the activity and settling it into the existing
+lookup (settled state already outranks the hand-off map and any refetch), so
+no new state, no reducer — nothing about a chat changes, which is also why a
+mid-chat student is undisturbed and simply finds the new copy if they return
+to the lobby. A disconnected student misses the event and heals on reload;
+the next joiner always gets fresh truth from the lookup.
+
+_Implemented in
+[useLobbyPresence](../../client/src/pages/student/useLobbyPresence.ts) (the
+relay), [useActiveMatch](../../client/src/pages/student/join/useActiveMatch.ts)
+(forwarded untouched), and
+[JoinActivityPage](../../client/src/pages/student/JoinActivityPage.tsx) (the
+rebuild + `deliver`); plan in
+[docs/plans/feature-17](../plans/feature-17-host-name-and-scene-sync-live.md)._
+
 ### Name and instructions edits sync with no second-device echo, and an emptied box clears
 
 _2026-07-26_
@@ -250,6 +291,13 @@ fed `engine.paused` from
 [index.tsx](../../client/src/components/Teacher/HostActivity/index.tsx) — the
 value the rail already had. Presentational only: `paused` never enters the draft,
 so the panel still emits on a settings or email diff and nothing else._
+
+_Update (2026-07-26): feature 17's widening happened, on the schedule this
+entry set — the lead paragraph now counts the host name and the instructions
+among what saves and says lobbies see those changes live, leaving characters
+as the one this-page-only edit. See
+[Students' lobbies follow name and instructions edits live, and the swap is silent](#students-lobbies-follow-name-and-instructions-edits-live-and-the-swap-is-silent).
+Feature 18 widens it once more, to its own scope._
 
 ### A best-effort fallback emails the transcript if the teacher just closes the laptop
 
@@ -882,6 +930,13 @@ any, see
 [A woken host device reads the class settings back before it can write them](#a-woken-host-device-reads-the-class-settings-back-before-it-can-write-them).
 The replace and the room-minus-sender echo stand unchanged._
 
+_Partly superseded 2026-07-26 by
+[Students' lobbies follow name and instructions edits live, and the swap is silent](#students-lobbies-follow-name-and-instructions-edits-live-and-the-swap-is-silent):
+**the host name is no longer local-only** — it and the student instructions
+sync to the server and to students' lobbies (feature 17). Characters and
+scenario stay local until feature 18; the settings half of this entry
+stands._
+
 **Why:** Real auto-match forces the question: the switch and its seconds
 must reach the server or the rail lies. Syncing the whole settings object is
 one event and stops the panel silently reverting on refresh; syncing only
@@ -1085,6 +1140,13 @@ the teacher's other devices, and survive a refresh. The rest of this
 entry stands unchanged: the panel keeps rendering on real activities, and
 character, scenario, and host-name edits are still local to the
 teacher's page until roster sync ships._
+
+_Further superseded 2026-07-26 by
+[Students' lobbies follow name and instructions edits live, and the swap is silent](#students-lobbies-follow-name-and-instructions-edits-live-and-the-swap-is-silent):
+**host-name and instructions edits are no longer local-only either** —
+feature 17 syncs them to the server and to students' lobbies. What still
+stands: the panel renders on real activities, and character edits stay
+local until feature 18._
 
 ### Start their chat sits below Pair everyone 1:1, nearest the names
 

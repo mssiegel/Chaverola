@@ -165,18 +165,18 @@ export function LiveSettingsPanel({
           : "Add your email and we'll send you every chat when the activity wraps up"
       }
     >
-      {/* Only what actually travels gets promised. Settings and the email
-          reach the server on the 1-second pause; characters, the
-          instructions and the host name are still local to this tab
-          (founder call 2026-07-19), so students keep the setup copy and a
-          refetch drops the edit. Features 17 and 18 widen this line as
-          their sync ships — to their own scope, never back to "what
-          students see mid-chat". See DECISIONS.md → "The live settings
-          panel only claims the edits that actually travel". */}
+      {/* Only what actually travels gets promised. Settings, the email, the
+          host name and the instructions all reach the server on the
+          1-second pause, and student lobbies follow the name/instructions
+          live (feature 17); characters are still local to this tab until
+          feature 18 widens this line to its own scope — never back to
+          "what students see mid-chat". See DECISIONS.md → "The live
+          settings panel only claims the edits that actually travel". */}
       <p className="text-sm leading-relaxed text-muted-foreground">
-        Settings and your email save as soon as you pause typing. Characters,
-        the instructions and your name only change this page for now: students
-        still see what you set up, and refreshing undoes those edits.
+        Your name, the instructions, settings, and your email all save as soon
+        as you pause typing, and students in the lobby see name and instruction
+        changes live. Characters only change this page for now: students keep
+        the cast you set up, and refreshing undoes those edits.
       </p>
 
       <div className="mt-6 flex flex-col gap-7">

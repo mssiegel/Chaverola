@@ -14,6 +14,7 @@ import { useActivityLookup } from "@/lib/useActivityLookup";
 import { usePageTitle } from "@/lib/usePageTitle";
 import { cn } from "@/lib/utils";
 import { DEMO_JOIN_CODE, DEMO_STUDENT_NAME } from "@/mockData";
+import type { Activity } from "@/types/activity";
 
 import { ActivityFullCard } from "./join/ActivityFullCard";
 import { ActivityGoneCard } from "./join/ActivityGoneCard";
@@ -154,6 +155,25 @@ export function JoinActivityPage() {
     // Latch the dead activity's code, which flips the stage to activity-gone.
     onEnded: () => {
       if (activity) setGoneCode(activity.joinCode);
+    },
+    // The teacher edited the lobby's detail pair mid-activity (feature 17):
+    // rebuild the activity field-by-field and settle it into the lookup —
+    // settled state outranks the hand-off map and any refetch, so every
+    // render site (lobby, join gate) follows without new state. A silent
+    // swap by design, like activity:paused. null instructions OMIT the key,
+    // the server's own shape, so the lobby's block disappears rather than
+    // rendering empty.
+    onActivityDetails: (payload) => {
+      if (!activity) return;
+      const next: Activity = {
+        joinCode: activity.joinCode,
+        hostName: payload.hostName,
+        characters: activity.characters,
+      };
+      if (payload.studentInstructions !== null) {
+        next.studentInstructions = payload.studentInstructions;
+      }
+      deliverLookup(next);
     },
   });
 

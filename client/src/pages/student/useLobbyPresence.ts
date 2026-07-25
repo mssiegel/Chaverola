@@ -107,6 +107,10 @@ function buildStudentAuth(
  * that expires the indicator. `onPeerConnection` is a chat partner's drop
  * (past the server's 4s gate, with the remaining grace) or return — the
  * page owns the offline map and the countdown derived from it.
+ * `onActivityDetails` is the teacher's live edit of the lobby's detail pair
+ * (host name + student instructions, feature 17) — a full replace, with
+ * `null` meaning the instructions were cleared; the page folds it into its
+ * activity lookup.
  */
 export function useLobbyPresence({
   active,
@@ -121,6 +125,7 @@ export function useLobbyPresence({
   onChatEnded,
   onPeerTyping,
   onPeerConnection,
+  onActivityDetails,
 }: {
   active: boolean;
   joinCode: string | undefined;
@@ -165,6 +170,10 @@ export function useLobbyPresence({
     state: "dropped" | "returned";
     secondsLeft: number | null;
   }) => void;
+  onActivityDetails?: (payload: {
+    hostName: string;
+    studentInstructions: string | null;
+  }) => void;
 }): {
   presence: LobbyPresence;
   paused: boolean;
@@ -190,6 +199,7 @@ export function useLobbyPresence({
   const onChatEndedRef = useLatestRef(onChatEnded);
   const onPeerTypingRef = useLatestRef(onPeerTyping);
   const onPeerConnectionRef = useLatestRef(onPeerConnection);
+  const onActivityDetailsRef = useLatestRef(onActivityDetails);
 
   // Sessions from before the live lobby have no nonce — mint one before the
   // first connect so their fresh joins are idempotent too.
@@ -235,6 +245,9 @@ export function useLobbyPresence({
     });
     socket.on("activity:paused", (payload) => {
       setPaused(payload.paused === true);
+    });
+    socket.on("activity:details-changed", (payload) => {
+      onActivityDetailsRef.current?.(payload);
     });
     socket.on("lobby:removed", () => {
       setPresence("removed");
@@ -352,6 +365,7 @@ export function useLobbyPresence({
     onChatEndedRef,
     onPeerTypingRef,
     onPeerConnectionRef,
+    onActivityDetailsRef,
   ]);
 
   const retry = () => {

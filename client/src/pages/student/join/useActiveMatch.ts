@@ -30,9 +30,12 @@ import {
  * — the typing-TTL and 🎉-flash timer refs, and the synchronous
  * `liveChatIdRef`.
  *
- * `onRemoved` / `onEnded` are caller-supplied because they touch page-level
- * state (sign-out, the name field, the activity-gone latch); this hook wraps
- * `onRemoved` to also clear its own match, and forwards `onEnded` untouched.
+ * `onRemoved` / `onEnded` / `onActivityDetails` are caller-supplied because
+ * they touch page-level state (sign-out, the name field, the activity-gone
+ * latch, the activity lookup); this hook wraps `onRemoved` to also clear its
+ * own match, and forwards the other two untouched. No liveMatchState reducer
+ * for the details event on purpose: nothing about a chat changes — the pair
+ * lives on the activity lookup, not on the match.
  */
 export function useActiveMatch({
   activity,
@@ -43,6 +46,7 @@ export function useActiveMatch({
   activityGoneFromSocket,
   onRemoved,
   onEnded,
+  onActivityDetails,
 }: {
   activity: Activity | undefined;
   session: StudentSession | null;
@@ -54,6 +58,10 @@ export function useActiveMatch({
   activityGoneFromSocket: boolean;
   onRemoved: () => void;
   onEnded: () => void;
+  onActivityDetails: (payload: {
+    hostName: string;
+    studentInstructions: string | null;
+  }) => void;
 }) {
   // Set by the lobby's demo match triggers (demo) or by the server's
   // chat:started (real activities, via the presence hook below).
@@ -159,6 +167,7 @@ export function useActiveMatch({
       setRevealed(false);
     },
     onEnded,
+    onActivityDetails,
     onChatStarted: (payload) => {
       if (!session) return;
       liveChatIdRef.current = payload.chatId;
