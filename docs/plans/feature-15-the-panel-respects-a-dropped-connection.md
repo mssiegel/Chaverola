@@ -51,7 +51,7 @@ grid. This doc supersedes nothing. It finishes applying that decision to the
 block left outside it, and corrects the "lost" clause to whatever the browser
 actually shows.
 
-- [ ] Prompt — The settings panel joins the reconnecting treatment
+- [x] Prompt — The settings panel joins the reconnecting treatment
 
 ---
 

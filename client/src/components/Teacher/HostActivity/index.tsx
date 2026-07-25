@@ -221,21 +221,11 @@ export function HostActivityDashboard({
 
       <JoiningInstructions joinCode={activity.joinCode} />
 
-      {/* On real activities too — founder call. Settings edits and the
-          teacher's email now sync to the server (the page's onActivityChange
-          wrapper emits them); characters/scenario/hostName edits stay
-          local-only until edit-sync ships; see DECISIONS.md → "The
-          live-settings panel stays on real activities". */}
-      <LiveSettingsPanel
-        activity={activity}
-        characterIdsInUse={engine.characterIdsInUse}
-        paused={engine.paused}
-        onActivityChange={onActivityChange}
-      />
-
       {/* While the teacher's own connection is down, the banner says so and
-          the last-known queue and cards stay readable (but not actionable)
-          under it. Unreachable on the demo — its connection never drops. */}
+          everything below it — the settings panel included — stays readable
+          but not actionable. `inert` on the wrappers, not pointer-events
+          alone: a focused switch would still toggle on Space. Unreachable on
+          the demo — its connection never drops. */}
       {reconnecting && (
         <div
           role="status"
@@ -253,11 +243,36 @@ export function HostActivityDashboard({
         </div>
       )}
 
+      {/* On real activities too — founder call. Settings edits and the
+          teacher's email now sync to the server (the page's onActivityChange
+          wrapper emits them); characters/scenario/hostName edits stay
+          local-only until edit-sync ships; see DECISIONS.md → "The
+          live-settings panel stays on real activities". */}
+      {/* Its own dim wrapper, OUTSIDE the grid one — moving the panel into
+          the grid would change the desktop layout. An offline edit here
+          would actually land at reconnect (the socket buffers it), but a
+          live switch next to the rail's identical dead one reads as two
+          truths — founder call, feature 15. */}
+      <div
+        inert={reconnecting}
+        className={cn(
+          reconnecting && "pointer-events-none opacity-60 select-none"
+        )}
+      >
+        <LiveSettingsPanel
+          activity={activity}
+          characterIdsInUse={engine.characterIdsInUse}
+          paused={engine.paused}
+          onActivityChange={onActivityChange}
+        />
+      </div>
+
       {/* The full round, demo and live alike. Desktop: the pairing queue is
           a sticky rail beside the chats — the teacher watches the lobby
           refill while monitoring chats. It never disappears at zero;
           students come back to it. */}
       <div
+        inert={reconnecting}
         className={cn(
           reconnecting && "pointer-events-none opacity-60 select-none"
         )}

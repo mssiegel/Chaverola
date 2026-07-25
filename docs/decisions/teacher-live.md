@@ -298,7 +298,11 @@ activity — or deletes it when the teacher empties the field. It is the second
 thing that syncs from that panel, and the list stops there: characters, the
 scene, and the host name stay local to the teacher's page. The event has no
 echo: a second host device is not told, so last write wins. An edit made while
-the socket is down is lost, exactly like a settings edit.
+the socket is down is buffered by the client and lands at reconnect, exactly
+like a settings edit (this corrects the original "is lost" wording — see the
+offline-edit corner under
+[A woken host device reads the class settings back before it can write them](#a-woken-host-device-reads-the-class-settings-back-before-it-can-write-them);
+browser-verified 2026-07-25, feature 15).
 
 **Why:** Feature 11 makes the email do something — the server mails every
 transcript there when the activity ends, quite possibly after the teacher has
@@ -926,6 +930,21 @@ also turns the grid non-interactive (`pointer-events-none`). Readable but
 not actionable is the point: a tap on a stale rail would emit into a dead
 socket and appear to do nothing. The demo never reaches this state; its
 connection can't drop._
+
+_Extended 2026-07-25 (feature 15): the settings panel joins the treatment.
+It used to render above the banner with full color and interactivity, so
+the page showed the same auto-match setting twice — the rail's switch dead,
+the panel's identical one live. Now the banner sits at the top and the
+panel dims under it like the grid. Not because a panel edit would vanish —
+a browser pass confirmed an offline edit is buffered and lands at reconnect
+— but because one live control beside its dead twin reads as two truths,
+and the post-reconnect screen can briefly show the pre-edit value anyway
+(the snapshot-before-flush corner), so "your edits will send" could not be
+promised honestly on screen. Both wrappers are `inert`, not
+`pointer-events-none` alone: the same pass showed a focused rail switch
+still toggled on Space. No flush-on-unmount for the panel's typing debounce
+— the debounce fires regardless of connection, so only a sub-second
+type-then-unmount race would ever hit it (founder call, 2026-07-25)._
 
 ### A rematch only counts when it's an exact rerun for everyone in it
 

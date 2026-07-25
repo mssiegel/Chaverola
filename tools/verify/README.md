@@ -97,9 +97,10 @@ empty-transcript hint on live cards.
 - A dropped student dims with an amber "lost connection" tag — in the queue
   AND on the chat card (allow the ping-cycle detection + broadcast gate; both
   scale with `CHAVEROLA_TIME_SCALE`). The teacher's own drop shows a
-  `role="status"` "Reconnecting to your class…" banner, and the whole grid
-  below it dims AND goes `pointer-events-none` (clicks won't land — don't read
-  that as a broken selector).
+  `role="status"` "Reconnecting to your class…" banner at the top, and
+  everything below it — the settings panel AND the grid — dims and goes
+  `inert` (clicks and keyboard won't land, and the subtree drops out of the
+  a11y tree — don't read either as a broken selector).
 - The live-settings panel is present on real activities. **Settings** edits
   are real (they reach the server, survive a refresh, and a second host page
   hears `settings:changed`); character/scenario/host-name edits are local-only
