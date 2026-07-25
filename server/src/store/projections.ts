@@ -35,6 +35,21 @@ export function toActivity(stored: StoredActivity): Activity {
   return activity;
 }
 
+/** The student-visible detail pair as activity:details-changed carries it
+ *  (feature 17) — this payload reaches student sockets, so teacherEmail,
+ *  settings, and the hostKey must be structurally unable to ride along.
+ *  `null`, not an omitted key: a clear must be expressible on the wire
+ *  (toActivity keeps its omit-when-undefined shape). */
+export function toActivityDetails(stored: StoredActivity): {
+  hostName: string;
+  studentInstructions: string | null;
+} {
+  return {
+    hostName: stored.hostName,
+    studentInstructions: stored.studentInstructions ?? null,
+  };
+}
+
 /** The teacher projection: everything students see plus the teacher-only
  *  setup fields. The hostKey stays out — it lives only in the URL. */
 export function toHostedActivity(stored: StoredActivity): HostedActivity {

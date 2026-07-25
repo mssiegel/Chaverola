@@ -5,6 +5,33 @@ area. Entries are newest-first; add new ones at the top, and add a matching line
 to the index in the same change. Replaced decisions move to Superseded at the
 bottom of this file.
 
+### Name and instructions edits sync with no second-device echo, and an emptied box clears
+
+_2026-07-26_
+
+**Decision:** `activity:update-details` (feature 17) carries the host name and
+the student instructions to the server, which stores them and fans
+`activity:details-changed` out to connected student seats only — never the
+teacher room. A second host device keeps its copy until its next refetch:
+silent last-write-wins, the email's idiom, not the settings echo. And an
+emptied instructions textarea travels as `null` and deletes the stored
+instructions — the block disappears from students' lobbies, matching how the
+teacher's own page already treats empty as "no instructions"
+(`activityFromLiveDraft` omits it).
+
+**Why:** Founder call (2026-07-26): almost every class runs on one host
+device, so the echo leg — the room emit plus a `mergeExternalDetails` guard so
+an arriving echo can't clobber a half-typed draft — is code without a
+customer. If the echo is ever added, that guard becomes mandatory:
+`LiveSettingsPanel` seeds its draft once and never re-reads these fields, so a
+bare echo would overwrite whatever the teacher is mid-typing. The clear-means-
+remove call keeps one meaning for an empty box on every surface.
+
+_Implemented in [teacher.ts](../../server/src/live/handlers/teacher.ts) and
+[lobbyContext.ts](../../server/src/live/lobbyContext.ts)
+(`sendActivityDetails`); plan in
+[docs/plans/feature-17](../plans/feature-17-host-name-and-scene-sync-live.md)._
+
 ### A return to the host page refetches, behind the normal loading screen
 
 _2026-07-25_

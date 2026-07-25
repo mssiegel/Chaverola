@@ -222,6 +222,16 @@ export interface ServerToClientEvents {
   "activity:paused": (payload: { paused: boolean }) => void;
   /** Teacher room minus the sender — keeps a second host device coherent. */
   "settings:changed": (payload: { settings: ActivitySettings }) => void;
+  /** Student only, targeted at every connected seat — the student-visible
+   *  detail pair (the two lobby-only fields) after a teacher edit,
+   *  full-replace like settings:changed. `studentInstructions: null` means
+   *  the teacher cleared them. Deliberately NEVER the teacher room: a second
+   *  host device is silent last-write-wins, like the email (founder call,
+   *  2026-07-26). Feature 18 extends this payload with the character roster. */
+  "activity:details-changed": (payload: {
+    hostName: string;
+    studentInstructions: string | null;
+  }) => void;
   /** To the clicking teacher socket only, never the room — the End-activity
    *  outcome (feature 11). `email: null` means nothing was sent: no address
    *  set, or not a single message across every chat. Carries only what the
@@ -280,6 +290,15 @@ export interface ClientToServerEvents {
    *  has no echo event: the email is one field on the teacher's own form, so
    *  last write wins and a second host device keeps the copy it fetched. */
   "activity:update-email": (payload: { teacherEmail: string | null }) => void;
+  /** Teacher only; zod-validated, full-replace of the student-visible detail
+   *  pair (feature 17). `studentInstructions: null` clears them — a blank
+   *  string is rejected, same rule as the email. Fans out to connected seats
+   *  as activity:details-changed; no teacher-room echo (last write wins on
+   *  the rare second host device, like the email). */
+  "activity:update-details": (payload: {
+    hostName: string;
+    studentInstructions: string | null;
+  }) => void;
   /** Teacher only; no payload. The terminal wrap-up (feature 11): every chat
    *  ends, the transcript email is sent, and the activity is removed — one
    *  activity ends at most once. A repeat while the send is in flight is

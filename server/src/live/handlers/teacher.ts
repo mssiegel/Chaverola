@@ -1,6 +1,7 @@
 import { stuckInLineNotice } from "@chaverola/shared";
 
 import {
+  activityDetailsUpdateSchema,
   activitySettingsSchema,
   teacherEmailUpdateSchema,
 } from "../../schemas/activity";
@@ -49,6 +50,7 @@ export function registerTeacherHandlers(
     settleMembershipChange,
     sendChatStarted,
     sendActivityPaused,
+    sendActivityDetails,
   } = ctx;
 
   socket.join(room(data.joinCode));
@@ -263,6 +265,36 @@ export function registerTeacherHandlers(
     socket.to(room(data.joinCode)).emit("settings:changed", {
       settings: parsed.data,
     });
+  });
+
+  socket.on("activity:update-details", (payload) => {
+    const parsed = activityDetailsUpdateSchema.safeParse(payload);
+    if (!parsed.success) {
+      log.warn({ joinCode: data.joinCode }, "invalid activity:update-details");
+      return;
+    }
+    const current = getByHostKey(data.hostKey);
+    if (!current) return;
+    current.hostName = parsed.data.hostName;
+    if (parsed.data.studentInstructions === null) {
+      delete current.studentInstructions;
+    } else {
+      current.studentInstructions = parsed.data.studentInstructions;
+    }
+    // Every connected seat hears the new pair so students' lobbies can
+    // follow live (feature 17 prompt 2 registers the listener — until then
+    // the emit lands nowhere, the safe direction of the deploy race). No
+    // teacher-room echo: a second host device is last-write-wins, like the
+    // email. The instructions text stays out of the log — the boolean is
+    // what we'd actually debug with.
+    sendActivityDetails(current);
+    log.info(
+      {
+        joinCode: data.joinCode,
+        instructions: parsed.data.studentInstructions !== null,
+      },
+      "activity details updated by teacher"
+    );
   });
 
   socket.on("activity:update-email", (payload) => {

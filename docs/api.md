@@ -334,6 +334,15 @@ export interface ServerToClientEvents {
   }) => void;
   /** Teacher room minus the sender — keeps a second host device coherent. */
   "settings:changed": (payload: { settings: ActivitySettings }) => void;
+  /** Student only, targeted at every connected seat — the student-visible
+   *  detail pair after a teacher edit (feature 17), full-replace like
+   *  settings:changed. `studentInstructions: null` means the teacher cleared
+   *  them. Never the teacher room: a second host device is silent
+   *  last-write-wins, like the email. */
+  "activity:details-changed": (payload: {
+    hostName: string;
+    studentInstructions: string | null;
+  }) => void;
   /** To the clicking teacher socket only — the End-activity outcome (feature
    *  11). `email: null` means nothing was sent (no address, or no message in
    *  any chat). */
@@ -463,6 +472,14 @@ export interface ClientToServerEvents {
    *  has no echo event: the email is one field on the teacher's own form, so
    *  last write wins and a second host device keeps the copy it fetched. */
   "activity:update-email": (payload: { teacherEmail: string | null }) => void;
+  /** Teacher only; zod-validated, full-replace of the student-visible detail
+   *  pair (feature 17). `studentInstructions: null` clears them — a blank
+   *  string is rejected, same rule as the email. Fans out to connected seats
+   *  as activity:details-changed; no teacher-room echo. */
+  "activity:update-details": (payload: {
+    hostName: string;
+    studentInstructions: string | null;
+  }) => void;
   /** Teacher only; no payload. The terminal wrap-up (feature 11): every chat
    *  ends, the transcript is emailed, and the activity is removed — one
    *  activity ends at most once. A repeat while the send is in flight is
@@ -499,7 +516,8 @@ from starting chats or rewriting settings. Two cases are pinned by tests:
 a 4-digit join code cannot open a teacher socket at all, and a student
 socket emitting `queue:remove`, `chat:start`, `chat:remove`, `chat:end`,
 `chats:end-all`, `chats:pause-all`, `chats:resume-all`, `settings:update`,
-`activity:update-email`, or `activity:end` is silently ignored.
+`activity:update-email`, `activity:update-details`, or `activity:end` is
+silently ignored.
 
 Teacher commands are also **idempotent and self-correcting**: a command
 naming a student who just dropped, a chat that just ended, or a seat that
@@ -605,10 +623,22 @@ below.
   through the echo re-syncs at reconnect instead of shipping its stale
   object whole on its next edit. `revealNames` now
   acts (feature 10): while it is on, a chat's `chat:ended` reveals each
-  peer's real name, read live at end time. Character,
-  student-instructions, and host-name edits stay local to the teacher's
-  page — they'd have to reach students' lobbies, which is a bigger
-  feature than a settings echo.
+  peer's real name, read live at end time. Character edits stay local to
+  the teacher's page until feature 18.
+- **The host name and student instructions sync too, on their own
+  event.** `activity:update-details` (feature 17) replaces the stored
+  `hostName` and `studentInstructions` wholesale, deleting the
+  instructions when they arrive as `null` — the teacher emptied the box,
+  which means "no instructions", matching the teacher's own page.
+  Validated against the same limits the create request uses (blank host
+  names and blank instruction strings rejected); invalid payloads are
+  logged and dropped, and the instructions text never reaches the log.
+  The server fans `activity:details-changed` out to every **connected
+  seat** — students render the pair in the lobby — and never to the
+  teacher room: a second host device is silent last-write-wins, like the
+  email (founder call, 2026-07-26). A student joining later gets the
+  updated values from `GET /activities/:joinCode` — the stored record is
+  the single source.
 - **The teacher's email syncs too, on its own event.**
   `activity:update-email` (feature 11) sets `teacherEmail` on the stored
   record, or deletes it when the payload is `null` — the teacher cleared

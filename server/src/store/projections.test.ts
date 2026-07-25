@@ -8,6 +8,7 @@ import type { Seat } from "../live/seats";
 import type { StoredActivity } from "./activityStore";
 import {
   toActivity,
+  toActivityDetails,
   toActivitySettings,
   toChatEnded,
   toChatSnapshot,
@@ -84,6 +85,15 @@ describe("toActivity (student projection)", () => {
       "characters",
       "hostName",
       "joinCode",
+      "studentInstructions",
+    ]);
+  });
+});
+
+describe("toActivityDetails (the details-changed payload, student-visible)", () => {
+  it("exposes exactly hostName and studentInstructions — never teacherEmail, settings, or hostKey", () => {
+    expect(Object.keys(toActivityDetails(fullRecord)).sort()).toEqual([
+      "hostName",
       "studentInstructions",
     ]);
   });

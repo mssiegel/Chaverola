@@ -74,6 +74,30 @@ export const teacherEmailUpdateSchema = z.union([
     .regex(EMAIL_PATTERN, "That doesn't look like an email address."),
 ]);
 
+/** The socket's activity:update-details validator — the same limits the
+ *  create request's hostName and studentInstructions fields use (the
+ *  code-point caps included), plus an explicit null for clearing the
+ *  instructions. A blank string is rejected on purpose: a clear travels as
+ *  null, so an emptied textarea can never be mistaken for instructions. */
+export const activityDetailsUpdateSchema = z.object({
+  hostName: z
+    .string()
+    .trim()
+    .min(1, "The host name is required.")
+    .refine(withinNameCap, `Host names max out at ${NAME_MAX_CHARS} chars.`),
+  studentInstructions: z.union([
+    z.null(),
+    z
+      .string()
+      .trim()
+      .min(1, "Send null instead of blank instructions.")
+      .refine(
+        (value) => Array.from(value).length <= STUDENT_INSTRUCTIONS_MAX_CHARS,
+        `Student instructions max out at ${STUDENT_INSTRUCTIONS_MAX_CHARS} chars.`
+      ),
+  ]),
+});
+
 export const createActivityRequestSchema = z.object({
   hostName: z
     .string()
