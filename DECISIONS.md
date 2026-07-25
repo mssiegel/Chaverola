@@ -95,6 +95,7 @@ git: `git log -- DECISIONS.md`.
 - [Characters & rosters](docs/decisions/characters.md)
   - [A character's emoji is part of its name](docs/decisions/characters.md#a-characters-emoji-is-part-of-its-name)
 - [Teacher activity setup](docs/decisions/teacher-setup.md)
+  - [The scene field is now student instructions: 250 characters, after the characters](docs/decisions/teacher-setup.md#the-scene-field-is-now-student-instructions-250-characters-after-the-characters)
   - [A character's emoji is typed into its name](docs/decisions/teacher-setup.md#a-characters-emoji-is-typed-into-its-name)
   - [Setup is one scrolling form, and Host the Activity is never disabled](docs/decisions/teacher-setup.md#setup-is-one-scrolling-form-and-host-the-activity-is-never-disabled)
   - [The setup draft lives in the tab, and hosting doesn't clear it](docs/decisions/teacher-setup.md#the-setup-draft-lives-in-the-tab-and-hosting-doesnt-clear-it)

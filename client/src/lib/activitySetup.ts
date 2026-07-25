@@ -5,7 +5,7 @@ import {
   MAX_CHARACTERS,
   MIN_CHARACTERS,
   NAME_MAX_CHARS,
-  SCENE_MAX_WORDS,
+  STUDENT_INSTRUCTIONS_MAX_CHARS,
 } from "@chaverola/shared";
 import type {
   CharacterInput,
@@ -16,7 +16,7 @@ import type { ActivitySettings } from "@/types/activity";
 import type { Character } from "@/types/chat";
 
 import { readSessionJson, writeSessionJson } from "./storage";
-import { clampChars, clampWords } from "./text";
+import { clampChars } from "./text";
 
 /*
   Everything behind the teacher's setup form that isn't UI: the in-progress
@@ -35,13 +35,13 @@ export {
   MAX_CHARACTERS,
   MIN_CHARACTERS,
   NAME_MAX_CHARS,
-  SCENE_MAX_WORDS,
+  STUDENT_INSTRUCTIONS_MAX_CHARS,
 };
 export type { StepperBounds };
 
 /** The caps' quiet counters appear only this close to the limit. */
 export const NAME_COUNTER_FROM = 25;
-export const SCENE_COUNTER_FROM = 16;
+export const STUDENT_INSTRUCTIONS_COUNTER_FROM = 200;
 
 /** One character row as drafted — may be empty while typing. Just a name:
  *  an emoji, if the teacher wants one, is part of that name. */
@@ -51,7 +51,7 @@ export type CharacterDraft = Pick<Character, "name">;
 export interface ActivityDraftFields {
   hostName: string;
   teacherEmail: string;
-  scene: string;
+  studentInstructions: string;
   settings: ActivitySettings;
 }
 
@@ -65,7 +65,7 @@ export function defaultActivityDraft(): ActivityDraft {
     characters: [{ name: "" }, { name: "" }],
     hostName: "",
     teacherEmail: "",
-    scene: "",
+    studentInstructions: "",
     settings: { ...DEFAULT_ACTIVITY_SETTINGS },
   };
 }
@@ -130,8 +130,19 @@ function sanitizeDraft(raw: unknown): ActivityDraft {
   if (typeof candidate.teacherEmail === "string") {
     draft.teacherEmail = candidate.teacherEmail;
   }
-  if (typeof candidate.scene === "string") {
-    draft.scene = clampWords(candidate.scene, SCENE_MAX_WORDS);
+  // `?? candidate.scene`: pre-rename drafts stored this field as `scene`, so
+  // an in-flight tab's draft survives the rename deploy.
+  const instructions =
+    typeof candidate.studentInstructions === "string"
+      ? candidate.studentInstructions
+      : typeof candidate.scene === "string"
+        ? candidate.scene
+        : undefined;
+  if (instructions !== undefined) {
+    draft.studentInstructions = clampChars(
+      instructions,
+      STUDENT_INSTRUCTIONS_MAX_CHARS
+    );
   }
 
   const settings =
@@ -173,8 +184,8 @@ export interface SetupProblem {
 
 /**
  * Everything that blocks hosting, in top-to-bottom form order — the form
- * scrolls to the first one. Field caps (name length, scene words) never show
- * up here because the inputs hard-block them while typing.
+ * scrolls to the first one. Field caps (name and instruction lengths) never
+ * show up here because the inputs hard-block them while typing.
  */
 export function validateActivityDraft(draft: ActivityDraft): SetupProblem[] {
   const problems: SetupProblem[] = [];
@@ -234,8 +245,7 @@ export function validateActivityDraft(draft: ActivityDraft): SetupProblem[] {
  * Turn a valid draft into the `POST /activities` body. Rows left empty are
  * dropped here — an abandoned character row never blocks a class from
  * starting. Blank optional fields are omitted (the wire contract never sends
- * `""` or null), the draft's `scene` becomes the wire's `scenario`, and no
- * ids go over: the server mints character ids.
+ * `""` or null), and no ids go over: the server mints character ids.
  */
 export function toCreateActivityRequest(
   draft: ActivityDraft
@@ -244,14 +254,14 @@ export function toCreateActivityRequest(
     .filter(isFilledCharacter)
     .map((row) => ({ name: row.name.trim() }));
 
-  const scene = draft.scene.trim();
+  const instructions = draft.studentInstructions.trim();
   const email = draft.teacherEmail.trim();
   const request: CreateActivityRequest = {
     hostName: draft.hostName.trim(),
     characters,
     settings: { ...draft.settings },
   };
-  if (scene !== "") request.scenario = scene;
+  if (instructions !== "") request.studentInstructions = instructions;
   if (email !== "") request.teacherEmail = email;
   return request;
 }

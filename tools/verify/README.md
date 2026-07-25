@@ -103,8 +103,8 @@ empty-transcript hint on live cards.
   a11y tree — don't read either as a broken selector).
 - The live-settings panel is present on real activities. **Settings** edits
   are real (they reach the server, survive a refresh, and a second host page
-  hears `settings:changed`); character/scenario/host-name edits are local-only
-  and a refresh reverts them — expected, not a bug. Edits propagate ~1s after
+  hears `settings:changed`); character/student-instructions/host-name edits are
+  local-only and a refresh reverts them — expected, not a bug. Edits propagate ~1s after
   typing pauses (assert on "Hosted by <new name>" in the header after ~1.6s).
 - Dead host links (garbage keys, stale 4-digit codes) render "That activity
   isn't running" with no demo redirect; an unreachable server renders "We

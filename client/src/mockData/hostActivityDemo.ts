@@ -7,8 +7,8 @@ import { demoActivity } from "./activityDemo";
 /*
   Mock data behind the teacher's live activity page. The host demo runs the
   SAME activity as the student join flow (code `1234`, Ms. Cohen, the Rome
-  scenario) — there is no cross-tab sync, the two sides just agree on the
-  story. The dialogue here is deliberately character-agnostic: chats on the
+  instructions) — there is no cross-tab sync, the two sides just agree on
+  the story. The dialogue here is deliberately character-agnostic: chats on the
   host page get characters assigned at pairing time (possibly a teacher's own
   cast), so no line may name a specific character.
 */

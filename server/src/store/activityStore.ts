@@ -27,7 +27,7 @@ export interface StoredActivity {
   hostKey: string;
   hostName: string;
   characters: Character[];
-  scenario?: string;
+  studentInstructions?: string;
   teacherEmail?: string;
   settings: ActivitySettings;
   createdAt: number;
@@ -70,7 +70,7 @@ export interface StoredActivity {
 export interface NewActivity {
   hostName: string;
   characters: CharacterInput[];
-  scenario?: string;
+  studentInstructions?: string;
   teacherEmail?: string;
   settings: ActivitySettings;
 }
@@ -185,7 +185,8 @@ export function createActivity(
     pausedAt: null,
     transcriptEmail: null,
   };
-  if (input.scenario !== undefined) record.scenario = input.scenario;
+  if (input.studentInstructions !== undefined)
+    record.studentInstructions = input.studentInstructions;
   if (input.teacherEmail !== undefined)
     record.teacherEmail = input.teacherEmail;
 

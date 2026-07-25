@@ -30,7 +30,7 @@ function liveDraft(overrides: Partial<LiveActivityDraft>): LiveActivityDraft {
     ],
     hostName: "Ms. Cohen",
     teacherEmail: "",
-    scene: "",
+    studentInstructions: "",
     settings: { ...DEFAULT_ACTIVITY_SETTINGS },
     ...overrides,
   };
@@ -68,11 +68,11 @@ describe("activityFromLiveDraft", () => {
         { id: "caesar", name: "  Julius  " },
         { id: "live-character-9", name: "" },
       ],
-      scene: "  Rome, 44 BC  ",
+      studentInstructions: "  Rome, 44 BC  ",
     });
     const activity = activityFromLiveDraft(draft, baseActivity);
     expect(activity.characters).toEqual([{ id: "caesar", name: "Julius" }]);
-    expect(activity.scenario).toBe("Rome, 44 BC");
+    expect(activity.studentInstructions).toBe("Rome, 44 BC");
     expect(activity.joinCode).toBe("4321");
   });
 });

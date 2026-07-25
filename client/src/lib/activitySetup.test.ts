@@ -103,21 +103,24 @@ describe("toCreateActivityRequest", () => {
     const request = toCreateActivityRequest(
       draftWith({
         characters: [{ name: "Ada" }, { name: "  " }, { name: "Ben" }],
-        scene: "   ",
+        studentInstructions: "   ",
         teacherEmail: "",
       })
     );
     expect(request.characters.map((c) => c.name)).toEqual(["Ada", "Ben"]);
     // Omitted, not "" — the wire contract never sends blank optionals.
-    expect("scenario" in request).toBe(false);
+    expect("studentInstructions" in request).toBe(false);
     expect("teacherEmail" in request).toBe(false);
   });
 
-  it("maps the draft's scene onto the wire's scenario, trimmed", () => {
+  it("sends the student instructions trimmed", () => {
     const request = toCreateActivityRequest(
-      draftWith({ scene: "  Rome, 44 BC.  ", teacherEmail: "a@b.co" })
+      draftWith({
+        studentInstructions: "  Rome, 44 BC.  ",
+        teacherEmail: "a@b.co",
+      })
     );
-    expect(request.scenario).toBe("Rome, 44 BC.");
+    expect(request.studentInstructions).toBe("Rome, 44 BC.");
     expect(request.teacherEmail).toBe("a@b.co");
   });
 });

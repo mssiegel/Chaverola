@@ -79,15 +79,6 @@ export function WaitingLobby({
           </p>
         </div>
 
-        {activity.scenario && (
-          <div>
-            <SectionLabel>The scene</SectionLabel>
-            <p className="mt-0.5 text-sm leading-relaxed text-foreground">
-              {activity.scenario}
-            </p>
-          </div>
-        )}
-
         <div>
           <SectionLabel>Characters in this activity</SectionLabel>
           <ul className="mt-2 flex flex-wrap gap-2">
@@ -101,6 +92,15 @@ export function WaitingLobby({
             ))}
           </ul>
         </div>
+
+        {activity.studentInstructions && (
+          <div>
+            <SectionLabel>Instructions</SectionLabel>
+            <p className="mt-0.5 text-sm leading-relaxed text-foreground">
+              {activity.studentInstructions}
+            </p>
+          </div>
+        )}
       </div>
     </section>
   );

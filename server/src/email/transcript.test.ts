@@ -47,7 +47,7 @@ function record(chats: StoredChat[]): StoredActivity {
       { id: "caesar", name: "Caesar 👑" },
       { id: "cicero", name: "Cicero" }, // no emoji on purpose
     ],
-    scenario: "Rome, 44 BC, the night before the Ides of March.",
+    studentInstructions: "Rome, 44 BC, the night before the Ides of March.",
     teacherEmail: "cohen@example.com",
     settings: { ...DEFAULT_ACTIVITY_SETTINGS },
     createdAt: 0,
@@ -68,19 +68,19 @@ describe("formatTranscriptEmail", () => {
     expect(subject).toBe("Ms. Cohen's Chaverola activity (code 5678)");
   });
 
-  it("heads the body with who hosted, the code, and the scenario", () => {
+  it("heads the body with who hosted, the code, and the instructions", () => {
     const { text } = formatTranscriptEmail(record([]));
     expect(text).toContain("Hosted by Ms. Cohen");
     expect(text).toContain("Join code: 5678");
     expect(text).toContain(
-      "Scenario: Rome, 44 BC, the night before the Ides of March."
+      "Instructions: Rome, 44 BC, the night before the Ides of March."
     );
   });
 
-  it("omits the scenario line when none was set", () => {
+  it("omits the instructions line when none were set", () => {
     const base = record([]);
-    delete base.scenario;
-    expect(formatTranscriptEmail(base).text).not.toContain("Scenario:");
+    delete base.studentInstructions;
+    expect(formatTranscriptEmail(base).text).not.toContain("Instructions:");
   });
 
   it("renders participants and lines in the established teacher format", () => {

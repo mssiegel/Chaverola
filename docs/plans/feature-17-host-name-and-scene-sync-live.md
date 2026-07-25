@@ -1,39 +1,41 @@
-# Feature 17 — The teacher's name and the scene reach students live
+# Feature 17 — The teacher's name and the student instructions reach students live
 
-The live settings panel lets a teacher rewrite **Your name** and **The scene**
-mid-activity. Neither edit leaves the tab. The one place an edit reaches the
-server is `handleActivityChange`
+The live settings panel lets a teacher rewrite **Your name** and the
+**Student instructions** mid-activity. Neither edit leaves the tab. The one
+place an edit reaches the server is `handleActivityChange`
 ([`HostActivityPage.tsx:255-270`](../../client/src/pages/teacher/HostActivityPage.tsx)),
 and it diffs exactly two things: `next.settings` (`:257-260`) and
-`next.teacherEmail` (`:266-268`). `hostName` and `scenario` land in
+`next.teacherEmail` (`:266-268`). `hostName` and `studentInstructions` land in
 `setActivity(next)` at `:269` and die there. There is no event for them in
 `ClientToServerEvents`
 ([`socket.ts:222-292`](../../shared/src/socket.ts)), no handler
 ([`teacher.ts:248-286`](../../server/src/live/handlers/teacher.ts) is where the
 two that exist live), no REST update route
 ([`activities.ts:34,49,62`](../../server/src/routes/activities.ts) are create,
-host-read, student-read), and `StoredActivity.hostName` / `.scenario` are
-write-once at create
+host-read, student-read), and `StoredActivity.hostName` /
+`.studentInstructions` are write-once at create
 ([`activityStore.ts:157-174`](../../server/src/store/activityStore.ts)).
 
 **Reproduce it in about two minutes** (the audit's three lenses disagreed on
-the _mechanism_ of the scene bug — one said students see a stale scene
-mid-chat, which is wrong, because no student surface renders the scene
-mid-chat at all — so start from the observed behavior, not the story):
+the _mechanism_ of the instructions bug — one said students see stale
+instructions mid-chat, which is wrong, because no student surface renders the
+instructions mid-chat at all — so start from the observed behavior, not the
+story):
 
-1. Host a real activity as "Ms. Cohen" with a scene. Two students join and
-   sit in the lobby.
+1. Host a real activity as "Ms. Cohen" with student instructions. Two
+   students join and sit in the lobby.
 2. In **Edit activity settings**, change **Your name** to "Mr. Levi" and
-   rewrite **The scene**. Stop typing for a second so the panel commits.
+   rewrite the **Student instructions**. Stop typing for a second so the
+   panel commits.
 3. The host header flips to "Hosted by Mr. Levi"
    ([`HostHeader.tsx:47-49`](../../client/src/components/Teacher/HostActivity/HostHeader.tsx)).
-   Both student lobbies keep the old name and the old scene
+   Both student lobbies keep the old name and the old instructions
    ([`WaitingLobby.tsx:39`](../../client/src/components/Student/WaitingLobby.tsx),
    [`:74-80`](../../client/src/components/Student/WaitingLobby.tsx),
-   [`:82-89`](../../client/src/components/Student/WaitingLobby.tsx)) — forever.
+   [`:96-103`](../../client/src/components/Student/WaitingLobby.tsx)) — forever.
 4. Now open a **third** tab and join fresh. The join gate
    ([`JoinGateCard.tsx:166-173`](../../client/src/pages/student/join/JoinGateCard.tsx))
-   and the lobby show the **old** name and scene too. This is the sharp bit:
+   and the lobby show the **old** name and instructions too. This is the sharp bit:
    the server was never told, so `toActivity`
    ([`projections.ts:26-34`](../../server/src/store/projections.ts)) hands the
    original values to a student who joins ten minutes later. It is missing
@@ -43,10 +45,11 @@ mid-chat at all — so start from the observed behavior, not the story):
 Setup promises step 3 will work, in as many words: _"Students see 'Hosted by
 {name}' in the lobby"_
 ([`ActivitySetup/index.tsx:240-245`](../../client/src/components/Teacher/ActivitySetup/index.tsx)).
-And the scene is worse than stale — it is currently an **unobservable no-op on
-every surface**: `activity.scenario` renders in exactly one place in the whole
-client, `WaitingLobby.tsx:82-89`. A teacher can rewrite the scene, watch it sit
-in the textarea, and change nothing anywhere, including on their own page.
+And the instructions are worse than stale — currently an **unobservable no-op
+on every surface**: `activity.studentInstructions` renders in exactly one
+place in the whole client, `WaitingLobby.tsx:96-103`. A teacher can rewrite
+the instructions, watch them sit in the textarea, and change nothing
+anywhere, including on their own page.
 
 **Deliberately the two fields that only render in the student LOBBY.** Both
 are lobby-only, so this ships without touching mid-chat label resolution —
@@ -59,16 +62,17 @@ deliberately does **not** reach a chat already in progress. Design here is
 chosen so 18 extends this event rather than rewriting it: see the wire contract
 section.
 
-**The decisions this supersedes.** Local-only name/scene edits are a recorded
-founder call, twice:
+**The decisions this supersedes.** Local-only name/instructions edits are a
+recorded founder call, twice:
 [`teacher-live.md:681-712`](../decisions/teacher-live.md) ("The live-settings
 panel stays on real activities, editing the teacher's local view", 2026-07-19,
-whose closing note says character/scenario/host-name edits stay local "until
-roster sync ships") and
+whose closing note says character/student-instructions/host-name edits stay
+local "until roster sync ships") and
 [`teacher-live.md:505-531`](../decisions/teacher-live.md) ("Settings edits sync
-for real; characters, scenario, and host name stay local"). This document
-**supersedes the name and scene half of both** and leaves the characters half
-standing for feature 18. Prompt 2 records that in `DECISIONS.md` + the
+for real; characters, scenario, and host name stay local" — the entry title
+keeps its original wording). This document **supersedes the name and
+instructions half of both** and leaves the characters half standing for
+feature 18. Prompt 2 records that in `DECISIONS.md` + the
 `docs/decisions/teacher-live.md` entry, in the supersession style those entries
 already use, and deletes the now-false comments at
 [`HostActivity/index.tsx:197-201`](../../client/src/components/Teacher/HostActivity/index.tsx)
@@ -91,7 +95,7 @@ commit — see the deploy race), and is safe to push on its own. Run
 Each prompt carries **Ask the founder** items. Raise them when you run that
 prompt, get an answer, then build. Do not resolve them yourself.
 
-- [ ] Prompt 1 — The name and scene edits reach the server (and the teacher's other devices)
+- [ ] Prompt 1 — The name and instructions edits reach the server (and the teacher's other devices)
 - [ ] Prompt 2 — Students' lobbies follow the edit live
 
 ## Shared context: the wire contract addition
@@ -104,14 +108,14 @@ In `shared/src/socket.ts`, per the seven touch points in
 // ClientToServerEvents (teacher only, beside settings:update at :265):
 "activity:update-details": (payload: {
   hostName: string;
-  scenario: string | null; // null clears the scene
+  studentInstructions: string | null; // null clears the instructions
 }) => void;
 
 // ServerToClientEvents — to the teacher room minus the sender AND to every
 // connected seat. Same shape both directions.
 "activity:details-changed": (payload: {
   hostName: string;
-  scenario: string | null;
+  studentInstructions: string | null;
 }) => void;
 ```
 
@@ -128,9 +132,9 @@ The projector is a **field-by-field literal, never a spread**
 (`projections.ts`'s house rule, stated at `:18-23`). This payload goes to
 STUDENTS, so `teacherEmail`, `hostKey` and `settings` must be structurally
 unable to ride along, and the exact-key pin in `projections.test.ts` is what
-keeps it that way. `scenario` travels as `string | null` rather than an
-optional key so a clear is expressible; `toActivity` keeps its
-omit-when-undefined shape untouched (`projections.ts:32`).
+keeps it that way. `studentInstructions` travels as `string | null` rather
+than an optional key so a clear is expressible; `toActivity` keeps its
+omit-when-undefined shape untouched (`projections.ts:33-34`).
 
 ## Shared context: the deploy race
 
@@ -167,13 +171,14 @@ commit rather than inventing a simulation for it.
 
 ---
 
-## Prompt 1 — The name and scene edits reach the server (and the teacher's other devices)
+## Prompt 1 — The name and instructions edits reach the server (and the teacher's other devices)
 
-**Goal:** a teacher who renames themselves or rewrites the scene mid-activity
-changes the activity for real. The edit survives a refresh of the host page, a
-second host device follows it live, and — the part that matters most — a
-student who joins **after** the edit gets the new name and the new scene,
-because `GET /activities/:joinCode` now reads changed stored values. Students
+**Goal:** a teacher who renames themselves or rewrites the instructions
+mid-activity changes the activity for real. The edit survives a refresh of the
+host page, a second host device follows it live, and — the part that matters
+most — a student who joins **after** the edit gets the new name and the new
+instructions, because `GET /activities/:joinCode` now reads changed stored
+values. Students
 already in the lobby still keep the old copy until prompt 2.
 
 1. **Wire** (`shared/src/socket.ts`): both events above, with docblocks in the
@@ -181,26 +186,28 @@ already in the lobby still keep the old copy until prompt 2.
 2. **Schema** ([`activity.ts`](../../server/src/schemas/activity.ts)): declare
    `activityDetailsUpdateSchema` as a **sibling** const in the
    `teacherEmailUpdateSchema` idiom (`:63-71`) — same shared constants, same
-   limits, same word-count refine as the create schema's `hostName` (`:74-78`)
-   and `scenario` (`:100-109`) fields, with `scenario` as
+   limits as the create schema's `hostName` (`:78-82`) and
+   `studentInstructions` (`:104-114`) fields (the 250-char code-point cap;
+   there is no word refine anymore), with `studentInstructions` as
    `z.union([z.null(), …])` so a clear is expressible. Feature 11 set this
    precedent deliberately: **don't refactor `createActivityRequestSchema`** to
    share the field definitions. No new rules, no new limits — the panel's
    client-side validation and this schema must keep agreeing.
 3. **Projector** ([`projections.ts`](../../server/src/store/projections.ts)):
    `toActivityDetails(stored)` as a field-by-field literal returning
-   `{ hostName, scenario: stored.scenario ?? null }`, beside `toActivity` at
-   `:26-34`.
+   `{ hostName, studentInstructions: stored.studentInstructions ?? null }`,
+   beside `toActivity` at `:27-35`.
 4. **Allowlist pin — mandatory**
    ([`projections.test.ts`](../../server/src/store/projections.test.ts)):
-   `expect(Object.keys(toActivityDetails(fullRecord)).sort()).toEqual(["hostName","scenario"])`,
+   `expect(Object.keys(toActivityDetails(fullRecord)).sort()).toEqual(["hostName","studentInstructions"])`,
    in the style of the `toActivity` pin at `:79-88`. This is the privacy
    invariant and is not covered by "fewer tests".
 5. **Handler** ([`teacher.ts`](../../server/src/live/handlers/teacher.ts)):
    `socket.on("activity:update-details", …)` beside `settings:update`
    (`:248-263`) — safeParse, `getByHostKey`, assign `current.hostName`, and
-   set-or-`delete` `current.scenario` in the same idiom the email handler uses
-   at `:273-277`; log the join code (never the scene text).
+   set-or-`delete` `current.studentInstructions` in the same idiom the email
+   handler uses at `:273-277`; log the join code (never the instructions
+   text).
 6. **Fan out twice.** `socket.to(room(data.joinCode)).emit(...)` covers the
    teacher's other devices. Students **never join the teacher room** —
    `teacher.ts:51` is the only `socket.join` in the server — so add a
@@ -210,7 +217,7 @@ already in the lobby still keep the old copy until prompt 2.
    exactly on `sendActivityPaused` (`:250-260`). Nobody is listening on the
    student side until prompt 2; that is the safe direction.
 7. **Engine seam** ([`hostEngine.ts`](../../client/src/components/Teacher/HostActivity/hostEngine.ts)):
-   `updateDetails(details: { hostName: string; scenario: string | null }): void`.
+   `updateDetails(details: { hostName: string; studentInstructions: string | null }): void`.
    [`useHostActivityLive.ts`](../../client/src/components/Teacher/HostActivity/useHostActivityLive.ts)
    emits it beside `updateTeacherEmail` (`:268-270`) and registers the
    `activity:details-changed` listener beside `settings:changed` (`:181-183`),
@@ -218,15 +225,16 @@ already in the lobby still keep the old copy until prompt 2.
    [`useHostActivityDemo.ts`](../../client/src/components/Teacher/HostActivity/useHostActivityDemo.ts)
    is a no-op (demo edits already flow through local `setActivity`).
 8. **Call site** ([`HostActivityPage.tsx:255-270`](../../client/src/pages/teacher/HostActivityPage.tsx)):
-   add a details diff beside the email diff — when `hostName` or `scenario`
-   moved, `engine.updateDetails({ hostName: next.hostName, scenario: next.scenario ?? null })`.
+   add a details diff beside the email diff — when `hostName` or
+   `studentInstructions` moved,
+   `engine.updateDetails({ hostName: next.hostName, studentInstructions: next.studentInstructions ?? null })`.
    Wire `onDetailsSync` to fold the server's copy into `setActivity` **without
    re-entering `handleActivityChange`** — the anti-echo rule already spelled
    out at `:243-249`.
 9. **Only if the founder keeps the second-device echo: don't clobber a
    half-typed edit.** The panel seeds its draft once
    ([`LiveSettingsPanel.tsx:47-49`](../../client/src/components/Teacher/HostActivity/LiveSettingsPanel.tsx))
-   and never re-reads `hostName`/`scene`, so an arriving remote change needs the
+   and never re-reads `hostName`/`studentInstructions`, so an arriving remote change needs the
    same treatment settings get: a `mergeExternalDetails(prev, next, draft)`
    beside [`mergeExternalSettings`](../../client/src/lib/hostActivity.ts)
    (`hostActivity.ts:113-126`), applied in the panel's merge effect at `:58-65`.
@@ -235,22 +243,24 @@ already in the lobby still keep the old copy until prompt 2.
    spec.
 10. **Docs.** `docs/api.md` (the two events). Amend the code comments at
     `HostActivityPage.tsx:182-185` and `HostActivity/index.tsx:197-201` to say
-    name and scene now reach the server and the teacher's other devices, with
-    students landing in prompt 2 — the full supersession entry is prompt 2's.
+    name and instructions now reach the server and the teacher's other
+    devices, with students landing in prompt 2 — the full supersession entry
+    is prompt 2's.
 
 **Ask the founder:**
 
-- Should a **second host device** hear a name/scene edit live (the
+- Should a **second host device** hear a name/instructions edit live (the
   `settings:changed` idiom, `teacher.ts:257-262`), or should it be silent
   last-write-wins like the teacher's email deliberately is
   (`socket.ts:266-270`)? The steps above assume the echo; if the answer is no,
   drop the `socket.to(room(...))` leg and keep only the seat loop.
-- **Clearing the scene**: when the teacher empties the scene textarea, does
-  "The scene" disappear from students' lobbies, or does an emptied box mean
-  "leave the scene as it was"? The wire carries `null` either way; this is the
-  product call about what an empty box means. (Note the asymmetry today:
-  `activityFromLiveDraft` at `hostActivity.ts:168-171` simply omits an empty
-  scene, so the teacher's own page currently treats empty as "no scene".)
+- **Clearing the instructions**: when the teacher empties the instructions
+  textarea, does the "Instructions" block disappear from students' lobbies, or
+  does an emptied box mean "leave the instructions as they were"? The wire
+  carries `null` either way; this is the product call about what an empty box
+  means. (Note the asymmetry today: `activityFromLiveDraft` at
+  `hostActivity.ts:158-160` simply omits empty instructions, so the teacher's
+  own page currently treats empty as "no instructions".)
 
 **Edge cases:** an emptied **name** never commits at all — the panel's whole
 commit is gated on `validateLiveDraft`
@@ -258,9 +268,9 @@ commit is gated on `validateLiveDraft`
 the server schema is the backstop; a mid-edit disconnect drops the edit exactly
 like a settings edit does today; a second device that was asleep during the
 edit still refetches on reload (its stale-full-object problem belongs to
-features 13/14, not here); the scene's word/char caps are enforced by the same
-schema the create route uses, so a paste-bomb is rejected server-side, silently
-like every other socket rejection.
+features 13/14, not here); the instructions' 250-char cap is enforced by the
+same schema the create route uses, so a paste-bomb is rejected server-side,
+silently like every other socket rejection.
 
 **Tests:** the `toActivityDetails` allowlist pin from step 4 — mandatory,
 privacy-bearing. Nothing else: the handler is a validated-input store write in
@@ -268,12 +278,12 @@ the `settings:update` idiom, and every other leg is visible in a browser
 within seconds.
 
 **Done when:** `pnpm typecheck` + `pnpm test` green; local pass with a host tab
-and a student tab — rename the host and rewrite the scene, **refresh the host
-page** and the edit is still there (proof it round-tripped through the server);
-open a **second host tab** on the same hostKey and watch it follow the edit
-live; **join a new student after the edit** and see the new name on the join
-gate and the new name + scene in the lobby; a student who was already in the
-lobby still shows the old copy (that's prompt 2); the `1234` demo unchanged
+and a student tab — rename the host and rewrite the instructions, **refresh the
+host page** and the edit is still there (proof it round-tripped through the
+server); open a **second host tab** on the same hostKey and watch it follow the
+edit live; **join a new student after the edit** and see the new name on the
+join gate and the new name + instructions in the lobby; a student who was
+already in the lobby still shows the old copy (that's prompt 2); the `1234` demo unchanged
 with zero `/socket.io/` traffic. **Push the server commit first, poll
 `/healthz` for it, then push the client commit** and confirm Vercel Ready.
 `pnpm format`, two commits, checkbox ticked — this prompt stands on its own
@@ -285,8 +295,8 @@ prompt 2.
 ## Prompt 2 — Students' lobbies follow the edit live
 
 **Goal:** a student sitting in the lobby watches "Hosted by Ms. Cohen" become
-"Hosted by Mr. Levi" and the scene rewrite itself, without a refresh and
-without losing their seat. Their tab has been receiving `activity:details-changed`
+"Hosted by Mr. Levi" and the instructions rewrite themselves, without a
+refresh and without losing their seat. Their tab has been receiving `activity:details-changed`
 since prompt 1 and ignoring it; this prompt gives it somewhere to land.
 
 1. **Listener** ([`useLobbyPresence.ts`](../../client/src/pages/student/useLobbyPresence.ts)):
@@ -310,9 +320,9 @@ since prompt 1 and ignoring it; this prompt gives it somewhere to land.
    hand-off map (`:118-128`) and any refetch (`:75` short-circuits the effect
    while the map holds the code). So the page's `onActivityDetails` handler
    rebuilds the activity field-by-field (`hostName` from the payload,
-   `scenario` set or omitted, `characters`/`joinCode` carried over) and calls
+   `studentInstructions` set or omitted, `characters`/`joinCode` carried over) and calls
    `deliverLookup`. No new state, no new hook, no cache invalidation.
-4. **Render sites need no change.** `WaitingLobby.tsx:39,74-80,82-89` and
+4. **Render sites need no change.** `WaitingLobby.tsx:39,74-80,96-103` and
    `JoinGateCard.tsx:166-173` already read from `activity`; they re-render
    when the lookup does.
 5. **Decisions.** Record the supersession: add the entry to the top of
@@ -320,7 +330,8 @@ since prompt 1 and ignoring it; this prompt gives it somewhere to land.
    line to `DECISIONS.md`, and add the supersession notes onto `:505-531` and
    `:681-712` in the style those entries already use (`:496-503` and `:706-712`
    are the models). The decision to record is the **reversal**: host name and
-   scene now sync to students live; characters remain local-only until feature 18. Then delete the now-false comments at
+   instructions now sync to students live; characters remain local-only until
+   feature 18. Then delete the now-false comments at
    `HostActivity/index.tsx:197-201` and `HostActivityPage.tsx:182-185`,
    leaving only the characters caveat.
 6. **Docs.** `docs/api.md` if prompt 1 left the student-recipient half
@@ -330,7 +341,8 @@ since prompt 1 and ignoring it; this prompt gives it somewhere to land.
 **Ask the founder:**
 
 - Does the lobby **announce** the change (a brief "Your teacher updated the
-  scene" line or a highlight on the changed block) or does it swap silently?
+  instructions" line or a highlight on the changed block) or does it swap
+  silently?
   Silent is the smaller build and matches how `activity:paused` behaves. If
   the answer is announce, that string is new user-facing copy and needs the
   humanizer pass before the prompt is done.
@@ -342,7 +354,7 @@ since prompt 1 and ignoring it; this prompt gives it somewhere to land.
   sentence to what travels today, and
   [feature 18](./feature-18-character-roster-syncs-live.md) prompt 4 widens it
   once the roster syncs. **The only open question is the interim**: does this
-  prompt touch that sentence to fold name and scene in, or does it stay narrow
+  prompt touch that sentence to fold name and instructions in, or does it stay narrow
   until 18 widens it in one go? Read what the string actually says before
   asking — if 12 hasn't shipped, it is still the original over-promise. Either
   way, don't rewrite it twice, and any new wording gets the humanizer pass.
@@ -353,10 +365,10 @@ and no chat state is touched; a student on the **name** stage sees the join
 gate's "Hosted by" update under them, which is correct and harmless; a
 disconnected student misses the event and heals on reconnect only if they
 reload (accepted — the lobby's copy is not worth a snapshot field, and the
-next student to join gets fresh truth from `toActivity`); `scenario: null`
-must **remove** the block rather than render an empty one (see prompt 1's
-founder question about what clearing means); the demo student tab is untouched
-by design (see the shared context).
+next student to join gets fresh truth from `toActivity`);
+`studentInstructions: null` must **remove** the block rather than render an
+empty one (see prompt 1's founder question about what clearing means); the
+demo student tab is untouched by design (see the shared context).
 
 **Tests:** none. The allowlist pin landed in prompt 1; everything here is a
 relay plus a state write, and a broken relay is loud in the browser within
@@ -364,9 +376,10 @@ seconds — nothing about this failure mode is silent.
 
 **Done when:** `pnpm typecheck` + `pnpm test` green; browser pass with one host
 tab and **two student tabs** (one sitting in the lobby, one mid-chat) — rename
-the host and rewrite the scene, and the lobby tab updates without a refresh
-while the chatting tab is undisturbed and shows the new copy when its chat
-ends; clear the scene and the block behaves as the founder decided; a third
+the host and rewrite the instructions, and the lobby tab updates without a
+refresh while the chatting tab is undisturbed and shows the new copy when its
+chat ends; clear the instructions and the block behaves as the founder
+decided; a third
 student joining afterward gets the same truth; the `1234` demo is unchanged
 with zero `/socket.io/` traffic, desktop and phone widths. **Production pass**
 on chaverola.com (this is the feature's one prod drive): cold-wake check first,

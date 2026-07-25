@@ -85,7 +85,8 @@ then:
 
 The **lobby half** of this feature extends the event feature 17 introduces; it
 does not add a second one. Feature 17 ships `activity:update-details` /
-`activity:details-changed` (host name and scene) through all seven touch points
+`activity:details-changed` (host name and student instructions) through all
+seven touch points
 in [`docs/adding-a-wire-event.md`](../adding-a-wire-event.md). Feature 18 adds
 `characters` to that same payload pair, reuses its fan-out, and extends its
 allowlist pin — that is the channel the **roster reaches the lobby** on. The
@@ -104,7 +105,7 @@ speak to this area:
   local-only, on the reasoning that roster sync "propagates to students'
   lobbies — a bigger feature than a settings echo." That was right. This is that
   bigger feature. Prompt 2 supersedes the character half; feature 17 superseded
-  the scene and host-name half.
+  the instructions and host-name half.
 - **"The live-settings panel stays on real activities, editing the teacher's
   local view"** (2026-07-19, `:681-713`) — its remaining local-only clause
   retires here.
@@ -112,7 +113,8 @@ speak to this area:
   (2026-07-15, `:1132-1161`) — this one is **revised, not fulfilled**. It
   promised every valid edit applies "everywhere at once — roster rows, pairing,
   in-progress chat cards, student surfaces — re-labeling by stable character
-  id." That is now true for **settings, scene and host name** (feature 17) but
+  id." That is now true for **settings, student instructions and host name**
+  (feature 17) but
   **deliberately not for characters**: a character edit reaches the lobby and
   future chats and stops at the door of a running one. Record the reversal in
   the entry's own update-note style — the phrase "in-progress chat cards,
@@ -154,9 +156,9 @@ whole design:
    ```ts
    // ClientToServerEvents — teacher only, beside settings:update (socket.ts:264-265):
    "activity:update-details": (payload: {
-     characters: Character[];   // ← feature 18 adds this
-     hostName: string;          // feature 17
-     scenario: string | null;   // feature 17
+     characters: Character[];              // ← feature 18 adds this
+     hostName: string;                     // feature 17
+     studentInstructions: string | null;   // feature 17
    }) => void;
 
    // ServerToClientEvents — same shape, fanned to other host devices AND to
@@ -379,8 +381,8 @@ refresh. A chat already running is untouched, because prompt 1 froze it.
    projector, use that one.)
 3. **Allowlist pin** (`projections.test.ts`, **mandatory**): extend 17's
    exact-key assertion for `toActivityDetails` — it pinned
-   `["hostName","scenario"]`, and this makes it
-   `["characters","hostName","scenario"]`
+   `["hostName","studentInstructions"]`, and this makes it
+   `["characters","hostName","studentInstructions"]`
    ([`projections.test.ts:24-44`](../../server/src/store/projections.test.ts)).
 4. **Server handler** ([`handlers/teacher.ts`](../../server/src/live/handlers/teacher.ts),
    beside `settings:update` at `:248-263`): extend feature 17's
@@ -601,7 +603,8 @@ feature gets its one production drive.
    which feature 12 narrowed to scope the promise to settings and email. The old
    string over-promised "changes reach everyone the moment you pause typing,
    including what students see mid-chat" — which is now **half true and half
-   deliberately false**: settings, scene and host name reach everyone live
+   deliberately false**: settings, student instructions and host name reach
+   everyone live
    (feature 17), and character edits reach the lobby and every new chat, **but a
    chat already running keeps its cast on purpose**. **Ask the founder for the
    wording** rather than reverting to the old string — the copy must not promise

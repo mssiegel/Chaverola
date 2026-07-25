@@ -16,7 +16,7 @@ export interface Character {
 
 /**
  * An activity as students see it when joining: who's hosting, which characters
- * are in play, and the optional scene the teacher set for the roleplay.
+ * are in play, and the teacher's optional instructions for the activity.
  */
 export interface Activity {
   /** The 4-digit code students type to get in. */
@@ -25,8 +25,9 @@ export interface Activity {
   hostName: string;
   /** The character roster students may be assigned from. */
   characters: Character[];
-  /** Optional scene-setting text; not every teacher writes one. */
-  scenario?: string;
+  /** Optional instructions students read in the lobby — a scene, a debate
+   *  topic, task steps. Not every teacher writes them. */
+  studentInstructions?: string;
 }
 
 /**

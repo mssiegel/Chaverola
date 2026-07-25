@@ -95,8 +95,8 @@ function formatTextBody(record: StoredActivity): string {
     `Join code: ${record.joinCode}`,
     summaryLine(record),
   ];
-  if (record.scenario !== undefined)
-    header.push(`Scenario: ${record.scenario}`);
+  if (record.studentInstructions !== undefined)
+    header.push(`Instructions: ${record.studentInstructions}`);
   blocks.push(header.join("\n"));
 
   record.chats.forEach((chat, index) => {
@@ -226,9 +226,9 @@ function formatHtmlBody(record: StoredActivity): string {
       `${escapeHtml(`Join code: ${record.joinCode}`)}<br>` +
       `<span style="color:${MUTED};">${escapeHtml(summaryLine(record))}</span></p>`,
   ];
-  if (record.scenario !== undefined) {
+  if (record.studentInstructions !== undefined) {
     header.push(
-      `<p style="margin:16px 0 0;color:${MUTED};font-style:italic;">${escapeHtml(record.scenario)}</p>`
+      `<p style="margin:16px 0 0;color:${MUTED};font-style:italic;">${escapeHtml(record.studentInstructions)}</p>`
     );
   }
 

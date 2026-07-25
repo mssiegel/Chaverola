@@ -57,7 +57,7 @@ export interface CharacterInput {
 export interface CreateActivityRequest {
   hostName: string; // 1–30 after trim
   characters: CharacterInput[]; // 2–4; names unique (trimmed, case-insensitive)
-  scenario?: string; // ≤ 20 words and ≤ SCENE_MAX_CHARS; omit when blank
+  studentInstructions?: string; // ≤ STUDENT_INSTRUCTIONS_MAX_CHARS (250, code points); omit when blank
   teacherEmail?: string; // EMAIL_PATTERN, ≤ EMAIL_MAX_CHARS; omit when blank
   settings: ActivitySettings; // required in full; bounds REJECTED, not clamped
 }
@@ -84,7 +84,7 @@ export interface ApiErrorResponse {
 ```
 
 `Activity` is the **student projection**: `joinCode`, `hostName`,
-`characters`, and optionally `scenario`. `HostedActivity` extends it with
+`characters`, and optionally `studentInstructions`. `HostedActivity` extends it with
 `settings` and optionally `teacherEmail`. **Neither ever contains the
 hostKey** — it appears only as the top-level `hostKey` member of the
 create response.
@@ -606,9 +606,9 @@ below.
   object whole on its next edit. `revealNames` now
   acts (feature 10): while it is on, a chat's `chat:ended` reveals each
   peer's real name, read live at end time. Character,
-  scenario, and host-name edits stay local to the teacher's page —
-  they'd have to reach students' lobbies, which is a bigger feature than
-  a settings echo.
+  student-instructions, and host-name edits stay local to the teacher's
+  page — they'd have to reach students' lobbies, which is a bigger
+  feature than a settings echo.
 - **The teacher's email syncs too, on its own event.**
   `activity:update-email` (feature 11) sets `teacherEmail` on the stored
   record, or deletes it when the payload is `null` — the teacher cleared

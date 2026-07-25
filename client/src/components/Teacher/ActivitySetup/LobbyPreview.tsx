@@ -7,7 +7,7 @@ import type { CharacterRowState } from "./CharacterRowsField";
 
 interface LobbyPreviewProps {
   hostName: string;
-  scene: string;
+  studentInstructions: string;
   characters: CharacterRowState[];
 }
 
@@ -20,12 +20,12 @@ interface LobbyPreviewProps {
  */
 export function LobbyPreview({
   hostName,
-  scene,
+  studentInstructions,
   characters,
 }: LobbyPreviewProps) {
   const cast = characters.filter(isFilledCharacter);
   const host = hostName.trim();
-  const sceneText = scene.trim();
+  const instructions = studentInstructions.trim();
 
   return (
     <div>
@@ -57,15 +57,6 @@ export function LobbyPreview({
               </p>
             </div>
 
-            {sceneText && (
-              <div>
-                <SectionLabel>The scene</SectionLabel>
-                <p className="mt-0.5 text-sm leading-relaxed text-foreground">
-                  {sceneText}
-                </p>
-              </div>
-            )}
-
             <div>
               <SectionLabel>Characters in this activity</SectionLabel>
               {cast.length > 0 ? (
@@ -85,6 +76,15 @@ export function LobbyPreview({
                 </p>
               )}
             </div>
+
+            {instructions && (
+              <div>
+                <SectionLabel>Instructions</SectionLabel>
+                <p className="mt-0.5 text-sm leading-relaxed text-foreground">
+                  {instructions}
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </div>

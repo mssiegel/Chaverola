@@ -2,7 +2,7 @@ import type { ChatScenario, Participant } from "@/types/chat";
 
 /*
   The chats a student gets matched into on the join flow (`/activity/join`).
-  They play inside the demo activity's scene — Rome, 44 BC, the night before
+  They play inside the demo activity's setting — Rome, 44 BC, the night before
   the Ides of March — using characters from that activity's roster, so the
   lobby's "Characters in this activity" chips and the chat agree with each
   other. Unlike the standalone demo scenarios, these start with NO seed

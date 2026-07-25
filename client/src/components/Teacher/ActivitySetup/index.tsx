@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowRight,
-  Clapperboard,
+  ClipboardList,
   Drama,
   Loader2,
   UserRound,
@@ -30,8 +30,8 @@ import {
 import { makeDraftPatches } from "./draftPatches";
 import { FormSection } from "./FormSection";
 import { LobbyPreview } from "./LobbyPreview";
-import { SceneField } from "./SceneField";
 import { SettingsSection } from "./SettingsSection";
+import { StudentInstructionsField } from "./StudentInstructionsField";
 
 // Same id-stamping idiom as the demo engines: rows need stable React keys,
 // but the persisted draft stores only the content.
@@ -213,15 +213,15 @@ export function ActivitySetupForm() {
           </FormSection>
 
           <FormSection
-            title="Set the scene"
-            icon={Clapperboard}
+            title="Student instructions"
+            icon={ClipboardList}
             accent="sky"
             optional
-            hint="One or two lines about where and when the chat happens. Students read it in the lobby while they wait."
+            hint="Tell students what to do, whether that's a scene to play or a question to debate. They read it in the lobby while they wait."
           >
-            <SceneField
-              value={form.scene}
-              onChange={(scene) => patch({ scene })}
+            <StudentInstructionsField
+              value={form.studentInstructions}
+              onChange={(studentInstructions) => patch({ studentInstructions })}
             />
           </FormSection>
 
@@ -234,7 +234,7 @@ export function ActivitySetupForm() {
           <div className="sticky top-20">
             <LobbyPreview
               hostName={form.hostName}
-              scene={form.scene}
+              studentInstructions={form.studentInstructions}
               characters={form.characters}
             />
           </div>

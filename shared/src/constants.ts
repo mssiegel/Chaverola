@@ -16,9 +16,9 @@ export const NAME_MAX_CHARS = 30;
  *  fresh-join validation read the same cap. */
 export const STUDENT_NAME_MAX_CHARS = 40;
 
-export const SCENE_MAX_WORDS = 20;
-/** Hard byte-ish backstop for the scene (the word cap is the real limit). */
-export const SCENE_MAX_CHARS = 500;
+/** Student instructions (a scene, a debate topic, task steps) — counted in
+ *  code points like every other char cap. */
+export const STUDENT_INSTRUCTIONS_MAX_CHARS = 250;
 
 /** One chat message, counted in code points (a multi-unit emoji is one) —
  *  the composer and the server's `chat:send` guard read the same cap, so

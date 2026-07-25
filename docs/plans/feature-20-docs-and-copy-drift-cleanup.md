@@ -49,7 +49,7 @@ updated **inside** the prompt that changes the behavior
 — it checks their work and cleans up what no feature owns.
 
 **Decisions this works within, not against.** The local-only split for roster,
-scene and host name is a recorded founder call
+student instructions and host name is a recorded founder call
 ([`teacher-live.md:505-531`](../decisions/teacher-live.md), extended by the email
 entry at [`:8-38`](../decisions/teacher-live.md)). Nothing here supersedes it.
 The job is to make the docs say what that decision actually decided, instead of a
@@ -67,8 +67,8 @@ on a live activity and what isn't, and every "implemented in X" pointer in
 changes; the deliverable is that the next agent stops being lied to.
 
 1. **`AGENTS.md:22`.** Replace the blanket sentence with what is true when you
-   run this: which of roster, scene and host-name edits are still the teacher's
-   local view, and where feature 11 stands. Point at the decision entry rather
+   run this: which of roster, student-instructions and host-name edits are
+   still the teacher's local view, and where feature 11 stands. Point at the decision entry rather
    than restating its reasoning — the one-home rule at
    [`AGENTS.md:28-30`](../../AGENTS.md) applies to this doc too.
 2. **The duplicate home.** [`architecture.md:391`](../architecture.md) asserts the

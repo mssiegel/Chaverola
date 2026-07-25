@@ -4,7 +4,7 @@ import { SlidersHorizontal } from "lucide-react";
 import { AboutYouFields } from "@/components/Teacher/ActivitySetup/AboutYouFields";
 import { CharacterRowsField } from "@/components/Teacher/ActivitySetup/CharacterRowsField";
 import { makeDraftPatches } from "@/components/Teacher/ActivitySetup/draftPatches";
-import { SceneField } from "@/components/Teacher/ActivitySetup/SceneField";
+import { StudentInstructionsField } from "@/components/Teacher/ActivitySetup/StudentInstructionsField";
 import { SettingsSection } from "@/components/Teacher/ActivitySetup/SettingsSection";
 import { SectionLabel } from "@/components/ui/section-label";
 import { type SetupField } from "@/lib/activitySetup";
@@ -115,7 +115,7 @@ export function LiveSettingsPanel({
 
   // A settings control is a click, not typing: it commits alone and
   // immediately, spread from the committed activity — never rebuilt
-  // through activityFromLiveDraft — so a half-typed name, scene, or email
+  // through activityFromLiveDraft — so a half-typed name, instructions, or email
   // can neither hold the click back nor ride along with it. The rail's
   // idiom (setAutoMatch in index.tsx). The later debounce tick re-commits
   // the same settings and the page diffs before emitting, so nothing extra
@@ -166,17 +166,17 @@ export function LiveSettingsPanel({
       }
     >
       {/* Only what actually travels gets promised. Settings and the email
-          reach the server on the 1-second pause; characters, the scene and
-          the host name are still local to this tab (founder call
-          2026-07-19), so students keep the setup copy and a refetch drops
-          the edit. Features 17 and 18 widen this line as their sync ships —
-          to their own scope, never back to "what students see mid-chat".
-          See DECISIONS.md → "The live settings panel only claims the edits
-          that actually travel". */}
+          reach the server on the 1-second pause; characters, the
+          instructions and the host name are still local to this tab
+          (founder call 2026-07-19), so students keep the setup copy and a
+          refetch drops the edit. Features 17 and 18 widen this line as
+          their sync ships — to their own scope, never back to "what
+          students see mid-chat". See DECISIONS.md → "The live settings
+          panel only claims the edits that actually travel". */}
       <p className="text-sm leading-relaxed text-muted-foreground">
         Settings and your email save as soon as you pause typing. Characters,
-        the scene and your name only change this page for now: students still
-        see what you set up, and refreshing undoes those edits.
+        the instructions and your name only change this page for now: students
+        still see what you set up, and refreshing undoes those edits.
       </p>
 
       <div className="mt-6 flex flex-col gap-7">
@@ -219,11 +219,11 @@ export function LiveSettingsPanel({
         </div>
 
         <div>
-          <SectionLabel>The scene</SectionLabel>
+          <SectionLabel>Student instructions</SectionLabel>
           <div className="mt-3">
-            <SceneField
-              value={draft.scene}
-              onChange={(scene) => patch({ scene })}
+            <StudentInstructionsField
+              value={draft.studentInstructions}
+              onChange={(studentInstructions) => patch({ studentInstructions })}
             />
           </div>
         </div>

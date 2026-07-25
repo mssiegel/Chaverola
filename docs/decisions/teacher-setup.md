@@ -5,6 +5,43 @@ area. Entries are newest-first; add new ones at the top, and add a matching line
 to the index in the same change. Replaced decisions move to Superseded at the
 bottom of this file.
 
+### The scene field is now student instructions: 250 characters, after the characters
+
+_2026-07-26_
+
+**Decision:** The optional setup field labeled "Set the scene" is now
+**Student instructions**, everywhere at once: the teacher-side label (setup
+form and the host page's live panel), the student-side lobby heading
+("Instructions"), and the underlying property, which unifies to
+`studentInstructions` (it was split — `scenario` on the wire/server, `scene`
+in the client draft). The cap changes from 20 words with a 500-char backstop
+to a flat **250 characters**, counted in code points like every other cap,
+with the quiet counter appearing from 200. In the student lobby and the setup
+form's live preview, the character chips now render **above** the
+instructions; "Hosted by" stays on top. The transcript email's header line
+reads `Instructions:`. The form section's icon went from the clapperboard to
+a clipboard for the same reason as the rename.
+
+**Why:** Founder call (2026-07-26). Teachers use the field for more than
+scene-setting — an ESL teacher runs anonymous guess-who chats ("Person 1"
+asking questions to figure out who "Person 2" is), a history teacher assigns
+a debate question. "Scene" mislabels those, and 20 words is too tight for
+instructions. A flat character cap beats a word cap now that the content
+varies more, and it matches how every other field in the app is capped.
+Characters moved above the instructions because the product is
+character-first, and instructions can now run long enough to push the roster
+out of first view. One deploy-bridge kept on purpose: `sanitizeDraft` still
+reads a sessionStorage draft's old `scene` key as a fallback, so a teacher
+mid-setup during the deploy loses nothing.
+
+_Implemented across
+[activitySetup](../../client/src/lib/activitySetup.ts),
+[StudentInstructionsField](../../client/src/components/Teacher/ActivitySetup/StudentInstructionsField.tsx),
+[WaitingLobby](../../client/src/components/Student/WaitingLobby.tsx),
+[schemas/activity.ts](../../server/src/schemas/activity.ts), and
+[transcript.ts](../../server/src/email/transcript.ts); the cap lives in
+[shared/src/constants.ts](../../shared/src/constants.ts)._
+
 ### A character's emoji is typed into its name
 
 _2026-07-24_
@@ -161,6 +198,11 @@ then never exist.
 _Caps in [activitySetup](../../client/src/lib/activitySetup.ts), the clamp helpers
 in [text.ts](../../client/src/lib/text.ts), the counter in
 [FieldFeedback](../../client/src/components/Teacher/ActivitySetup/FieldFeedback.tsx)._
+
+_Update (2026-07-26): the scene became
+[student instructions](#the-scene-field-is-now-student-instructions-250-characters-after-the-characters)
+and its cap is now a flat 250 characters (code points, counter from 200) —
+the word cap and `clampWords` are gone. The name caps are unchanged._
 
 ### Settings ship on, and a toggle's sub-control disables instead of hiding
 

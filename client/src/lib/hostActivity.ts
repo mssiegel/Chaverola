@@ -45,7 +45,7 @@ export function liveDraftFromActivity(
     characters: activity.characters.map((c) => ({ id: c.id, name: c.name })),
     hostName: activity.hostName,
     teacherEmail: activity.teacherEmail ?? "",
-    scene: activity.scenario ?? "",
+    studentInstructions: activity.studentInstructions ?? "",
     settings: { ...activity.settings },
   };
 }
@@ -55,7 +55,7 @@ function toActivityDraft(draft: LiveActivityDraft): ActivityDraft {
     characters: draft.characters.map(({ name }) => ({ name })),
     hostName: draft.hostName,
     teacherEmail: draft.teacherEmail,
-    scene: draft.scene,
+    studentInstructions: draft.studentInstructions,
     settings: draft.settings,
   };
 }
@@ -155,9 +155,9 @@ export function activityFromLiveDraft(
     characters,
     settings: { ...draft.settings },
   };
-  const scene = draft.scene.trim();
+  const instructions = draft.studentInstructions.trim();
   const email = draft.teacherEmail.trim();
-  if (scene !== "") activity.scenario = scene;
+  if (instructions !== "") activity.studentInstructions = instructions;
   if (email !== "") activity.teacherEmail = email;
   return activity;
 }

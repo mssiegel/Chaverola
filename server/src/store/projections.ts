@@ -30,7 +30,8 @@ export function toActivity(stored: StoredActivity): Activity {
     hostName: stored.hostName,
     characters: stored.characters,
   };
-  if (stored.scenario !== undefined) activity.scenario = stored.scenario;
+  if (stored.studentInstructions !== undefined)
+    activity.studentInstructions = stored.studentInstructions;
   return activity;
 }
 
@@ -43,7 +44,8 @@ export function toHostedActivity(stored: StoredActivity): HostedActivity {
     characters: stored.characters,
     settings: stored.settings,
   };
-  if (stored.scenario !== undefined) activity.scenario = stored.scenario;
+  if (stored.studentInstructions !== undefined)
+    activity.studentInstructions = stored.studentInstructions;
   if (stored.teacherEmail !== undefined) {
     activity.teacherEmail = stored.teacherEmail;
   }

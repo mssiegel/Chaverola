@@ -7,8 +7,7 @@ import {
   MAX_CHARACTERS,
   MIN_CHARACTERS,
   NAME_MAX_CHARS,
-  SCENE_MAX_CHARS,
-  SCENE_MAX_WORDS,
+  STUDENT_INSTRUCTIONS_MAX_CHARS,
 } from "@chaverola/shared";
 import type {
   ActivitySettings,
@@ -102,14 +101,15 @@ export const createActivityRequestSchema = z.object({
         }
       });
     }),
-  scenario: z
+  studentInstructions: z
     .string()
     .trim()
-    .min(1, "Omit scenario instead of sending it blank.")
-    .max(SCENE_MAX_CHARS, `The scene maxes out at ${SCENE_MAX_CHARS} chars.`)
+    .min(1, "Omit studentInstructions instead of sending it blank.")
+    // Code points, not .max() — the same rule as names, so an emoji-heavy
+    // instruction the form accepts isn't rejected here.
     .refine(
-      (scene) => scene.split(/\s+/).length <= SCENE_MAX_WORDS,
-      `The scene maxes out at ${SCENE_MAX_WORDS} words.`
+      (value) => Array.from(value).length <= STUDENT_INSTRUCTIONS_MAX_CHARS,
+      `Student instructions max out at ${STUDENT_INSTRUCTIONS_MAX_CHARS} chars.`
     )
     .optional(),
   teacherEmail: z

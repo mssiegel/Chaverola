@@ -31,7 +31,7 @@ const fullRecord: StoredActivity = {
     { id: "caesar", name: "Caesar" },
     { id: "cicero", name: "Cicero" },
   ],
-  scenario: "Rome, 44 BC, the night before the Ides of March.",
+  studentInstructions: "Rome, 44 BC, the night before the Ides of March.",
   teacherEmail: "cohen@example.com",
   settings: { ...DEFAULT_ACTIVITY_SETTINGS },
   createdAt: 1_000,
@@ -84,7 +84,7 @@ describe("toActivity (student projection)", () => {
       "characters",
       "hostName",
       "joinCode",
-      "scenario",
+      "studentInstructions",
     ]);
   });
 });
@@ -95,8 +95,8 @@ describe("toHostedActivity (teacher projection)", () => {
       "characters",
       "hostName",
       "joinCode",
-      "scenario",
       "settings",
+      "studentInstructions",
       "teacherEmail",
     ]);
   });

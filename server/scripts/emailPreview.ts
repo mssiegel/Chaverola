@@ -47,7 +47,7 @@ const fixture: StoredActivity = {
     { id: "rivka", name: "Rivka 📜" },
     { id: "david", name: "David" }, // no emoji on purpose
   ],
-  scenario:
+  studentInstructions:
     "Basel, 1897. The First Zionist Congress is about to open, and everyone has an opinion.",
   teacherEmail: "preview@example.com",
   settings: { ...DEFAULT_ACTIVITY_SETTINGS },

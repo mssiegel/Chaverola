@@ -166,9 +166,9 @@ function HostActivityChrome({
   them, and the teacher's other devices hear settings:changed. The TEACHER'S
   EMAIL syncs through the same wrapper (activity:update-email, no echo
   event) — the server is what sends the transcripts, so a local-only edit
-  would silently mail the old address. Characters/scenario/hostName edits
-  stay local-only until edit-sync ships (students' lobbies keep the server's
-  copy, refresh reverts — founder call; see DECISIONS.md). On the demo
+  would silently mail the old address. Characters/studentInstructions/
+  hostName edits stay local-only until edit-sync ships (students' lobbies
+  keep the server's copy, refresh reverts — founder call; see DECISIONS.md). On the demo
   everything is local because the whole class is client-side.
 */
 

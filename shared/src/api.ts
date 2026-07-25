@@ -17,8 +17,8 @@ export interface CreateActivityRequest {
   hostName: string;
   /** 2–4 characters; names unique (trimmed, case-insensitive). */
   characters: CharacterInput[];
-  /** ≤ SCENE_MAX_WORDS words and ≤ SCENE_MAX_CHARS; omit when blank. */
-  scenario?: string;
+  /** ≤ STUDENT_INSTRUCTIONS_MAX_CHARS; omit when blank. */
+  studentInstructions?: string;
   /** EMAIL_PATTERN, ≤ EMAIL_MAX_CHARS; omit when blank. */
   teacherEmail?: string;
   /** Required in full; out-of-bounds values are rejected, not clamped. */

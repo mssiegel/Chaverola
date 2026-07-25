@@ -21,13 +21,15 @@ export const DEMO_STUDENT_NAME = "Rachel";
 export const demoActivity: Activity = {
   joinCode: DEMO_JOIN_CODE,
   hostName: "Ms. Cohen",
-  // 19 words on purpose: the scene counter appears at 16 and turns red at
-  // the 20-word cap, so this sits one under — the demo shows the counter
-  // working instead of a seeded scene that reads as an error. Keep any
-  // rewrite at 16-19 words.
-  scenario:
+  // 239 chars on purpose: the instructions counter appears at 200 and turns
+  // red at the 250-char cap, so this sits between — the demo shows the
+  // counter working instead of a seeded value that reads as an error. Keep
+  // any rewrite at 200-249 chars.
+  studentInstructions:
     "Rome, on the Ides of March. A rumor is going around the forum, and " +
-    "nobody knows who to trust.",
+    "nobody knows who to trust. Stay in character and ask nosy questions. " +
+    "And don't tell anyone what you saw last night: someone in this chat " +
+    "knows more than they're letting on.",
   characters: [
     { id: "caesars-ghost", name: "Caesar's ghost 👻" },
     { id: "brutus", name: "Brutus 🔪" },
