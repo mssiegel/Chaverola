@@ -166,10 +166,14 @@ function HostActivityChrome({
   them, and the teacher's other devices hear settings:changed. The TEACHER'S
   EMAIL syncs through the same wrapper (activity:update-email, no echo
   event) — the server is what sends the transcripts, so a local-only edit
-  would silently mail the old address. Characters/studentInstructions/
-  hostName edits stay local-only until edit-sync ships (students' lobbies
-  keep the server's copy, refresh reverts — founder call; see DECISIONS.md). On the demo
-  everything is local because the whole class is client-side.
+  would silently mail the old address. The HOST NAME and STUDENT
+  INSTRUCTIONS sync the same way (activity:update-details, feature 17, no
+  echo either — a second device is last-write-wins like the email), so the
+  edit survives a refresh and a student joining later gets the current
+  copy; students already sitting in the lobby follow live in prompt 2.
+  CHARACTER edits stay local-only until feature 18 (students' lobbies keep
+  the server's roster, refresh reverts — founder call; see DECISIONS.md).
+  On the demo everything is local because the whole class is client-side.
 */
 
 function DemoHostActivityView({
@@ -253,6 +257,21 @@ function ConnectedHostActivityView({
     // while the draft has a problem, so a half-typed address never emits.
     if (activity.teacherEmail !== next.teacherEmail) {
       engine.updateTeacherEmail(next.teacherEmail ?? null);
+    }
+    // The details pair syncs the same way (feature 17): the host name and
+    // the lobby instructions decide what a joining student sees, so a
+    // local-only edit would greet latecomers with the old name. An emptied
+    // instructions box arrives as `undefined` and travels as an explicit
+    // null — a clear. No echo comes back to fold in: a second host device
+    // is last-write-wins, like the email.
+    if (
+      activity.hostName !== next.hostName ||
+      activity.studentInstructions !== next.studentInstructions
+    ) {
+      engine.updateDetails({
+        hostName: next.hostName,
+        studentInstructions: next.studentInstructions ?? null,
+      });
     }
     setActivity(next);
   };

@@ -50,6 +50,16 @@ export interface HostEngine {
    *  tab may be gone); the demo's world reads activity.teacherEmail directly,
    *  so its engine no-ops, exactly like updateSettings. */
   updateTeacherEmail: (email: string | null) => void;
+  /** The student-visible detail pair — the host name and the lobby
+   *  instructions, where null clears the instructions (feature 17). The live
+   *  engine sends it to the server so joining students get the current copy;
+   *  the demo's page reads its local activity directly, so its engine no-ops,
+   *  exactly like updateSettings. No echo comes back — a second host device
+   *  is last-write-wins, like the email. */
+  updateDetails: (details: {
+    hostName: string;
+    studentInstructions: string | null;
+  }) => void;
   /** The teacher's own link to the class. The demo is always "connected";
    *  the live page goes amber (banner + dimmed queue) while "reconnecting". */
   connection: LobbyConnectionState;

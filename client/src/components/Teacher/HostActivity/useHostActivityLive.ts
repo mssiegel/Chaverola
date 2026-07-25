@@ -339,6 +339,15 @@ export function useHostActivityLive({
   const updateTeacherEmail = (teacherEmail: string | null) => {
     socketRef.current?.emit("activity:update-email", { teacherEmail });
   };
+  const updateDetails = (details: {
+    hostName: string;
+    studentInstructions: string | null;
+  }) => {
+    // No listener to pair with this emit: activity:details-changed goes to
+    // student seats only — a second host device is last-write-wins, like the
+    // email (founder call, 2026-07-26).
+    socketRef.current?.emit("activity:update-details", details);
+  };
 
   const chatsInProgress = chats.filter((c) => c.status === "active");
   const completedChats = chats.filter((c) => c.status === "ended");
@@ -376,6 +385,7 @@ export function useHostActivityLive({
     removeFromChat,
     updateSettings,
     updateTeacherEmail,
+    updateDetails,
     connection,
     endActivity,
     ended,

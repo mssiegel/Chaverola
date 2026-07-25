@@ -95,7 +95,7 @@ commit — see the deploy race), and is safe to push on its own. Run
 Each prompt carries **Ask the founder** items. Raise them when you run that
 prompt, get an answer, then build. Do not resolve them yourself.
 
-- [ ] Prompt 1 — The name and instructions edits reach the server (and the teacher's other devices)
+- [x] Prompt 1 — The name and instructions edits reach the server (and the teacher's other devices)
 - [ ] Prompt 2 — Students' lobbies follow the edit live
 
 ## Shared context: the wire contract addition

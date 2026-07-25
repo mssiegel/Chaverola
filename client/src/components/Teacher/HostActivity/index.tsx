@@ -243,11 +243,12 @@ export function HostActivityDashboard({
         </div>
       )}
 
-      {/* On real activities too — founder call. Settings edits and the
-          teacher's email now sync to the server (the page's onActivityChange
-          wrapper emits them); characters/studentInstructions/hostName edits
-          stay local-only until edit-sync ships; see DECISIONS.md → "The
-          live-settings panel stays on real activities". */}
+      {/* On real activities too — founder call. Settings edits, the
+          teacher's email, and (feature 17) the host name and student
+          instructions all sync to the server (the page's onActivityChange
+          wrapper emits them); character edits stay local-only until feature
+          18; see DECISIONS.md → "The live-settings panel stays on real
+          activities". */}
       {/* Its own dim wrapper, OUTSIDE the grid one — moving the panel into
           the grid would change the desktop layout. An offline edit here
           would actually land at reconnect (the socket buffers it), but a
