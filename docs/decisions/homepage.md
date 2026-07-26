@@ -13,10 +13,9 @@ _2026-07-26_
 section — heading "The free plan is the whole thing." — with two cards. The
 **Free** card lists everything the product does today and ends in the standard
 outline Host CTA; it is never described as limited, trial-like, or a tier.
-The **Complete Implementation** card (team training on curriculum fit and on
-running lessons, Google Classroom-type integrations, teacher accounts with
-saved characters, mid-activity tasks pushed into student chats) lists no
-price — its secondary "Write to Moshe" CTA opens a dialog with a prefilled
+The **Complete Implementation** card (team training on curriculum fit,
+Google Classroom-type integrations, teacher accounts with saved characters,
+mid-activity tasks pushed into student chats) lists no price — its secondary "Write to Moshe" CTA opens a dialog with a prefilled
 mailto to siegel.moshes@gmail.com plus the raw address as select-all text.
 The paid card's accent is a grape-tinted border and one rotated sticker tag
 ("With the Chaverola team") — no badges, ribbons, price columns, or icon

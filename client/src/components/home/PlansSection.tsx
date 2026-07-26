@@ -71,7 +71,6 @@ export function PlansSection() {
           tagline="For teachers and schools that want help making Chaverola part of how they teach."
           bullets={[
             "Training from our team on fitting activities into your curriculum",
-            "Training on running lessons that teach the material and that students love",
             <>
               Connections to{" "}
               <span className="whitespace-nowrap">
