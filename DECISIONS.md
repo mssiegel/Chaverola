@@ -47,6 +47,7 @@ git: `git log -- DECISIONS.md`.
 ## Index
 
 - [Student join flow & lobby](docs/decisions/student-join.md)
+  - [The lobby has a leave door and acknowledges a long wait](docs/decisions/student-join.md#the-lobby-has-a-leave-door-and-acknowledges-a-long-wait)
   - [An unreachable lookup retries itself; a signed-in student waits it out on a reconnecting screen, never the code gate](docs/decisions/student-join.md#an-unreachable-lookup-retries-itself-a-signed-in-student-waits-it-out-on-a-reconnecting-screen-never-the-code-gate)
   - [The full-activity screen names the 60-seat cap and offers a retry](docs/decisions/student-join.md#the-full-activity-screen-names-the-60-seat-cap-and-offers-a-retry)
   - [A removed student retypes their name — the field is not refilled](docs/decisions/student-join.md#a-removed-student-retypes-their-name--the-field-is-not-refilled)

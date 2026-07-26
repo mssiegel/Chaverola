@@ -294,6 +294,13 @@ export function JoinActivityPage() {
         ? "reconnecting"
         : "connected";
 
+  // The lobby's leave door. Same road browser-back takes: land on code entry,
+  // where the resolved-code-entry effect above signs the student out, and the
+  // presence hook's teardown emits the flush-protected `lobby:leave` on its
+  // way down. Never a second hand-rolled emit — the LEAVE_FLUSH_MS gap in
+  // useLobbyPresence is a prod lesson, and this path already carries it.
+  const leaveActivity = () => navigate("/activity/join");
+
   // Mock event: the teacher kicks the student out of the activity. They're
   // signed out on the spot and land back on the name step (which the demo
   // refills, so rejoining stays one click).
@@ -403,6 +410,7 @@ export function JoinActivityPage() {
                 studentName={session.name}
                 isPaused={isRealActivity ? livePaused : classPaused}
                 connection={lobbyConnection}
+                onLeaveActivity={leaveActivity}
               />
             </div>
             {/* Demo steering is demo furniture: a real activity's lobby

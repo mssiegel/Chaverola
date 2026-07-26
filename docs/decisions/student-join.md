@@ -5,6 +5,48 @@ area. Entries are newest-first; add new ones at the top, and add a matching line
 to the index in the same change. Replaced decisions move to Superseded at the
 bottom of this file.
 
+### The lobby has a leave door and acknowledges a long wait
+
+_2026-07-26_
+
+**Decision:** Two additions to the waiting lobby, both client-only:
+
+- A quiet "Leave the activity" link under the info card, link weight rather
+  than a second button. It confirms through the shared dialog ("Leave the
+  activity?" / "Your teacher will see you've left. You can rejoin with the
+  same code, but you'd start waiting again.") and on confirm navigates to
+  code entry, which is the exact road browser-back already takes: the
+  resolved-code-entry effect signs the student out, and the presence hook's
+  teardown emits the flush-protected `lobby:leave`. No second emit.
+- The body line above the pill rotates on real wall-clock time: the baseline
+  until 50 seconds, "Still finding you a partner. Hang tight, your chat opens
+  right here." until 2.5 minutes, then "Longer wait than usual, but you're
+  still in line. Your chat opens as soon as someone's free." The pill itself
+  never changes, and there is no countdown, no percentage, and no estimate.
+
+**Why:** The lobby was the product's longest dead moment and its only exit was
+browser back. The decision that ending a chat keeps your seat says leaving is
+a lobby act, but the lobby rendered no way to do it, so "done for the day"
+meant guessing at the back button. On the pulse: a screen identical at second
+5 and minute 5 reads as broken to a kid comparing phones, and kids refresh or
+back out of screens they think are stuck. The copy moves and the pill holds
+because the pill is the promise and the body line is the acknowledgment. No
+time estimate, because nothing here can predict when a partner frees up.
+
+**The match race needs no guard:** the dialog renders inside `WaitingLobby`,
+and a `chat:started` swaps the stage, which unmounts the lobby and the open
+dialog with it. A matched seat can't be given up through the lobby door.
+
+**Demo parity:** the demo auto-pairs around 20 seconds, so the rotation
+almost never shows there. The leave link does show, and it works through the
+same navigation (the demo has no socket, so leaving is only the session half).
+
+_Implemented in
+[WaitingLobby](../../client/src/components/Student/WaitingLobby.tsx), wired
+through
+[JoinActivityPage](../../client/src/pages/student/JoinActivityPage.tsx)
+(`leaveActivity`)._
+
 ### An unreachable lookup retries itself; a signed-in student waits it out on a reconnecting screen, never the code gate
 
 _2026-07-26_
