@@ -61,6 +61,19 @@ function resolveApiBaseUrl(): string {
 
 export const API_BASE_URL = resolveApiBaseUrl();
 
+/**
+ * How long a GET waits before it gives up. A fetch that connects and then
+ * stalls — a captive portal, an overloaded classroom AP — never rejects on
+ * its own, so without this the caller spins forever on a loading screen.
+ * The abort rejects the fetch, and the `catch` in `request` maps it to
+ * `unreachable` like any other failure to get an answer.
+ *
+ * Deliberately on the GET helpers one by one, not on `request` itself:
+ * `createActivity` must never carry a timeout (see AGENTS.md — create isn't
+ * idempotent, and a retry could mint a second activity).
+ */
+const GET_TIMEOUT_MS = 8_000;
+
 async function request<T>(
   path: string,
   init?: RequestInit
@@ -100,12 +113,16 @@ export function createActivity(
 export function getActivity(
   joinCode: string
 ): Promise<ApiResult<GetActivityResponse>> {
-  return request<GetActivityResponse>(`/activities/${joinCode}`);
+  return request<GetActivityResponse>(`/activities/${joinCode}`, {
+    signal: AbortSignal.timeout(GET_TIMEOUT_MS),
+  });
 }
 
 /** `GET /activities/host/:hostKey` — the full activity, TTL-refreshing. */
 export function getHostedActivity(
   hostKey: string
 ): Promise<ApiResult<GetHostedActivityResponse>> {
-  return request<GetHostedActivityResponse>(`/activities/host/${hostKey}`);
+  return request<GetHostedActivityResponse>(`/activities/host/${hostKey}`, {
+    signal: AbortSignal.timeout(GET_TIMEOUT_MS),
+  });
 }

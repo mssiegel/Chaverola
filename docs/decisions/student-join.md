@@ -5,6 +5,47 @@ area. Entries are newest-first; add new ones at the top, and add a matching line
 to the index in the same change. Replaced decisions move to Superseded at the
 bottom of this file.
 
+### An unreachable lookup retries itself; a signed-in student waits it out on a reconnecting screen, never the code gate
+
+_2026-07-26_
+
+**Decision:** Three parts, all on the join-code lookup:
+
+- The idempotent GETs (`getActivity`, `getHostedActivity`) give up after 8
+  seconds and read as unreachable. `createActivity` still carries no timeout.
+- A lookup that comes back unreachable retries itself on a capped backoff
+  (2s, 5s, then every 10s) for as long as the page is showing that code. A
+  retry that succeeds drops the student straight back into their lobby with
+  no tap.
+- While that runs, a student whose session already holds the code in the URL
+  sees a holding card ("Hang tight, {name}", the lobby's amber "Reconnecting
+  you…" pill, and a "Try now" button) instead of the code-entry gate. A
+  visitor with no session keeps the old behavior: the code gate with the
+  unreachable copy.
+
+**Why:** The seat was already being kept for these students, and nothing on
+screen said so. A refresh during a classroom wifi hiccup dropped a seated
+student onto the code gate under a red error, which reads as "you're out" —
+and because the page had no activity, the presence socket never reconnected,
+so the seat quietly burned through the server's 120-second grace while the
+student read a screen telling them to check their code. A stalled fetch was
+worse than a failed one: with no abort signal it never settled at all, so a
+captive portal or an overloaded classroom AP left the loading card spinning
+forever. The backoff is capped because thirty phones retrying a genuinely
+dead server is its own problem, and it starts short because the grace window
+is the clock that actually matters. The holding card is deliberately not an
+error screen and offers no way out: leaving would throw away a seat that is
+usually seconds from coming back.
+
+_Implemented in
+[useActivityLookup](../../client/src/lib/useActivityLookup.ts) and
+[lookupRetry](../../client/src/lib/lookupRetry.ts), rendered by
+[ReconnectingCard](../../client/src/pages/student/join/ReconnectingCard.tsx)
+off the stage machine in
+[JoinActivityPage](../../client/src/pages/student/JoinActivityPage.tsx); the
+timeout lives in [api](../../client/src/lib/api.ts). Extends
+[Real codes resolve over the API, and only a resolved miss signs anyone out](#real-codes-resolve-over-the-api-and-only-a-resolved-miss-signs-anyone-out)._
+
 ### The full-activity screen names the 60-seat cap and offers a retry
 
 _2026-07-19_
@@ -176,6 +217,13 @@ tier's idle spin-down, and the API now runs on a paid instance that never
 sleeps (see [backend-api.md](backend-api.md#the-api-runs-on-a-paid-render-instance-because-free-web-services-block-outbound-smtp)).
 The rest of this entry stands: unreachable still never signs a student out,
 and the loading card still says "Finding your activity…".
+
+**Update (2026-07-26):** "when it answers again the student lands right back
+in their lobby" is now something the app does rather than something it waits
+for. The lookup retries itself, the GETs stop after 8 seconds instead of
+hanging, and a signed-in student waits on a holding card instead of the code
+gate. See
+[An unreachable lookup retries itself; a signed-in student waits it out on a reconnecting screen, never the code gate](#an-unreachable-lookup-retries-itself-a-signed-in-student-waits-it-out-on-a-reconnecting-screen-never-the-code-gate).
 
 ### Stage swaps inside the student route open at the top of the page
 

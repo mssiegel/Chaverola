@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { getActivity } from "@/lib/api";
+import { lookupRetryDelayMs } from "@/lib/lookupRetry";
 import { DEMO_JOIN_CODE, demoActivity } from "@/mockData";
 import type { Activity } from "@/types/activity";
 
@@ -46,6 +47,12 @@ export function primeActivityLookup(activity: Activity): void {
  * synchronously with zero network — the demo works offline forever. Real
  * codes go through `GET /activities/:joinCode`.
  *
+ * An unreachable answer isn't the end: the lookup retries itself on a capped
+ * backoff for as long as the hook is mounted for that code, so a student who
+ * refreshes through a wifi blip is put back in their lobby the moment the
+ * server answers — no tap required. `retryNow` is the impatient student's
+ * version of the same thing.
+ *
  * `deliver` hands the hook an activity a caller fetched itself (the
  * code-entry submit, when the code is already in the URL so no navigation
  * will remount anything) — it goes through hook state, the only channel a
@@ -54,60 +61,110 @@ export function primeActivityLookup(activity: Activity): void {
 export function useActivityLookup(joinCode: string | undefined): {
   lookup: ActivityLookup;
   deliver: (activity: Activity) => void;
+  retryNow: () => void;
 } {
   const [settled, setSettled] = useState<{
     joinCode: string;
     lookup: ActivityLookup;
   } | null>(null);
+  // The running lookup loop's handles. Republished by the effect on every
+  // run and dropped on cleanup, so callers outside the effect (the holding
+  // screen's button, `deliver`) can reach the timer that's actually live.
+  const loopRef = useRef<{ retryNow: () => void; stop: () => void } | null>(
+    null
+  );
 
   useEffect(() => {
     if (joinCode === undefined || joinCode === DEMO_JOIN_CODE) return;
     if (handedOff.has(joinCode)) return;
-    let cancelled = false;
-    void getActivity(joinCode).then((result) => {
-      if (cancelled) return;
-      setSettled({
-        joinCode,
-        lookup: result.ok
+    let stopped = false;
+    let inFlight = false;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+
+    const run = (retriesSoFar: number) => {
+      // One fetch at a time: a tapped retry mid-flight would fork the
+      // backoff ladder and leave a timer nobody owns.
+      if (stopped || inFlight) return;
+      inFlight = true;
+      void getActivity(joinCode).then((result) => {
+        inFlight = false;
+        if (stopped) return;
+        const lookup: ActivityLookup = result.ok
           ? { state: "found", activity: result.data.activity }
           : result.kind === "not_found"
             ? { state: "not-found" }
-            : { state: "unreachable" },
+            : { state: "unreachable" };
+        setSettled({ joinCode, lookup });
+        // Only "we couldn't reach the server" keeps the loop alive. Found
+        // and not-found are answers, and the page acts on them.
+        if (lookup.state === "unreachable") {
+          timer = setTimeout(
+            () => run(retriesSoFar + 1),
+            lookupRetryDelayMs(retriesSoFar)
+          );
+        }
       });
-    });
+    };
+
+    const stop = () => {
+      stopped = true;
+      clearTimeout(timer);
+    };
+    // Timers live in the effect and die with it, so an unmount, a code
+    // change, and StrictMode's double-fire all cancel cleanly.
+    loopRef.current = {
+      // A tap restarts the ladder at its shortest wait — the student is
+      // telling us the wifi is back.
+      retryNow: () => {
+        clearTimeout(timer);
+        run(0);
+      },
+      stop,
+    };
+    run(0);
+
     return () => {
-      cancelled = true;
+      stop();
+      loopRef.current = null;
     };
   }, [joinCode]);
 
   const deliver = (activity: Activity) => {
+    // The caller has the activity in hand, so the loop has nothing left to
+    // look for — and stopping it matters: a retry landing a moment later
+    // would overwrite a good answer with an unreachable one.
+    loopRef.current?.stop();
     setSettled({
       joinCode: activity.joinCode,
       lookup: { state: "found", activity },
     });
   };
 
+  const retryNow = () => loopRef.current?.retryNow();
+
   if (joinCode === undefined) {
-    return { lookup: { state: "idle" }, deliver };
+    return { lookup: { state: "idle" }, deliver, retryNow };
   }
   if (joinCode === DEMO_JOIN_CODE) {
     return {
       lookup: { state: "found", activity: demoActivity },
       deliver,
+      retryNow,
     };
   }
   // Settled state outranks the hand-off map: a fresh mount reads the map
   // reliably, but later renders may see a memoized (stale) `get`, so state
   // is the source of truth once it exists.
   if (settled !== null && settled.joinCode === joinCode) {
-    return { lookup: settled.lookup, deliver };
+    return { lookup: settled.lookup, deliver, retryNow };
   }
   const primed = handedOff.get(joinCode);
   if (primed !== undefined) {
     return {
       lookup: { state: "found", activity: primed },
       deliver,
+      retryNow,
     };
   }
-  return { lookup: { state: "loading" }, deliver };
+  return { lookup: { state: "loading" }, deliver, retryNow };
 }

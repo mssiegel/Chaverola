@@ -4,6 +4,9 @@ import type { ActivityChatScenarioKey } from "@/mockData";
 export type StudentStage =
   | "code"
   | "loading"
+  // A signed-in student whose lookup can't reach the server. Its own stage
+  // so the code gate never appears under someone who still has a seat.
+  | "reconnecting"
   | "name"
   | "lobby"
   | "chatting"
@@ -84,6 +87,7 @@ export const PENDING_ECHO_TIMEOUT_MS = 5000;
 export const PAGE_TITLES: Record<StudentStage, string> = {
   code: "Join an Activity",
   loading: "Join an Activity",
+  reconnecting: "Reconnecting",
   name: "Join an Activity",
   lobby: "Waiting Lobby",
   chatting: "Chatting",

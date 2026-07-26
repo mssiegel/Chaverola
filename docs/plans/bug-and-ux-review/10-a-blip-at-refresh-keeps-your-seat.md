@@ -1,6 +1,6 @@
 # 10 — A blip at refresh keeps your seat
 
-State: **Not started**
+State: **Complete**
 
 **The problem.** A seated student who refreshes (or whose tab is restored)
 during a wifi hiccup is dumped onto what looks like being kicked out, while
@@ -39,7 +39,7 @@ student lands right back in their lobby — same name, no re-entry"
   unreachable lookup retries itself; a signed-in student waits it out on a
   reconnecting screen, never the code gate").
 
-- [ ] Prompt — Timeouts, retries, and an honest holding screen
+- [x] Prompt — Timeouts, retries, and an honest holding screen
 
 ---
 

@@ -90,7 +90,7 @@ Load-bearing — trip over them before you break one:
 - **`pausedAt` is both the pause flag and the freeze anchor.** While set, snapshots clock `waitSeconds` against it (but reconnecting state keeps real time — the grace clock runs through a pause), and `resumeChats` shifts the stored timestamps forward by the pause duration so nothing jumps. Don't split it into a boolean plus a timestamp, and don't "fix" the grace window to freeze.
 - **Live socket timers never pass through `scaledMs`**; demo simulation always does.
 - **`LiveChatStage` is a component split beside the demo's `ChatStage.tsx`, never a conditional hook.**
-- **The create-activity submit has no client-side timeout** — create isn't idempotent, and a retry could mint a second activity.
+- **The create-activity submit has no client-side timeout** — create isn't idempotent, and a retry could mint a second activity. The idempotent GETs are the opposite: `getActivity` and `getHostedActivity` each carry an 8s `AbortSignal.timeout`, and an unreachable student lookup retries itself on a capped backoff. Keep the timeout on the helpers one by one, never on `request`.
 
 ## Task router
 

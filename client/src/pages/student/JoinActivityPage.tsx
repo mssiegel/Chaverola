@@ -21,6 +21,7 @@ import { ActivityGoneCard } from "./join/ActivityGoneCard";
 import { JoinGateCard } from "./join/JoinGateCard";
 import { LoadingCard } from "./join/LoadingCard";
 import { LobbyDemoControls } from "./join/LobbyDemoControls";
+import { ReconnectingCard } from "./join/ReconnectingCard";
 import {
   PAGE_TITLES,
   STUDENT_CARD_CLASS,
@@ -36,7 +37,9 @@ import { useDemoLobby } from "./join/useDemoLobby";
  * the UI changes by stage.
  *
  * Stage is derived, not stored: no `:joinCode` param means code entry, a
- * code still being looked up means loading, a code that resolved to nothing
+ * code still being looked up means loading, a code whose lookup can't reach
+ * the server holds a signed-in student on the reconnecting card while the
+ * lookup retries itself, a code that resolved to nothing
  * falls back to code entry, a found activity without a signed-in session
  * means name entry, and a session that matches the code means the lobby —
  * until a match starts a chat: the demo's mock triggers on `1234`, the
@@ -63,8 +66,21 @@ export function JoinActivityPage() {
   const { setChatStudentName } = useOutletContext<StudentWorldOutletContext>();
   const { session, signIn, signOut, updateSession } = useStudentSession();
 
-  const { lookup, deliver: deliverLookup } = useActivityLookup(joinCodeParam);
+  const {
+    lookup,
+    deliver: deliverLookup,
+    retryNow: retryLookup,
+  } = useActivityLookup(joinCodeParam);
   const activity = lookup.state === "found" ? lookup.activity : undefined;
+
+  // A student who still holds a session for the code in the URL, on a lookup
+  // that couldn't reach the server. Their seat is real and the server is
+  // holding it through its grace window, so they get a holding screen — never
+  // the code gate, which would read as "you're out" over a seat that's fine.
+  const heldSeatUnreachable =
+    lookup.state === "unreachable" &&
+    joinCodeParam !== undefined &&
+    session?.joinCode === joinCodeParam;
 
   const isSignedIn =
     activity !== undefined && session?.joinCode === activity.joinCode;
@@ -197,15 +213,17 @@ export function JoinActivityPage() {
     ? "code"
     : lookup.state === "loading"
       ? "loading"
-      : !activity
-        ? "code"
-        : !isSignedIn
-          ? "name"
-          : match
-            ? chatEnded
-              ? "ended"
-              : "chatting"
-            : "lobby";
+      : heldSeatUnreachable
+        ? "reconnecting"
+        : !activity
+          ? "code"
+          : !isSignedIn
+            ? "name"
+            : match
+              ? chatEnded
+                ? "ended"
+                : "chatting"
+              : "lobby";
   // The gone latch outranks every stage but one: a student reading their
   // ended chat keeps it. End activity settles every chat before it tears the
   // activity down, so the wrap-up — reveal included — is already on screen
@@ -400,6 +418,12 @@ export function JoinActivityPage() {
         )
       ) : stage === "loading" ? (
         <LoadingCard />
+      ) : stage === "reconnecting" && session ? (
+        // Signed in, seat held, server not answering — wait it out here. The
+        // lookup is already retrying on its own; the button is for a student
+        // who knows their wifi came back and doesn't want to wait for the
+        // next attempt.
+        <ReconnectingCard studentName={session.name} onTryNow={retryLookup} />
       ) : (
         <JoinGateCard
           stage={stage}

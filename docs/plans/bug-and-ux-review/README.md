@@ -67,7 +67,7 @@ rules:
 | [06 — The queue counts who can actually pair](06-the-queue-counts-who-can-actually-pair.md)             | The waiting count and Pair everyone tell the truth about sleeping phones                  | Complete    |
 | [07 — A wifi blip keeps your tick](07-a-wifi-blip-keeps-your-tick.md)                                   | A selected student who blinks offline stays selected                                      | Complete    |
 | [08 — Back means back](08-back-means-back.md)                                                           | Leaving costs one back press, not one per chat the student went through                   | Complete    |
-| [10 — A blip at refresh keeps your seat](10-a-blip-at-refresh-keeps-your-seat.md)                       | A refresh during a wifi hiccup retries instead of dumping a student on the code screen    | Not started |
+| [10 — A blip at refresh keeps your seat](10-a-blip-at-refresh-keeps-your-seat.md)                       | A refresh during a wifi hiccup retries instead of dumping a student on the code screen    | Complete    |
 | [22 — You can tell when you're the one offline](22-you-can-tell-when-youre-the-one-offline.md)          | A student whose own wifi drops sees it, instead of typing into the void                   | Not started |
 | [23 — The lobby is alive and leavable](23-the-lobby-is-alive-and-leavable.md)                           | Waiting students get progress, honesty about a missing teacher, and a way out             | Not started |
 | [24 — Removal lands gently](24-removal-lands-gently.md)                                                 | A removed student gets a real ending and an explanation, not a keyboard in the face       | Not started |

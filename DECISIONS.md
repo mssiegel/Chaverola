@@ -47,6 +47,7 @@ git: `git log -- DECISIONS.md`.
 ## Index
 
 - [Student join flow & lobby](docs/decisions/student-join.md)
+  - [An unreachable lookup retries itself; a signed-in student waits it out on a reconnecting screen, never the code gate](docs/decisions/student-join.md#an-unreachable-lookup-retries-itself-a-signed-in-student-waits-it-out-on-a-reconnecting-screen-never-the-code-gate)
   - [The full-activity screen names the 60-seat cap and offers a retry](docs/decisions/student-join.md#the-full-activity-screen-names-the-60-seat-cap-and-offers-a-retry)
   - [A removed student retypes their name — the field is not refilled](docs/decisions/student-join.md#a-removed-student-retypes-their-name--the-field-is-not-refilled)
   - [The real lobby still says Waiting for your match until matching ships](docs/decisions/student-join.md#the-real-lobby-still-says-waiting-for-your-match-until-matching-ships)
