@@ -77,7 +77,7 @@ rules:
 | [28 — Endings talk like the game](28-endings-talk-like-the-game.md)                                     | The goodbye the whole class reads at the bell speaks the game's voice, not an ops dashboard's | Complete    |
 | [31 — The host page stops re-downloading the class](31-the-host-page-stops-re-downloading-the-class.md) | The teacher dashboard stays fast in round three                                               | Complete    |
 | [32 — Students download the student app](32-students-download-the-student-app.md)                       | 30 phones on one AP stop pulling the teacher dashboard to type four digits                    | Complete    |
-| [35 — The 404 serves a kid holding a code](35-the-404-serves-a-kid-holding-a-code.md)                   | A lost student finds the join flow from the dead end                                          | Not started |
+| [35 — The 404 serves a kid holding a code](35-the-404-serves-a-kid-holding-a-code.md)                   | A lost student finds the join flow from the dead end                                          | Complete    |
 
 ## Conventions every doc assumes
 

@@ -1,6 +1,6 @@
 # 35 — The 404 serves a kid holding a code
 
-State: **Not started**
+State: **Complete**
 
 **The problem.** The most likely person to hit a Chaverola 404 is a
 student holding a join code who mistyped a path their teacher said out
@@ -23,7 +23,7 @@ recorded and stays.
 - "Routes are canonical — don't invent new ones" — no new routes; the
   doorway links to `/activity/join`.
 
-- [ ] Prompt — A title and a doorway
+- [x] Prompt — A title and a doorway
 
 ---
 
