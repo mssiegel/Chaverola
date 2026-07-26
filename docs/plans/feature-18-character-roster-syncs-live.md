@@ -17,8 +17,7 @@ character id within a second through
 and [`CompletedChatsSection.tsx:48`](../../client/src/components/Teacher/HostActivity/CompletedChatsSection.tsx)),
 so the rename looks like it worked. It reaches nobody else. The student's side
 resolves every label against the roster fetched **once** at join
-([`characterLabel.ts:13-15`](../../client/src/lib/characterLabel.ts),
-[`liveMatchState.ts:72-101`](../../client/src/pages/student/join/liveMatchState.ts),
+([`liveMatchState.ts:72-101`](../../client/src/pages/student/join/liveMatchState.ts),
 [`ChatEndedSection.tsx:144-157`](../../client/src/components/Student/Chatbox/ChatEndedSection.tsx)),
 and the lobby's roster chips come from the same copy
 ([`WaitingLobby.tsx:91-104`](../../client/src/components/Student/WaitingLobby.tsx)).
@@ -26,10 +25,12 @@ A student who joins ten minutes _after_ the rename gets the old name too
 ([`projections.ts:26-34`](../../server/src/store/projections.ts) reads
 `stored.characters`), so this is missing data, not a stale cache — a refresh on
 the host page just reverts the whole edit. It is a teacher-facing illusion with
-nothing behind it. Emoji rides the identical path
-([`EmojiSlot.tsx:58-75`](../../client/src/components/Teacher/ActivitySetup/EmojiSlot.tsx));
-clearing one works locally only, via a truthiness check two files away
-([`hostActivity.ts:154-160`](../../client/src/lib/hostActivity.ts)).
+nothing behind it. Emoji have no separate path to worry about: since the
+2026-07-24 single-input call
+([characters.md → "A character's emoji is part of its name"](../decisions/characters.md#a-characters-emoji-is-part-of-its-name))
+an emoji lives inside the name string typed into the one character input, so
+an emoji swap or clear IS a rename and travels — or fails to travel —
+exactly like one.
 
 **What this feature delivers, and the line it draws.** A character rename, an
 emoji swap, an added character, a removed one — each should reach the **waiting
@@ -43,7 +44,8 @@ that room. The lobby and the next chat follow the edit; a running chat is a
 fixed scene.
 
 **The mechanism is a snapshot at chat start.** When a chat forms, each seat's
-character name and emoji are captured onto `chat.members` — today a member holds
+character is captured onto `chat.members` (one `{ id, name }` object — emoji
+live inside the name) — today a member holds
 only `{ studentId, name, characterId }`
 ([`matching.ts:53-70`](../../server/src/live/matching.ts)), where `name` is the
 student's real name and the character label is resolved later from
@@ -167,7 +169,8 @@ whole design:
    ```
 
    **This does not weaken the characterIds-only invariant.** A `Character` is
-   `{ id, name, emoji? }` — public data every student already fetches at join
+   `{ id, name }` (emoji live inside the name string — the 2026-07-24
+   single-input call) — public data every student already fetches at join
    through `GET /activities/:joinCode`
    ([`projections.ts:26-34`](../../server/src/store/projections.ts)). What must
    never ride along is `teacherEmail`, `hostKey`, `settings`, seats, or chats,
@@ -179,7 +182,7 @@ whole design:
 2. **The frozen-cast channel — the chat's own events.** A chat already carries
    its members to the teacher (`toChatSnapshot`) and to each student
    (`toChatStarted`, plus the resume delivery). Prompt 1 captures each
-   character's name and emoji onto `chat.members` at chat start and teaches
+   seat's `Character` onto `chat.members` at chat start and teaches
    those two projectors to read the snapshot rather than resolve against the
    live roster. The student's `chat:started` / resume payload gains the chat's
    frozen `cast: Character[]` so the client resolves in-chat labels against it,
@@ -248,7 +251,7 @@ Socket.IO drops an unhandled event **silently** (AGENTS.md → Working Rules).
 
 **Goal:** every surface that shows a character _inside a chat_ — the teacher's
 in-progress and completed cards, both students' bubbles and peer labels, the
-end-of-chat reveal rows, and the emailed transcript — reads a name and emoji
+end-of-chat reveal rows, and the emailed transcript — reads a character label
 **captured when the chat started**, not the live roster. Today the roster is
 still write-once (feature 17 left characters local-only), so this ships with
 **no student-visible change**: it is the insulation that lets prompt 2 make the
@@ -264,8 +267,8 @@ the cards now render captured truth instead of the panel's unsynced draft.
    resolved from `stored.characters` **at chat-start time** and never touched
    again. (Keeping both `characterId` and the captured `character` is
    deliberate: the id stays the matching/deal key, the object is the frozen
-   label. An implementer who prefers `characterName` + `characterEmoji` scalars
-   may — the projector shape is what matters.) Update the docblock at
+   label. A `Character` is one `{ id, name }` object — emoji live inside the
+   name, so there is no second field to carry.) Update the docblock at
    `matching.ts:53-70`, which already says `name` is captured "so a removed
    seat's card label survives" — the same reasoning now covers the character.
 2. **Teacher projector reads the snapshot**
@@ -317,9 +320,9 @@ the cards now render captured truth instead of the panel's unsynced draft.
    and never re-resolved (`shrinkToPeers` only filters,
    [`liveMatchState.ts:111-121`](../../client/src/pages/student/join/liveMatchState.ts));
    the only place the mutable roster could still leak in is the resume re-map of
-   `everPeers` (`:164-199`) — feed it the frozen cast too. `characterLabel`
-   reads `participant.character` and needs nothing
-   ([`characterLabel.ts:13-15`](../../client/src/lib/characterLabel.ts)).
+   `everPeers` (`:164-199`) — feed it the frozen cast too. Label rendering
+   needs nothing: surfaces read `character.name` directly (the
+   `characterLabel` formatter was deleted with the emoji field, 2026-07-24).
 8. **Docs.** `docs/api.md` (the `cast` field on `chat:started`); the
    `liveMatchState.ts` module docblock at `:19-27` (the chat resolves against
    its own frozen cast, not the live roster);
@@ -449,8 +452,10 @@ roster last-write-wins per device like the teacher's email
 but re-introduces the stale-device overwrite; the merge is one more pure
 function. Also settle the id question in the shared context above.
 
-**Edge cases:** a cleared emoji arrives as an absent key and the server replaces
-the roster wholesale, so it clears — verify rather than assume; an invalid draft
+**Edge cases:** an emoji clear is just a rename — an emoji is part of the name
+string (the 2026-07-24 single-input call), so there is no separate key to
+clear, and the wholesale roster replace carries it like any name edit; an
+invalid draft
 never emits (the panel already holds its commit at
 [`LiveSettingsPanel.tsx:89-98`](../../client/src/components/Teacher/HostActivity/LiveSettingsPanel.tsx)),
 and server zod is the backstop; a student mid-chat sees the lobby chips change
