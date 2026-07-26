@@ -108,10 +108,13 @@ function buildStudentAuth(
  * that expires the indicator. `onPeerConnection` is a chat partner's drop
  * (past the server's 4s gate, with the remaining grace) or return — the
  * page owns the offline map and the countdown derived from it.
- * `onActivityDetails` is the teacher's live edit of the lobby's detail pair
- * (host name + student instructions, feature 17) — a full replace, with
- * `null` meaning the instructions were cleared; the page folds it into its
- * activity lookup.
+ * `onActivityDetails` is the teacher's live edit of the lobby's details
+ * (the character roster, host name and student instructions; features 17
+ * and 18) — a full replace, with `null` meaning the instructions were
+ * cleared; the page folds it into its activity lookup. A student mid-chat
+ * receives it and is right to ignore the roster for their own room: chat
+ * labels resolve against the frozen `cast` that came with chat:started, so
+ * this only re-dresses the lobby they'll return to.
  */
 export function useLobbyPresence({
   active,
@@ -176,6 +179,9 @@ export function useLobbyPresence({
     secondsLeft: number | null;
   }) => void;
   onActivityDetails?: (payload: {
+    /** The live lobby roster. Optional for the deploy window — an older
+     *  server omits it, and the page keeps the roster it already has. */
+    characters?: Character[];
     hostName: string;
     studentInstructions: string | null;
   }) => void;

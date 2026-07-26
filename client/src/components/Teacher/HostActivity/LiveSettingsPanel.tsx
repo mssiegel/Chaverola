@@ -165,18 +165,20 @@ export function LiveSettingsPanel({
           : "Add your email and we'll send you every chat when the activity wraps up"
       }
     >
-      {/* Only what actually travels gets promised. Settings, the email, the
-          host name and the instructions all reach the server on the
-          1-second pause, and student lobbies follow the name/instructions
-          live (feature 17); characters are still local to this tab until
-          feature 18 widens this line to its own scope — never back to
-          "what students see mid-chat". See DECISIONS.md → "The live
-          settings panel only claims the edits that actually travel". */}
+      {/* Only what actually travels gets promised. Everything in this panel
+          now reaches the server on the 1-second pause, and student lobbies
+          follow all of it live (features 17 and 18) — which is why the
+          second sentence exists: the roster's reach stops at a chat already
+          running, and that limit is deliberate, not a gap to paper over.
+          Never widen this back to "what students see mid-chat". See
+          DECISIONS.md → "The live settings panel only claims the edits that
+          actually travel" and "A chat freezes its cast when it starts". */}
       <p className="text-sm leading-relaxed text-muted-foreground">
-        Your name, the instructions, settings, and your email all save as soon
-        as you pause typing, and students in the lobby see name and instruction
-        changes live. Characters only change this page for now: students keep
-        the cast you set up, and refreshing undoes those edits.
+        Your name, the instructions, the characters, settings, and your email
+        all save as soon as you pause typing, and students waiting in the lobby
+        see the changes right away. A chat that's already running keeps the
+        characters it started with, so nobody gets renamed mid-conversation. New
+        chats use your latest cast.
       </p>
 
       <div className="mt-6 flex flex-col gap-7">

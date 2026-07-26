@@ -156,19 +156,25 @@ export function JoinActivityPage() {
     onEnded: () => {
       if (activity) setGoneCode(activity.joinCode);
     },
-    // The teacher edited the lobby's detail pair mid-activity (feature 17):
-    // rebuild the activity field-by-field and settle it into the lookup —
-    // settled state outranks the hand-off map and any refetch, so every
-    // render site (lobby, join gate) follows without new state. A silent
-    // swap by design, like activity:paused. null instructions OMIT the key,
-    // the server's own shape, so the lobby's block disappears rather than
-    // rendering empty.
+    // The teacher edited the lobby's details mid-activity (feature 17, the
+    // roster added by 18): rebuild the activity field-by-field and settle it
+    // into the lookup — settled state outranks the hand-off map and any
+    // refetch, so every render site (lobby chips, join gate) follows without
+    // new state. A silent swap by design, like activity:paused. null
+    // instructions OMIT the key, the server's own shape, so the lobby's
+    // block disappears rather than rendering empty.
+    //
+    // This is the LOBBY roster and nothing else. A student mid-chat gets
+    // this event too, and their chat does not move: in-chat labels resolve
+    // against the frozen `cast` chat:started carried, never this lookup
+    // (feature 18 prompt 1). `?? activity.characters` covers the deploy
+    // window where the server hasn't started sending the roster yet.
     onActivityDetails: (payload) => {
       if (!activity) return;
       const next: Activity = {
         joinCode: activity.joinCode,
         hostName: payload.hostName,
-        characters: activity.characters,
+        characters: payload.characters ?? activity.characters,
       };
       if (payload.studentInstructions !== null) {
         next.studentInstructions = payload.studentInstructions;

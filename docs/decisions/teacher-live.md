@@ -5,6 +5,77 @@ area. Entries are newest-first; add new ones at the top, and add a matching line
 to the index in the same change. Replaced decisions move to Superseded at the
 bottom of this file.
 
+### The character roster reaches the lobby and every future chat, and its ids are minted client-side
+
+_2026-07-26_
+
+**Decision:** A character rename, an emoji swap, an added character and a
+removed one all reach the server on the panel's 1-second pause, riding
+feature 17's `activity:update-details` beside the host name and the
+instructions. The stored roster stops being write-once: it is what students'
+lobby chips render, what a student joining ten minutes later fetches, and
+what the next chat is dealt from. A chat **already running** is untouched —
+it keeps the cast it froze at start. Three sub-calls settle with it:
+
+- **No teacher-room echo, for the roster too.** A second host device keeps
+  its copy until its next load, exactly as the name and instructions already
+  behave on this event. Last write wins per device, so a device that slept
+  through another's edit overwrites it on its next commit.
+- **Character ids are minted client-side and stored as given.** The server
+  slugs ids at create; the live panel mints its own for rows added
+  mid-activity, and the server never remints them. `mintLiveCharacterId`
+  moved from a module counter to a random id in the same change.
+- **The panel's promise line widens now**, rather than waiting for feature
+  18's last prompt, and says what the roster does _not_ do as plainly as what
+  it does.
+
+**Why:** Founder call, 2026-07-26. This is the "bigger feature" the
+2026-07-19 local-only call named and deferred, and it lands only because
+[A chat freezes its cast the moment it starts](#a-chat-freezes-its-cast-the-moment-it-starts)
+made a mutable roster safe: with every running chat holding its own labels,
+the edit has nowhere disorienting to land.
+
+No echo because almost every class runs on one host device, so the echo leg
+plus the merge guard it would then require is code without a customer — the
+same reasoning that settled it for the name and instructions, applied to the
+same event. Client-side ids because the alternative (server remaps unknown
+ids and echoes the canonical roster back) needs exactly that rejected echo,
+breaks the panel's standing "an id never changes once a row exists" rule by
+re-keying an open draft mid-typing, and buys less than it looks: once names
+are mutable, a server slug goes stale against its own name on the first
+rename, so "every id is a slug of its name" stops being true the day this
+ships. The counter had to go regardless — it reset on every page load, so
+refreshing the host page and adding a row minted an id the stored roster was
+already using, which would deal two chat members the same characterId and
+collapse a student's peer labels into each other. A duplicate-id zod refine
+backs the new scheme up.
+
+The copy moved early for the reason it moved early in feature 17: after this
+ships, "Characters only change this page for now" is not merely incomplete
+but false, and a panel that lies about what travels is worse than one that
+under-promises.
+
+This supersedes the characters half of
+[Settings edits sync for real; characters, scenario, and host name stay local](#settings-edits-sync-for-real-characters-scenario-and-host-name-stay-local)
+and the remaining local-only clause of
+[The live-settings panel stays on real activities, editing the teacher's local view](#the-live-settings-panel-stays-on-real-activities-editing-the-teachers-local-view)
+— both are now fully retired, their name/instructions halves having gone in
+feature 17.
+
+_Implemented in [socket.ts](../../shared/src/socket.ts) (the roster on both
+sides of the event), [activity.ts](../../server/src/schemas/activity.ts)
+(the live-character schema and its duplicate-id refine),
+[teacher.ts](../../server/src/live/handlers/teacher.ts) (the store's roster
+becomes mutable), [projections.ts](../../server/src/store/projections.ts)
+(`toActivityDetails` carries it),
+[hostActivity.ts](../../client/src/lib/hostActivity.ts) (`mintLiveCharacterId`,
+`sameRoster`),
+[HostActivityPage](../../client/src/pages/teacher/HostActivityPage.tsx) (the
+roster diff), and
+[JoinActivityPage](../../client/src/pages/student/JoinActivityPage.tsx) (the
+lobby fold); plan in
+[docs/plans/feature-18](../plans/feature-18-character-roster-syncs-live.md)._
+
 ### A chat freezes its cast the moment it starts
 
 _2026-07-26_
@@ -975,6 +1046,15 @@ sync to the server and to students' lobbies (feature 17). Characters and
 scenario stay local until feature 18; the settings half of this entry
 stands._
 
+_Character half superseded 2026-07-26 by
+[The character roster reaches the lobby and every future chat, and its ids are minted client-side](#the-character-roster-reaches-the-lobby-and-every-future-chat-and-its-ids-are-minted-client-side):
+**characters sync too now.** This entry's "Why" called roster sync "a bigger
+feature than a settings echo" because it propagates to students' lobbies,
+and it was right — that is the feature, and it shipped. Nothing local-only
+is left in this entry's title. (Scenario is not a live field: the setup
+form's scenario became the student instructions, which feature 17 already
+syncs.)_
+
 **Why:** Real auto-match forces the question: the switch and its seconds
 must reach the server or the rail lies. Syncing the whole settings object is
 one event and stops the panel silently reverting on refresh; syncing only
@@ -1185,6 +1265,14 @@ _Further superseded 2026-07-26 by
 feature 17 syncs them to the server and to students' lobbies. What still
 stands: the panel renders on real activities, and character edits stay
 local until feature 18._
+
+_Local-only clause fully retired 2026-07-26 by
+[The character roster reaches the lobby and every future chat, and its ids are minted client-side](#the-character-roster-reaches-the-lobby-and-every-future-chat-and-its-ids-are-minted-client-side):
+**nothing on this panel is local-only anymore.** Every field reaches the
+server on the 1-second pause and survives a refresh. All that survives of
+this entry is the part that was never about syncing: the panel renders on
+real activities, fully editable, and the pairing rail's auto-match switch
+stays interactive on the same terms._
 
 ### Start their chat sits below Pair everyone 1:1, nearest the names
 

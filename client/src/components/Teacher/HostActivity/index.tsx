@@ -243,11 +243,13 @@ export function HostActivityDashboard({
         </div>
       )}
 
-      {/* On real activities too — founder call. Settings edits, the
-          teacher's email, and (feature 17) the host name and student
-          instructions all sync to the server (the page's onActivityChange
-          wrapper emits them); character edits stay local-only until feature
-          18; see DECISIONS.md → "The live-settings panel stays on real
+      {/* On real activities too — founder call. Every edit here syncs to the
+          server through the page's onActivityChange wrapper: settings, the
+          teacher's email, and (features 17 and 18) the host name, student
+          instructions and character roster. The roster reaches students'
+          lobbies and every chat that starts after it, and deliberately not a
+          chat already running — that keeps the cast it was dealt. See
+          DECISIONS.md → "The live-settings panel stays on real
           activities". */}
       {/* Its own dim wrapper, OUTSIDE the grid one — moving the panel into
           the grid would change the desktop layout. An offline edit here

@@ -107,6 +107,7 @@ git: `git log -- DECISIONS.md`.
   - [Host the Activity docks to the bottom edge at every breakpoint](docs/decisions/teacher-setup.md#host-the-activity-docks-to-the-bottom-edge-at-every-breakpoint)
   - [Setup sections each carry one brand accent; settings stays the quiet one](docs/decisions/teacher-setup.md#setup-sections-each-carry-one-brand-accent-settings-stays-the-quiet-one)
 - [Teacher live activity page](docs/decisions/teacher-live.md)
+  - [The character roster reaches the lobby and every future chat, and its ids are minted client-side](docs/decisions/teacher-live.md#the-character-roster-reaches-the-lobby-and-every-future-chat-and-its-ids-are-minted-client-side)
   - [A chat freezes its cast the moment it starts](docs/decisions/teacher-live.md#a-chat-freezes-its-cast-the-moment-it-starts)
   - [Students' lobbies follow name and instructions edits live, and the swap is silent](docs/decisions/teacher-live.md#students-lobbies-follow-name-and-instructions-edits-live-and-the-swap-is-silent)
   - [Name and instructions edits sync with no second-device echo, and an emptied box clears](docs/decisions/teacher-live.md#name-and-instructions-edits-sync-with-no-second-device-echo-and-an-emptied-box-clears)

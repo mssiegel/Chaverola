@@ -101,11 +101,16 @@ empty-transcript hint on live cards.
   everything below it — the settings panel AND the grid — dims and goes
   `inert` (clicks and keyboard won't land, and the subtree drops out of the
   a11y tree — don't read either as a broken selector).
-- The live-settings panel is present on real activities. **Settings** edits
-  are real (they reach the server, survive a refresh, and a second host page
-  hears `settings:changed`); character/student-instructions/host-name edits are
-  local-only and a refresh reverts them — expected, not a bug. Edits propagate ~1s after
-  typing pauses (assert on "Hosted by <new name>" in the header after ~1.6s).
+- The live-settings panel is present on real activities, and every edit on it
+  is real: they reach the server and survive a refresh. **Settings** echo to a
+  second host page as `settings:changed`; the **roster, host name and student
+  instructions** ride `activity:update-details` to every student's lobby with
+  no teacher echo at all, so a second host page only picks them up on its next
+  load. Edits propagate ~1s after typing pauses (assert on "Hosted by <new
+  name>" in the header after ~1.6s). A **character** edit reaches the lobby
+  chips and every chat that starts afterward, and deliberately never a chat
+  already running: those students keep the cast they were dealt, and so does
+  the teacher's card for them — expected, not a stale render.
 - Dead host links (garbage keys, stale 4-digit codes) render "That activity
   isn't running" with no demo redirect; an unreachable server renders "We
   can't reach Chaverola" whose Try again refetches in place.

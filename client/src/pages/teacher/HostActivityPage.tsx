@@ -10,6 +10,7 @@ import { useHostActivityDemo } from "@/components/Teacher/HostActivity/useHostAc
 import { useHostActivityLive } from "@/components/Teacher/HostActivity/useHostActivityLive";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { sameRoster } from "@/lib/hostActivity";
 import { usePageTitle } from "@/lib/usePageTitle";
 import { useHostedActivityLookup } from "@/lib/useHostedActivityLookup";
 import { DEMO_JOIN_CODE, demoHostedActivity } from "@/mockData";
@@ -166,14 +167,20 @@ function HostActivityChrome({
   them, and the teacher's other devices hear settings:changed. The TEACHER'S
   EMAIL syncs through the same wrapper (activity:update-email, no echo
   event) — the server is what sends the transcripts, so a local-only edit
-  would silently mail the old address. The HOST NAME and STUDENT
-  INSTRUCTIONS sync the same way (activity:update-details, feature 17, no
-  echo either — a second device is last-write-wins like the email), so the
-  edit survives a refresh, a student joining later gets the current copy,
-  and students sitting in the lobby watch it change live (a silent swap,
-  no announcement — founder call). CHARACTER edits stay local-only until
-  feature 18 (students' lobbies keep the server's roster, refresh reverts
-  — founder call; see DECISIONS.md).
+  would silently mail the old address. The HOST NAME, STUDENT INSTRUCTIONS
+  and CHARACTER ROSTER sync the same way (activity:update-details, features
+  17 and 18, no echo either — a second device is last-write-wins like the
+  email), so the edit survives a refresh, a student joining later gets the
+  current copy, and students sitting in the lobby watch it change live (a
+  silent swap, no announcement — founder call).
+
+  The roster's reach stops at the door of a running chat, on purpose: a
+  rename lands on the lobby chips and on every chat that starts afterward,
+  while the two students already mid-scene keep the names they began with
+  and so does the teacher's card for them (the server froze that cast at
+  chat start — feature 18 prompt 1). So folding a roster edit into
+  `activity` updates the lobby-facing copy and the pairing rail, never a
+  chat card. See DECISIONS.md → "Teacher live activity page".
   On the demo everything is local because the whole class is client-side.
 */
 
@@ -259,13 +266,20 @@ function ConnectedHostActivityView({
     if (activity.teacherEmail !== next.teacherEmail) {
       engine.updateTeacherEmail(next.teacherEmail ?? null);
     }
-    // The details pair syncs the same way (feature 17): the host name and
-    // the lobby instructions decide what a joining student sees, so a
-    // local-only edit would greet latecomers with the old name. An emptied
-    // instructions box arrives as `undefined` and travels as an explicit
-    // null — a clear. No echo comes back to fold in: a second host device
-    // is last-write-wins, like the email.
+    // The details sync the same way (feature 17, roster added by 18): the
+    // host name, the lobby instructions and the cast all decide what a
+    // joining student sees, so a local-only edit would greet latecomers with
+    // the old ones. An emptied instructions box arrives as `undefined` and
+    // travels as an explicit null — a clear. The roster is compared by
+    // CONTENT, not identity: activityFromLiveDraft rebuilds the array on
+    // every debounced commit, so an identity check would re-send the whole
+    // cast each time the teacher paused typing in any other field. No echo
+    // comes back to fold in: a second host device is last-write-wins, like
+    // the email — including for the roster, so a device that slept through
+    // another's edit overwrites it on its next commit (founder call,
+    // 2026-07-26).
     if (
+      !sameRoster(activity.characters, next.characters) ||
       activity.hostName !== next.hostName ||
       activity.studentInstructions !== next.studentInstructions
     ) {

@@ -134,6 +134,24 @@ export function mergeExternalSettings(
 }
 
 /**
+ * Did the roster actually change? Order matters — it is what the server
+ * deals from, so moving a character is a real edit. Compared by content
+ * because activityFromLiveDraft rebuilds the array on every debounced
+ * commit: an identity check would re-send the whole cast every time the
+ * teacher paused typing in any other field.
+ */
+export function sameRoster(
+  a: readonly Character[],
+  b: readonly Character[]
+): boolean {
+  return (
+    a.length === b.length &&
+    // The index is in range on both — same length, checked above.
+    a.every((row, i) => row.id === b[i]!.id && row.name === b[i]!.name)
+  );
+}
+
+/**
  * Commit a valid draft: trims like hosting does, silently drops added rows
  * that were left empty, and keeps every character id exactly as drafted.
  */

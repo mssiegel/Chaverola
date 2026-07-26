@@ -3,6 +3,7 @@ import { useRef, useState } from "react";
 import { TYPING_INDICATOR_TTL_MS } from "@chaverola/shared";
 
 import type { Activity } from "@/types/activity";
+import type { Character } from "@/types/chat";
 import type { StudentSession } from "@/lib/studentSession";
 import type { ActivityChatScenarioKey } from "@/mockData";
 import { useLobbyPresence } from "@/pages/student/useLobbyPresence";
@@ -34,8 +35,10 @@ import {
  * they touch page-level state (sign-out, the name field, the activity-gone
  * latch, the activity lookup); this hook wraps `onRemoved` to also clear its
  * own match, and forwards the other two untouched. No liveMatchState reducer
- * for the details event on purpose: nothing about a chat changes — the pair
- * lives on the activity lookup, not on the match.
+ * for the details event on purpose: nothing about a chat changes. That holds
+ * for the roster it now carries too (feature 18) — those are the LOBBY's
+ * characters, and an in-chat label resolves against the frozen cast baked
+ * into the match at chat:started, never against the activity lookup.
  */
 export function useActiveMatch({
   activity,
@@ -59,6 +62,8 @@ export function useActiveMatch({
   onRemoved: () => void;
   onEnded: () => void;
   onActivityDetails: (payload: {
+    /** Optional for the deploy window — an older server omits it. */
+    characters?: Character[];
     hostName: string;
     studentInstructions: string | null;
   }) => void;
