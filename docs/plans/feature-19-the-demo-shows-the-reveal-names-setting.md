@@ -1,5 +1,10 @@
 # Feature 19 — The demo shows what "reveal names" actually does
 
+> **Completed 2026-07-26 — but not as written below.** The founder's answers to
+> the prompt's three questions rejected its premise. Read
+> [Founder's call](#founders-call) before you read anything else here; the
+> analysis still holds, the proposed fix does not.
+
 **Reproduce it in 30 seconds:** open `/activity/host/1234?fast=10`, expand **Edit
 activity settings**, and flip **Reveal names when a chat ends** off. Now end a
 chat. Then flip it on and end another. Nothing on the page differs — not the card
@@ -54,7 +59,61 @@ demo invariants — extend the demo engines and the
 (feature 10's reveal pin stays as it is). Nothing races on deploy, and the commit
 touches `client/`, so Vercel builds it.
 
-- [ ] Prompt — The demo host page shows the reveal firing
+- [x] Prompt — The demo host page shows the reveal firing _(reshaped by the
+      founder's call below; shipped 2026-07-26)_
+
+---
+
+## Founder's call
+
+_2026-07-26 — asked before writing code, as the prompt below instructs._
+
+The prompt's three questions were all answered the same way: **nothing about
+the reveal goes on the teacher's page, demo or live.** In the founder's words —
+"We want the demo page to be just like the real thing. So in the real thing it
+doesn't show a toast or anything on the teacher's live activity page, rather the
+student's chats simply show whom they were talking to."
+
+That rejects the prompt's premise rather than picking one of its options. A
+marker living only on `1234` would make the demo diverge from the product, which
+is the one thing the demo may never do — it is the pitch surface, and a pitch
+audience would learn a behavior no real teacher gets. Recorded as
+[The name reveal is the student's moment, and the teacher's page stays silent](../decisions/demo-flows.md#the-name-reveal-is-the-students-moment-and-the-teachers-page-stays-silent).
+
+**Which means the analysis below is right about the symptom and wrong about the
+cure.** `revealNames` _is_ demoable and always was, on the student side:
+`/activity/join/1234` renders the very same
+[`ChatEndedSection`](../../client/src/components/Student/Chatbox/ChatEndedSection.tsx)
+a real chat renders, and its steering toggle reaches both outcomes. The
+AGENTS.md demo rule was already satisfied at the seat where a student meets the
+setting. What was actually broken was the record: a comment promising a
+teacher-side takeover, and no decision doc explaining the teacher page's
+silence — so this kept looking like a bug.
+
+**Shipped, therefore:**
+
+1. The stale comment at
+   [`ChatStage.tsx:55-56`](../../client/src/components/Student/ChatStage.tsx)
+   now says why the toggle is local and permanent (step 5 below, the one step
+   that survived intact).
+2. That toggle is relabeled "Your teacher reveals names when the chat ends"
+   ([`ChatDemoControls.tsx`](../../client/src/components/demo/ChatDemoControls.tsx)),
+   naming whose setting it stands in for — matching its neighbours "Teacher ends
+   chat" and "Teacher pauses the class". Humanizer pass done.
+3. The decision entry above, plus its [`DECISIONS.md`](../../DECISIONS.md) index
+   line (step 7).
+
+**Deliberately not done** — steps 1–4 and 6 below, dropped by the call, not left
+undone: no `revealedNames` field on `HostedChat`, no `endChatIn` signature
+change, no stamp in `removeFromChat`, no `HOST_SEED_CHATS` stamp, and no marker
+on `ChatCard` / `ChatCardHeader` / `CompletedChatsSection`. The demo host page's
+completed cards are byte-for-byte what they were. `hostWorld.ts`,
+`useHostActivityDemo.ts` and `hostActivityDemo.ts` were never touched, so the
+"Edge cases" section below has nothing left to guard.
+
+**The passing condition inverted.** Ending a demo chat with the setting on and
+again with it off must produce **identical** teacher cards. That is the
+assertion now, not the bug.
 
 ---
 

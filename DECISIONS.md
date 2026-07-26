@@ -198,6 +198,7 @@ git: `git log -- DECISIONS.md`.
   - [The name's story is Chaver + Olah ("rising up"), not Chaver + Crayola](docs/decisions/branding.md#the-names-story-is-chaver--olah-rising-up-not-chaver--crayola)
   - [Page titles read "&lt;Page&gt; | Chaverola", page name first](docs/decisions/branding.md#page-titles-read-ltpagegt--chaverola-page-name-first)
 - [Demo flows & demo furniture](docs/decisions/demo-flows.md)
+  - [The name reveal is the student's moment, and the teacher's page stays silent](docs/decisions/demo-flows.md#the-name-reveal-is-the-students-moment-and-the-teachers-page-stays-silent)
   - [The student demo skips the code screen and joins you as Rachel](docs/decisions/demo-flows.md#the-student-demo-skips-the-code-screen-and-joins-you-as-rachel)
   - [The demo notice is a banner you can't miss](docs/decisions/demo-flows.md#the-demo-notice-is-a-banner-you-cant-miss)
   - [When the backend arrives: real activities get strictly real, and `1234` stays the only demo](docs/decisions/demo-flows.md#when-the-backend-arrives-real-activities-get-strictly-real-and-1234-stays-the-only-demo)

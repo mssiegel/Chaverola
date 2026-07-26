@@ -5,6 +5,48 @@ area. Entries are newest-first; add new ones at the top, and add a matching line
 to the index in the same change. Replaced decisions move to Superseded at the
 bottom of this file.
 
+### The name reveal is the student's moment, and the teacher's page stays silent
+
+_2026-07-26_
+
+**Decision:** Nothing on the teacher's host page reports whether a chat's
+students found out who they were talking to — no badge on the completed-chat
+card, no toast when a chat ends, nothing. That holds on the demo (`1234`)
+exactly as it holds on a real activity, and the demo grows no marker of its own.
+The teacher's surface for the setting is the switch itself and its description
+in the settings panel ("Chats are anonymous while they run. When one ends, the
+students in it find out who they were really talking to"); the reveal is
+something **students** see, on the ended screen, per
+[The live name reveal fires at chat-end, per the teacher's setting](chat-behavior.md#the-live-name-reveal-fires-at-chat-end-per-the-teachers-setting).
+So the place the demo demonstrates this setting is the student side —
+`/activity/join/1234`, whose steering panel carries "Your teacher reveals names
+when the chat ends" and flips the same `revealNames` prop a real chat gets off
+`chat:ended`. That toggle is local and stays local: the two demo tabs share no
+state, so a demo student has no teacher tab to read a setting from.
+
+**Why:** Founder call (2026-07-26), answering the three questions
+[feature-19](../plans/feature-19-the-demo-shows-the-reveal-names-setting.md)
+raised. The plan proposed stamping each demo chat with the setting at end time
+and painting a marker on the teacher's completed-chat card, so that flipping the
+switch on the demo host page would visibly do something. The founder rejected
+the premise: the demo's job is to be indistinguishable from the product, and a
+marker living only on `1234` would teach a pitch audience a behavior no real
+teacher ever gets. The plan's opening complaint was real but misdiagnosed — the
+demo already demonstrates `revealNames`, at the seat where a student meets it.
+A teacher's page reporting back what students saw is a separate feature, and
+nobody has asked for it.
+
+_The student demo's toggle lives in
+[ChatStage.tsx](../../client/src/components/Student/ChatStage.tsx) and
+[ChatDemoControls.tsx](../../client/src/components/demo/ChatDemoControls.tsx);
+both reveal states render through
+[ChatEndedSection](../../client/src/components/Student/Chatbox/ChatEndedSection.tsx),
+the same component a real chat renders. The teacher's completed cards
+([CompletedChatsSection](../../client/src/components/Teacher/HostActivity/CompletedChatsSection.tsx)
+→ [ChatCard](../../client/src/components/Teacher/ChatCard/index.tsx)) carry no
+reveal state, by this decision. Related:
+[No reveal-names control in Chats in progress](teacher-live.md#no-reveal-names-control-in-chats-in-progress)._
+
 ### The student demo skips the code screen and joins you as Rachel
 
 _2026-07-16_

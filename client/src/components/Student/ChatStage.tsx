@@ -52,8 +52,12 @@ export function ChatStage({
   // teacher's live settings.
   const chat = useChatDemo(scenario, { isPaused: classPaused });
 
-  // Mock of the teacher's activity-level "reveal names" setting, until the
-  // teacher host page owns it for real.
+  // The demo's stand-in for the teacher's activity-level "reveal names"
+  // setting. It stays local and stays a toggle: the two demo tabs share no
+  // state by design (see DECISIONS.md), so a demo student has no teacher to
+  // read the setting from, and this switch is how a visitor sees both
+  // outcomes. A real chat gets the same prop off chat:ended, where the
+  // server decides it at end time from the teacher's setting.
   const [revealNames, setRevealNames] = useState(true);
   const [confirmOpen, setConfirmOpen] = useState(false);
 

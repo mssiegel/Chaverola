@@ -25,10 +25,11 @@ interface ChatDemoControlsProps {
 }
 
 /**
- * The demo steering panel for a student-seat chat: the events a real backend
- * will push later (connection drops, a peer ending the chat) plus the mocked
- * "reveal names" setting, as visitor-friendly buttons. Used by the join
- * flow's chatting stage, which adds its own extras.
+ * The demo steering panel for a student-seat chat: the things that happen to a
+ * real student on their own (connection drops, a peer ending the chat, the
+ * teacher's name reveal) as visitor-friendly buttons. Used by the join flow's
+ * chatting stage, which adds its own extras. Demo seats only — a real chat is
+ * driven by the server and has no panel.
  */
 export function ChatDemoControls({
   chat,
@@ -46,13 +47,15 @@ export function ChatDemoControls({
     >
       <div className="space-y-4">
         <label className="flex cursor-pointer items-center justify-between gap-3">
+          {/* text-balance: on a phone this label wraps, and without it the
+              last word sits alone on the second line. */}
           <span
             className={cn(
-              "text-sm font-medium",
+              "text-sm font-medium text-balance",
               onWorld ? "text-white/90" : "text-foreground"
             )}
           >
-            Reveal names when chat ends
+            Your teacher reveals names when the chat ends
           </span>
           <DemoToggle checked={revealNames} onChange={onRevealNamesChange} />
         </label>
