@@ -1,6 +1,6 @@
 # 26 — Scrolling up means you get to read
 
-State: **Not started**
+State: **Complete**
 
 **The problem.** The shared conversation feed hard-snaps to the bottom on
 every new message/typing change
@@ -25,7 +25,7 @@ Record the new rule when done: entry atop
 ("The feed follows the newest line only when you're already at the bottom —
 except your own send, which always snaps").
 
-- [ ] Prompt — Stick to the bottom only from the bottom
+- [x] Prompt — Stick to the bottom only from the bottom
 
 ---
 
@@ -79,3 +79,38 @@ jumps to the newest line on tap, and clears; own send snaps down; hero
 still follows its script; teacher card unaffected. Decision entry + DECISIONS.md
 line in this commit. `pnpm format`, one commit to `main`, push, tick this
 box, flip doc + README state to Complete.
+
+---
+
+## What shipped
+
+**Two surfaces, not three.** The teacher's chat cards never rendered
+`Conversation` — [`ChatCard`](../../../client/src/components/Teacher/ChatCard/index.tsx)
+renders `ConversationLines` inside its own scroll container with its own
+expand/collapse and its own stick-to-newest effect. So the change reaches the
+student chatbox (live and demo) and the homepage hero, and the teacher card was
+verification-only. The "may skip the chip on teacher cards" call answered
+itself.
+
+**Only an upward scroll unpins** — the one thing the prompt didn't anticipate,
+and the browser pass caught it. Plain `atBottom` bookkeeping broke on a fast
+exchange: the catch-up scroll is animated, so a second line landing mid-flight
+fires a scroll event from halfway up the feed, which reads as "they scrolled
+away" and strands the transcript. `handleScroll` now unpins only on a scroll
+that moves the view up; a downward event is either the reader coming back or
+our own animation. The first driver run failed exactly here (16 lines in, the
+reader was no longer following), which is what the fix is for.
+
+**The chip is derived, not set from an effect.** `readingFromCount` records how
+many lines there were when the reader left the bottom, and the chip falls out
+of `messages.length > readingFromCount` during render. Written the obvious way
+(a `hasNewBelow` boolean set from a `useEffect`) it tripped
+`react-hooks/set-state-in-effect` — two new lint errors over the repo's
+baseline. Counting instead of flagging keeps every write in an event handler.
+
+**Verified** with three scratch drivers (gitignored, so listed here rather than
+committed): a live 1:1 room at phone width, 17/17 — feed fills, scrolled-up
+reader survives peer lines, typing, and a keyboard-sized resize; chip appears,
+jumps, and clears; own send snaps down; teacher card still opens at newest. The
+same core at desktop width plus the hero's full script, 9/9. Demo student chat,
+3/3.

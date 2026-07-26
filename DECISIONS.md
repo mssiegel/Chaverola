@@ -72,6 +72,7 @@ git: `git log -- DECISIONS.md`.
   - [One page serves both join routes; a wrong code never changes the URL](docs/decisions/student-join.md#one-page-serves-both-join-routes-a-wrong-code-never-changes-the-url)
   - [Student sign-in lives in the tab, and removal sends you to the name step](docs/decisions/student-join.md#student-sign-in-lives-in-the-tab-and-removal-sends-you-to-the-name-step)
 - [Chat behavior](docs/decisions/chat-behavior.md)
+  - [The feed follows the newest line only from the bottom, except your own send](docs/decisions/chat-behavior.md#the-feed-follows-the-newest-line-only-from-the-bottom-except-your-own-send)
   - [Your own drop shows in the chat, without a countdown](docs/decisions/chat-behavior.md#your-own-drop-shows-in-the-chat-without-a-countdown)
   - [The send window holds a fast typist's messages instead of dropping them](docs/decisions/chat-behavior.md#the-send-window-holds-a-fast-typists-messages-instead-of-dropping-them)
   - [A sent message shows as pending until its echo, and says so if it never lands](docs/decisions/chat-behavior.md#a-sent-message-shows-as-pending-until-its-echo-and-says-so-if-it-never-lands)

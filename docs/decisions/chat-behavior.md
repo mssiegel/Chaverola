@@ -5,6 +5,46 @@ area. Entries are newest-first; add new ones at the top, and add a matching line
 to the index in the same change. Replaced decisions move to Superseded at the
 bottom of this file.
 
+### The feed follows the newest line only from the bottom, except your own send
+
+_2026-07-26_
+
+**Decision:** The conversation feed sticks to the newest message while the
+reader is already at the bottom (within 48px, so half a line of scroll jitter
+doesn't count). Scroll up to re-read and the feed holds still: new lines, a
+partner's typing indicator, and a feed resize all leave the view where the
+student put it. Two things always bring them back down. Their own send, because
+they just spoke and the reply belongs where they're looking. And a tap on the
+quiet "New messages" chip that floats near the bottom of the feed whenever
+lines arrive while they're reading above; scrolling back down clears it too.
+
+**Why:** transcripts run to 200 lines (`CHAT_TRANSCRIPT_MAX_LINES`), and a
+partner who keeps typing is the normal case, not the rare one. A student who
+scrolled up to check what their partner actually said got yanked to the bottom
+the moment anyone typed a character. Re-reading was effectively impossible in
+the exact moment it mattered most.
+
+**Only an upward scroll unpins.** The catch-up scroll is animated and takes a
+few hundred milliseconds, so a second message landing while it plays fires a
+scroll event from halfway up the feed. Reading that as "they went off to read"
+strands the feed mid-transcript during exactly the fast back-and-forth the chat
+is for. A downward scroll event is either the reader coming back or our own
+animation, and neither is a reason to stop following.
+
+**The keyboard case still works.** The resize handler exists because a phone
+keyboard shrinks the chat card and would otherwise leave the newest lines below
+the fold. It now honors the pin, which costs nothing: a student opening the
+keyboard is a student composing, and a student composing is at the bottom.
+
+**One rule, both surfaces.** The homepage hero runs the same component. It is
+never unpinned in practice (a visitor doesn't scroll a demo mid-script), so its
+lines still auto-follow, and if someone does scroll it the chip is the right
+answer there too. The teacher's chat cards are untouched: they render
+`ConversationLines` inside their own scroll container, not this feed.
+
+_Implemented in
+[Conversation.tsx](../../client/src/components/chat/Conversation.tsx)._
+
 ### Your own drop shows in the chat, without a countdown
 
 _2026-07-26_
