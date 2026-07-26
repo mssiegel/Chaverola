@@ -8,12 +8,12 @@ each link verified:
 
 1. Pause flips `isPaused`; the student chatbox passes
    `disabled={isPaused}` to the composer
-   ([`Chatbox/index.tsx:200`](../../client/src/components/Student/Chatbox/index.tsx)).
+   ([`Chatbox/index.tsx:200`](../../../client/src/components/Student/Chatbox/index.tsx)).
 2. A focused `<textarea>` that becomes `disabled` is blurred by the
    browser; the phone keyboard closes.
 3. The blur drops the `group-has-[textarea:focus]` state, so the world
    chrome un-collapses:
-   [`StudentWorldLayout.tsx:56`](../../client/src/components/layout/StudentWorldLayout.tsx)
+   [`StudentWorldLayout.tsx:56`](../../../client/src/components/layout/StudentWorldLayout.tsx)
    un-hides the corner pills, :74 swaps `pt-2` back to `pt-20`, and the
    demo banner reappears on demo flows — the card shifts ~80px under the
    student's thumb in the same frame the paused banner lands.
@@ -24,14 +24,14 @@ jump reads as a glitch — during the exact moment the teacher wants calm.
 **Decisions in play.**
 
 - "While a student types on a phone, the world's chrome gets out of the
-  way" ([`chat-behavior.md`](../decisions/chat-behavior.md)) designed the
+  way" ([`chat-behavior.md`](../../decisions/chat-behavior.md)) designed the
   collapse; the pause interaction wasn't considered.
 - "Pause is one world-level switch: chats freeze, clocks hold" — pausing
   must still genuinely block sending; the server refuses paused sends
-  anyway ([`studentChat.ts:63`](../../server/src/live/handlers/studentChat.ts)),
+  anyway ([`studentChat.ts:63`](../../../server/src/live/handlers/studentChat.ts)),
   so the composer is UX, not the enforcement.
 - Record when done: entry atop
-  [`chat-behavior.md`](../decisions/chat-behavior.md) + DECISIONS.md line
+  [`chat-behavior.md`](../../decisions/chat-behavior.md) + DECISIONS.md line
   ("A pause locks the composer without stealing focus or the keyboard").
 
 - [ ] Prompt — Lock the composer without blurring it
@@ -44,7 +44,7 @@ jump reads as a glitch — during the exact moment the teacher wants calm.
 and the layout exactly where they were; resume hands the student straight
 back to their draft.
 
-1. In [`MessageComposer.tsx`](../../client/src/components/chat/MessageComposer.tsx),
+1. In [`MessageComposer.tsx`](../../../client/src/components/chat/MessageComposer.tsx),
    split the `disabled` prop's meaning: keep `disabled` for terminal states
    (chat ended — where dropping focus is correct) and add a `locked` mode
    for pause. **Design (settled by the founder's no-handset call,
@@ -59,7 +59,7 @@ back to their draft.
    paused placeholder swap ("Paused. Hang tight…") only shows when the box
    is empty — with a draft, the draft stays visible and editable; editing
    during a pause is drafting, which is fine — they just can't send.
-2. [`Chatbox/index.tsx:200`](../../client/src/components/Student/Chatbox/index.tsx)
+2. [`Chatbox/index.tsx:200`](../../../client/src/components/Student/Chatbox/index.tsx)
    passes the new mode for `isPaused`; the ended path keeps `disabled`.
 3. Check the emoji picker while locked: the smile button should disable
    with the composer (it already hides on phones —
@@ -68,7 +68,7 @@ back to their draft.
    device will be available when this runs, which is exactly why step 1
    avoids `readOnly` (whose iOS keyboard behavior only a handset can
    answer). Record the ask in
-   [`docs/pending-manual-tests.md`](../pending-manual-tests.md) as part
+   [`docs/pending-manual-tests.md`](../../pending-manual-tests.md) as part
    of this prompt: on a real iPhone, pause mid-word → keyboard stays up,
    no layout jump, draft still editable, send refused; resume → typing
    continues without re-tapping.
@@ -89,7 +89,7 @@ chrome-collapse chain (it's `max-sm`) but gets the same no-blur lock.
 10`, phone width): with a draft mid-word, teacher pauses → banner appears,
 keyboard stays, layout doesn't jump, send is refused; resume → typing
 continues without re-tapping. Demo pass per step 5. Handset ask logged in
-[`docs/pending-manual-tests.md`](../pending-manual-tests.md). Decision
+[`docs/pending-manual-tests.md`](../../pending-manual-tests.md). Decision
 entry + DECISIONS.md line in this commit. `pnpm format`,
 one commit to `main`, push, tick this box, flip doc + README state to
 Complete.

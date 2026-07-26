@@ -5,7 +5,7 @@ State: **Complete**
 **The problem.** "End activity" is the normal end of every real lesson, and it
 gives every student still in a chat the worst ending in the product. The
 handler
-([`teacher.ts:366-390`](../../server/src/live/handlers/teacher.ts)) flips
+([`teacher.ts:366-390`](../../../server/src/live/handlers/teacher.ts)) flips
 every chat to ended with a bare `endChat(current, chat.id)` loop (line 378)
 and **deliberately skips `settleMembershipChange`** (comment at 374-377), so
 no student ever receives `chat:ended` — no wrap-up screen, no name reveal.
@@ -18,13 +18,13 @@ a student's phone:
    why.
 2. Then the whole screen is replaced mid-sentence by the "This activity is
    over" card
-   ([`ActivityGoneCard.tsx`](../../client/src/pages/student/join/ActivityGoneCard.tsx)):
+   ([`ActivityGoneCard.tsx`](../../../client/src/pages/student/join/ActivityGoneCard.tsx)):
    no "And… scene!", no "you were really chatting with…". The reveal — the
    product's emotional payoff — never happens for the ending the entire class
    experiences at once.
 
 On the client, the gone latch outranks everything:
-[`JoinActivityPage.tsx:202`](../../client/src/pages/student/JoinActivityPage.tsx)
+[`JoinActivityPage.tsx:202`](../../../client/src/pages/student/JoinActivityPage.tsx)
 (`stage = activityGone ? "activity-gone" : baseStage`), so even if the server
 did send `chat:ended` first, the gone card would stomp the reveal seconds
 later.
@@ -32,22 +32,22 @@ later.
 **Decisions in play.**
 
 - "The live name reveal fires at chat-end, per the teacher's setting"
-  ([`chat-behavior.md`](../decisions/chat-behavior.md)) — its own text says
+  ([`chat-behavior.md`](../../decisions/chat-behavior.md)) — its own text says
   every ending reveals. End-activity currently contradicts it; this doc makes
   it true.
 - "End activity is the terminal wrap-up, and it emails the class transcript" +
   "Ending removes the activity right away"
-  ([`teacher-live.md`](../decisions/teacher-live.md)) — both stand. Removal
+  ([`teacher-live.md`](../../decisions/teacher-live.md)) — both stand. Removal
   still happens immediately after the send; what changes is that students get
   their ending first, and their screens don't discard it just because the
   activity died.
 - The teacher's confirm copy
-  ([`confirmCopy.ts`](../../client/src/components/Teacher/HostActivity/confirmCopy.ts))
+  ([`confirmCopy.ts`](../../../client/src/components/Teacher/HostActivity/confirmCopy.ts))
   says students "see the activity is over" — after this doc they see their
   ended chat (reveal included), then the activity-over card when they tap
   onward. Update the confirm copy only if it reads as wrong afterwards.
 - Record the outcome as a decision: entry atop
-  [`chat-behavior.md`](../decisions/chat-behavior.md) (+ its DECISIONS.md
+  [`chat-behavior.md`](../../decisions/chat-behavior.md) (+ its DECISIONS.md
   line) in whichever prompt lands second — "End activity ends every chat with
   the full ended-screen treatment; the activity-over card waits for the
   student's tap."
@@ -76,7 +76,7 @@ the same `chat:ended` they'd get from "End all chats" — reason `teacher`,
 reveal included when the setting is on — before the transcript send starts
 and before removal.
 
-1. In [`teacher.ts`](../../server/src/live/handlers/teacher.ts) `activity:end`
+1. In [`teacher.ts`](../../../server/src/live/handlers/teacher.ts) `activity:end`
    (line 366), replace the bare loop at :378 with the `chats:end-all` body's
    idiom (:237-247): `endChat(current, chat.id)` and, when it returns a
    result, `settleMembershipChange(current, result)` — snapshot
@@ -90,7 +90,7 @@ and before removal.
 3. Do NOT touch the send-once guard (:369), the await, the emit, or
    `removeActivity` — doc 03 owns the failure paths.
 4. Server suite: `pnpm --filter @chaverola/server test`. The end-all test
-   (["chats:end-all closes every active chat at once"](../../server/src/live/lobby.test.ts))
+   (["chats:end-all closes every active chat at once"](../../../server/src/live/lobby.test.ts))
    is the shape to imitate **only if** an invariant is genuinely at stake;
    policy is safety-invariants-only ("Server tests cover only the safety
    invariants"). The reveal-on-end-activity leg rides the existing
@@ -98,7 +98,7 @@ and before removal.
 
 **Edge cases:** chats already ended return `undefined` from `endChat` and are
 skipped (pinned by
-[`matching.test.ts:322-325`](../../server/src/live/matching.test.ts)). A
+[`matching.test.ts:322-325`](../../../server/src/live/matching.test.ts)). A
 student who dropped mid-chat gets the ended chat replayed on resume — but
 resume dies with the activity at removal; that window is unchanged from
 today. The emits from `settleMembershipChange` land before removal's
@@ -120,14 +120,14 @@ flip the doc + README state to Complete.
 **Goal:** a student on the chat-ended screen (reveal on screen) keeps it when
 `activity:ended` lands; the "This activity is over" card waits for their tap.
 
-1. In [`JoinActivityPage.tsx`](../../client/src/pages/student/JoinActivityPage.tsx),
+1. In [`JoinActivityPage.tsx`](../../../client/src/pages/student/JoinActivityPage.tsx),
    narrow the override at :202: when `baseStage` is `"ended"`, let it win —
    `activityGone` stays latched (the `goneCode` state, :156-158) but only
    takes the screen once the student leaves the ended stage. The ended screen
    renders from `chatEnded` state and needs no socket, so it survives the
    disconnect that removal causes.
 2. The ended screen's CTA ("Back to the lobby",
-   [`ChatEndedSection.tsx`](../../client/src/components/Student/Chatbox/ChatEndedSection.tsx))
+   [`ChatEndedSection.tsx`](../../../client/src/components/Student/Chatbox/ChatEndedSection.tsx))
    currently calls `backToLobby`/`returnToLobby`. With the activity gone,
    returning to a lobby that no longer exists is wrong — when `goneCode` is
    latched, the tap should land on the activity-gone stage instead (likely
@@ -139,14 +139,14 @@ flip the doc + README state to Complete.
    user-facing copy: humanizer pass, and it's a small enough call to make
    without the founder.
 3. Presence: `useLobbyPresence` treats `activity:ended` as terminal
-   ([`useLobbyPresence.ts`](../../client/src/pages/student/useLobbyPresence.ts))
+   ([`useLobbyPresence.ts`](../../../client/src/pages/student/useLobbyPresence.ts))
    — confirm the ended screen doesn't flash a "Reconnecting…" pill when the
    socket drops at removal (the terminal latch should already cover it; fix
    here if not).
 4. **Demo parity:** the student demo's teacher-ends-chat event already shows
    the reveal flow. The demo has no "activity ends" event today — check
-   [`ChatDemoControls`](../../client/src/components/demo/ChatDemoControls.tsx)
-   / [`useChatDemo.ts`](../../client/src/components/chat/useChatDemo.ts); if
+   [`ChatDemoControls`](../../../client/src/components/demo/ChatDemoControls.tsx)
+   / [`useChatDemo.ts`](../../../client/src/components/chat/useChatDemo.ts); if
    adding an "activity wraps up" demo beat is cheap, add it; if not, record in
    this doc's State note that the demo shows the reveal-on-end but not the
    end-activity sequencing (acceptable — the sequencing is a live-wire

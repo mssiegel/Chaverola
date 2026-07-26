@@ -5,7 +5,7 @@ State: **Not started**
 **The problem.** The teacher taps two names to pair them, glances up to
 quiet the room, and one of the phones sleeps for a second. That student's
 tick is gone — permanently and silently. In
-[`index.tsx:89-102`](../../client/src/components/Teacher/HostActivity/index.tsx),
+[`index.tsx:89-102`](../../../client/src/components/Teacher/HostActivity/index.tsx),
 `validSelectedIds` filters the selection to
 `s.connection === "connected"`, and lines 100-102 **write the filtered list
 back into state** ("Falling out is permanent"). A student who passes
@@ -23,9 +23,9 @@ not a transient connection state of a row still sitting in it.
 **Decisions in play.**
 
 - "A dropped student keeps their seat for 2 minutes, **marked and
-  unmatchable**" ([`teacher-live.md`](../decisions/teacher-live.md)) —
+  unmatchable**" ([`teacher-live.md`](../../decisions/teacher-live.md)) —
   stays fully: while `reconnecting`, the row is dimmed/disabled
-  ([`PairingPanel.tsx`](../../client/src/components/Teacher/HostActivity/PairingPanel.tsx))
+  ([`PairingPanel.tsx`](../../../client/src/components/Teacher/HostActivity/PairingPanel.tsx))
   and "Start their chat" must not fire with them in the group. The change
   is only that the **tick survives** the blip.
 - The cast-cap prune (`slice(0, maxGroupSize)`, founder call 2026-07-26 in
@@ -33,7 +33,7 @@ not a transient connection state of a row still sitting in it.
 - Doc [06](06-the-queue-counts-who-can-actually-pair.md) touches adjacent
   lines — either order; rebase.
 - Record when done: entry atop
-  [`teacher-live.md`](../decisions/teacher-live.md) + DECISIONS.md line
+  [`teacher-live.md`](../../decisions/teacher-live.md) + DECISIONS.md line
   ("A selection survives a reconnect; only leaving the queue clears it").
 
 - [ ] Prompt — Prune on absence, gate on connection
@@ -46,7 +46,7 @@ not a transient connection state of a row still sitting in it.
 the cast shrinks); a reconnecting student keeps theirs — visibly parked —
 and everything gates exactly as safely as today.
 
-1. In [`index.tsx`](../../client/src/components/Teacher/HostActivity/index.tsx),
+1. In [`index.tsx`](../../../client/src/components/Teacher/HostActivity/index.tsx),
    split the derivation:
    - `presentSelectedIds` — selected ids still in `engine.waiting` at all,
      capped by `maxGroupSize` (the state-prune baseline: :100-102 writes
@@ -57,7 +57,7 @@ chat` counts, what `startSelectedChat` sends, what the rematch-warning
 2. `toggleSelect` (:104-112) operates on `presentSelectedIds` so tapping a
    dimmed-but-ticked row untoggles it cleanly; adding while at the cap
    still refuses.
-3. [`PairingPanel.tsx`](../../client/src/components/Teacher/HostActivity/PairingPanel.tsx):
+3. [`PairingPanel.tsx`](../../../client/src/components/Teacher/HostActivity/PairingPanel.tsx):
    a `reconnecting` row that is ticked renders tick + amber tag together
    (today a ticked row can't be reconnecting, so verify the combined visual
    doesn't collide — `aria-pressed` stays true, the button stays disabled).

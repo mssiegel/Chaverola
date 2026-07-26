@@ -7,11 +7,11 @@ during a wifi hiccup is dumped onto what looks like being kicked out, while
 their seat quietly burns down:
 
 - The lookup runs **once** per code and never retries:
-  [`useActivityLookup.ts:63-81`](../../client/src/lib/useActivityLookup.ts)
+  [`useActivityLookup.ts:63-81`](../../../client/src/lib/useActivityLookup.ts)
   settles `unreachable` and stays there.
 - `unreachable` isn't `loading` and yields no `activity`, so the stage
   machine falls through to `"code"`
-  ([`JoinActivityPage.tsx:189-201`](../../client/src/pages/student/JoinActivityPage.tsx))
+  ([`JoinActivityPage.tsx:189-201`](../../../client/src/pages/student/JoinActivityPage.tsx))
   — the signed-in student sees the code-entry gate with a red error, which
   reads as "you're out". (The session is correctly kept — the sign-out
   effect at :217-221 spares unreachable — but nothing _uses_ that care.)
@@ -20,12 +20,12 @@ their seat quietly burns down:
   student doesn't notice the prefilled code and tap Continue in time, they
   lose their queue spot, or end their partner's chat.
 - Worse, a fetch that connects and then stalls never settles at all:
-  [`api.ts:64-86`](../../client/src/lib/api.ts) passes no `AbortSignal`, so
+  [`api.ts:64-86`](../../../client/src/lib/api.ts) passes no `AbortSignal`, so
   the captive-portal / overloaded-AP case is an **infinite** LoadingCard.
 
 The recorded decision promises the opposite: "when it answers again the
 student lands right back in their lobby — same name, no re-entry"
-([`student-join.md`](../decisions/student-join.md)).
+([`student-join.md`](../../decisions/student-join.md)).
 
 **Decisions in play.**
 
@@ -50,16 +50,16 @@ retries by itself with backoff; and a signed-in student rides it out on a
 calm "reconnecting you" screen that lands them back in their lobby the
 moment the server answers — never on the code gate.
 
-1. **Bound the GETs** ([`api.ts`](../../client/src/lib/api.ts)): pass
+1. **Bound the GETs** ([`api.ts`](../../../client/src/lib/api.ts)): pass
    `AbortSignal.timeout(~8000)` on the GET helpers (`getActivity`, the
    hosted-activity GET). An abort rejects the fetch → the existing `catch`
    already maps it to `unreachable` — verify `AbortError` lands there and
    note it. **`createActivity` gets nothing** (see invariant). The
    teacher-side host lookup inherits the timeout for free — confirm
-   [`useHostedActivityLookup.ts`](../../client/src/lib/useHostedActivityLookup.ts)
+   [`useHostedActivityLookup.ts`](../../../client/src/lib/useHostedActivityLookup.ts)
    handles `unreachable` (it has its own retry screen already).
 2. **Retry in the hook**
-   ([`useActivityLookup.ts`](../../client/src/lib/useActivityLookup.ts)):
+   ([`useActivityLookup.ts`](../../../client/src/lib/useActivityLookup.ts)):
    when a lookup settles `unreachable`, schedule a refetch with capped
    backoff (~2s → 5s → 10s, then every 10s) while the hook is mounted for
    that code. Cancel on unmount/code change (the `cancelled` flag pattern
@@ -69,7 +69,7 @@ moment the server answers — never on the code gate.
    double-fire (the verify README's known gotcha): timers live in the
    effect and die with it.
 3. **The holding screen**
-   ([`JoinActivityPage.tsx`](../../client/src/pages/student/JoinActivityPage.tsx)):
+   ([`JoinActivityPage.tsx`](../../../client/src/pages/student/JoinActivityPage.tsx)):
    split the `!activity` fallthrough — `unreachable` **with a signed-in
    session** renders a reconnecting-style card (amber pill language from
    the lobby, "We can't reach Chaverola — retrying…", plus the manual

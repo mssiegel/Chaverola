@@ -3,12 +3,12 @@
 State: **Not started**
 
 **The problem.** The back-guard leaks one swallowed history entry per chat.
-[`useBackGuard.ts:22-33`](../../client/src/lib/useBackGuard.ts) pushes a
+[`useBackGuard.ts:22-33`](../../../client/src/lib/useBackGuard.ts) pushes a
 sentinel copy of the current entry every time `active` flips true, and
 nothing ever consumes it. `LiveChatStage` is keyed by `chatId`
-([`JoinActivityPage.tsx:315`](../../client/src/pages/student/JoinActivityPage.tsx))
+([`JoinActivityPage.tsx:315`](../../../client/src/pages/student/JoinActivityPage.tsx))
 and arms the guard on every mount
-([`LiveChatStage.tsx:118`](../../client/src/components/Student/LiveChatStage.tsx))
+([`LiveChatStage.tsx:118`](../../../client/src/components/Student/LiveChatStage.tsx))
 — so after four rounds of chatting, a student backing out of the lobby
 presses back five or six times, each press appearing to do nothing. Browser
 back is also the flow's designed escape (redo a wrong name, leave the
@@ -21,7 +21,7 @@ wart" — it didn't anticipate the per-chat accumulation.
 **Decisions in play.**
 
 - "Back during a live chat asks before ending it"
-  ([`student-join.md`](../decisions/student-join.md)) — fully stands; the
+  ([`student-join.md`](../../decisions/student-join.md)) — fully stands; the
   guard's behavior _while armed_ doesn't change.
 - "Landing on code entry signs the student out" — the escape this doc
   repairs; unchanged.
@@ -37,7 +37,7 @@ the one already-documented swallowed back — and if the cleanup proves safe
 across browsers, zero.
 
 1. **Floor (must land):** cap the sentinel at one. In
-   [`useBackGuard.ts`](../../client/src/lib/useBackGuard.ts), track
+   [`useBackGuard.ts`](../../../client/src/lib/useBackGuard.ts), track
    "sentinel already behind us" in module state (or stamp a marker into the
    cloned `history.state` — e.g. `{ ...history.state, __chaverolaGuard:
 true }` — and check it before pushing). Re-arming (chat 2, 3, 4…) with
@@ -57,7 +57,7 @@ true }` — and check it before pushing). Re-arming (chat 2, 3, 4…) with
 3. Update the docblock — it's the only documentation of this behavior;
    keep its honesty (whichever endstate ships).
 4. **Demo parity:** the demo chat stage uses the same guard
-   ([`ChatStage.tsx`](../../client/src/components/Student/ChatStage.tsx))
+   ([`ChatStage.tsx`](../../../client/src/components/Student/ChatStage.tsx))
    — free; verify the demo's multi-round flow (end chat via demo controls,
    re-pair, repeat) accumulates nothing.
 

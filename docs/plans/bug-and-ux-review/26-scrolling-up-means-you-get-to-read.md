@@ -4,7 +4,7 @@ State: **Not started**
 
 **The problem.** The shared conversation feed hard-snaps to the bottom on
 every new message/typing change
-([`Conversation.tsx:54-57`](../../client/src/components/chat/Conversation.tsx))
+([`Conversation.tsx:54-57`](../../../client/src/components/chat/Conversation.tsx))
 and on every resize via a deliberately unconditional `ResizeObserver`
 (:64-72 — its comment says "no 'was I at the bottom?' bookkeeping: chats
 here are short"). Transcripts run to 200 lines
@@ -21,7 +21,7 @@ pieces).
 **Decisions in play.** No decisions entry covers feed scrolling — the
 "unconditional on purpose" note is an inline comment, not a recorded call.
 Record the new rule when done: entry atop
-[`chat-behavior.md`](../decisions/chat-behavior.md) + DECISIONS.md line
+[`chat-behavior.md`](../../decisions/chat-behavior.md) + DECISIONS.md line
 ("The feed follows the newest line only when you're already at the bottom —
 except your own send, which always snaps").
 
@@ -35,7 +35,7 @@ except your own send, which always snaps").
 yank the view; being at (or near) the bottom keeps today's behavior
 exactly; sending your own message always returns you to the bottom.
 
-1. In [`Conversation.tsx`](../../client/src/components/chat/Conversation.tsx),
+1. In [`Conversation.tsx`](../../../client/src/components/chat/Conversation.tsx),
    track "pinned to bottom" with a scroll listener on the feed (threshold
    ~48px — an intentional upward scroll unpins; sub-line jitter doesn't).
    Store it in a ref (render doesn't depend on it), per the React Compiler

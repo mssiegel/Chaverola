@@ -9,29 +9,29 @@ with the system swipe. The evidence:
 
 - `env(safe-area-inset-*)` appears exactly **once** in the client, on the
   teacher's setup dock
-  ([`ActivitySetup/index.tsx:252`](../../client/src/components/Teacher/ActivitySetup/index.tsx))
+  ([`ActivitySetup/index.tsx:252`](../../../client/src/components/Teacher/ActivitySetup/index.tsx))
   — that's the in-repo pattern to follow.
 - The student world's column ends at `pb-2 sm:pb-8`
-  ([`StudentWorldLayout.tsx:74`](../../client/src/components/layout/StudentWorldLayout.tsx)),
+  ([`StudentWorldLayout.tsx:74`](../../../client/src/components/layout/StudentWorldLayout.tsx)),
   and the phone chat stretches flush to the bottom
-  ([`LiveChatStage.tsx:186`](../../client/src/components/Student/LiveChatStage.tsx))
+  ([`LiveChatStage.tsx:186`](../../../client/src/components/Student/LiveChatStage.tsx))
   with the composer as the last thing in the document.
 - **The insets are currently guaranteed to be zero anyway:** the viewport
-  meta ([`client/index.html:9-12`](../../client/index.html)) has no
+  meta ([`client/index.html:9-12`](../../../client/index.html)) has no
   `viewport-fit=cover`, and without it iOS reports every
   `safe-area-inset-*` as 0. Any fix starts there.
 
 **Decisions in play.**
 
 - "On phones the chat fills the screen and hugs the keyboard; desktop
-  keeps the fixed card" ([`chat-behavior.md`](../decisions/chat-behavior.md))
+  keeps the fixed card" ([`chat-behavior.md`](../../decisions/chat-behavior.md))
   — stands; it deliberately rejected `visualViewport` JS and named an
   iPhone gap as the known follow-up. **This doc is only the safe-area
   slice of that gap** — insets, not keyboard mechanics.
 - "Send real features to a real phone" (AGENTS.md) — this change is
   _about_ device chrome. **Founder call (2026-07-26): no handset will be
   available when this runs** — recording the ask in
-  [`docs/pending-manual-tests.md`](../pending-manual-tests.md) is part of
+  [`docs/pending-manual-tests.md`](../../pending-manual-tests.md) is part of
   the prompt itself, not a fallback; the check runs later from that file.
 
 - [ ] Prompt — viewport-fit=cover plus insets where the world touches the edges
@@ -45,13 +45,13 @@ clear of the indicator strip; the top corner pills clear the notch; and
 nothing changes on devices without insets (env() falls back to 0).
 
 1. Add `viewport-fit=cover` to the viewport meta in
-   [`client/index.html`](../../client/index.html) (append to the existing
+   [`client/index.html`](../../../client/index.html) (append to the existing
    content — keep `interactive-widget=resizes-content` and its comment).
    Note: with `cover`, the page extends under the chrome — the inset
    paddings below are what keep content out of it; land them in the same
    commit.
 2. Bottom: in
-   [`StudentWorldLayout.tsx`](../../client/src/components/layout/StudentWorldLayout.tsx),
+   [`StudentWorldLayout.tsx`](../../../client/src/components/layout/StudentWorldLayout.tsx),
    the column's `pb-2` becomes a computed pad —
    `pb-[max(0.5rem,env(safe-area-inset-bottom))]` (Tailwind arbitrary
    value; the setup dock's idiom). The chat card's composer inherits the
@@ -86,7 +86,7 @@ and the setup dock (which already pads) on the handset too.
 **Done when:** `pnpm typecheck` green; browser pass at phone width for
 regressions (insets are 0 there — everything must look identical); the
 handset ask recorded in
-[`docs/pending-manual-tests.md`](../pending-manual-tests.md) with these
+[`docs/pending-manual-tests.md`](../../pending-manual-tests.md) with these
 exact checks (founder, 2026-07-26 — the logged ask IS this prompt's
 handset leg): composer clear of the home-indicator strip with keyboard
 closed, no double-gap with it open, corner pills clear of the notch,

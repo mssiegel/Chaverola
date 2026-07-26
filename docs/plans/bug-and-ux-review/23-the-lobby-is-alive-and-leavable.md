@@ -5,20 +5,20 @@ State: **Not started**
 **The problem.** The waiting lobby is the product's longest dead moment, and
 it has two honesty gaps and a missing door:
 
-- **Static forever:** [`WaitingLobby.tsx`](../../client/src/components/Student/WaitingLobby.tsx)
+- **Static forever:** [`WaitingLobby.tsx`](../../../client/src/components/Student/WaitingLobby.tsx)
   shows the same heading, the same pill, the same three dots at second 5
   and at minute 5. Kids compare screens and conclude it's broken — then
   refresh or back out.
 - **Silently inert without a teacher:** auto-match runs only while a
   teacher socket is connected
-  ([`autoMatch.ts`](../../server/src/live/autoMatch.ts) arms on the 0→1st,
+  ([`autoMatch.ts`](../../../server/src/live/autoMatch.ts) arms on the 0→1st,
   releases on the last — a recorded invariant), and manual pairing
   obviously needs the teacher too. When the teacher's laptop sleeps,
   every student's lobby keeps chirping "Waiting for your match" for a
   matchmaker that is not running. Nothing on any student screen reflects
   it.
 - **No way out:** the decision "Ending your own chat keeps your seat…"
-  ([`chat-behavior.md`](../decisions/chat-behavior.md)) states "**Leaving
+  ([`chat-behavior.md`](../../decisions/chat-behavior.md)) states "**Leaving
   the activity is a lobby act.** …a student who is really done ends the
   chat, then leaves from the lobby" — but the lobby renders no leave
   control. The only exit is browser back (degraded until doc
@@ -31,17 +31,17 @@ it has two honesty gaps and a missing door:
   founder call) — **fully stands**. Prompt 2 tells students the truth
   about it; it does not change matching.
 - "The real lobby still says Waiting for your match until matching ships"
-  ([`student-join.md`](../decisions/student-join.md)) — the pill's copy
+  ([`student-join.md`](../../decisions/student-join.md)) — the pill's copy
   stays the baseline; new states layer on the existing pill-swap pattern
   (reconnecting/paused already swap it).
 - "The student wire carries characterIds only" — prompt 2's new field is a
   boolean about the _teacher_, no student data; it still gets the
   mandatory allowlist pin in `projections.test.ts`.
 - Record both changes as decisions entries when their prompts land
-  ([`student-join.md`](../decisions/student-join.md) + DECISIONS.md).
+  ([`student-join.md`](../../decisions/student-join.md) + DECISIONS.md).
 
 **Prompt order.** Independent. 1 is client-only; 2 is a wire change
-(follow [docs/adding-a-wire-event.md](../adding-a-wire-event.md)).
+(follow [docs/adding-a-wire-event.md](../../adding-a-wire-event.md)).
 
 - [ ] Prompt 1 — A door and a pulse
 - [ ] Prompt 2 — The lobby knows when the teacher's away
@@ -55,17 +55,17 @@ control, and a student who waits sees the screen acknowledge time passing.
 
 1. **The leave control:** a quiet "I'm done — leave the activity" affordance
    under the info card in
-   [`WaitingLobby.tsx`](../../client/src/components/Student/WaitingLobby.tsx)
+   [`WaitingLobby.tsx`](../../../client/src/components/Student/WaitingLobby.tsx)
    (link-weight, not a competing CTA — leaving is the rare path). Confirm
    through the shared
-   [`confirm-dialog`](../../client/src/components/ui/confirm-dialog.tsx)
+   [`confirm-dialog`](../../../client/src/components/ui/confirm-dialog.tsx)
    ("leave the activity? your teacher will see you've left" energy — copy
    through the humanizer). On confirm: drive the **existing** teardown path
    — sign out and let the page land on code entry (the same flow browser
    back takes; `useLobbyPresence`'s cleanup emits the flush-protected
    `lobby:leave` — do NOT hand-roll a second emit; the `LEAVE_FLUSH_MS`
    machinery is a pinned prod lesson). Wire the handler up through
-   [`JoinActivityPage.tsx`](../../client/src/pages/student/JoinActivityPage.tsx)
+   [`JoinActivityPage.tsx`](../../../client/src/pages/student/JoinActivityPage.tsx)
    (which owns `signOut`).
 2. **The pulse:** time-based copy variance under the pill — after ~45-60s,
    the body line rotates to a calmer acknowledgment ("Still lining
@@ -78,7 +78,7 @@ control, and a student who waits sees the screen acknowledge time passing.
    its confirm + exit works against the demo flow (client-simulated,
    no socket) — likely just the same signOut path; verify.
 4. Decision entry: "The lobby has a leave door and acknowledges a long
-   wait" ([`student-join.md`](../decisions/student-join.md)) +
+   wait" ([`student-join.md`](../../decisions/student-join.md)) +
    DECISIONS.md line.
 
 **Edge cases:** leave while a match lands (chat:started racing the
@@ -108,23 +108,23 @@ back up when they return") instead of dots promising a matchmaker that
 isn't running.
 
 1. **Wire (all seven touch points —
-   [docs/adding-a-wire-event.md](../adding-a-wire-event.md) is the HOWTO):**
+   [docs/adding-a-wire-event.md](../../adding-a-wire-event.md) is the HOWTO):**
    a `teacherPresent: boolean` for students. Shape: include it in the
    student's `lobby:welcome` payload (for joiners while the teacher is
    away) and add an `activity:teacher-presence { present }` broadcast to
    student seats on the 0↔1 teacher-socket transitions — the exact
-   moments [`autoMatch.ts`](../../server/src/live/autoMatch.ts) already
+   moments [`autoMatch.ts`](../../../server/src/live/autoMatch.ts) already
    arms/releases on (hook the same call sites in
-   [`teacher.ts`](../../server/src/live/handlers/teacher.ts) /
-   [`lobby.ts`](../../server/src/live/lobby.ts) rather than inventing a
+   [`teacher.ts`](../../../server/src/live/handlers/teacher.ts) /
+   [`lobby.ts`](../../../server/src/live/lobby.ts) rather than inventing a
    second refcount). Projection stays a field-by-field literal; **add the
    allowlist pin in
-   [`projections.test.ts`](../../server/src/store/projections.test.ts)
+   [`projections.test.ts`](../../../server/src/store/projections.test.ts)
    (mandatory)** — the boolean carries no student data.
 2. **Client:** register in
-   [`useLobbyPresence.ts`](../../client/src/pages/student/useLobbyPresence.ts),
+   [`useLobbyPresence.ts`](../../../client/src/pages/student/useLobbyPresence.ts),
    reduce into lobby state (a pure reducer beside the others in
-   [`liveMatchState.ts`](../../client/src/pages/student/join/liveMatchState.ts)
+   [`liveMatchState.ts`](../../../client/src/pages/student/join/liveMatchState.ts)
    if that's where it fits, else hook state), thread to `WaitingLobby` and
    swap the pill/body copy when `teacherPresent === false`. Precedence:
    reconnecting > paused > teacher-away > waiting (an away claim through a
@@ -143,7 +143,7 @@ isn't running.
    state unless a steering event is added; don't add one — the demo's
    job is the happy path. Note it here).
 5. Decision entry: "The lobby says so when no teacher device is
-   connected" ([`student-join.md`](../decisions/student-join.md)) +
+   connected" ([`student-join.md`](../../decisions/student-join.md)) +
    DECISIONS.md line, noting the auto-match invariant deliberately
    unchanged.
 

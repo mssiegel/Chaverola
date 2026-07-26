@@ -12,19 +12,19 @@ until, two minutes later, the screen jumps to "📶 You lost connection".
 
 The lobby handles this exact case with an amber "Reconnecting you…" pill —
 the chat, where it matters far more, has nothing:
-[`JoinActivityPage.tsx:255+`](../../client/src/pages/student/JoinActivityPage.tsx)
+[`JoinActivityPage.tsx:255+`](../../../client/src/pages/student/JoinActivityPage.tsx)
 derives `lobbyConnection` from the presence hook and hands it **only** to
 `WaitingLobby`; the `LiveChatStage` render (:315-343) gets `isPaused` but no
 connection state, and
-[`LiveChatStage.tsx:96-113`](../../client/src/components/Student/LiveChatStage.tsx)
+[`LiveChatStage.tsx:96-113`](../../../client/src/components/Student/LiveChatStage.tsx)
 has no own-connection input at all. The banner slot already exists:
-[`Conversation.tsx:90-101`](../../client/src/components/chat/Conversation.tsx)
+[`Conversation.tsx:90-101`](../../../client/src/components/chat/Conversation.tsx)
 stacks `ChatPausedBanner` and `PeerReconnectBanner` in a sticky header.
 
 **Decisions in play.**
 
 - "Students see a partner's drop and return, on the teacher's own 4s gate"
-  ([`chat-behavior.md`](../decisions/chat-behavior.md)) built the _peer_
+  ([`chat-behavior.md`](../../decisions/chat-behavior.md)) built the _peer_
   half deliberately; no entry says the self half shouldn't exist.
 - "A disconnected peer gets 2 minutes to come back, and the student watches
   the clock" — the self banner should NOT show a grace countdown (the
@@ -34,7 +34,7 @@ stacks `ChatPausedBanner` and `PeerReconnectBanner` in a sticky header.
   ripples to all three). Keep the self state an **optional** addition that
   the other two surfaces never set.
 - Record the decision when done: entry atop
-  [`chat-behavior.md`](../decisions/chat-behavior.md) + DECISIONS.md line
+  [`chat-behavior.md`](../../decisions/chat-behavior.md) + DECISIONS.md line
   ("Your own drop shows in the chat, without a countdown").
 
 - [ ] Prompt — The chat wears the lobby's reconnecting pill
@@ -49,20 +49,20 @@ the composer stays usable for drafting but the student is never left
 believing a dead room is live.
 
 1. **Thread the state:** `presence` already lives in `useActiveMatch`'s
-   return (via [`useLobbyPresence.ts`](../../client/src/pages/student/useLobbyPresence.ts)
+   return (via [`useLobbyPresence.ts`](../../../client/src/pages/student/useLobbyPresence.ts)
    — `"connected" | "reconnecting" | …`). In
-   [`JoinActivityPage.tsx`](../../client/src/pages/student/JoinActivityPage.tsx),
+   [`JoinActivityPage.tsx`](../../../client/src/pages/student/JoinActivityPage.tsx),
    pass a `selfConnection` (map presence → `"connected" | "reconnecting"`)
    into the `LiveChatStage` render (:315-343), demo default `"connected"`
    except step 4.
 2. **Render it:** add the field to `ChatRoomState`
-   ([`types/chat.ts`](../../client/src/types/chat.ts)) as **optional**
+   ([`types/chat.ts`](../../../client/src/types/chat.ts)) as **optional**
    (absent = connected — hero and teacher cards never set it, so their
    behavior is byte-identical). In
-   [`Conversation.tsx`](../../client/src/components/chat/Conversation.tsx),
+   [`Conversation.tsx`](../../../client/src/components/chat/Conversation.tsx),
    render a self-reconnect banner in the existing sticky stack (:90-101).
    Reuse the lobby pill's visual language (amber, spinner — see
-   [`WaitingLobby.tsx`](../../client/src/components/Student/WaitingLobby.tsx))
+   [`WaitingLobby.tsx`](../../../client/src/components/Student/WaitingLobby.tsx))
    — likely a small shared piece or a variant of `PeerReconnectBanner`
    rather than a third bespoke banner; no countdown (see decisions note).
    Precedence when stacked: pause banner, then self-reconnect, then peer
@@ -75,11 +75,11 @@ believing a dead room is live.
    layer. No soft-block.
 4. **Demo parity:** the student demo already has a wifi-blip control wired
    to the LOBBY pill (`demoWifiBlip` via `useDemoLobby`,
-   [`JoinActivityPage.tsx:204-205`](../../client/src/pages/student/JoinActivityPage.tsx)).
+   [`JoinActivityPage.tsx:204-205`](../../../client/src/pages/student/JoinActivityPage.tsx)).
    Wire the same blip into the chat stage's new `selfConnection` so the
    demo shows the banner — check whether the blip control renders during
    the demo chat stage; if it's lobby-only today, extend the demo controls
-   ([`ChatDemoControls.tsx`](../../client/src/components/demo/ChatDemoControls.tsx))
+   ([`ChatDemoControls.tsx`](../../../client/src/components/demo/ChatDemoControls.tsx))
    with the blip event there.
 5. **Copy:** short, calm, game-voiced ("Reconnecting you…" is already
    good); humanizer pass on anything new.

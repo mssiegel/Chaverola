@@ -6,9 +6,9 @@ State: **Not started**
 chat_ — is teleported straight to the name form, and on a phone the
 keyboard immediately opens over the explanation:
 
-- [`JoinActivityPage.tsx:150-154`](../../client/src/pages/student/JoinActivityPage.tsx):
+- [`JoinActivityPage.tsx:150-154`](../../../client/src/pages/student/JoinActivityPage.tsx):
   `onRemoved` runs `signOut(); setName(""); setRemovedByTeacher(true)`.
-- [`JoinGateCard.tsx:177`](../../client/src/pages/student/join/JoinGateCard.tsx):
+- [`JoinGateCard.tsx:177`](../../../client/src/pages/student/join/JoinGateCard.tsx):
   `autoFocus={isDesktopViewport || name === ""}` — the name was just
   cleared, so the field autofocuses and the phone keyboard slides over the
   red notice the student most needs to read.
@@ -17,7 +17,7 @@ keyboard immediately opens over the explanation:
   account-speak in a product whose pitch is _no accounts_, and nothing
   acknowledges the conversation that just vanished mid-sentence. Every
   other ending in the flow gets a wrap-up screen (🎬 🎭 🎓 🔌 📶 👋 in
-  [`ChatEndedSection.tsx`](../../client/src/components/Student/Chatbox/ChatEndedSection.tsx));
+  [`ChatEndedSection.tsx`](../../../client/src/components/Student/Chatbox/ChatEndedSection.tsx));
   removal is the one exit with none.
 
 **The founder's call (2026-07-26): a mid-chat removal gets a full wrap-up
@@ -30,15 +30,15 @@ directly on the name step with the warmer notice.
 **Decisions in play.**
 
 - "Student sign-in lives in the tab, and removal sends you to the name
-  step" ([`student-join.md`](../decisions/student-join.md)) — **amended by
+  step" ([`student-join.md`](../../decisions/student-join.md)) — **amended by
   the founder call above**: the name step stays the destination, but a
   mid-chat removal shows its ending screen on the way. Prompt 2 records
   the amendment.
 - "A removed student retypes their name — the field is not refilled"
-  ([`student-join.md`](../decisions/student-join.md)) — **stands**; the
+  ([`student-join.md`](../../decisions/student-join.md)) — **stands**; the
   blank field is deliberate (founder call).
 - "Removing a student mid-chat is a quiet exit"
-  ([`teacher-live.md`](../decisions/teacher-live.md)) — quiet for the
+  ([`teacher-live.md`](../../decisions/teacher-live.md)) — quiet for the
   _room_ (no group notice, partner handling unchanged); the removed
   student's own screen getting an ending doesn't touch it.
 - "The live name reveal fires at chat-end, per the teacher's setting" —
@@ -65,7 +65,7 @@ readable — keyboard down, copy in the product's voice — and rejoining
 stays one tap away.
 
 1. **Keyboard down:** in
-   [`JoinGateCard.tsx`](../../client/src/pages/student/join/JoinGateCard.tsx),
+   [`JoinGateCard.tsx`](../../../client/src/pages/student/join/JoinGateCard.tsx),
    suppress the autofocus when the removal notice is showing (the
    `removedByTeacher` flag already reaches the card — use it in the
    `autoFocus` condition rather than `name === ""`). Desktop can keep
@@ -104,8 +104,8 @@ any other ending — greyed room, a clear "your teacher took you out of
 this one" wrap-up, no reveal — and one tap lands them on the name step.
 
 1. **Route the removal:** in
-   [`useActiveMatch.ts`](../../client/src/pages/student/join/useActiveMatch.ts)
-   / [`JoinActivityPage.tsx`](../../client/src/pages/student/JoinActivityPage.tsx),
+   [`useActiveMatch.ts`](../../../client/src/pages/student/join/useActiveMatch.ts)
+   / [`JoinActivityPage.tsx`](../../../client/src/pages/student/JoinActivityPage.tsx),
    when the removal event arrives **while a live match is on screen**,
    don't run the instant `signOut()` path — set the chat-ended state with
    a client-local end reason (`"removed"`) so the ended stage renders,
@@ -118,7 +118,7 @@ this one" wrap-up, no reveal — and one tap lands them on the name step.
    presence hook already treats `removed` as terminal — no reconnect
    flashes).
 2. **The screen:** a seventh reason in
-   [`ChatEndedSection.tsx`](../../client/src/components/Student/Chatbox/ChatEndedSection.tsx)
+   [`ChatEndedSection.tsx`](../../../client/src/components/Student/Chatbox/ChatEndedSection.tsx)
    — tile/title/body in the family's voice ("Your teacher took you out
    of this one" energy; 🚪 or similar tile; **no reveal block ever**, the
    server sends none for removal and the screen must not imply one). CTA
@@ -135,7 +135,7 @@ this one" wrap-up, no reveal — and one tap lands them on the name step.
    server ordering fix, its own decision).
 4. **Demo parity:** not a demo event — note and move on.
 5. Decision entry: the amendment described at the top of this doc
-   ([`student-join.md`](../decisions/student-join.md)) + DECISIONS.md
+   ([`student-join.md`](../../decisions/student-join.md)) + DECISIONS.md
    line ("A mid-chat removal ends like a chat, then lands on the name
    step").
 
@@ -148,7 +148,7 @@ still exits to the gate. Back-guard: the ended screen disarms it
 (`useBackGuard(!isEnded…)`) — unchanged.
 
 **Tests:** if the removal routing lands in the pure reducers
-([`liveMatchState.ts`](../../client/src/pages/student/join/liveMatchState.ts)),
+([`liveMatchState.ts`](../../../client/src/pages/student/join/liveMatchState.ts)),
 add the case beside the others — in policy. Component rendering stays
 browser-verified.
 

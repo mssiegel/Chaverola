@@ -4,12 +4,12 @@ State: **Not started**
 
 **The problem.** Sending is fire-and-forget with no feedback of any kind. The
 composer clears the box the instant Send is tapped
-([`MessageComposer.tsx:128-141`](../../client/src/components/chat/MessageComposer.tsx)),
+([`MessageComposer.tsx:128-141`](../../../client/src/components/chat/MessageComposer.tsx)),
 the emit has no ack
-([`useLobbyPresence.ts:404-406`](../../client/src/pages/student/useLobbyPresence.ts)
+([`useLobbyPresence.ts:404-406`](../../../client/src/pages/student/useLobbyPresence.ts)
 — its own docblock: "the echoed `chat:line` is the delivery receipt"), and
 every server-side rejection is a silent `return`
-([`studentChat.ts:48-67`](../../server/src/live/handlers/studentChat.ts)):
+([`studentChat.ts:48-67`](../../../server/src/live/handlers/studentChat.ts)):
 
 - the **10-messages-per-10s sliding window** (:56-58) — an excited kid firing
   one-word lines ("wait" / "no" / "lol") hits this in normal play; message 11
@@ -19,7 +19,7 @@ every server-side rejection is a silent `return`
 
 On classroom wifi even the happy path feels broken: the text vanishes from
 the box and reappears only a round-trip later. The homepage demo echoes
-instantly ([`useChatDemo.ts`](../../client/src/components/chat/useChatDemo.ts)
+instantly ([`useChatDemo.ts`](../../../client/src/components/chat/useChatDemo.ts)
 appends locally), so the real product feels _worse_ than the demo.
 
 **The design (no wire change).** The audit sketched a `clientTag` on
@@ -30,14 +30,14 @@ plus one shared-constants move, so there is **no deploy race**:
   (`pending-…`), rendered slightly muted. Reconcile when the echoed
   `chat:line` arrives: replace the oldest pending line whose `characterId`
   is self and whose text matches (the existing merge-by-id in
-  [`liveMatchState.ts` `applyChatLine`](../../client/src/pages/student/join/liveMatchState.ts)
+  [`liveMatchState.ts` `applyChatLine`](../../../client/src/pages/student/join/liveMatchState.ts)
   already dedupes server ids; pending replacement is a new branch beside it).
 - **Failure surfacing:** a pending line with no echo after ~5s flips to a
   "didn't send — tap to retry" state instead of silently disappearing. A late
   echo after the flip reconciles it anyway.
 - **Rate-limit honesty:** move `CHAT_SEND_WINDOW_MS` / `CHAT_SEND_WINDOW_LIMIT`
-  from [`studentChat.ts:21-22`](../../server/src/live/handlers/studentChat.ts)
-  into [`shared/src/constants.ts`](../../shared/src/constants.ts) so the
+  from [`studentChat.ts:21-22`](../../../server/src/live/handlers/studentChat.ts)
+  into [`shared/src/constants.ts`](../../../shared/src/constants.ts) so the
   composer can enforce the same window locally with friendly feedback
   _before_ the server silently drops — the server keeps its own check as the
   belt (same values, one source).
@@ -50,14 +50,14 @@ don't reach for it first.
 **Decisions in play.**
 
 - "The server never inspects what students write"
-  ([`chat-behavior.md`](../decisions/chat-behavior.md)) notes in passing that
+  ([`chat-behavior.md`](../../decisions/chat-behavior.md)) notes in passing that
   every rejection is a silent no-op — that was a rationale for skipping a
   content filter, not a decision that sends need no feedback. This doc
   changes the client, not the server's silence.
 - "Live socket timers never pass through `scaledMs`" — the 5s echo timeout is
   live-wire timing; hardcode real ms.
 - Record the new behavior: entry atop
-  [`chat-behavior.md`](../decisions/chat-behavior.md) + DECISIONS.md line
+  [`chat-behavior.md`](../../decisions/chat-behavior.md) + DECISIONS.md line
   ("A sent message shows as pending until its echo, and says so if it never
   lands"), in whichever prompt finishes the visible behavior.
 
@@ -76,24 +76,24 @@ limit with friendly copy.
 marked subtly until the server confirms it; if the server never does, the
 line says so and offers a retry — nothing ever just disappears.
 
-1. **Reducers first** ([`liveMatchState.ts`](../../client/src/pages/student/join/liveMatchState.ts)):
+1. **Reducers first** ([`liveMatchState.ts`](../../../client/src/pages/student/join/liveMatchState.ts)):
    extend the live match's message shape with an optional
    `delivery?: "pending" | "failed"` (absent = delivered; the shared wire
    types in `@chaverola/shared` are untouched — this is client state, so keep
    the field on the client-side message type, e.g. via a wrapper or an
-   intersection type in [`stageTypes.ts`](../../client/src/pages/student/join/stageTypes.ts)).
+   intersection type in [`stageTypes.ts`](../../../client/src/pages/student/join/stageTypes.ts)).
    Add pure helpers: `appendPendingLine`, `resolvePendingLine` (called from
    `applyChatLine` when the incoming line is self's — match oldest pending
    with equal text; fall through to today's append when nothing matches),
    and `failPendingLine(id)`. Chat-ended/paused states leave pending lines
    alone (the timeout will fail them honestly).
-2. **Hook wiring** ([`useActiveMatch.ts`](../../client/src/pages/student/join/useActiveMatch.ts)):
+2. **Hook wiring** ([`useActiveMatch.ts`](../../../client/src/pages/student/join/useActiveMatch.ts)):
    `sendChatMessage` goes through a wrapper that appends the pending line,
    arms its ~5s timer (one per pending id; cleared on resolve/unmount), and
    emits. Retry = re-append as a fresh pending send. Respect the React
    Compiler rules (no refs written during render; timers in effects or
    event handlers).
-3. **Render** ([`ConversationLines.tsx`](../../client/src/components/chat/ConversationLines.tsx)):
+3. **Render** ([`ConversationLines.tsx`](../../../client/src/components/chat/ConversationLines.tsx)):
    pending = reduced opacity; failed = the line plus a small "didn't send —
    tap to retry" affordance. This component is shared by the hero and the
    teacher cards — neither ever sets `delivery`, so nothing changes for
@@ -114,7 +114,7 @@ pending ones. Paused sends: the composer is disabled while paused, so
 pending-during-pause only happens on the race — the timeout handles it.
 
 **Tests:** yes — this is exactly the pure-reducer seam the client policy
-tests ([`liveMatchState.test.ts`](../../client/src/pages/student/join/liveMatchState.test.ts)):
+tests ([`liveMatchState.test.ts`](../../../client/src/pages/student/join/liveMatchState.test.ts)):
 append-pending → echo resolves oldest text match; echo with no pending
 appends normally; fail flips state; resume replay keeps pending lines.
 
@@ -133,8 +133,8 @@ already landed, and flip doc + README state to Complete.
 "slow down" instead of a silently eaten message.
 
 1. Move `CHAT_SEND_WINDOW_MS` / `CHAT_SEND_WINDOW_LIMIT` to
-   [`shared/src/constants.ts`](../../shared/src/constants.ts); import in
-   [`studentChat.ts`](../../server/src/live/handlers/studentChat.ts)
+   [`shared/src/constants.ts`](../../../shared/src/constants.ts); import in
+   [`studentChat.ts`](../../../server/src/live/handlers/studentChat.ts)
    (behavior unchanged). This touches `shared/` — a **compatible** change
    (constants only, no event shapes), so a single push is safe; still poll
    `/healthz` and confirm Vercel Ready per the standing deploy checks.

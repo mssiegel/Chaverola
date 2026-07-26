@@ -5,16 +5,16 @@ State: **Not started**
 **The problem.** Every seat-level event re-sends the teacher **every
 message of every chat that has ever existed** in the activity:
 
-- [`lobbyContext.ts:131-166`](../../server/src/live/lobbyContext.ts) —
+- [`lobbyContext.ts:131-166`](../../../server/src/live/lobbyContext.ts) —
   `chatsPayload` maps ALL `record.chats` (active _and_ ended; chats never
   expire from the record) through `toChatSnapshot`, whose projection
   includes the full `messages` array
-  ([`projections.ts`](../../server/src/store/projections.ts),
+  ([`projections.ts`](../../../server/src/store/projections.ts),
   `toChatSnapshot`). `broadcastState` emits it on every student connect,
   disconnect tick, `lobby:leave`, `chat:leave`, **every "Back to the
   lobby" tap**, grace expiry, and every teacher command.
 - Client-side,
-  [`useHostActivityLive.ts:187-202`](../../client/src/components/Teacher/HostActivity/useHostActivityLive.ts)
+  [`useHostActivityLive.ts:187-202`](../../../client/src/components/Teacher/HostActivity/useHostActivityLive.ts)
   replaces the whole `chats` state array on each snapshot.
 
 In a 30-student class doing 3-4 rounds, that's 45-60 accumulated chats ×
@@ -41,12 +41,12 @@ Client-ahead is harmless in the other direction.
 **Decisions in play.**
 
 - "Message lines are the one delta on the teacher wire"
-  ([`teacher-live.md`](../decisions/teacher-live.md)) — untouched; live
+  ([`teacher-live.md`](../../decisions/teacher-live.md)) — untouched; live
   chats keep their full snapshot + `chat:transcript-line` delta behavior.
 - "The homepage's 'full transcript' claim stands: the 200-line cap is per
   chat" — untouched; nothing here drops stored lines.
 - Record when done: entry atop
-  [`teacher-live.md`](../decisions/teacher-live.md) + DECISIONS.md line
+  [`teacher-live.md`](../../decisions/teacher-live.md) + DECISIONS.md line
   ("Seat events stop re-shipping ended transcripts; full snapshots heal").
 
 - [ ] Prompt 1 — The client keeps what it knows
@@ -60,20 +60,20 @@ Client-ahead is harmless in the other direction.
 as "unchanged transcript" — merging instead of replacing — while today's
 always-full server keeps working byte-identically.
 
-1. In [`shared/src/socket.ts`](../../shared/src/socket.ts), make the chat
+1. In [`shared/src/socket.ts`](../../../shared/src/socket.ts), make the chat
    snapshot's `messages` optional (`messages?: …`) with a comment naming
    the contract: absent = "no change since your last full snapshot; ended
    transcript held client-side". This is a **compatible loosening** — the
    server still always sends it until Prompt 2.
-2. In [`useHostActivityLive.ts`](../../client/src/components/Teacher/HostActivity/useHostActivityLive.ts)
+2. In [`useHostActivityLive.ts`](../../../client/src/components/Teacher/HostActivity/useHostActivityLive.ts)
    (:187-202), replace the wholesale `setChats(payload.chats…)` with a
    merge: for each incoming chat, if `messages` is present use it; if
    absent, keep the previous state's messages for that chat id (empty
    array if genuinely never seen — a race the next full snapshot heals).
    Keep every other field from the incoming snapshot (status, pause,
    reconnecting ids — those must stay live).
-3. Check [`useHostActivityDemo.ts`](../../client/src/components/Teacher/HostActivity/useHostActivityDemo.ts)
-   / [`hostWorld.ts`](../../client/src/components/Teacher/HostActivity/hostWorld.ts)
+3. Check [`useHostActivityDemo.ts`](../../../client/src/components/Teacher/HostActivity/useHostActivityDemo.ts)
+   / [`hostWorld.ts`](../../../client/src/components/Teacher/HostActivity/hostWorld.ts)
    compile against the loosened type (the demo always has messages — no
    behavior change; the live engine imports only types from hostWorld,
    invariant untouched).
@@ -109,10 +109,10 @@ carry everything; the teacher's dashboard stays byte-identical to the eye.
 **Precondition: Prompt 1 is deployed to production (Vercel Ready).** If it
 isn't, stop and run it first.
 
-1. In [`lobbyContext.ts`](../../server/src/live/lobbyContext.ts), give
+1. In [`lobbyContext.ts`](../../../server/src/live/lobbyContext.ts), give
    `chatsPayload`/`broadcastState` a mode: **full** (default) vs **slim**
    (ended chats projected without `messages` — add the variant in
-   [`projections.ts`](../../server/src/store/projections.ts) as an
+   [`projections.ts`](../../../server/src/store/projections.ts) as an
    explicit field-by-field literal, never a spread; extend the
    projection-privacy allowlist tests for the new shape).
 2. Classify call sites: seat lifecycle (connect/resume, disconnect ticks,
