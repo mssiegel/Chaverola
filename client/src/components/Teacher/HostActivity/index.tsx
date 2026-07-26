@@ -92,6 +92,15 @@ export function HostActivityDashboard({
     )
     .slice(0, maxGroupSize);
 
+  // Falling out is permanent, so prune the state and don't only derive around
+  // it: a student who leaves the queue must lose their tick for good, or
+  // ending their chat would land them back in the queue still selected from
+  // the round before. Adjusted during render (not an effect) — the length
+  // guard makes it converge on the next pass.
+  if (validSelectedIds.length !== selectedIds.length) {
+    setSelectedIds(validSelectedIds);
+  }
+
   const toggleSelect = (studentId: string) => {
     setSelectedIds(
       validSelectedIds.includes(studentId)
