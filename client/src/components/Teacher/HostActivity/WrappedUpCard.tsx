@@ -37,6 +37,14 @@ function wrappedCopy(
     };
   }
 
+  if (state === "unconfirmed") {
+    return {
+      tile: "📮",
+      title: "We didn't hear back about the email",
+      body: `The message to ${to} may still have gone out, but we never heard back either way. Check your inbox in a few minutes. Your chats are below, so copy anything you want to keep before you close this tab.`,
+    };
+  }
+
   if (state === "sent") {
     return {
       tile: "📬",

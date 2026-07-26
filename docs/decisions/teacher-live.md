@@ -5,6 +5,29 @@ area. Entries are newest-first; add new ones at the top, and add a matching line
 to the index in the same change. Replaced decisions move to Superseded at the
 bottom of this file.
 
+### The wrapped-up card gives up on the email after 25 seconds and says so
+
+_2026-07-26_
+
+**Decision:** The card's "Sending your transcripts…" state is optimistic and
+now bounded. If no `activity:end-result` arrives within 25 real seconds, the
+card flips to an honest unknown: the message may still have gone out, we
+never heard back, check your inbox. The exit CTA appears with it, and a
+result that lands later still settles the card to sent or failed.
+
+**Why:** The sending state hides the only way off the page, and the host
+route has no brand link in the navbar, so a teacher whose answer never
+arrives has no exit at all. The server now always answers within its own
+budget, which means this timer fires only when the answer is genuinely lost:
+a socket that dropped during the send, or the second-host-device case. In
+both, the truthful thing to show is that we don't know. Guessing "sent"
+would be a lie a teacher acts on; leaving the spinner up strands them.
+
+25 seconds sits above the server's worst case (SMTP timeouts of roughly half
+a minute answer with a failure rather than silence), so a healthy End never
+sees it. It's a real-millisecond timer: live socket timers never pass through
+`scaledMs`.
+
 ### End activity answers the device that pressed it, and a second host device pressing End mid-send gets no answer
 
 _2026-07-26_

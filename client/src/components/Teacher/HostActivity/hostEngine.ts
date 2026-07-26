@@ -20,7 +20,11 @@ import type { HostedChat, WaitingStudent } from "./hostWorld";
  *  send's progress, where "empty" means there was nothing to send. */
 export interface HostEnded {
   to: string | null;
-  state: "sending" | "sent" | "failed" | "empty";
+  /** "unconfirmed" is the client's own verdict, never the server's: the End
+   *  went through but no activity:end-result came back inside the wait, so
+   *  the card stops promising a send and hands the teacher their exit. A
+   *  late result still settles it to sent/failed. */
+  state: "sending" | "unconfirmed" | "sent" | "failed" | "empty";
 }
 
 export interface HostEngine {

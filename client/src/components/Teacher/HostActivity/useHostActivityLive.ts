@@ -41,6 +41,15 @@ import type { HostedChat, WaitingStudent } from "./hostWorld";
   class alive with no client-side work here.
 */
 
+/** How long the wrapped-up card waits for activity:end-result before it
+ *  stops claiming the email is on its way. Sized above the server's own
+ *  budget (SMTP timeouts cap the send at roughly half a minute's worst case,
+ *  and it answers even when that fails), so this fires only when the answer
+ *  is genuinely lost — a dropped socket, or a second host device whose End
+ *  hit the send-once guard. Real milliseconds: live socket timers never pass
+ *  through scaledMs. */
+const END_RESULT_WAIT_MS = 25_000;
+
 /** Server truth → the row shape the dashboard renders. */
 function toWaitingStudent(entry: QueueEntry): WaitingStudent {
   return {
@@ -142,6 +151,10 @@ export function useHostActivityLive({
   // to not-found. A ref, not the state, because the listeners are registered
   // once and would otherwise see a stale closure.
   const endedRef = useRef(false);
+  // The one-shot that gives up on activity:end-result. Held in a ref so the
+  // socket listener (registered once) and the unmount cleanup can both clear
+  // it; only ever written from an event handler or an effect.
+  const endResultTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const onActivityGoneRef = useLatestRef(onActivityGone);
   const onSettingsSyncRef = useLatestRef(onSettingsSync);
 
@@ -168,6 +181,11 @@ export function useHostActivityLive({
       setConnection("reconnecting");
     });
     socket.on("activity:end-result", ({ email }) => {
+      // The answer arrived — even late, after the card gave up on it.
+      if (endResultTimerRef.current !== null) {
+        clearTimeout(endResultTimerRef.current);
+        endResultTimerRef.current = null;
+      }
       // Settle the optimistic "sending" card. Keep the destination we already
       // showed, but prefer the server's authoritative `to` when it sent one; a
       // null result with a known address means a silent class ("empty"), not a
@@ -266,6 +284,10 @@ export function useHostActivityLive({
       setRematchNotice(null);
       setEnded(null);
       endedRef.current = false;
+      if (endResultTimerRef.current !== null) {
+        clearTimeout(endResultTimerRef.current);
+        endResultTimerRef.current = null;
+      }
     };
   }, [hostKey, onActivityGoneRef, onSettingsSyncRef]);
 
@@ -335,6 +357,20 @@ export function useHostActivityLive({
       to: teacherEmail,
       state: teacherEmail ? "sending" : "empty",
     });
+    // Nothing was promised without an address, so there's nothing to time out.
+    if (teacherEmail) {
+      if (endResultTimerRef.current !== null) {
+        clearTimeout(endResultTimerRef.current);
+      }
+      endResultTimerRef.current = setTimeout(() => {
+        endResultTimerRef.current = null;
+        // Only the still-waiting card gives up; a result that already landed
+        // owns the state.
+        setEnded((prev) =>
+          prev?.state === "sending" ? { ...prev, state: "unconfirmed" } : prev
+        );
+      }, END_RESULT_WAIT_MS);
+    }
     socketRef.current?.emit("activity:end");
   };
   const updateTeacherEmail = (teacherEmail: string | null) => {

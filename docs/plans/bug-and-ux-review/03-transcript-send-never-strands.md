@@ -1,6 +1,6 @@
 # 03 — The transcript send never strands the teacher
 
-State: **Not started**
+State: **Complete**
 
 **The problem.** After tapping End activity, the teacher's wrap-up card shows
 "Sending your transcripts… This only takes a moment" — and that state has no
@@ -57,7 +57,7 @@ no wire shape changes (the `activity:end-result` payload is unchanged), so no
 deploy race either way.
 
 - [x] Prompt 1 — The send is bounded and the handler can't die mid-End
-- [ ] Prompt 2 — The sending card stops holding the teacher hostage
+- [x] Prompt 2 — The sending card stops holding the teacher hostage
 
 ---
 
