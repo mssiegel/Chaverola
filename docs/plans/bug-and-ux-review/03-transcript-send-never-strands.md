@@ -56,7 +56,7 @@ edit the same handler. Either doc first; rebase on what's there.
 no wire shape changes (the `activity:end-result` payload is unchanged), so no
 deploy race either way.
 
-- [ ] Prompt 1 — The send is bounded and the handler can't die mid-End
+- [x] Prompt 1 — The send is bounded and the handler can't die mid-End
 - [ ] Prompt 2 — The sending card stops holding the teacher hostage
 
 ---

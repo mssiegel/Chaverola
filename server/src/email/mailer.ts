@@ -20,6 +20,13 @@ import type { Config } from "../config";
   builds and wires the mailer so that prompt stays pure feature.
 */
 
+/** TCP connect to the SMTP host. */
+const SMTP_CONNECTION_TIMEOUT_MS = 10_000;
+/** Waiting for the server's greeting once connected. */
+const SMTP_GREETING_TIMEOUT_MS = 10_000;
+/** Inactivity on an established socket — the stalled-mid-send case. */
+const SMTP_SOCKET_TIMEOUT_MS = 20_000;
+
 export interface EmailMessage {
   to: string;
   subject: string;
@@ -49,6 +56,16 @@ export function createMailer(config: Config, logger: Logger): Mailer {
     const transport = createTransport({
       service: "gmail",
       auth: { user: config.smtp.user, pass: config.smtp.pass },
+      // A teacher is standing in front of a class watching a spinner while
+      // this runs — End activity awaits the send before it can answer.
+      // nodemailer's defaults (~2 min to connect, up to 10 min on a stalled
+      // socket) are sized for a background job, not for that. These cap the
+      // worst case at roughly half a minute, after which the send reports
+      // failed and the wrap-up moves on; a transcript that needs longer than
+      // this was not going to arrive on time anyway.
+      connectionTimeout: SMTP_CONNECTION_TIMEOUT_MS,
+      greetingTimeout: SMTP_GREETING_TIMEOUT_MS,
+      socketTimeout: SMTP_SOCKET_TIMEOUT_MS,
     });
     log.info({ mode: "gmail" }, "mailer ready — sending via Gmail SMTP");
     return {

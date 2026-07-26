@@ -32,6 +32,10 @@ import { removeSeat } from "../seats";
  *  — enumeration must not keep activities alive. */
 const TEACHER_KEEPALIVE_MS = 5 * 60 * 1000;
 
+/** The `email` field of `activity:end-result`, taken from the function that
+ *  produces it on the happy path so the failure path can't drift from it. */
+type EndResultEmail = Awaited<ReturnType<typeof sendTranscriptEmail>>;
+
 /** Everything a teacher socket does: join the room, take initial snapshots,
  *  hold the TTL open, and serve the teacher commands. Registered on teacher
  *  sockets only — the structural boundary that makes a student emitting
@@ -367,34 +371,63 @@ export function registerTeacherHandlers(
     const current = getByHostKey(data.hostKey);
     if (!current) return;
     if (current.transcriptEmail?.state === "sending") return;
-    // Stop auto-match outright, whatever the teacher refcount — otherwise a
-    // second host device would leave the tick armed, and it could pair the
-    // students we just freed into fresh chats during the send await.
-    clearAutoMatch(data.joinCode);
-    // Flip every active chat to ended before the await so the transcript is
-    // frozen for the send — and settle each one exactly like chats:end-all,
-    // so the class gets the real ending (reason "teacher", name reveal when
-    // the setting is on) instead of the chat going quietly dead under them
-    // for the length of the send. endChat only mutates the chat in place, so
-    // iterating current.chats directly is safe. Until doc 02 prompt 2 lands,
-    // the client's gone latch may still replace that ended screen with the
-    // activity-over card once removal fires below.
-    for (const chat of current.chats) {
-      const result = endChat(current, chat.id);
-      if (!result) continue; // already-ended chats in the list
-      settleMembershipChange(current, result);
+    // The teacher's one exit is this emit — the wrap-up card hides its CTA
+    // until a result arrives — so every path below has to answer exactly
+    // once, including the ones nobody planned. answer() makes the catch
+    // safe to call blind, and removeActivity runs whatever happened: a
+    // teardown skipped by a throw would leave the class zombied on a server
+    // that already told the teacher it was over.
+    let answered = false;
+    const answer = (email: EndResultEmail) => {
+      if (answered) return;
+      answered = true;
+      socket.emit("activity:end-result", { email });
+    };
+    try {
+      // Stop auto-match outright, whatever the teacher refcount — otherwise a
+      // second host device would leave the tick armed, and it could pair the
+      // students we just freed into fresh chats during the send await.
+      clearAutoMatch(data.joinCode);
+      // Flip every active chat to ended before the await so the transcript is
+      // frozen for the send — and settle each one exactly like chats:end-all,
+      // so the class gets the real ending (reason "teacher", name reveal when
+      // the setting is on) instead of the chat going quietly dead under them
+      // for the length of the send. endChat only mutates the chat in place, so
+      // iterating current.chats directly is safe.
+      for (const chat of current.chats) {
+        const result = endChat(current, chat.id);
+        if (!result) continue; // already-ended chats in the list
+        settleMembershipChange(current, result);
+      }
+      const result = await sendTranscriptEmail(current, mailer, log);
+      // To the clicking socket only — the room never hears it. If the teacher
+      // already vanished this emit goes nowhere and removal still runs.
+      answer(result);
+      log.info(
+        { joinCode: data.joinCode, chats: current.chats.length },
+        "activity ended by teacher"
+      );
+    } catch (err) {
+      log.error({ joinCode: data.joinCode, err }, "activity:end failed");
+      // The teacher asked to end; the class IS ending either way. Report the
+      // email as failed when there was an address to fail — the wrap-up card
+      // then tells them to copy anything they need before closing.
+      answer(
+        current.teacherEmail
+          ? { to: current.teacherEmail, state: "failed" }
+          : null
+      );
+    } finally {
+      // onActivityRemoved does the whole teardown: seat timers cleared, every
+      // student sent activity:ended, all sockets (this one included) dropped.
+      // Best-effort: a throw in here would otherwise escape the handler as an
+      // unhandled rejection, and nothing in index.ts catches those.
+      try {
+        removeActivity(current);
+      } catch (err) {
+        log.error({ joinCode: data.joinCode, err }, "activity teardown failed");
+      }
     }
-    const result = await sendTranscriptEmail(current, mailer, log);
-    // To the clicking socket only — the room never hears it. If the teacher
-    // already vanished this emit goes nowhere and removal still runs.
-    socket.emit("activity:end-result", { email: result });
-    log.info(
-      { joinCode: data.joinCode, chats: current.chats.length },
-      "activity ended by teacher"
-    );
-    // onActivityRemoved does the whole teardown: seat timers cleared, every
-    // student sent activity:ended, all sockets (this one included) dropped.
-    removeActivity(current);
   });
 
   socket.on("disconnect", (reason) => {

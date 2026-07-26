@@ -5,6 +5,32 @@ area. Entries are newest-first; add new ones at the top, and add a matching line
 to the index in the same change. Replaced decisions move to Superseded at the
 bottom of this file.
 
+### End activity answers the device that pressed it, and a second host device pressing End mid-send gets no answer
+
+_2026-07-26_
+
+**Decision:** `activity:end` now always answers the pressing socket — the send
+is bounded by SMTP timeouts, a throw anywhere in the wrap-up still emits
+`activity:end-result` with the email marked failed, and the activity is torn
+down either way. The one case deliberately left unanswered: a **second** host
+device pressing End while the first device's send is still in flight. It hits
+the send-once guard
+([`teacher.ts`](../../server/src/live/handlers/teacher.ts)) and returns
+without an emit, so that second device sits on "Sending your transcripts…"
+until doc 03 prompt 2's client-side escape flips it.
+
+**Why:** Founder call, 2026-07-26 — in 99% of classes there is one host
+device, and the guard is what keeps one activity from mailing two transcripts.
+Answering the second device properly means teaching the guard to remember who
+else is waiting, which is real state for a case that barely happens. The
+client-side escape covers it well enough: the second device gets its exit
+after a bounded wait, and the transcript the first device triggered still
+sends exactly once.
+
+Recorded because the missing emit looks like an oversight in the handler and
+reads like a bug worth "fixing" — don't change the `"sending"` guard's early
+return without reopening this.
+
 ### The homepage's "full transcript" claim stands: the 200-line cap is per chat
 
 _2026-07-26_

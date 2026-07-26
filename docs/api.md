@@ -701,7 +701,13 @@ below.
   student sent `activity:ended`, all sockets dropped. The send-once guard
   makes a double-click or a second host device produce exactly one email;
   a repeat while a send is in flight is dropped. Nothing about the result
-  reaches a student socket.
+  reaches a student socket. **The emit is guaranteed and bounded:** SMTP
+  timeouts cap the await at roughly half a minute, and a throw anywhere in
+  the wrap-up still emits exactly one result (email marked `failed`) and
+  still removes the activity. The one socket that hears nothing is a second
+  host device that pressed End during another device's send — a recorded
+  scope cut, not a gap (DECISIONS.md → "End activity answers the device that
+  pressed it").
 - **Chats outlive their students.** A chat record keeps everyone who was
   ever in it (with the name captured at chat start), so a card still
   reads correctly after a member's seat is gone.

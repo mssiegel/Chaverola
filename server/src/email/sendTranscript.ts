@@ -43,8 +43,11 @@ export async function sendTranscriptEmail(
   // on. (existing is null or "failed"; "failed" is the sanctioned one retry.)
   record.transcriptEmail = { to, state: "sending" };
 
-  const { subject, text, html } = formatTranscriptEmail(record);
   try {
+    // Composing is inside the guard too: a throw here (a malformed record, a
+    // formatter bug) used to leave the claim above stuck on "sending"
+    // forever, which makes every later End a silent no-op.
+    const { subject, text, html } = formatTranscriptEmail(record);
     await mailer.send({ to, subject, text, html });
     record.transcriptEmail = { to, state: "sent" };
     log.info(
