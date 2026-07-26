@@ -90,16 +90,15 @@ export function HostActivityDashboard({
   const reconnectingCount = engine.waiting.length - connectedWaiting.length;
 
   // Selection is derived against the live queue: a student who got matched
-  // away, removed, or marked reconnecting (unmatchable — founder call)
-  // simply falls out of it. And never wider than the cast: removing a
-  // character under a selection already made drops the newest taps, so the
-  // Start button's count can't promise a chat the roster has no seats for
-  // (founder call, 2026-07-26). Derived rather than an effect, so the
-  // un-ticking lands in the same render as the roster edit.
-  const validSelectedIds = selectedIds
-    .filter((id) =>
-      engine.waiting.some((s) => s.id === id && s.connection === "connected")
-    )
+  // away or removed simply falls out of it. Leaving the queue is the ONLY
+  // thing that clears a tick — a phone that sleeps for a second is still in
+  // the queue, so the teacher's tap survives it. And never wider than the
+  // cast: removing a character under a selection already made drops the
+  // newest taps, so the Start button's count can't promise a chat the roster
+  // has no seats for (founder call, 2026-07-26). Derived rather than an
+  // effect, so the un-ticking lands in the same render as the roster edit.
+  const presentSelectedIds = selectedIds
+    .filter((id) => engine.waiting.some((s) => s.id === id))
     .slice(0, maxGroupSize);
 
   // Falling out is permanent, so prune the state and don't only derive around
@@ -107,17 +106,25 @@ export function HostActivityDashboard({
   // ending their chat would land them back in the queue still selected from
   // the round before. Adjusted during render (not an effect) — the length
   // guard makes it converge on the next pass.
-  if (validSelectedIds.length !== selectedIds.length) {
-    setSelectedIds(validSelectedIds);
+  if (presentSelectedIds.length !== selectedIds.length) {
+    setSelectedIds(presentSelectedIds);
   }
+
+  // The subset the server would actually pair. A ticked student who's
+  // reconnecting keeps their tick but sits out of every gate and count until
+  // they're back — their seat is unmatchable in its grace window (founder
+  // call), so this is what Start counts, sends, and warns about.
+  const actionableSelectedIds = presentSelectedIds.filter((id) =>
+    connectedWaiting.some((s) => s.id === id)
+  );
 
   const toggleSelect = (studentId: string) => {
     setSelectedIds(
-      validSelectedIds.includes(studentId)
-        ? validSelectedIds.filter((id) => id !== studentId)
-        : validSelectedIds.length < maxGroupSize
-          ? [...validSelectedIds, studentId]
-          : validSelectedIds
+      presentSelectedIds.includes(studentId)
+        ? presentSelectedIds.filter((id) => id !== studentId)
+        : presentSelectedIds.length < maxGroupSize
+          ? [...presentSelectedIds, studentId]
+          : presentSelectedIds
     );
   };
 
@@ -127,11 +134,11 @@ export function HostActivityDashboard({
   let rematchWarning: string | null = null;
   if (
     activity.settings.rematchWarning &&
-    validSelectedIds.length >= 2 &&
-    engine.isExactRematch(validSelectedIds)
+    actionableSelectedIds.length >= 2 &&
+    engine.isExactRematch(actionableSelectedIds)
   ) {
-    // `validSelectedIds` is derived from `engine.waiting`, so the lookup holds.
-    const names = validSelectedIds.map(
+    // Derived from `engine.waiting`, so the lookup holds.
+    const names = actionableSelectedIds.map(
       (id) => engine.waiting.find((s) => s.id === id)!.realName
     );
     rematchWarning = `${listNames(names)} just chatted ${
@@ -140,13 +147,13 @@ export function HostActivityDashboard({
   }
 
   const startSelectedChat = () => {
-    if (validSelectedIds.length < 2) return;
+    if (actionableSelectedIds.length < 2) return;
     // No optimistic clear. The selection is derived against the queue, so a
     // chat that really starts empties it on its own the moment its students
     // leave the queue — and a start the server refuses (a cast that can't
     // seat them, founder call 2026-07-26) leaves the ticks on screen as the
     // thing to fix, which is the whole point of refusing.
-    engine.startChat(validSelectedIds);
+    engine.startChat(actionableSelectedIds);
   };
 
   const confirmPendingAction = () => {
@@ -190,7 +197,8 @@ export function HostActivityDashboard({
     <PairingPanel
       waiting={engine.waiting}
       noStudentsYet={noStudentsYet}
-      selectedIds={validSelectedIds}
+      selectedIds={presentSelectedIds}
+      actionableSelectedIds={actionableSelectedIds}
       onToggleSelect={toggleSelect}
       maxGroupSize={maxGroupSize}
       onStartChat={startSelectedChat}

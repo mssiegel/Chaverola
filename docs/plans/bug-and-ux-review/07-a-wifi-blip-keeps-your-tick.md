@@ -1,6 +1,6 @@
 # 07 — A wifi blip keeps your tick
 
-State: **Not started**
+State: **Complete**
 
 **The problem.** The teacher taps two names to pair them, glances up to
 quiet the room, and one of the phones sleeps for a second. That student's
@@ -36,7 +36,7 @@ not a transient connection state of a row still sitting in it.
   [`teacher-live.md`](../../decisions/teacher-live.md) + DECISIONS.md line
   ("A selection survives a reconnect; only leaving the queue clears it").
 
-- [ ] Prompt — Prune on absence, gate on connection
+- [x] Prompt — Prune on absence, gate on connection
 
 ---
 

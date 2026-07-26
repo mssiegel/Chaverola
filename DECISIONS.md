@@ -110,6 +110,7 @@ git: `git log -- DECISIONS.md`.
   - [Host the Activity docks to the bottom edge at every breakpoint](docs/decisions/teacher-setup.md#host-the-activity-docks-to-the-bottom-edge-at-every-breakpoint)
   - [Setup sections each carry one brand accent; settings stays the quiet one](docs/decisions/teacher-setup.md#setup-sections-each-carry-one-brand-accent-settings-stays-the-quiet-one)
 - [Teacher live activity page](docs/decisions/teacher-live.md)
+  - [A selection survives a reconnect; only leaving the queue clears it](docs/decisions/teacher-live.md#a-selection-survives-a-reconnect-only-leaving-the-queue-clears-it)
   - [The wrapped-up card gives up on the email after 25 seconds and says so](docs/decisions/teacher-live.md#the-wrapped-up-card-gives-up-on-the-email-after-25-seconds-and-says-so)
   - [End activity answers the device that pressed it, and a second host device pressing End mid-send gets no answer](docs/decisions/teacher-live.md#end-activity-answers-the-device-that-pressed-it-and-a-second-host-device-pressing-end-mid-send-gets-no-answer)
   - [The homepage's "full transcript" claim stands: the 200-line cap is per chat](docs/decisions/teacher-live.md#the-homepages-full-transcript-claim-stands-the-200-line-cap-is-per-chat)

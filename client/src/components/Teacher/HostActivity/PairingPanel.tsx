@@ -9,6 +9,8 @@ import {
   Zap,
 } from "lucide-react";
 
+import { listNames } from "@chaverola/shared";
+
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { formatWaitShort } from "@/lib/time";
@@ -21,7 +23,10 @@ export interface PairingPanelProps {
   waiting: WaitingStudent[];
   /** Nobody has joined at all — a fresh real activity, not a busy round. */
   noStudentsYet: boolean;
+  /** Every tick on screen — a reconnecting student keeps theirs. */
   selectedIds: string[];
+  /** The ticked students the server would actually pair right now. */
+  actionableSelectedIds: string[];
   onToggleSelect: (studentId: string) => void;
   /** min(4, characters on the roster) — how big a selection can get. */
   maxGroupSize: number;
@@ -57,14 +62,17 @@ export interface PairingPanelProps {
  *
  * A student marked "reconnecting" renders dimmed with a lost-connection tag:
  * their seat is riding out its grace window, the wait clock keeps ticking,
- * and the only thing a teacher can do with them is Remove. They stay in the
- * list but out of every count and gate here — a button that lights up for
- * students the server won't pair does nothing when it's tapped.
+ * and they stay out of every count and gate here — a button that lights up
+ * for students the server won't pair does nothing when it's tapped. A tick
+ * they already had survives the blip, though: it renders beside the tag, and
+ * tapping the row still clears it, so one sleeping phone can't strand a
+ * selection the teacher wants to change.
  */
 export function PairingPanel({
   waiting,
   noStudentsYet,
   selectedIds,
+  actionableSelectedIds,
   onToggleSelect,
   maxGroupSize,
   onStartChat,
@@ -88,6 +96,13 @@ export function PairingPanel({
   const connectedCount = waiting.filter(
     (s) => s.connection === "connected"
   ).length;
+  // Ticked but off the air. Start counts only who can pair, so name the ones
+  // it's waiting on rather than leave the teacher doing the subtraction.
+  const parkedNames = waiting
+    .filter(
+      (s) => selectedIds.includes(s.id) && !actionableSelectedIds.includes(s.id)
+    )
+    .map((s) => s.realName);
   // The host page renders this panel twice (desktop rail + the phones'
   // collapsible section), so the switch id must be unique per instance.
   const autoMatchSwitchId = useId();
@@ -179,13 +194,20 @@ export function PairingPanel({
             </Button>
             <Button
               onClick={onStartChat}
-              disabled={selectedIds.length < 2}
+              disabled={actionableSelectedIds.length < 2}
               className="w-full"
             >
               <Sparkles aria-hidden />
               Start their chat
-              {selectedIds.length >= 2 ? ` (${selectedIds.length})` : ""}
+              {actionableSelectedIds.length >= 2
+                ? ` (${actionableSelectedIds.length})`
+                : ""}
             </Button>
+            {parkedNames.length > 0 && (
+              <p role="status" className="text-xs text-amber-700">
+                Waiting on {listNames(parkedNames)} to reconnect.
+              </p>
+            )}
           </div>
           <p className="-mt-2 text-xs text-muted-foreground lg:-mt-4">
             Tap two students to pair them
@@ -281,11 +303,19 @@ export function PairingPanel({
                     type="button"
                     onClick={() => onToggleSelect(student.id)}
                     aria-pressed={selected}
-                    // A dropped student is unmatchable while their seat
-                    // rides out the grace window (founder call) — and the
-                    // disabled dim doubles as the row's marking.
-                    disabled={dropped || (!selected && selectionFull)}
-                    className="flex min-w-0 flex-1 items-center gap-2.5 rounded-lg px-2 py-1.5 text-left transition-colors hover:bg-accent/60 disabled:cursor-not-allowed disabled:opacity-60"
+                    // A dropped student can't be newly ticked — their seat is
+                    // unmatchable while it rides out the grace window (founder
+                    // call), and the disabled dim doubles as the row's
+                    // marking. Untapping one that's already ticked stays live:
+                    // otherwise a blip at a full selection locks the teacher
+                    // out of pairing anyone at all.
+                    disabled={!selected && (dropped || selectionFull)}
+                    className={cn(
+                      "flex min-w-0 flex-1 items-center gap-2.5 rounded-lg px-2 py-1.5 text-left transition-colors hover:bg-accent/60 disabled:cursor-not-allowed disabled:opacity-60",
+                      // A ticked dropped row is still tappable (to untick), so
+                      // the dim has to come from the drop, not from disabled.
+                      dropped && "opacity-60"
+                    )}
                   >
                     {rowContent}
                   </button>

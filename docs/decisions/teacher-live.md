@@ -5,6 +5,37 @@ area. Entries are newest-first; add new ones at the top, and add a matching line
 to the index in the same change. Replaced decisions move to Superseded at the
 bottom of this file.
 
+### A selection survives a reconnect; only leaving the queue clears it
+
+_2026-07-26_
+
+**Decision:** A tick in the pairing queue clears when the student actually
+leaves the queue (matched away, removed, seat expired) or when the cast
+shrinks below the selection. A student who drops and comes back keeps their
+tick. While they're down the row dims and carries its "lost connection" tag
+with the tick still showing, **Start their chat** counts only the students
+who can pair right now, and a line under the button reads "Waiting on Maya
+to reconnect." Tapping a dimmed row that's already ticked still unticks it;
+a dimmed row that isn't ticked can't be ticked.
+
+**Why:** A phone sleeping for a second is the most ordinary event in a
+classroom, and it was silently deleting the teacher's tap. The teacher looks
+up to quiet the room, looks back, and the pair they set up is gone with
+nothing on screen saying why. The permanence was there to stop a real
+problem (a student who leaves and returns arriving still selected from the
+round before), but that problem is about absence from the queue, not about a
+connection state on a row still sitting in it. Splitting the two keeps the
+round-trip protection and stops the blip from costing a tap.
+
+Untick stays live on a dimmed row because the alternative strands the
+teacher: with a two-character cast, one blip on a full selection would leave
+them unable to pair anybody until the phone woke up.
+
+_Implemented in
+[HostActivity/index.tsx](../../client/src/components/Teacher/HostActivity/index.tsx)
+and
+[PairingPanel](../../client/src/components/Teacher/HostActivity/PairingPanel.tsx)._
+
 ### The wrapped-up card gives up on the email after 25 seconds and says so
 
 _2026-07-26_
