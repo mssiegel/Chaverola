@@ -339,11 +339,14 @@ export interface ServerToClientEvents {
   /** Teacher room minus the sender — keeps a second host device coherent. */
   "settings:changed": (payload: { settings: ActivitySettings }) => void;
   /** Student only, targeted at every connected seat — the student-visible
-   *  detail pair after a teacher edit (feature 17), full-replace like
-   *  settings:changed. `studentInstructions: null` means the teacher cleared
-   *  them. Never the teacher room: a second host device is silent
-   *  last-write-wins, like the email. */
+   *  details after a teacher edit (feature 17; roster added by 18),
+   *  full-replace like settings:changed. `studentInstructions: null` means
+   *  the teacher cleared them. Never the teacher room: a second host device
+   *  is silent last-write-wins, like the email. This is the LOBBY channel:
+   *  the roster drives the lobby chips and the next deal, never a running
+   *  chat (that reads chat:started's frozen `cast`). */
   "activity:details-changed": (payload: {
+    characters: Character[];
     hostName: string;
     studentInstructions: string | null;
   }) => void;
@@ -476,11 +479,15 @@ export interface ClientToServerEvents {
    *  has no echo event: the email is one field on the teacher's own form, so
    *  last write wins and a second host device keeps the copy it fetched. */
   "activity:update-email": (payload: { teacherEmail: string | null }) => void;
-  /** Teacher only; zod-validated, full-replace of the student-visible detail
-   *  pair (feature 17). `studentInstructions: null` clears them — a blank
-   *  string is rejected, same rule as the email. Fans out to connected seats
-   *  as activity:details-changed; no teacher-room echo. */
+  /** Teacher only; zod-validated, full-replace of the student-visible
+   *  details (feature 17; roster added by 18). `studentInstructions: null`
+   *  clears them — a blank string is rejected, same rule as the email. Fans
+   *  out to connected seats as activity:details-changed; no teacher-room
+   *  echo. `characters` is the whole roster: a rename, an emoji swap, an add
+   *  and a removal are one edit here. Ids are minted client-side for rows
+   *  added mid-activity and stored as given — never reminted. */
   "activity:update-details": (payload: {
+    characters: Character[];
     hostName: string;
     studentInstructions: string | null;
   }) => void;
@@ -617,7 +624,7 @@ below.
   seat's `joinedAt` and every active chat's `startedAt` forward by the
   pause duration, clamped to now — pre-pause time is preserved,
   mid-pause arrivals resume at zero, and nobody's clock jumps.
-- **Settings sync; the roster doesn't.** `settings:update` is
+- **Settings sync.** `settings:update` is
   zod-validated against the same schema `POST /activities` uses and
   replaces the stored settings wholesale; the server echoes
   `settings:changed` to the teacher's **other** devices (the room minus
@@ -627,22 +634,35 @@ below.
   through the echo re-syncs at reconnect instead of shipping its stale
   object whole on its next edit. `revealNames` now
   acts (feature 10): while it is on, a chat's `chat:ended` reveals each
-  peer's real name, read live at end time. Character edits stay local to
-  the teacher's page until feature 18.
-- **The host name and student instructions sync too, on their own
-  event.** `activity:update-details` (feature 17) replaces the stored
-  `hostName` and `studentInstructions` wholesale, deleting the
-  instructions when they arrive as `null` — the teacher emptied the box,
-  which means "no instructions", matching the teacher's own page.
-  Validated against the same limits the create request uses (blank host
-  names and blank instruction strings rejected); invalid payloads are
-  logged and dropped, and the instructions text never reaches the log.
-  The server fans `activity:details-changed` out to every **connected
-  seat** — students render the pair in the lobby — and never to the
-  teacher room: a second host device is silent last-write-wins, like the
-  email (founder call, 2026-07-26). A student joining later gets the
-  updated values from `GET /activities/:joinCode` — the stored record is
-  the single source.
+  peer's real name, read live at end time.
+- **The roster, host name and student instructions sync too, on their own
+  event.** `activity:update-details` (feature 17; the roster added by 18)
+  replaces the stored `characters`, `hostName` and `studentInstructions`
+  wholesale, deleting the instructions when they arrive as `null` — the
+  teacher emptied the box, which means "no instructions", matching the
+  teacher's own page. Validated against the same limits the create request
+  uses (blank host names, blank instruction strings and duplicate
+  character names rejected, 2–4 characters), plus a duplicate-id rule the
+  create path can't need; invalid payloads are logged and dropped, and
+  neither the instructions text nor the character names ever reach the log
+  (a count does). The server fans `activity:details-changed` out to every
+  **connected seat** — students render all three in the lobby — and never
+  to the teacher room: a second host device is silent last-write-wins,
+  like the email (founder call, 2026-07-26). A student joining later gets
+  the updated values from `GET /activities/:joinCode` — the stored record
+  is the single source.
+- **A roster edit reaches the lobby and the next chat, never a running
+  one.** The stored `characters` array is what the lobby chips render and
+  what `createChat` / pair-everyone deal from, so a rename, an emoji swap
+  (emoji live inside the name), an add or a removal lands on every lobby
+  within a second and on every chat that starts afterward. A chat already
+  in progress is untouched: it froze its cast onto its members when it
+  started and ships that on `chat:started`'s `cast` (feature 18 prompt 1).
+  Two students mid-scene keep the names they began with, and so does the
+  teacher's card for that chat. Character **ids** are the join key and are
+  never reminted: rows added mid-activity arrive with client-minted ids
+  and are stored as given, so a chat member's `characterId` keeps
+  resolving for the activity's life.
 - **The teacher's email syncs too, on its own event.**
   `activity:update-email` (feature 11) sets `teacherEmail` on the stored
   record, or deletes it when the payload is `null` — the teacher cleared

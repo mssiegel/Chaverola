@@ -26,6 +26,12 @@ export interface StoredActivity {
   joinCode: string;
   hostKey: string;
   hostName: string;
+  /** The LIVE roster — mutable since feature 18: activity:update-details
+   *  replaces it wholesale, so this is what the lobby chips and the next
+   *  deal read. It is deliberately NOT what a running chat reads: each chat
+   *  froze its own cast onto `chat.members[].character` when it started, so
+   *  a rename, an add or a removal here never reaches a scene in progress.
+   *  Ids are minted here only at create; a live edit brings its own. */
   characters: Character[];
   studentInstructions?: string;
   teacherEmail?: string;

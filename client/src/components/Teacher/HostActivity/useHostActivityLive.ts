@@ -7,6 +7,7 @@ import {
 } from "@chaverola/shared";
 import type {
   ActivitySettings,
+  Character,
   ChatSnapshot,
   ChatTranscriptLine,
   LobbyConnectionState,
@@ -340,12 +341,16 @@ export function useHostActivityLive({
     socketRef.current?.emit("activity:update-email", { teacherEmail });
   };
   const updateDetails = (details: {
+    characters: Character[];
     hostName: string;
     studentInstructions: string | null;
   }) => {
     // No listener to pair with this emit: activity:details-changed goes to
     // student seats only — a second host device is last-write-wins, like the
-    // email (founder call, 2026-07-26).
+    // email (founder call, 2026-07-26). The roster rides along (feature 18):
+    // it replaces the one the lobby chips and the next deal read, and never
+    // touches a chat already running — those hold the cast they froze at
+    // start, which is what the cards already render.
     socketRef.current?.emit("activity:update-details", details);
   };
 

@@ -424,9 +424,14 @@ describe("the live lobby", () => {
     // transcript gets mailed, so a student who could rewrite it would have
     // the whole class's chats sent to them.
     studentA.emit("activity:update-email", { teacherEmail: "them@evil.test" });
-    // Feature 17: the details pair reaches every student lobby, so a student
-    // who could rewrite it would rename the host for the whole class.
+    // Feature 17: the details reach every student lobby, so a student who
+    // could rewrite them would rename the host for the whole class — and
+    // since feature 18 they carry the roster too, so they'd recast it.
     studentA.emit("activity:update-details", {
+      characters: [
+        { id: "hacked-1", name: "Whoever I Say" },
+        { id: "hacked-2", name: "And This One" },
+      ],
       hostName: "Not The Teacher",
       studentInstructions: null,
     });
@@ -435,6 +440,10 @@ describe("the live lobby", () => {
     expect(activity.settings).toEqual(DEFAULT_ACTIVITY_SETTINGS);
     expect(activity.teacherEmail).toBeUndefined();
     expect(activity.hostName).toBe("Ms. Cohen");
+    expect(activity.characters.map((c) => c.name)).toEqual([
+      "Brutus",
+      "Caesar",
+    ]);
     expect(started).toEqual([]);
 
     // `!` — both members are eligible; the chat just built above them.

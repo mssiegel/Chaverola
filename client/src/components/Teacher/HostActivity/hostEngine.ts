@@ -1,4 +1,8 @@
-import type { ActivitySettings, LobbyConnectionState } from "@chaverola/shared";
+import type {
+  ActivitySettings,
+  Character,
+  LobbyConnectionState,
+} from "@chaverola/shared";
 
 import type { HostedChat, WaitingStudent } from "./hostWorld";
 
@@ -50,13 +54,17 @@ export interface HostEngine {
    *  tab may be gone); the demo's world reads activity.teacherEmail directly,
    *  so its engine no-ops, exactly like updateSettings. */
   updateTeacherEmail: (email: string | null) => void;
-  /** The student-visible detail pair — the host name and the lobby
-   *  instructions, where null clears the instructions (feature 17). The live
-   *  engine sends it to the server so joining students get the current copy;
-   *  the demo's page reads its local activity directly, so its engine no-ops,
-   *  exactly like updateSettings. No echo comes back — a second host device
-   *  is last-write-wins, like the email. */
+  /** The student-visible details — the character roster, the host name, and
+   *  the lobby instructions, where null clears the instructions (feature 17;
+   *  roster added by 18). The live engine sends them to the server so
+   *  joining students get the current copy, students already in the lobby
+   *  follow live, and the next chat is dealt the current cast; a chat
+   *  already running keeps the one it froze at start. The demo's page reads
+   *  its local activity directly, so its engine no-ops, exactly like
+   *  updateSettings. No echo comes back — a second host device is
+   *  last-write-wins, like the email. */
   updateDetails: (details: {
+    characters: Character[];
     hostName: string;
     studentInstructions: string | null;
   }) => void;

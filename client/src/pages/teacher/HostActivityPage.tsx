@@ -270,6 +270,7 @@ function ConnectedHostActivityView({
       activity.studentInstructions !== next.studentInstructions
     ) {
       engine.updateDetails({
+        characters: next.characters,
         hostName: next.hostName,
         studentInstructions: next.studentInstructions ?? null,
       });

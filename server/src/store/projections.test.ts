@@ -108,8 +108,9 @@ describe("toActivity (student projection)", () => {
 });
 
 describe("toActivityDetails (the details-changed payload, student-visible)", () => {
-  it("exposes exactly hostName and studentInstructions — never teacherEmail, settings, or hostKey", () => {
+  it("exposes exactly characters, hostName and studentInstructions — never teacherEmail, settings, or hostKey", () => {
     expect(Object.keys(toActivityDetails(fullRecord)).sort()).toEqual([
+      "characters",
       "hostName",
       "studentInstructions",
     ]);

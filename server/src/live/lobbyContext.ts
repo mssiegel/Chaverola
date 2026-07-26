@@ -274,12 +274,14 @@ export function createLobbyContext(
     }
   }
 
-  /** The student-visible detail pair changed (host name / instructions) —
-   *  every connected seat hears it, exactly like the pause flip: chat
-   *  members, lobby waiters, and wrappingUp seats alike, so a lobby the
-   *  student returns to is already current. Deliberately never the teacher
-   *  room: a second host device is silent last-write-wins, like the email
-   *  (founder call, 2026-07-26). */
+  /** The student-visible details changed (the roster, host name, or
+   *  instructions) — every connected seat hears it, exactly like the pause
+   *  flip: chat members, lobby waiters, and wrappingUp seats alike, so a
+   *  lobby the student returns to is already current. A student mid-chat
+   *  gets it too and is right not to care: their chat renders its frozen
+   *  cast, and this only re-dresses the lobby they'll come back to.
+   *  Deliberately never the teacher room: a second host device is silent
+   *  last-write-wins, like the email (founder call, 2026-07-26). */
   function sendActivityDetails(record: StoredActivity): void {
     const payload = toActivityDetails(record);
     for (const seat of record.seats.byId.values()) {

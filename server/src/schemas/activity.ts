@@ -74,12 +74,70 @@ export const teacherEmailUpdateSchema = z.union([
     .regex(EMAIL_PATTERN, "That doesn't look like an email address."),
 ]);
 
+/**
+ * A character as the LIVE roster carries it (feature 18) — the create
+ * request's row plus the id, because a mid-activity roster arrives from a
+ * panel that already knows every id. The server takes ids as given rather
+ * than reminting them: a chat member holds a `characterId` and a re-minted
+ * id would orphan the deal-time bookkeeping, and ids are opaque anyway —
+ * nothing renders them (founder call, 2026-07-26). The cap is generous and
+ * exists only so an opaque key can't be used as a storage channel.
+ */
+const liveCharacterSchema = z.object({
+  id: z.string().trim().min(1, "Every character needs an id.").max(120),
+  name: z
+    .string()
+    .trim()
+    .min(1, "Every character needs a name.")
+    .refine(
+      withinNameCap,
+      `Character names max out at ${NAME_MAX_CHARS} chars.`
+    ),
+});
+
 /** The socket's activity:update-details validator — the same limits the
- *  create request's hostName and studentInstructions fields use (the
- *  code-point caps included), plus an explicit null for clearing the
+ *  create request's hostName, characters and studentInstructions fields use
+ *  (the code-point caps included), plus an explicit null for clearing the
  *  instructions. A blank string is rejected on purpose: a clear travels as
- *  null, so an emptied textarea can never be mistaken for instructions. */
+ *  null, so an emptied textarea can never be mistaken for instructions.
+ *  The refines are repeated here rather than shared with
+ *  createActivityRequestSchema — the teacherEmailUpdateSchema precedent:
+ *  the two schemas describe different payloads and are free to drift. */
 export const activityDetailsUpdateSchema = z.object({
+  characters: z
+    .array(liveCharacterSchema)
+    .min(MIN_CHARACTERS, `At least ${MIN_CHARACTERS} characters.`)
+    .max(MAX_CHARACTERS, `At most ${MAX_CHARACTERS} characters.`)
+    .superRefine((characters, ctx) => {
+      // The same duplicate-name rule (trimmed, case-insensitive) and the same
+      // later-row choice as the setup form, plus a duplicate-ID rule the
+      // create path can't need: these ids are minted client-side, and two
+      // characters sharing one would deal two chat members the same
+      // characterId — which is how a student's peer labels collapse.
+      const names = new Set<string>();
+      const ids = new Set<string>();
+      characters.forEach((character, index) => {
+        const key = character.name.toLowerCase();
+        if (names.has(key)) {
+          ctx.addIssue({
+            code: "custom",
+            message: "Two characters can't share a name.",
+            path: [index, "name"],
+          });
+        } else {
+          names.add(key);
+        }
+        if (ids.has(character.id)) {
+          ctx.addIssue({
+            code: "custom",
+            message: "Two characters can't share an id.",
+            path: [index, "id"],
+          });
+        } else {
+          ids.add(character.id);
+        }
+      });
+    }),
   hostName: z
     .string()
     .trim()

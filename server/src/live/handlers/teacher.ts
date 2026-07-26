@@ -276,21 +276,31 @@ export function registerTeacherHandlers(
     const current = getByHostKey(data.hostKey);
     if (!current) return;
     current.hostName = parsed.data.hostName;
+    // The roster stops being write-once here (feature 18): a fresh array of
+    // fresh objects, never the parsed rows aliased, so nothing a chat
+    // already snapshotted can be mutated from under it. Ids arrive from the
+    // panel and are stored as given — a chat member's characterId has to
+    // keep resolving, so the server never remints. Whoever is mid-chat is
+    // untouched: their cast was frozen at chat start.
+    current.characters = parsed.data.characters.map((character) => ({
+      id: character.id,
+      name: character.name,
+    }));
     if (parsed.data.studentInstructions === null) {
       delete current.studentInstructions;
     } else {
       current.studentInstructions = parsed.data.studentInstructions;
     }
-    // Every connected seat hears the new pair so students' lobbies can
-    // follow live (feature 17 prompt 2 registers the listener — until then
-    // the emit lands nowhere, the safe direction of the deploy race). No
-    // teacher-room echo: a second host device is last-write-wins, like the
-    // email. The instructions text stays out of the log — the boolean is
-    // what we'd actually debug with.
+    // Every connected seat hears the new details so students' lobbies follow
+    // live. No teacher-room echo: a second host device is last-write-wins,
+    // like the email. The instructions text and the character names stay out
+    // of the log — the boolean and the count are what we'd actually debug
+    // with, and a roster is the teacher's classroom material.
     sendActivityDetails(current);
     log.info(
       {
         joinCode: data.joinCode,
+        characters: parsed.data.characters.length,
         instructions: parsed.data.studentInstructions !== null,
       },
       "activity details updated by teacher"

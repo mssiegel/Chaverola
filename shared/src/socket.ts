@@ -232,12 +232,23 @@ export interface ServerToClientEvents {
   /** Teacher room minus the sender — keeps a second host device coherent. */
   "settings:changed": (payload: { settings: ActivitySettings }) => void;
   /** Student only, targeted at every connected seat — the student-visible
-   *  detail pair (the two lobby-only fields) after a teacher edit,
-   *  full-replace like settings:changed. `studentInstructions: null` means
-   *  the teacher cleared them. Deliberately NEVER the teacher room: a second
-   *  host device is silent last-write-wins, like the email (founder call,
-   *  2026-07-26). Feature 18 extends this payload with the character roster. */
+   *  details after a teacher edit, full-replace like settings:changed.
+   *  `studentInstructions: null` means the teacher cleared them.
+   *  Deliberately NEVER the teacher room: a second host device is silent
+   *  last-write-wins, like the email (founder call, 2026-07-26).
+   *
+   *  This is the LOBBY channel — the roster it carries drives the lobby's
+   *  character chips and the next chat the server deals, never a chat
+   *  already running. A running chat rides its own frozen-cast channel
+   *  (chat:started's `cast`, feature 18 prompt 1), so a rename lands in the
+   *  lobby while the two students mid-scene keep the names they started
+   *  with. A Character is `{ id, name }` — public data every student
+   *  already fetches at join through GET /activities/:joinCode — which is
+   *  why a roster is safe here and the email, settings, hostKey, seats and
+   *  chats are not. The exact-key pin in projections.test.ts is what keeps
+   *  them out. */
   "activity:details-changed": (payload: {
+    characters: Character[];
     hostName: string;
     studentInstructions: string | null;
   }) => void;
@@ -299,12 +310,22 @@ export interface ClientToServerEvents {
    *  has no echo event: the email is one field on the teacher's own form, so
    *  last write wins and a second host device keeps the copy it fetched. */
   "activity:update-email": (payload: { teacherEmail: string | null }) => void;
-  /** Teacher only; zod-validated, full-replace of the student-visible detail
-   *  pair (feature 17). `studentInstructions: null` clears them — a blank
-   *  string is rejected, same rule as the email. Fans out to connected seats
-   *  as activity:details-changed; no teacher-room echo (last write wins on
-   *  the rare second host device, like the email). */
+  /** Teacher only; zod-validated, full-replace of the student-visible
+   *  details (feature 17, roster added by 18). `studentInstructions: null`
+   *  clears them — a blank string is rejected, same rule as the email. Fans
+   *  out to connected seats as activity:details-changed; no teacher-room
+   *  echo (last write wins on the rare second host device, like the email).
+   *
+   *  `characters` is the whole roster, replaced wholesale: a rename, an
+   *  emoji swap (emoji live inside the name), an add and a removal are all
+   *  the same edit on the wire. Ids are minted CLIENT-side for rows added
+   *  while the activity runs and taken as given here — they are opaque, and
+   *  a chat that already references one must keep resolving, so the server
+   *  never remints them (founder call, 2026-07-26). This replaces the
+   *  roster the LOBBY and the next deal read; a running chat keeps the cast
+   *  it started with. */
   "activity:update-details": (payload: {
+    characters: Character[];
     hostName: string;
     studentInstructions: string | null;
   }) => void;

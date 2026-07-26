@@ -32,12 +32,24 @@ export interface LiveActivityDraft extends ActivityDraftFields {
   characters: LiveCharacterRow[];
 }
 
-let liveCharacterSeq = 0;
-
-/** Permanent id for a character row added while the activity runs. */
+/**
+ * Permanent id for a character row added while the activity runs.
+ *
+ * Random, not a counter: since feature 18 these ids ride the wire and land
+ * in the server's roster as given, so they have to be unique beyond this
+ * tab. A module counter reset on every page load, which meant refreshing
+ * the host page and adding a row minted an id the stored roster was already
+ * using — two characters sharing one id, and two chat members dealt the same
+ * characterId, which is how a student's peer labels collapse into each
+ * other. The `live-` prefix is only for reading logs; ids are opaque and
+ * nothing renders them. crypto.randomUUID needs a secure context, so the
+ * same fallback as mintNonce covers plain-http dev hosts.
+ */
 export function mintLiveCharacterId(): string {
-  liveCharacterSeq += 1;
-  return `live-character-${liveCharacterSeq}`;
+  if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
+    return `live-${crypto.randomUUID()}`;
+  }
+  return `live-${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
 }
 
 export function liveDraftFromActivity(

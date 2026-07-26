@@ -35,16 +35,20 @@ export function toActivity(stored: StoredActivity): Activity {
   return activity;
 }
 
-/** The student-visible detail pair as activity:details-changed carries it
- *  (feature 17) — this payload reaches student sockets, so teacherEmail,
- *  settings, and the hostKey must be structurally unable to ride along.
- *  `null`, not an omitted key: a clear must be expressible on the wire
- *  (toActivity keeps its omit-when-undefined shape). */
+/** The student-visible details as activity:details-changed carries them
+ *  (feature 17; the roster joined in 18) — this payload reaches student
+ *  sockets, so teacherEmail, settings, and the hostKey must be structurally
+ *  unable to ride along. The roster is the one thing here students already
+ *  hold: toActivity hands them the same array at join. `null`, not an
+ *  omitted key, for the instructions: a clear must be expressible on the
+ *  wire (toActivity keeps its omit-when-undefined shape). */
 export function toActivityDetails(stored: StoredActivity): {
+  characters: Character[];
   hostName: string;
   studentInstructions: string | null;
 } {
   return {
+    characters: stored.characters,
     hostName: stored.hostName,
     studentInstructions: stored.studentInstructions ?? null,
   };
