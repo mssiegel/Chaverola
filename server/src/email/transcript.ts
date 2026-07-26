@@ -5,7 +5,6 @@ import {
 
 import type { StoredChat } from "../live/matching";
 import type { StoredActivity } from "../store/activityStore";
-import { resolveCharacter } from "../store/projections";
 
 /*
   The transcript email's body, composed twice from one record — pure, no io.
@@ -18,9 +17,10 @@ import { resolveCharacter } from "../store/projections";
 
   The teacher's live cards render `(Rachel) Brutus 🔪: text` with real names
   (ConversationLines.tsx, showRealNames); both parts keep that format. Names
-  come off chat.members (captured at chat start), so a student who left
-  mid-chat still resolves — their card label survives them, and their lines
-  stay in place.
+  AND character labels come off chat.members (both captured at chat start),
+  so a student who left mid-chat still resolves, and a character renamed or
+  removed after the chat keeps the label it ran under — the email is a
+  record of the chat as it happened, never the roster as it is now.
 
   Emoji ride through as UTF-8: every modern mail client renders them, and it
   keeps the email matching what the teacher saw live.
@@ -47,9 +47,9 @@ function summaryLine(record: StoredActivity): string {
   return `${count(record.chats.length, "chat")} · ${count(students, "student")}`;
 }
 
-function participantLine(chat: StoredChat, activity: StoredActivity): string[] {
+function participantLine(chat: StoredChat): string[] {
   return chat.members.map((member) => {
-    const label = resolveCharacter(activity, member.characterId).name;
+    const label = member.character.name;
     const left = chat.inactiveStudentIds.includes(member.studentId)
       ? ` ${LEFT_NOTE}`
       : "";
@@ -57,7 +57,7 @@ function participantLine(chat: StoredChat, activity: StoredActivity): string[] {
   });
 }
 
-function transcriptLines(chat: StoredChat, activity: StoredActivity): string[] {
+function transcriptLines(chat: StoredChat): string[] {
   if (chat.lines.length === 0) return [EMPTY_CHAT_NOTE];
 
   const byId = new Map(
@@ -68,9 +68,7 @@ function transcriptLines(chat: StoredChat, activity: StoredActivity): string[] {
     // appendLine refuses a non-member, so this can't miss; the fallback keeps
     // the formatter total anyway.
     const name = member?.name ?? line.studentId;
-    const label = member
-      ? resolveCharacter(activity, member.characterId).name
-      : line.studentId;
+    const label = member?.character.name ?? line.studentId;
     return `(${name}) ${label}: ${line.text}`;
   });
 
@@ -103,9 +101,9 @@ function formatTextBody(record: StoredActivity): string {
     const block = [
       DIVIDER,
       `Chat ${index + 1} of ${total}`,
-      ...participantLine(chat, record),
+      ...participantLine(chat),
       "",
-      ...transcriptLines(chat, record),
+      ...transcriptLines(chat),
     ];
     blocks.push(block.join("\n"));
   });
@@ -163,13 +161,9 @@ function noteHtml(text: string, extraStyle = ""): string {
   return `<div style="font-size:13px;color:${MUTED};${extraStyle}">${escapeHtml(text)}</div>`;
 }
 
-function castLineHtml(
-  chat: StoredChat,
-  activity: StoredActivity,
-  colors: Map<string, string>
-): string {
+function castLineHtml(chat: StoredChat, colors: Map<string, string>): string {
   const parts = chat.members.map((member) => {
-    const label = resolveCharacter(activity, member.characterId).name;
+    const label = member.character.name;
     const left = chat.inactiveStudentIds.includes(member.studentId)
       ? ` <span style="font-size:13px;color:${MUTED};">${escapeHtml(LEFT_NOTE)}</span>`
       : "";
@@ -184,7 +178,6 @@ function castLineHtml(
 
 function transcriptLinesHtml(
   chat: StoredChat,
-  activity: StoredActivity,
   colors: Map<string, string>
 ): string[] {
   if (chat.lines.length === 0) return [noteHtml(EMPTY_CHAT_NOTE)];
@@ -195,9 +188,7 @@ function transcriptLinesHtml(
   const rows = chat.lines.map((line, index) => {
     const member = byId.get(line.studentId);
     const name = member?.name ?? line.studentId;
-    const label = member
-      ? resolveCharacter(activity, member.characterId).name
-      : line.studentId;
+    const label = member?.character.name ?? line.studentId;
     const color = (member && colors.get(member.characterId)) ?? INK;
     // ConversationLines' rhythm: 0px between lines from the same speaker,
     // +4px when the speaker changes.
@@ -236,9 +227,9 @@ function formatHtmlBody(record: StoredActivity): string {
     [
       `<div style="border-top:1px solid ${HAIRLINE};margin-top:28px;padding-top:14px;">`,
       `<div style="font-size:12px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:${MUTED};">Chat ${index + 1} of ${total}</div>`,
-      `<div style="margin-top:6px;">${castLineHtml(chat, record, colors)}</div>`,
+      `<div style="margin-top:6px;">${castLineHtml(chat, colors)}</div>`,
       `<div style="margin-top:12px;">`,
-      ...transcriptLinesHtml(chat, record, colors),
+      ...transcriptLinesHtml(chat, colors),
       `</div>`,
       `</div>`,
     ].join("\n")

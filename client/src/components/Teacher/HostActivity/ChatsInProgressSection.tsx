@@ -2,7 +2,6 @@ import { LogOut, MessagesSquare, Pause, Play, UsersRound } from "lucide-react";
 
 import { ChatCard } from "@/components/Teacher/ChatCard";
 import { Button } from "@/components/ui/button";
-import { withCurrentCharacters } from "@/lib/hostActivity";
 import type { HostedActivity } from "@/types/activity";
 import type { Participant } from "@/types/chat";
 
@@ -147,12 +146,10 @@ export function ChatsInProgressSection({
             {chats.map((chat) => (
               <ChatCard
                 key={chat.id}
-                // Labels resolve against the CURRENT roster, so a live
-                // rename re-labels every card instantly.
-                participants={withCurrentCharacters(
-                  chat.participants,
-                  activity
-                )}
+                // The chat's own frozen cast — labels were captured when
+                // the chat started, so a roster edit never relabels a
+                // running card (feature 18).
+                participants={chat.participants}
                 messages={chat.messages}
                 isEnded={false}
                 isPaused={paused}

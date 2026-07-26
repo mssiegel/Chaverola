@@ -23,6 +23,23 @@ function line(studentId: string, text: string): StoredChatLine {
   return { id: `line-${lineId++}`, studentId, text, sentAt: lineId };
 }
 
+// The roster below AND the labels members captured at chat start —
+// identical here, as they are until a mid-activity roster edit.
+const CHARACTERS = {
+  herzl: { id: "herzl", name: "Herzl 🎩" },
+  golda: { id: "golda", name: "Golda 🕊️" },
+  rivka: { id: "rivka", name: "Rivka 📜" },
+  david: { id: "david", name: "David" }, // no emoji on purpose
+};
+
+function member(
+  studentId: string,
+  name: string,
+  characterId: keyof typeof CHARACTERS
+): StoredChat["members"][number] {
+  return { studentId, name, characterId, character: CHARACTERS[characterId] };
+}
+
 function chat(over: Partial<StoredChat>): StoredChat {
   return {
     id: `chat-${lineId++}`,
@@ -41,12 +58,7 @@ const fixture: StoredActivity = {
   joinCode: "4321",
   hostKey: "PREVIEWPREVIEWPREVIEWPRE",
   hostName: "Ms. Rivkin",
-  characters: [
-    { id: "herzl", name: "Herzl 🎩" },
-    { id: "golda", name: "Golda 🕊️" },
-    { id: "rivka", name: "Rivka 📜" },
-    { id: "david", name: "David" }, // no emoji on purpose
-  ],
+  characters: Object.values(CHARACTERS),
   studentInstructions:
     "Basel, 1897. The First Zionist Congress is about to open, and everyone has an opinion.",
   teacherEmail: "preview@example.com",
@@ -57,10 +69,10 @@ const fixture: StoredActivity = {
   chats: [
     chat({
       members: [
-        { studentId: "s1", name: "Ana Fallback", characterId: "herzl" },
-        { studentId: "s2", name: "Ben", characterId: "golda" },
-        { studentId: "s3", name: "Carmel", characterId: "rivka" },
-        { studentId: "s4", name: "Dov", characterId: "david" },
+        member("s1", "Ana Fallback", "herzl"),
+        member("s2", "Ben", "golda"),
+        member("s3", "Carmel", "rivka"),
+        member("s4", "Dov", "david"),
       ],
       lines: [
         line("s1", "If you will it, it is no dream."),
@@ -75,10 +87,7 @@ const fixture: StoredActivity = {
       ],
     }),
     chat({
-      members: [
-        { studentId: "s5", name: "Efrat", characterId: "golda" },
-        { studentId: "s6", name: "Gil", characterId: "herzl" },
-      ],
+      members: [member("s5", "Efrat", "golda"), member("s6", "Gil", "herzl")],
       inactiveStudentIds: ["s6"],
       lines: [
         line("s6", "I have to go — my delegation is calling."),
@@ -86,10 +95,7 @@ const fixture: StoredActivity = {
       ],
     }),
     chat({
-      members: [
-        { studentId: "s7", name: "Hila", characterId: "rivka" },
-        { studentId: "s8", name: "Ido", characterId: "david" },
-      ],
+      members: [member("s7", "Hila", "rivka"), member("s8", "Ido", "david")],
       lines: [],
     }),
   ],

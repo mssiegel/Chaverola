@@ -20,15 +20,24 @@ import {
   timers. Each `apply*` takes the previous match (the `setMatch` prev) and a
   wire payload and returns the next match; the hook that owns `match`
   (useActiveMatch) wires them as one-liners and owns the timers and refs the
-  spec keeps beside them. Roster resolution takes the fetched characters as a
+  spec keeps beside them. Roster resolution takes the characters as a
   parameter instead of closing over the page's activity — the only reason
-  these weren't already pure.
+  these weren't already pure. Since feature 18 the roster passed in is the
+  chat's OWN frozen cast (`payload.cast`, captured server-side at chat
+  start), never the mutable lobby roster — a roster edit reaches the lobby
+  and future chats, and a running chat keeps the cast it started with. The
+  fetched lobby roster remains only as the deploy-window fallback for a
+  server that doesn't send `cast` yet.
 */
 
 /** chat:started's payload, as the presence hook hands it over. */
 export type ChatStartedPayload = {
   chatId: string;
   selfCharacterId: string;
+  /** The chat's frozen cast, captured at chat start — what every in-chat
+   *  label resolves against. Optional for the deploy window where an older
+   *  server sends none; the hook then falls back to the lobby roster. */
+  cast?: Character[];
   peers: ChatPeer[];
   everPeers: ChatPeer[];
   lines: ChatLine[];

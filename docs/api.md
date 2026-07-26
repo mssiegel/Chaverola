@@ -248,6 +248,9 @@ export interface ServerToClientEvents {
     settings: ActivitySettings; // the stored settings — a woken host device re-syncs from its connect-time snapshot instead of committing its stale copy
   }) => void;
   /** Student only, targeted; re-sent on every resume while matched.
+   *  `cast` is the chat's FROZEN character roster — every member's
+   *  character captured at chat start — and is what in-chat labels
+   *  resolve against, never the lobby's mutable `activity.characters`;
    *  `lines` is the transcript backlog (authoritative on every delivery);
    *  `everPeers` is everyone ever in the room minus self;
    *  `reconnectingPeers` is the offline backlog — active peers mid-grace,
@@ -258,6 +261,7 @@ export interface ServerToClientEvents {
   "chat:started": (payload: {
     chatId: string;
     selfCharacterId: string;
+    cast: Character[];
     peers: ChatPeer[];
     everPeers: ChatPeer[];
     lines: ChatLine[];
@@ -696,6 +700,14 @@ below.
   live roster and shrinks on `chat:update`; `everPeers` is everyone ever
   in the room minus self, so a departed member's backlog lines (and their
   character's color) survive a refresh.
+- **`cast` is the chat's frozen character roster.** Each member's
+  character is captured onto the chat when it starts, and every in-chat
+  label — self, peers, `everPeers`, the reveal rows, the teacher's card,
+  the emailed transcript — reads that snapshot, never the live roster.
+  A roster edit (feature 18) reaches the lobby and every chat that starts
+  afterward; a chat already running keeps the cast it started with.
+  Absent from an older server during the deploy window; the client falls
+  back to the join-time roster.
 - **The teacher reads everything, live, with real names.** Every accepted
   `chat:send` also emits one `chat:transcript-line` to the teacher room —
   the same stored line the students got, projected with `studentId` and

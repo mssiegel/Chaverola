@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 
 import {
   TYPING_HEARTBEAT_MS,
+  type Character,
   type ChatLine,
   type ChatPeer,
   type StudentAuth,
@@ -138,6 +139,10 @@ export function useLobbyPresence({
   onChatStarted?: (payload: {
     chatId: string;
     selfCharacterId: string;
+    /** The chat's frozen cast — captured at chat start, what in-chat labels
+     *  resolve against. Optional for the deploy window — an older server
+     *  omits it, and the page falls back to the lobby roster. */
+    cast?: Character[];
     peers: ChatPeer[];
     everPeers: ChatPeer[];
     lines: ChatLine[];

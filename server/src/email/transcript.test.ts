@@ -23,6 +23,22 @@ function line(studentId: string, text: string): StoredChatLine {
   return { id: `${studentId}-${text}`, studentId, text, sentAt: 0 };
 }
 
+// The roster the record carries AND the labels members captured at chat
+// start — identical here, as they are until a mid-activity roster edit.
+const CHARACTERS = {
+  brutus: { id: "brutus", name: "Brutus 🔪" },
+  caesar: { id: "caesar", name: "Caesar 👑" },
+  cicero: { id: "cicero", name: "Cicero" }, // no emoji on purpose
+};
+
+function member(
+  studentId: string,
+  name: string,
+  characterId: keyof typeof CHARACTERS
+): StoredChat["members"][number] {
+  return { studentId, name, characterId, character: CHARACTERS[characterId] };
+}
+
 function chat(over: Partial<StoredChat>): StoredChat {
   return {
     id: "chat",
@@ -42,11 +58,7 @@ function record(chats: StoredChat[]): StoredActivity {
     joinCode: "5678",
     hostKey: "AAAAAAAAAAAAAAAAAAAAAAAA",
     hostName: "Ms. Cohen",
-    characters: [
-      { id: "brutus", name: "Brutus 🔪" },
-      { id: "caesar", name: "Caesar 👑" },
-      { id: "cicero", name: "Cicero" }, // no emoji on purpose
-    ],
+    characters: Object.values(CHARACTERS),
     studentInstructions: "Rome, 44 BC, the night before the Ides of March.",
     teacherEmail: "cohen@example.com",
     settings: { ...DEFAULT_ACTIVITY_SETTINGS },
@@ -88,8 +100,8 @@ describe("formatTranscriptEmail", () => {
       record([
         chat({
           members: [
-            { studentId: "s1", name: "Rachel", characterId: "brutus" },
-            { studentId: "s2", name: "Noa", characterId: "caesar" },
+            member("s1", "Rachel", "brutus"),
+            member("s2", "Noa", "caesar"),
           ],
           lines: [line("s1", "Et tu?"), line("s2", "rude")],
         }),
@@ -109,8 +121,8 @@ describe("formatTranscriptEmail", () => {
       record([
         chat({
           members: [
-            { studentId: "s1", name: "Rachel", characterId: "brutus" },
-            { studentId: "s3", name: "Dana", characterId: "cicero" },
+            member("s1", "Rachel", "brutus"),
+            member("s3", "Dana", "cicero"),
           ],
           inactiveStudentIds: ["s3"],
           // Dana spoke before leaving — the line survives, in place.
@@ -129,8 +141,8 @@ describe("formatTranscriptEmail", () => {
       record([
         chat({
           members: [
-            { studentId: "s1", name: "Rachel", characterId: "brutus" },
-            { studentId: "s2", name: "Noa", characterId: "caesar" },
+            member("s1", "Rachel", "brutus"),
+            member("s2", "Noa", "caesar"),
           ],
           lines: [],
         }),
@@ -146,7 +158,7 @@ describe("formatTranscriptEmail", () => {
     const { text } = formatTranscriptEmail(
       record([
         chat({
-          members: [{ studentId: "s1", name: "Rachel", characterId: "brutus" }],
+          members: [member("s1", "Rachel", "brutus")],
           lines,
         }),
       ])
@@ -160,9 +172,7 @@ describe("formatTranscriptEmail", () => {
     const { html } = formatTranscriptEmail(
       record([
         chat({
-          members: [
-            { studentId: "s1", name: "Rachel <QA>", characterId: "brutus" },
-          ],
+          members: [member("s1", "Rachel <QA>", "brutus")],
           lines: [line("s1", `<script>alert("x")</script> & 1 < 2`)],
         }),
       ])
@@ -180,15 +190,15 @@ describe("formatTranscriptEmail", () => {
       record([
         chat({
           members: [
-            { studentId: "s1", name: "Rachel", characterId: "brutus" },
-            { studentId: "s2", name: "Noa", characterId: "caesar" },
+            member("s1", "Rachel", "brutus"),
+            member("s2", "Noa", "caesar"),
           ],
           lines: [line("s1", "first")],
         }),
         chat({
           members: [
-            { studentId: "s2", name: "Noa", characterId: "caesar" },
-            { studentId: "s1", name: "Rachel", characterId: "brutus" },
+            member("s2", "Noa", "caesar"),
+            member("s1", "Rachel", "brutus"),
           ],
           lines: [line("s2", "second")],
         }),
@@ -212,8 +222,8 @@ describe("formatTranscriptEmail", () => {
   it("numbers each chat against the total", () => {
     const twoMembers = {
       members: [
-        { studentId: "s1", name: "Rachel", characterId: "brutus" },
-        { studentId: "s2", name: "Noa", characterId: "caesar" },
+        member("s1", "Rachel", "brutus"),
+        member("s2", "Noa", "caesar"),
       ],
       lines: [line("s1", "hi")],
     };

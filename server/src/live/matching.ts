@@ -7,6 +7,7 @@ import {
   pairEveryonePlan,
   pickAutoMatchPair,
 } from "@chaverola/shared";
+import type { Character } from "@chaverola/shared";
 
 import type { StoredActivity } from "../store/activityStore";
 import type { Seat } from "./seats";
@@ -54,9 +55,17 @@ export interface StoredChatLine {
  *  decides what leaves (students get characterIds only). */
 export interface StoredChat {
   id: string; // randomUUID
-  /** Everyone ever in the room, seat order. `name` is captured at chat
-   *  start, so a removed seat's card label survives. */
-  members: { studentId: string; name: string; characterId: string }[];
+  /** Everyone ever in the room, seat order. `name` and `character` are
+   *  captured at chat start — a removed seat's card label survives, and a
+   *  roster edit never rewrites a running chat's cast. `characterId` stays
+   *  beside the snapshot on purpose: the id is the deal/matching key, the
+   *  object is the frozen label. */
+  members: {
+    studentId: string;
+    name: string;
+    characterId: string;
+    character: Character;
+  }[];
   inactiveStudentIds: string[];
   /** The transcript, capped at CHAT_TRANSCRIPT_MAX_LINES (oldest drop).
    *  In memory like everything else — a deploy wipes it. */
@@ -153,12 +162,18 @@ export function createChat(
   const cast = dealCast(activity.characters, seated.length);
   const chat: StoredChat = {
     id: randomUUID(),
-    members: seated.map((seat, index) => ({
-      studentId: seat.studentId,
-      name: seat.name,
+    members: seated.map((seat, index) => {
       // `cast` and `seated` are the same length by construction.
-      characterId: cast[index]!.id,
-    })),
+      const character = cast[index]!;
+      return {
+        studentId: seat.studentId,
+        name: seat.name,
+        characterId: character.id,
+        // A copy, not the roster reference — the snapshot must stay frozen
+        // however a future roster edit lands (replace or in-place).
+        character: { id: character.id, name: character.name },
+      };
+    }),
     inactiveStudentIds: [],
     lines: [],
     startedAt: now,

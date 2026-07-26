@@ -63,8 +63,8 @@ function toTranscriptMessage(line: ChatTranscriptLine): ChatMessage {
 }
 
 /** Server truth → the chat shape the dashboard renders. The wire's
- *  `character` is the SERVER roster's copy, which withCurrentCharacters
- *  keeps as the fallback when a local edit dropped the character. */
+ *  `character` is the chat's frozen snapshot (captured at chat start), and
+ *  the cards render it as-is — a roster edit never relabels a card. */
 function toHostedChat(snapshot: ChatSnapshot): HostedChat {
   return {
     id: snapshot.id,

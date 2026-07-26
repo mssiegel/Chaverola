@@ -138,7 +138,7 @@ prompt 4.
 Where a prompt names an **Ask the founder** question, raise it when you run that
 prompt. Do not resolve it from this document.
 
-- [ ] Prompt 1 — A chat's cast is fixed the moment it starts
+- [x] Prompt 1 — A chat's cast is fixed the moment it starts
 - [ ] Prompt 2 — A renamed character reaches the lobby and every future chat
 - [ ] Prompt 3 — Removing a character actually removes it
 - [ ] Prompt 4 — Nobody is silently left out of a chat, and the panel stops lying

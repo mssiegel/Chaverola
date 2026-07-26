@@ -3,7 +3,6 @@ import { useEffect, useRef, useState } from "react";
 import { isExactRematchIn } from "@chaverola/shared";
 
 import { scaledMs } from "@/lib/demoTime";
-import { withCurrentCharacters } from "@/lib/hostActivity";
 import { nextId, randInt, randomFrom } from "@/lib/random";
 import { useLatestRef } from "@/lib/useLatestRef";
 import { HOST_CHATTER_LINES } from "@/mockData";
@@ -175,7 +174,6 @@ export function useHostActivityDemo(
   // signed out (student side) — here they just leave the simulation.
   const removeFromChat = (chatId: string, studentId: string) => {
     const w = worldRef.current;
-    const activity = activityRef.current;
     const chat = w.chats.find((c) => c.id === chatId);
     if (!chat || chat.status !== "active") return;
     const remaining = activeChatMembers(chat).filter((p) => p.id !== studentId);
@@ -201,10 +199,10 @@ export function useHostActivityDemo(
       return;
     }
 
+    // The deal-time character IS the label — a chat's cast is frozen when
+    // it starts (feature 18), so no re-resolve against the live roster.
     const removed = chat.participants.find((p) => p.id === studentId);
-    const label = removed
-      ? withCurrentCharacters([removed], activity)[0]!.character.name
-      : "Someone";
+    const label = removed ? removed.character.name : "Someone";
     commit({
       ...w,
       chats: w.chats.map((c) =>

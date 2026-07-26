@@ -5,6 +5,44 @@ area. Entries are newest-first; add new ones at the top, and add a matching line
 to the index in the same change. Replaced decisions move to Superseded at the
 bottom of this file.
 
+### A chat freezes its cast the moment it starts
+
+_2026-07-26_
+
+**Decision:** When a chat forms, each seat's character is captured onto the
+chat's stored members, and every surface that shows a character **inside a
+chat** reads that snapshot: the teacher's in-progress and completed cards,
+both students' bubbles and peer labels, the end-of-chat reveal rows, and the
+emailed transcript. The student wire carries it as `cast` on `chat:started`
+(and every resume re-delivery). Character edits reach the waiting lobby and
+every chat that starts **after** the edit (feature 18 prompt 2 makes the
+roster mutable); a chat already in progress keeps the cast it started with,
+always. The teacher-page-only relabel (`withCurrentCharacters`), which
+re-resolved card labels against the local roster on every render, is retired
+— cards render the captured truth.
+
+**Why:** Founder call, 2026-07-23. Renaming the cast is a between-rounds
+move, not a mid-conversation one: two students deep in a scene as Brutus and
+Cassius should not watch their names rewrite themselves under them, and the
+teacher and both students must always agree on who is in that room. The
+alternative — following a rename into a live chat, which earlier drafts of
+the feature planned — was rejected as disorienting for no gain. The snapshot
+also makes removing a character label-safe at any time (its label lives on
+in the chats that used it), which feature 18 prompt 3 leans on. This revises
+[Live edits propagate after a 1-second pause, and invalid states never do](#live-edits-propagate-after-a-1-second-pause-and-invalid-states-never-do):
+its promise that valid edits apply to "in-progress chat cards, student
+surfaces" no longer describes character edits.
+
+_Implemented in [matching.ts](../../server/src/live/matching.ts) (the
+capture at chat start),
+[projections.ts](../../server/src/store/projections.ts) (`toChatSnapshot`
+reads the snapshot; `toChatStarted` ships `cast`),
+[transcript.ts](../../server/src/email/transcript.ts) (the email reads it
+too), and
+[useActiveMatch](../../client/src/pages/student/join/useActiveMatch.ts)
+(in-chat labels resolve against `payload.cast`); plan in
+[docs/plans/feature-18](../plans/feature-18-character-roster-syncs-live.md)._
+
 ### Students' lobbies follow name and instructions edits live, and the swap is silent
 
 _2026-07-26_
@@ -1544,6 +1582,12 @@ stepper, a row's remove button — now commit alone and immediately, valid
 draft or not; see
 [A click in the live settings panel commits alone and immediately](#a-click-in-the-live-settings-panel-commits-alone-and-immediately).
 The 1-second debounce and last-valid-wins for typed fields are unchanged.
+
+**Update (2026-07-26):** revised for characters specifically — a character
+edit now deliberately stops at the door of a running chat (feature 18's
+frozen cast, founder call 2026-07-23), so the phrase "in-progress chat
+cards, student surfaces" no longer describes character edits. See
+[A chat freezes its cast the moment it starts](#a-chat-freezes-its-cast-the-moment-it-starts).
 
 _Implemented in
 [LiveSettingsPanel](../../client/src/components/Teacher/HostActivity/LiveSettingsPanel.tsx)

@@ -1,7 +1,6 @@
 import { Archive } from "lucide-react";
 
 import { ChatCard } from "@/components/Teacher/ChatCard";
-import { withCurrentCharacters } from "@/lib/hostActivity";
 import type { HostedActivity } from "@/types/activity";
 
 import { CollapsibleSection } from "./CollapsibleSection";
@@ -45,7 +44,9 @@ export function CompletedChatsSection({
           {chats.map((chat) => (
             <ChatCard
               key={chat.id}
-              participants={withCurrentCharacters(chat.participants, activity)}
+              // Frozen at chat start — an ended chat's labels are history,
+              // never re-resolved against the roster (feature 18).
+              participants={chat.participants}
               messages={chat.messages}
               isEnded
               // A real empty state: a chat can end before its first message

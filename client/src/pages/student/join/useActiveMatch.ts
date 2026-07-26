@@ -182,7 +182,11 @@ export function useActiveMatch({
         applyChatStarted(
           prev,
           payload,
-          activity?.characters ?? [],
+          // The chat resolves against its OWN frozen cast — captured
+          // server-side at chat start — never the mutable lobby roster;
+          // the lobby copy is only the deploy-window fallback for a
+          // server that doesn't send `cast` yet.
+          payload.cast ?? activity?.characters ?? [],
           session.name
         )
       );

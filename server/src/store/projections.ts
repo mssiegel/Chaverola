@@ -153,25 +153,10 @@ export function toLobbyWelcome(
   };
 }
 
-/** Characters resolve from the SERVER roster (character edits are
- *  local-only client-side, so the server's copy never changes and the id
- *  was minted from it — the find can't miss; the fallback keeps the
- *  projector total anyway). Exported for the transcript formatter
- *  (server/src/email/transcript.ts), which resolves the same way. */
-export function resolveCharacter(
-  activity: StoredActivity,
-  characterId: string
-): Character {
-  return (
-    activity.characters.find((c) => c.id === characterId) ?? {
-      id: characterId,
-      name: characterId,
-    }
-  );
-}
-
 /** The teacher's chat card (room lobby:${joinCode}) — real names are fine
- *  here; never a token. */
+ *  here; never a token. `character` is the member's frozen snapshot,
+ *  captured at chat start — never re-resolved against the roster, so a
+ *  roster edit relabels nothing already on a card. */
 export function toChatSnapshot(
   chat: StoredChat,
   activity: StoredActivity,
@@ -182,7 +167,7 @@ export function toChatSnapshot(
     participants: chat.members.map((member) => ({
       id: member.studentId,
       name: member.name,
-      character: resolveCharacter(activity, member.characterId),
+      character: member.character,
     })),
     inactiveStudentIds: [...chat.inactiveStudentIds],
     reconnectingStudentIds: activeMembers(chat)
@@ -255,6 +240,7 @@ export function toChatStarted(
 ): {
   chatId: string;
   selfCharacterId: string;
+  cast: Character[];
   peers: ChatPeer[];
   everPeers: ChatPeer[];
   lines: ChatLine[];
@@ -267,6 +253,10 @@ export function toChatStarted(
   return {
     chatId: chat.id,
     selfCharacterId: self.characterId,
+    // The chat's frozen cast — every member's captured character (each
+    // dealt once, so already distinct). The client resolves every in-chat
+    // label against this, never the mutable lobby roster.
+    cast: chat.members.map((member) => member.character),
     peers: toChatPeers(chat, studentId),
     everPeers: toChatEverPeers(chat, studentId),
     lines: chat.lines.map((line) => toChatLine(chat, line)),

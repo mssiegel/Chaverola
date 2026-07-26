@@ -47,7 +47,14 @@ function fakeMailer(opts: { reject?: boolean; park?: boolean } = {}): {
 function makeRecord(over: Partial<StoredActivity> = {}): StoredActivity {
   const chat: StoredChat = {
     id: "chat-1",
-    members: [{ studentId: "s1", name: "Rachel", characterId: "brutus" }],
+    members: [
+      {
+        studentId: "s1",
+        name: "Rachel",
+        characterId: "brutus",
+        character: { id: "brutus", name: "Brutus" },
+      },
+    ],
     inactiveStudentIds: [],
     lines: [{ id: "l1", studentId: "s1", text: "hi", sentAt: 0 }],
     startedAt: 0,
@@ -143,7 +150,14 @@ describe("sendTranscriptEmail", () => {
   it("sends nothing when no chat has a single message", async () => {
     const silentChat: StoredChat = {
       id: "chat-1",
-      members: [{ studentId: "s1", name: "Rachel", characterId: "brutus" }],
+      members: [
+        {
+          studentId: "s1",
+          name: "Rachel",
+          characterId: "brutus",
+          character: { id: "brutus", name: "Brutus" },
+        },
+      ],
       inactiveStudentIds: [],
       lines: [],
       startedAt: 0,

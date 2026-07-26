@@ -91,11 +91,13 @@ describe("createChat", () => {
           studentId: matched.studentId,
           name: matched.name,
           characterId: "brutus",
+          character: { id: "brutus", name: "Brutus" },
         },
         {
           studentId: partner.studentId,
           name: partner.name,
           characterId: "caesar",
+          character: { id: "caesar", name: "Caesar" },
         },
       ],
       inactiveStudentIds: [],

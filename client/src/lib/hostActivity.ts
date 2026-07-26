@@ -1,5 +1,5 @@
 import type { ActivitySettings, HostedActivity } from "@/types/activity";
-import type { Character, Participant } from "@/types/chat";
+import type { Character } from "@/types/chat";
 
 import {
   validateActivityDraft,
@@ -11,12 +11,14 @@ import {
 /*
   The host page's live-edit model. The settings panel edits a draft that
   mirrors the setup form (same fields, same caps, same validation), but with
-  one extra rule: character ids are STABLE. A rename must reach every surface
-  that shows the character — roster chips, in-progress chat cards, future
-  pairings — and they all resolve labels by character id, so the id must
-  never change once a row exists. New rows therefore mint their permanent id
-  the moment they're added (ids are opaque; only setup slugs them for
-  readability). See DECISIONS.md → "Teacher live activity page".
+  one extra rule: character ids are STABLE. The server's chat members
+  reference characters by id (the deal/matching key), and the roster chips
+  and future pairings resolve by id too, so the id must never change once a
+  row exists. New rows therefore mint their permanent id the moment they're
+  added (ids are opaque; only setup slugs them for readability). Chat cards
+  are NOT part of this loop anymore: a chat's labels are frozen server-side
+  when it starts (feature 18), so a roster edit never touches a running or
+  completed card. See DECISIONS.md → "Teacher live activity page".
 */
 
 /**
@@ -117,24 +119,6 @@ export function mergeExternalSettings(
     }
   }
   return merged;
-}
-
-/**
- * Re-labels stored participants with the roster's CURRENT characters, by id.
- * Chats capture their characters when they start; rendering through this
- * makes a live rename reach every card instantly. A character
- * that's no longer on the roster (removed after its chats ended) falls back
- * to the label it had, so completed cards never lose their names.
- */
-export function withCurrentCharacters(
-  participants: Participant[],
-  activity: HostedActivity
-): Participant[] {
-  return participants.map((p) => ({
-    ...p,
-    character:
-      activity.characters.find((c) => c.id === p.character.id) ?? p.character,
-  }));
 }
 
 /**

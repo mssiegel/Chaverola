@@ -26,8 +26,9 @@ export interface QueueEntry {
 }
 
 /** Teacher-only surface (room lobby:${joinCode}) — real names are fine here.
- *  Exact-allowlist-tested: never a token. `character` is the SERVER roster's
- *  copy (id + name) so a locally-renamed roster still resolves. */
+ *  Exact-allowlist-tested: never a token. `character` is the chat's frozen
+ *  snapshot, captured at chat start like `name` — a roster edit never
+ *  relabels a chat already on a card. */
 export interface ChatParticipant {
   id: string; // studentId
   name: string; // captured at chat start — survives seat removal
@@ -131,10 +132,18 @@ export interface ServerToClientEvents {
    *  chat:peer-connection, seconds computed at emit — and is authoritative
    *  on every delivery for the same reason as `lines`: the "dropped"
    *  fan-out skips disconnected seats too, so a resumer who was dark when
-   *  a partner dropped learns it only here. */
+   *  a partner dropped learns it only here. `cast` is the chat's FROZEN
+   *  character roster — every member's character captured at chat start
+   *  (self included, everyone ever in the room) — and is what the client
+   *  resolves every in-chat label against, never the mutable lobby roster:
+   *  a roster edit (feature 18) reaches the lobby and future chats, never
+   *  a chat already running. Public data only (the ids the recipient
+   *  already has, plus display names) — the characterIds-only pin is about
+   *  peers' real names and studentIds, which this never carries. */
   "chat:started": (payload: {
     chatId: string;
     selfCharacterId: string;
+    cast: Character[];
     peers: ChatPeer[];
     everPeers: ChatPeer[];
     lines: ChatLine[];

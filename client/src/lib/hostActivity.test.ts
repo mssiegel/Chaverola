@@ -1,14 +1,12 @@
 import { describe, expect, it } from "vitest";
 
 import type { HostedActivity } from "@/types/activity";
-import type { Participant } from "@/types/chat";
 
 import { DEFAULT_ACTIVITY_SETTINGS } from "./activitySetup";
 import {
   activityFromLiveDraft,
   mergeExternalSettings,
   validateLiveDraft,
-  withCurrentCharacters,
   type LiveActivityDraft,
 } from "./hostActivity";
 
@@ -124,26 +122,5 @@ describe("mergeExternalSettings", () => {
       autoMatch: false,
       revealNames: false,
     });
-  });
-});
-
-describe("withCurrentCharacters", () => {
-  const participants: Participant[] = [
-    {
-      id: "s1",
-      realName: "Ada",
-      character: { id: "caesar", name: "Old Name" },
-    },
-    {
-      id: "s2",
-      realName: "Ben",
-      character: { id: "long-gone", name: "Removed Character" },
-    },
-  ];
-
-  it("re-labels by id from the current roster, falling back for removed ones", () => {
-    const relabeled = withCurrentCharacters(participants, baseActivity);
-    expect(relabeled[0]!.character.name).toBe("Caesar's ghost 👻");
-    expect(relabeled[1]!.character.name).toBe("Removed Character");
   });
 });

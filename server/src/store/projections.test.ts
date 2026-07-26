@@ -61,13 +61,30 @@ const fullSeat: Seat = {
 // The third member is INACTIVE on purpose: with only active members,
 // `peers` and `everPeers` project identically and wiring everPeers to
 // activeMembers would pass anyway. The departed member is what tells the
-// two rosters apart.
+// two rosters apart. Brutus's captured character deliberately DIVERGES
+// from the roster's copy — what tells the frozen snapshot apart from a
+// live re-resolve.
 const fullChat: StoredChat = {
   id: "chat-1",
   members: [
-    { studentId: "student-1", name: "Rachel", characterId: "brutus" },
-    { studentId: "student-2", name: "Noa", characterId: "caesar" },
-    { studentId: "student-3", name: "Dana", characterId: "cicero" },
+    {
+      studentId: "student-1",
+      name: "Rachel",
+      characterId: "brutus",
+      character: { id: "brutus", name: "Brutus the Elder 🔪" },
+    },
+    {
+      studentId: "student-2",
+      name: "Noa",
+      characterId: "caesar",
+      character: { id: "caesar", name: "Caesar" },
+    },
+    {
+      studentId: "student-3",
+      name: "Dana",
+      characterId: "cicero",
+      character: { id: "cicero", name: "Cicero" },
+    },
   ],
   inactiveStudentIds: ["student-3"],
   lines: [
@@ -164,6 +181,12 @@ describe("toChatSnapshot (teacher chat card)", () => {
         "name",
       ]);
     }
+    // The label is the member's FROZEN snapshot, never a re-resolve against
+    // the roster (whose brutus reads "Brutus 🔪").
+    expect(snapshot.participants[0]!.character).toEqual({
+      id: "brutus",
+      name: "Brutus the Elder 🔪",
+    });
   });
 
   it("projects transcript lines with the sender resolved off the members", () => {
@@ -213,6 +236,7 @@ describe("toChatStarted (the student wire)", () => {
   it("carries characterIds only — no names, no studentIds", () => {
     const started = toChatStarted(fullChat, record, "student-1", 30_000);
     expect(Object.keys(started).sort()).toEqual([
+      "cast",
       "chatId",
       "everPeers",
       "lines",
@@ -228,6 +252,22 @@ describe("toChatStarted (the student wire)", () => {
     for (const peer of [...started.peers, ...started.everPeers]) {
       expect(Object.keys(peer)).toEqual(["characterId"]);
     }
+  });
+
+  it("ships the frozen cast — captured characters only, never a seat or a name", () => {
+    const started = toChatStarted(fullChat, record, "student-1", 30_000);
+    // Everyone ever in the room, self and the inactive member included —
+    // the roster everPeers (and self) resolve against.
+    expect(started.cast).toHaveLength(3);
+    for (const character of started.cast) {
+      expect(Object.keys(character).sort()).toEqual(["id", "name"]);
+    }
+    // The captured label, not the roster's ("Brutus 🔪") — the frozen
+    // snapshot is the whole point of the field.
+    expect(started.cast[0]!).toEqual({
+      id: "brutus",
+      name: "Brutus the Elder 🔪",
+    });
   });
 
   it("projects lines as characterId-only — no studentId, no name", () => {
