@@ -68,12 +68,11 @@ believing a dead room is live.
    Precedence when stacked: pause banner, then self-reconnect, then peer
    banner — self-reconnect suppresses the peer banner while active (you
    can't trust peer state through a dead socket).
-3. **Composer stance:** don't disable it (drafting while reconnecting is
-   fine, and doc 05 marks undelivered sends). If doc 05 hasn't landed, keep
-   sends emitting as today — socket.io buffers and flushes on reconnect;
-   the banner is the honesty layer. **Founder question when running this
-   prompt:** should send be soft-blocked while reconnecting, or allowed to
-   buffer? Buffering is today's behavior and pairs well with 05.
+3. **Composer stance — settled (founder, 2026-07-26): buffer and flush.**
+   Don't disable the composer and don't block Send: socket.io queues sends
+   and delivers them on reconnect — today's behavior, kept deliberately.
+   The banner (plus doc 05's pending state, once landed) is the honesty
+   layer. No soft-block.
 4. **Demo parity:** the student demo already has a wifi-blip control wired
    to the LOBBY pill (`demoWifiBlip` via `useDemoLobby`,
    [`JoinActivityPage.tsx:204-205`](../../client/src/pages/student/JoinActivityPage.tsx)).

@@ -46,27 +46,32 @@ back to their draft.
 
 1. In [`MessageComposer.tsx`](../../client/src/components/chat/MessageComposer.tsx),
    split the `disabled` prop's meaning: keep `disabled` for terminal states
-   (chat ended — where dropping focus is correct) and add a `locked` (or
-   `readOnly`) mode for pause: the `<textarea>` gets `readOnly` +
-   `aria-disabled`, `handleSend` refuses while locked (the `disabled` guard
-   at :130 extends to it), the send button disables visually, and
-   `onTyping` suppression comes free (readOnly fires no change events; the
-   heartbeat also dies server-side on pause). The paused placeholder swap
-   ("Paused. Hang tight…") only shows when the box is empty — with a draft,
-   the draft stays visible; that's correct, leave it.
+   (chat ended — where dropping focus is correct) and add a `locked` mode
+   for pause. **Design (settled by the founder's no-handset call,
+   2026-07-26): the locked textarea stays fully enabled** — no `disabled`,
+   no `readOnly`, so no browser on any platform can force a blur. The lock
+   lives in behavior: `handleSend` refuses while locked (extend the
+   `disabled` guard at :130), the send button disables visually with
+   `aria-disabled`, the composer takes the dimmed/paused styling, and
+   `onTyping` gets an explicit `!locked` gate — the free suppression
+   `disabled` gave is gone since change events still fire on an enabled
+   field (the server dropping paused heartbeats stays the belt). The
+   paused placeholder swap ("Paused. Hang tight…") only shows when the box
+   is empty — with a draft, the draft stays visible and editable; editing
+   during a pause is drafting, which is fine — they just can't send.
 2. [`Chatbox/index.tsx:200`](../../client/src/components/Student/Chatbox/index.tsx)
    passes the new mode for `isPaused`; the ended path keeps `disabled`.
 3. Check the emoji picker while locked: the smile button should disable
    with the composer (it already hides on phones —
    `pointer-coarse:hidden` — so this is desktop-only polish).
-4. **iOS reality check (📱):** some iOS versions treat a focused field
-   flipping to `readOnly` differently (keyboard may stay, may close —
-   that's the point of the handset leg). If the keyboard still closes on
-   iOS, fall back to keeping the textarea fully enabled and blocking at
-   `handleSend` + visual treatment; the goal is no forced blur. Record the
-   handset ask in
-   [`docs/pending-manual-tests.md`](../pending-manual-tests.md) if no
-   device is available when this runs.
+4. **Handset check (📱, pre-routed):** founder call 2026-07-26 — no
+   device will be available when this runs, which is exactly why step 1
+   avoids `readOnly` (whose iOS keyboard behavior only a handset can
+   answer). Record the ask in
+   [`docs/pending-manual-tests.md`](../pending-manual-tests.md) as part
+   of this prompt: on a real iPhone, pause mid-word → keyboard stays up,
+   no layout jump, draft still editable, send refused; resume → typing
+   continues without re-tapping.
 5. **Demo parity:** the demo teacher's "Pause all chats" drives the same
    student component through the demo engines — verify the demo student
    chat behaves identically (`/activity/join/1234?fast=10` while the demo
@@ -83,7 +88,8 @@ chrome-collapse chain (it's `max-sm`) but gets the same no-blur lock.
 **Done when:** `pnpm typecheck` green; browser pass (`verify:up --scale
 10`, phone width): with a draft mid-word, teacher pauses → banner appears,
 keyboard stays, layout doesn't jump, send is refused; resume → typing
-continues without re-tapping. Demo pass per step 5. Handset leg run or
-logged. Decision entry + DECISIONS.md line in this commit. `pnpm format`,
+continues without re-tapping. Demo pass per step 5. Handset ask logged in
+[`docs/pending-manual-tests.md`](../pending-manual-tests.md). Decision
+entry + DECISIONS.md line in this commit. `pnpm format`,
 one commit to `main`, push, tick this box, flip doc + README state to
 Complete.

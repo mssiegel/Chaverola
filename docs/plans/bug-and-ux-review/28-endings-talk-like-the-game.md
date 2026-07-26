@@ -55,9 +55,9 @@ naming servers — and no other student-facing string talks infrastructure.
 3. **Sweep** the student-world strings for other ops-voice leaks (grep
    `client/src` for `server`, `signed out`, `connection` in user-facing
    strings): expected finds — the unreachable copy ("We can't reach
-   Chaverola right now…" — acceptable, it's genuinely a network message;
-   founder's call whether to warm it), and doc 24's removal notice (leave
-   it — owned there). Fix only what's clearly ops-voice on a student
+   Chaverola right now…" — **settled, founder 2026-07-26: leave it
+   technical**; a network failure is the one moment plain speech beats
+   charm), and doc 24's removal notice (leave it — owned there). Fix only what's clearly ops-voice on a student
    screen; list what was left alone in the commit message.
 4. **Demo parity:** the demo never shows the gone card (the demo activity
    can't die). Nothing to do; note it.

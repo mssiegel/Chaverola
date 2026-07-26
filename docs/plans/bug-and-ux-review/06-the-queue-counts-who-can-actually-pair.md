@@ -53,11 +53,10 @@ enabled button that does nothing.
    `PairingPanel`'s CTA enablement + hold-notice counts. The queue **list**
    keeps rendering all seats (amber rows included) — that's the recorded
    decision and it's right.
-2. Decide the hero stat's face with the founder when running this: just the
-   connected number, or "N waiting" with a quiet "+M reconnecting" subline
-   when M > 0. The subline is more honest in the sleeping-class case (a
-   count that silently dropped by 5 also confuses); it's one line of copy —
-   humanizer pass.
+2. **Settled (founder, 2026-07-26): count + subline.** The hero stat shows
+   the connected number, with a quiet "+M reconnecting" second line that
+   appears only when M > 0 — honest about drops without the big number
+   silently shrinking. One line of copy — humanizer pass.
 3. **Pair everyone 1:1** disables below 2 connected; the section empty-state
    copy ("Pair two students in the queue…") should not invite a tap the
    gate refuses — check the empty-state variant that renders when everyone
@@ -83,7 +82,7 @@ nothing here.
 
 **Done when:** `pnpm typecheck` + `pnpm test` green; browser pass
 (`verify:up --scale 10`, two students): drop both student contexts → hero
-count falls to 0 (+2 reconnecting if the subline was chosen), Pair everyone
+count falls to 0 with the "+2 reconnecting" subline, Pair everyone
 disables; one returns → 1, still disabled; both back → 2, enabled, and
 pairing works. Demo blip dips the demo count. `pnpm format`, one commit to
 `main`, push, tick this box, flip doc + README state to Complete.

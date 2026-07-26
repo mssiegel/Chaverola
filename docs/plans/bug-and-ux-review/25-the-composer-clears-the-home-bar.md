@@ -29,9 +29,10 @@ with the system swipe. The evidence:
   iPhone gap as the known follow-up. **This doc is only the safe-area
   slice of that gap** — insets, not keyboard mechanics.
 - "Send real features to a real phone" (AGENTS.md) — this change is
-  _about_ device chrome; the handset leg is mandatory, and
-  [`docs/pending-manual-tests.md`](../pending-manual-tests.md) is the
-  fallback if no device is available when this runs.
+  _about_ device chrome. **Founder call (2026-07-26): no handset will be
+  available when this runs** — recording the ask in
+  [`docs/pending-manual-tests.md`](../pending-manual-tests.md) is part of
+  the prompt itself, not a fallback; the check runs later from that file.
 
 - [ ] Prompt — viewport-fit=cover plus insets where the world touches the edges
 
@@ -62,9 +63,9 @@ nothing changes on devices without insets (env() falls back to 0).
 4. Keyboard interplay: when the keyboard is up, the OS hides the home
    indicator area — the inset pad must not double-space the composer.
    `env(safe-area-inset-bottom)` reads 0 with the keyboard open on iOS in
-   practice, but **verify on the handset** — if it doesn't, scope the pad
-   with the existing `group-has-[textarea:focus]` collapse the layout
-   already uses.
+   practice, but **that's a handset question — fold it into the logged
+   ask** — and if it turns out not to, scope the pad with the existing
+   `group-has-[textarea:focus]` collapse the layout already uses.
 5. Sweep the other student-world screens at phone width (join gate,
    lobby, ended, gone cards) — they share the layout, so the column pad
    covers them; just look.
@@ -83,10 +84,11 @@ and the setup dock (which already pads) on the handset too.
 **Tests:** none — device chrome; the handset IS the verification.
 
 **Done when:** `pnpm typecheck` green; browser pass at phone width for
-regressions (insets are 0 there — everything must look identical);
-**handset leg on a home-indicator iPhone**: composer clear of the strip
-with keyboard closed, no double-gap with it open, corner pills clear of
-the notch, teacher setup dock still right — or the ask recorded in
+regressions (insets are 0 there — everything must look identical); the
+handset ask recorded in
 [`docs/pending-manual-tests.md`](../pending-manual-tests.md) with these
-exact checks. `pnpm format`, one commit to `main`, push, tick this box,
-flip doc + README state to Complete.
+exact checks (founder, 2026-07-26 — the logged ask IS this prompt's
+handset leg): composer clear of the home-indicator strip with keyboard
+closed, no double-gap with it open, corner pills clear of the notch,
+teacher setup dock still right. `pnpm format`, one commit to `main`,
+push, tick this box, flip doc + README state to Complete.

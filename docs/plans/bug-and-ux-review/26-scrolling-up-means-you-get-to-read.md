@@ -47,10 +47,13 @@ exactly; sending your own message always returns you to the bottom.
    case that motivated it happens while the student is composing — which is
    the pinned case — so the original fix keeps working; keep the comment's
    history, updated.
-4. Consider (and ask the founder when running this): an unpinned feed that
-   receives new lines — quiet "new messages ↓" chip that scrolls down on
-   tap, or nothing (scrollbar is the affordance)? A chip is new user-facing
-   copy → humanizer; "nothing" is acceptable for v1.
+4. **Settled (founder, 2026-07-26): add the chip.** While unpinned and new
+   lines arrive below, float a quiet "New messages ↓" chip near the bottom
+   of the feed; tapping it scrolls to the newest line and re-pins, and it
+   clears on re-pin. Chip copy through the humanizer. The student chat is
+   the surface that matters; the hero auto-follows (never unpinned in
+   practice), and the teacher cards may skip the chip if it fights the
+   card layout — note whichever call you make.
 5. **Cross-surface sweep** (this is a shared piece): the student chat
    (phone + desktop), the homepage hero (its scripted lines must still
    auto-follow — the visitor never scrolls it mid-demo, so pinned stays
@@ -71,7 +74,8 @@ the sweep is the verification.
 
 **Done when:** `pnpm typecheck` green; browser pass at phone + desktop on
 all three surfaces: scrolled-up student feed stays put while the partner
-sends and while the keyboard toggles; own send snaps down; hero still
-follows its script; teacher card unaffected. Decision entry + DECISIONS.md
+sends and while the keyboard toggles; the "New messages ↓" chip appears,
+jumps to the newest line on tap, and clears; own send snaps down; hero
+still follows its script; teacher card unaffected. Decision entry + DECISIONS.md
 line in this commit. `pnpm format`, one commit to `main`, push, tick this
 box, flip doc + README state to Complete.

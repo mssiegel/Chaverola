@@ -36,7 +36,7 @@ prompt leaves the app working and green on its own.
 | [10 — A blip at refresh keeps your seat](10-a-blip-at-refresh-keeps-your-seat.md)                       | A refresh during a wifi hiccup retries instead of dumping a student on the code screen    | Not started |
 | [22 — You can tell when you're the one offline](22-you-can-tell-when-youre-the-one-offline.md)          | A student whose own wifi drops sees it, instead of typing into the void                   | Not started |
 | [23 — The lobby is alive and leavable](23-the-lobby-is-alive-and-leavable.md)                           | Waiting students get progress, honesty about a missing teacher, and a way out             | Not started |
-| [24 — Removal lands gently](24-removal-lands-gently.md)                                                 | A removed student gets an explanation they can read, not a keyboard in the face           | Not started |
+| [24 — Removal lands gently](24-removal-lands-gently.md)                                                 | A removed student gets a real ending and an explanation, not a keyboard in the face       | Not started |
 | [25 — The composer clears the home bar](25-the-composer-clears-the-home-bar.md)                         | The send button stops sharing pixels with the iPhone home indicator                       | Not started |
 | [26 — Scrolling up means you get to read](26-scrolling-up-means-you-get-to-read.md)                     | Re-reading the chat stops getting yanked to the bottom on every new line                  | Not started |
 | [27 — Pause doesn't slam the keyboard](27-pause-doesnt-slam-the-keyboard.md)                            | A pause mid-typing stops closing the keyboard and jumping the layout                      | Not started |
