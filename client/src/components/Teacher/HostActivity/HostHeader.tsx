@@ -10,14 +10,22 @@ import type { HostedActivity } from "@/types/activity";
  * condenses into a slim bar pinned under the navbar — it is never off
  * screen. The number re-animates on every change so movement catches the
  * eye. See DECISIONS.md → "Teacher live activity page".
+ *
+ * The number counts students who can pair right now, so it matches what the
+ * pairing buttons will actually do. Dropped seats are counted separately in
+ * a quiet line beneath it.
  */
 export function HostHeader({
   activity,
   waitingCount,
+  reconnectingCount = 0,
   noStudentsYet = false,
 }: {
   activity: HostedActivity;
+  /** Waiting AND connected — the students the server would pair. */
   waitingCount: number;
+  /** Waiting but riding out a dropped connection; unmatchable until back. */
+  reconnectingCount?: number;
   /** Nobody has joined at all — a fresh real activity, not a busy round. */
   noStudentsYet?: boolean;
 }) {
@@ -67,13 +75,23 @@ export function HostHeader({
             waiting to chat
             <LiveDot />
           </p>
-          <p className="mt-0.5 text-sm text-muted-foreground">
-            {waitingCount === 0
-              ? noStudentsYet
-                ? "Share the pin below and they'll pop up here."
-                : "The queue refills as chats wrap up."
-              : "Pair them up below, or let auto-match handle it."}
-          </p>
+          {/* With seats held by dropped students, the reconnecting line below
+              is the whole story — a second line about the queue refilling
+              would only repeat it. */}
+          {(waitingCount > 0 || noStudentsYet || reconnectingCount === 0) && (
+            <p className="mt-0.5 text-sm text-muted-foreground">
+              {waitingCount > 0
+                ? "Pair them up below, or let auto-match handle it."
+                : noStudentsYet
+                  ? "Share the pin below and they'll pop up here."
+                  : "The queue refills as chats wrap up."}
+            </p>
+          )}
+          {reconnectingCount > 0 && (
+            <p className="mt-0.5 text-sm text-muted-foreground">
+              +{reconnectingCount} reconnecting, so they can't pair up yet.
+            </p>
+          )}
         </div>
       </div>
 

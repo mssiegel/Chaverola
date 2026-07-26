@@ -1,6 +1,6 @@
 # 06 — The queue counts who can actually pair
 
-State: **Not started**
+State: **Complete**
 
 **The problem.** The waiting count — the poster-sized hero stat the whole
 host page is built around — counts students the server won't pair. The
@@ -36,7 +36,7 @@ nothing — no chat, no notice, no state change.
 - Doc [07](07-a-wifi-blip-keeps-your-tick.md) touches the adjacent
   selection-prune lines in `index.tsx` — either order; rebase.
 
-- [ ] Prompt — Counts and CTAs follow the connected queue
+- [x] Prompt — Counts and CTAs follow the connected queue
 
 ---
 

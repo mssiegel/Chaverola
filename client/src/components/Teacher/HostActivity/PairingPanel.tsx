@@ -57,7 +57,9 @@ export interface PairingPanelProps {
  *
  * A student marked "reconnecting" renders dimmed with a lost-connection tag:
  * their seat is riding out its grace window, the wait clock keeps ticking,
- * and the only thing a teacher can do with them is Remove.
+ * and the only thing a teacher can do with them is Remove. They stay in the
+ * list but out of every count and gate here — a button that lights up for
+ * students the server won't pair does nothing when it's tapped.
  */
 export function PairingPanel({
   waiting,
@@ -80,6 +82,12 @@ export function PairingPanel({
   onDismissHoldNotice,
 }: PairingPanelProps) {
   const selectionFull = selectedIds.length >= maxGroupSize;
+  // Rows list everyone; counts and CTAs follow who the server would actually
+  // pair. Derived here rather than passed in, so the button and the number
+  // beside it can never drift apart.
+  const connectedCount = waiting.filter(
+    (s) => s.connection === "connected"
+  ).length;
   // The host page renders this panel twice (desktop rail + the phones'
   // collapsible section), so the switch id must be unique per instance.
   const autoMatchSwitchId = useId();
@@ -98,11 +106,11 @@ export function PairingPanel({
           <div className="flex items-start gap-2">
             <Zap aria-hidden className="mt-0.5 size-4 shrink-0" />
             <span className="min-w-0 flex-1">
-              {waiting.length === 0
+              {connectedCount === 0
                 ? "Auto-match is off. Students land back here as their chats wrap up."
-                : waiting.length === 1
+                : connectedCount === 1
                   ? "1 student is waiting, and auto-match is off."
-                  : `${waiting.length} students are waiting, and auto-match is off.`}
+                  : `${connectedCount} students are waiting, and auto-match is off.`}
             </span>
             <button
               type="button"
@@ -161,7 +169,9 @@ export function PairingPanel({
             <Button
               variant="outline"
               onClick={onPairEveryone}
-              disabled={waiting.length < 2}
+              // Two connected students, or the server pairs nobody and the
+              // tap is a silent no-op.
+              disabled={connectedCount < 2}
               className="w-full"
             >
               <UsersRound aria-hidden />

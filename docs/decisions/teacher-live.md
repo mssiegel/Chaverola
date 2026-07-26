@@ -1692,13 +1692,25 @@ has no "Activity in Progress" status label. (Product-owner pick,
 (**2026-07-16:** on the demo activity the condensed bar stands down — the
 sticky demo banner owns the under-navbar band there; see
 [The demo notice is a banner you can't miss](demo-flows.md#the-demo-notice-is-a-banner-you-cant-miss).)
+(**2026-07-26:** the number counts students who can pair _right now_ —
+connected seats only. Students riding out a dropped connection get a quiet
+"+2 reconnecting" line under it instead of being folded into the big number,
+and every other count and pairing gate on the page follows the same rule:
+the phone section's collapsed hint, the auto-match hold notice, and both
+**Pair everyone 1:1** buttons. The queue list itself still shows every seat,
+amber tags and all.)
 
 **Why:** A teacher glancing from across a classroom must catch the number
 instantly, and it must visibly react when it changes — students sitting
 unmatched is the one thing this page exists to prevent. The condensed bar
 keeps the number on screen while the teacher is deep in the chat cards. A
 status label was dropped because it states the obvious; the live count
-already says the activity is running.
+already says the activity is running. Counting dropped seats in the hero
+number made it lie in the one way that costs the teacher a tap: a class of
+sleeping phones read "2 waiting", lit up **Pair everyone 1:1**, and the
+server — which only pairs connected seats — did nothing at all. Splitting
+the reconnecting count onto its own line keeps the drop visible without a
+big number that quietly means something the buttons don't.
 
 _Implemented in
 [HostHeader](../../client/src/components/Teacher/HostActivity/HostHeader.tsx)._

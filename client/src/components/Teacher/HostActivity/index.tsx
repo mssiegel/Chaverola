@@ -79,6 +79,16 @@ export function HostActivityDashboard({
 
   const maxGroupSize = Math.min(4, activity.characters.length);
 
+  // Every count and every pairing gate runs off this, not off the raw queue:
+  // a dropped student keeps their seat and their row, but the server won't
+  // pair them, so a number that counts them promises a chat that can't start.
+  // The queue LIST still renders everyone (amber rows and all) — that's the
+  // recorded decision, and the rows are where the gap explains itself.
+  const connectedWaiting = engine.waiting.filter(
+    (s) => s.connection === "connected"
+  );
+  const reconnectingCount = engine.waiting.length - connectedWaiting.length;
+
   // Selection is derived against the live queue: a student who got matched
   // away, removed, or marked reconnecting (unmatchable — founder call)
   // simply falls out of it. And never wider than the cast: removing a
@@ -202,11 +212,17 @@ export function HostActivityDashboard({
   );
 
   const waitingHint =
-    engine.waiting.length === 0
-      ? noStudentsYet
-        ? "No students yet. Share the pin to let them in"
-        : "Everyone's chatting. The queue refills as chats end"
-      : `${engine.waiting.length} students waiting`;
+    connectedWaiting.length > 0
+      ? `${connectedWaiting.length} student${
+          connectedWaiting.length === 1 ? "" : "s"
+        } waiting`
+      : engine.waiting.length > 0
+        ? // Seats held, nobody pairable — say that rather than claim the room
+          //  is empty or everyone's mid-chat.
+          "No one can pair yet. Waiting on students to reconnect"
+        : noStudentsYet
+          ? "No students yet. Share the pin to let them in"
+          : "Everyone's chatting. The queue refills as chats end";
 
   const reconnecting = engine.connection === "reconnecting";
   // The demo runs the whole class in the browser and never emails anyone, so
@@ -235,7 +251,8 @@ export function HostActivityDashboard({
     <div className="flex flex-col gap-5">
       <HostHeader
         activity={activity}
-        waitingCount={engine.waiting.length}
+        waitingCount={connectedWaiting.length}
+        reconnectingCount={reconnectingCount}
         noStudentsYet={noStudentsYet}
       />
 
@@ -340,7 +357,7 @@ export function HostActivityDashboard({
               chats={engine.chatsInProgress}
               activity={activity}
               studentsChattingCount={engine.studentsChattingCount}
-              waitingCount={engine.waiting.length}
+              waitingCount={connectedWaiting.length}
               onEndChat={engine.endChat}
               onRequestEndAll={() => setPendingAction({ kind: "end-all" })}
               paused={engine.paused}
