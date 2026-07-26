@@ -27,6 +27,42 @@ on every push regardless of what changed.
   server against an old client indefinitely (see AGENTS.md → Working
   Rules → the tip commit must touch `client/`).
 
+## Recovering a skipped client build
+
+When a push's tip commit is docs-only, Vercel's Ignored Build Step cancels the
+client build and the code commits under it never reach chaverola.com — a
+permanent split, green on both dashboards (AGENTS.md → Working Rules → the tip
+commit). `vercel ls` shows it as a **Canceled** production deployment with a
+~1s duration, and the newest **Ready** one predating the code commit.
+
+The fix is a CLI deploy, which uploads local source and builds it directly —
+the Ignored Build Step gates only git-triggered deploys:
+
+```powershell
+# from the REPO ROOT, not client/
+vercel --prod --yes
+```
+
+**Run it from the repo root.** From `client/` it fails with
+`Command "npm install" exited with 1`: the CLI uploads only that directory, so
+the workspace root is absent and `@chaverola/shared` (a `workspace:` dep) can't
+resolve. From the root the whole monorepo uploads and the project's Root
+Directory setting still points the build at `client/`. Commit first — the
+deploy builds the working tree, so anything uncommitted ships too.
+
+Verify it landed by grepping the served bundle for a string the stranded commit
+changed, not by trusting Ready:
+
+```bash
+BUNDLE=$(curl -s https://chaverola.com/ | grep -o '/assets/index-[A-Za-z0-9_-]*\.js' | head -1)
+curl -s "https://chaverola.com$BUNDLE" | grep -c "some new string"
+```
+
+The resulting deployment isn't tied to a git SHA, which is fine — the next push
+whose tip touches `client/`, `shared/`, or a root manifest takes over normally.
+(Used 2026-07-26, when feature 20's docs-only tip commit stranded feature 19's
+client changes.)
+
 ## Reading production logs
 
 - **Vercel (client):** the Vercel CLI is installed and linked to the
