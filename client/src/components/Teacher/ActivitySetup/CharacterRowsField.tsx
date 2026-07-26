@@ -1,6 +1,5 @@
 import { Plus, X } from "lucide-react";
 
-import { LiveDot } from "@/components/ui/live-dot";
 import {
   MAX_CHARACTERS,
   MIN_CHARACTERS,
@@ -34,14 +33,6 @@ interface CharacterRowsFieldProps {
   onRemove: (id: string) => void;
   problemFor: (field: SetupField) => string | undefined;
   registerField: (field: SetupField) => (el: HTMLElement | null) => void;
-  /**
-   * Live host page only: why a removable row can't be removed right now
-   * (e.g. its character is in a live chat). A returned string replaces the
-   * remove button with the live-chat dot and shows as a short hint under
-   * the row; null/undefined keeps the row removable. Only called for
-   * rows 3–4.
-   */
-  removeGuard?: (row: CharacterRowState) => string | null | undefined;
 }
 
 /**
@@ -50,6 +41,11 @@ interface CharacterRowsFieldProps {
  * one, is simply part of that name. The first two rows are permanent (an
  * activity needs two characters anyway); rows 3–4 get a remove button, no
  * confirmation — retyping a name is cheap.
+ *
+ * The remove button is never gated, on the live host page either. A running
+ * chat holds the cast it was dealt (feature 18), so removing a character it
+ * is using can't strand a label — the row goes, the chat keeps its names,
+ * and only future deals see the shorter roster.
  */
 export function CharacterRowsField({
   rows,
@@ -58,7 +54,6 @@ export function CharacterRowsField({
   onRemove,
   problemFor,
   registerField,
-  removeGuard,
 }: CharacterRowsFieldProps) {
   return (
     <div className="flex flex-col gap-3">
@@ -66,7 +61,6 @@ export function CharacterRowsField({
         const error = problemFor(`character-${index}`);
         const count = charCount(row.name);
         const removable = index >= MIN_CHARACTERS;
-        const guardMessage = removable ? removeGuard?.(row) : undefined;
         return (
           <div key={row.id} className="flex items-start gap-3">
             <div className="min-w-0 flex-1">
@@ -79,14 +73,10 @@ export function CharacterRowsField({
                 invalid={Boolean(error)}
                 registerRef={registerField(`character-${index}`)}
               />
-              {(error || guardMessage || count >= NAME_COUNTER_FROM) && (
+              {(error || count >= NAME_COUNTER_FROM) && (
                 <div className="mt-1.5 flex items-baseline justify-between gap-3">
                   {error ? (
                     <FieldError message={error} />
-                  ) : guardMessage ? (
-                    <p className="text-xs text-muted-foreground">
-                      {guardMessage}
-                    </p>
                   ) : (
                     <span aria-hidden />
                   )}
@@ -99,17 +89,7 @@ export function CharacterRowsField({
               )}
             </div>
 
-            {guardMessage ? (
-              // The chat cards' pulsing "Live" dot stands in for the remove
-              // button — the row is locked by the same running chat the dot
-              // marks below. The named hint under the input explains.
-              <span
-                className="mt-2 grid size-8 shrink-0 place-items-center"
-                aria-hidden
-              >
-                <LiveDot />
-              </span>
-            ) : removable ? (
+            {removable ? (
               <button
                 type="button"
                 onClick={() => onRemove(row.id)}

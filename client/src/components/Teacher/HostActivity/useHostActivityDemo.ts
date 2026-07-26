@@ -272,11 +272,6 @@ export function useHostActivityDemo(
 
   const chatsInProgress = world.chats.filter((c) => c.status === "active");
   const completedChats = world.chats.filter((c) => c.status === "ended");
-  const characterIdsInUse = new Set(
-    chatsInProgress.flatMap((c) =>
-      activeChatMembers(c).map((p) => p.character.id)
-    )
-  );
 
   return {
     waiting: world.queue,
@@ -286,7 +281,6 @@ export function useHostActivityDemo(
       (sum, c) => sum + activeChatMembers(c).length,
       0
     ),
-    characterIdsInUse,
     leftoverStudentId: world.leftoverStudentId,
     rematchNotice: world.rematchNotice,
     dismissRematchNotice: () =>

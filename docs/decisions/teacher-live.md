@@ -5,6 +5,51 @@ area. Entries are newest-first; add new ones at the top, and add a matching line
 to the index in the same change. Replaced decisions move to Superseded at the
 bottom of this file.
 
+### Removing a character is never blocked, and its row carries no live marker
+
+_2026-07-26_
+
+**Decision:** A character's remove button on rows 3 and 4 works at every
+moment of an activity, including while a chat is using that character. The
+row gets no special treatment either: the pulsing Live dot that used to
+stand in for the remove button is gone, and nothing informational replaces
+it. The removed character keeps its place in every chat already running and
+every chat that ended, and simply stops being dealt.
+
+**Why:** Founder call, 2026-07-23. The lock existed for one reason: a
+removed character would vanish from the roster a live chat's labels were
+resolved against, and the card would fall back to rendering a raw id. Since
+[A chat freezes its cast the moment it starts](#a-chat-freezes-its-cast-the-moment-it-starts)
+that resolution doesn't happen — the chat holds its own labels — so the
+lock guards nothing and only stops a teacher from tidying a roster between
+rounds.
+
+The dot goes with it rather than staying on as an "in a live chat" marker,
+because a marker on a row that behaves like every other row is noise: the
+teacher already sees which characters are chatting on the cards below, and
+a second signal on a control that no longer changes its behavior only
+invites the question of what it is stopping. There is deliberately **no**
+server-side twin of the guard: a removal is a plain roster edit riding the
+same event as a rename.
+
+Two consequences worth naming, both correct. Dropping to two characters
+flips pair-everyone's odd-count rule from seating a trailing trio to marking
+the newest joiner the leftover, so an odd queue starts leaving one student
+in line. And removing a character then re-adding one with the same name
+mints a different id, so old chats keep resolving to their captured label
+while new chats get the new id.
+
+This fully supersedes
+[A character in a live chat shows the Live dot, and its hint says who](#a-character-in-a-live-chat-shows-the-live-dot-and-its-hint-says-who).
+
+_Implemented in
+[CharacterRowsField](../../client/src/components/Teacher/ActivitySetup/CharacterRowsField.tsx)
+(the guard hook and the dot deleted) and
+[LiveSettingsPanel](../../client/src/components/Teacher/HostActivity/LiveSettingsPanel.tsx)
+(the named message, and the `characterIdsInUse` engine field that fed it,
+deleted with it); plan in
+[docs/plans/feature-18](../plans/feature-18-character-roster-syncs-live.md)._
+
 ### The character roster reaches the lobby and every future chat, and its ids are minted client-side
 
 _2026-07-26_
@@ -1429,34 +1474,6 @@ _Implemented in
 [PairingPanel](../../client/src/components/Teacher/HostActivity/PairingPanel.tsx)
 (the banner)._
 
-### A character in a live chat shows the Live dot, and its hint says who
-
-_2026-07-16_
-
-**Decision:** While a live chat uses a character, that row in the host
-page's settings panel swaps its remove button for the same pulsing mint
-Live dot the chat cards wear (extracted to a shared
-[LiveDot](../../client/src/components/ui/live-dot.tsx)), and the hint under the
-input names the character: "Cleopatra is in a live chat right now. You can
-remove them once that chat ends." The name is the **committed** one — what
-running chats actually display — so a mid-rename draft never changes who
-the message claims is chatting.
-
-**Why:** Founder feedback (2026-07-16): the anonymous hint ("In a live
-chat right now…") rendered in the gap between two character rows and named
-nobody, so it read as ambiguous — which character is it about? — and the
-disabled × at 35% opacity was faint enough that the locked row looked like
-it had no remove control at all, while the neighbor's crisp × drew the eye
-to the wrong row. Naming the character makes the message unambiguous
-wherever it sits, and the Live dot marks the locked row with the exact
-signal that already means "chat running right now" on the cards below.
-
-_Implemented in
-[CharacterRowsField](../../client/src/components/Teacher/ActivitySetup/CharacterRowsField.tsx)
-(the indicator) and
-[LiveSettingsPanel](../../client/src/components/Teacher/HostActivity/LiveSettingsPanel.tsx)
-(the named message)._
-
 ### The host page is never projected — it's the teacher's private control room
 
 _2026-07-15_
@@ -1920,3 +1937,32 @@ couldn't exist; real host links ended it.
 
 _Was implemented in
 [HostActivityPage](../../client/src/pages/teacher/HostActivityPage.tsx)._
+
+### A character in a live chat shows the Live dot, and its hint says who
+
+_2026-07-16 · Superseded by
+[Removing a character is never blocked, and its row carries no live marker](#removing-a-character-is-never-blocked-and-its-row-carries-no-live-marker)_
+
+**Decision:** While a live chat uses a character, that row in the host
+page's settings panel swaps its remove button for the same pulsing mint
+Live dot the chat cards wear (extracted to a shared
+[LiveDot](../../client/src/components/ui/live-dot.tsx)), and the hint under the
+input names the character: "Cleopatra is in a live chat right now. You can
+remove them once that chat ends." The name is the **committed** one — what
+running chats actually display — so a mid-rename draft never changes who
+the message claims is chatting.
+
+**Why:** Founder feedback (2026-07-16): the anonymous hint ("In a live
+chat right now…") rendered in the gap between two character rows and named
+nobody, so it read as ambiguous — which character is it about? — and the
+disabled × at 35% opacity was faint enough that the locked row looked like
+it had no remove control at all, while the neighbor's crisp × drew the eye
+to the wrong row. Naming the character makes the message unambiguous
+wherever it sits, and the Live dot marks the locked row with the exact
+signal that already means "chat running right now" on the cards below.
+
+_Was implemented in
+[CharacterRowsField](../../client/src/components/Teacher/ActivitySetup/CharacterRowsField.tsx)
+(the indicator) and
+[LiveSettingsPanel](../../client/src/components/Teacher/HostActivity/LiveSettingsPanel.tsx)
+(the named message). The shared LiveDot lives on for the chat cards._

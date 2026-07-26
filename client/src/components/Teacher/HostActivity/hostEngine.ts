@@ -28,8 +28,6 @@ export interface HostEngine {
   chatsInProgress: HostedChat[];
   completedChats: HostedChat[];
   studentsChattingCount: number;
-  /** Character ids used by a live chat right now — their rows can't be removed. */
-  characterIdsInUse: ReadonlySet<string>;
   leftoverStudentId: string | null;
   rematchNotice: string | null;
   dismissRematchNotice: () => void;

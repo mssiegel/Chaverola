@@ -78,8 +78,8 @@ function toActivityDraft(draft: LiveActivityDraft): ActivityDraft {
  * Everything that blocks a live edit from propagating. The setup rules all
  * hold, plus one live-only rule: a character the class already has (any
  * committed id) can't be renamed to nothing — emptying the name would
- * silently drop the character at commit time, and removal has its own
- * guarded control. While problems exist, the last valid value stays in
+ * silently drop the character at commit time, and dropping one is what the
+ * remove button is for. While problems exist, the last valid value stays in
  * effect; fixing the field applies it on the next debounce tick.
  */
 export function validateLiveDraft(

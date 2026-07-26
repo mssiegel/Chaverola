@@ -356,11 +356,6 @@ export function useHostActivityLive({
 
   const chatsInProgress = chats.filter((c) => c.status === "active");
   const completedChats = chats.filter((c) => c.status === "ended");
-  const characterIdsInUse = new Set(
-    chatsInProgress.flatMap((c) =>
-      activeParticipantsOf(c).map((p) => p.character.id)
-    )
-  );
 
   return {
     waiting,
@@ -370,7 +365,6 @@ export function useHostActivityLive({
       (sum, c) => sum + activeParticipantsOf(c).length,
       0
     ),
-    characterIdsInUse,
     leftoverStudentId,
     // rematchNotice and isExactRematch both read server truth from
     // chats:snapshot; dismissing is a real server round-trip so a second host

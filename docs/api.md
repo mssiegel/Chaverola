@@ -554,6 +554,14 @@ below.
   eligible students and takes at most `min(4, roster length)`; anyone who
   doesn't fit visibly stays in the queue. Below 2 eligible it does
   nothing.
+- **Every deal reads the roster it finds.** Both deal paths size and slice
+  off `activity.characters` at the moment they run, so a character removed
+  mid-activity is never dealt again: the clamp above shrinks with it, and
+  pair-everyone's odd-count rule flips from "shed a trailing trio" to
+  "mark the newest joiner the leftover" the moment the roster drops below
+  three. Chats already running are unaffected — they hold the cast they
+  froze at start, so removing a character one of them is using is safe and
+  is never blocked (feature 18).
 - **Auto-match is server-run and teacher-gated.** A 1-second interval is
   armed on an activity's **first** connected teacher socket and cleared
   when the **last** one disconnects, so a closed laptop holds pairing and

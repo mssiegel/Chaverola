@@ -26,8 +26,6 @@ const PROPAGATE_DEBOUNCE_MS = 1000;
 
 interface LiveSettingsPanelProps {
   activity: HostedActivity;
-  /** Characters a live chat is using right now — their rows can't be removed. */
-  characterIdsInUse: ReadonlySet<string>;
   /**
    * Every chat is paused. Purely presentational here: it reaches the
    * auto-match row's description and nothing else, so it can never enter the
@@ -51,7 +49,6 @@ interface LiveSettingsPanelProps {
  */
 export function LiveSettingsPanel({
   activity,
-  characterIdsInUse,
   paused,
   onActivityChange,
 }: LiveSettingsPanelProps) {
@@ -140,6 +137,12 @@ export function LiveSettingsPanel({
     // strand the row half-removed — gone from the panel but still counted
     // by the roster and offered to pairings. A row that was only ever
     // local filters to a no-op here; the draft still loses it.
+    //
+    // Never gated, not even while a chat is using this character: that chat
+    // holds the cast it was dealt, so the label it shows can't break
+    // (feature 18). The commit rides the same event every other roster edit
+    // does, so the shrunk roster is what the lobby chips show, what the next
+    // deal reads, and what a reload finds.
     onActivityChange({
       ...activity,
       characters: activity.characters.filter((c) => c.id !== id),
@@ -192,17 +195,6 @@ export function LiveSettingsPanel({
               onRemove={removeCharacter}
               problemFor={problemFor}
               registerField={() => () => undefined}
-              removeGuard={(row) => {
-                if (!characterIdsInUse.has(row.id)) return null;
-                // Name who's locked with the committed name — that's what
-                // the running chat shows, even mid-rename.
-                const committed = activity.characters.find(
-                  (c) => c.id === row.id
-                );
-                const name =
-                  committed?.name.trim() || row.name.trim() || "This character";
-                return `${name} is in a live chat right now. You can remove them once that chat ends.`;
-              }}
             />
           </div>
         </div>

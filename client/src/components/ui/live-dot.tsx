@@ -4,8 +4,10 @@ import { cn } from "@/lib/utils";
 
 /**
  * The pulsing mint dot that marks something as live right now — the chat
- * cards' "Live" badge and the character row locked by a running chat share
- * it, so both read as the same state.
+ * cards' "Live" badge and the host header's own indicator share it, so both
+ * read as the same state. A character row never wears it: removing a
+ * character is never blocked, so there is nothing on that row to mark
+ * (feature 18).
  */
 function LiveDot({ className, ...props }: React.ComponentProps<"span">) {
   return (
