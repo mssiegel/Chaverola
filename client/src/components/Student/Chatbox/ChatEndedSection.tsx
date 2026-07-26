@@ -1,4 +1,4 @@
-import { EyeOff, RotateCcw } from "lucide-react";
+import { ArrowRight, EyeOff, RotateCcw } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { SectionLabel } from "@/components/ui/section-label";
@@ -22,6 +22,12 @@ interface ChatEndedSectionProps {
    * default line's "your teacher hasn't revealed them" would overpromise.
    */
   secretLine?: string;
+  /**
+   * The whole activity ended, not just this chat. There's no lobby left to
+   * offer, so the CTA drops the rematch line and lands on the activity-over
+   * screen instead.
+   */
+  activityEnded?: boolean;
   onBackToLobby: () => void;
 }
 
@@ -98,6 +104,7 @@ export function ChatEndedSection({
   endedByPeerId = null,
   endedInGroup = false,
   secretLine,
+  activityEnded = false,
   onBackToLobby,
 }: ChatEndedSectionProps) {
   const endedBy = endedByPeerId
@@ -169,13 +176,24 @@ export function ChatEndedSection({
         )}
 
         <div className="w-full space-y-2 pt-1">
-          <p className="text-sm font-medium text-foreground">
-            Ready for another round? 🚀
-          </p>
-          <Button size="lg" className="w-full" onClick={onBackToLobby}>
-            <RotateCcw className="size-4" />
-            Back to the lobby
-          </Button>
+          {activityEnded ? (
+            // No rematch to promise and no lobby to return to — the tap just
+            // closes the wrap-up out onto the activity-over screen.
+            <Button size="lg" className="w-full" onClick={onBackToLobby}>
+              Done
+              <ArrowRight className="size-4" />
+            </Button>
+          ) : (
+            <>
+              <p className="text-sm font-medium text-foreground">
+                Ready for another round? 🚀
+              </p>
+              <Button size="lg" className="w-full" onClick={onBackToLobby}>
+                <RotateCcw className="size-4" />
+                Back to the lobby
+              </Button>
+            </>
+          )}
         </div>
       </div>
     </div>

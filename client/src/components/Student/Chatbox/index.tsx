@@ -38,6 +38,9 @@ export interface ChatboxProps {
    * promise a feature that isn't there.
    */
   endedSecretLine?: string;
+  /** The whole activity ended, not just this chat — the ended screen swaps
+   *  its rematch CTA for one that closes out. */
+  activityEnded?: boolean;
   /** Sending drops focus on phones, closing the keyboard — the demo's way of
    *  handing back the steering panel its own keyboard hides. */
   releaseKeyboardOnSend?: boolean;
@@ -61,6 +64,7 @@ export function Chatbox({
   endConfirmOpen,
   onEndConfirmOpenChange,
   endedSecretLine,
+  activityEnded,
   releaseKeyboardOnSend,
 }: ChatboxProps) {
   const {
@@ -190,6 +194,7 @@ export function Chatbox({
           endedByPeerId={endedByPeerId}
           endedInGroup={peers.length > 1}
           secretLine={endedSecretLine}
+          activityEnded={activityEnded}
           onBackToLobby={onBackToLobby}
         />
       ) : (

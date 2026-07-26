@@ -27,7 +27,7 @@ prompt leaves the app working and green on its own.
 
 | Doc                                                                                                     | What a user gains                                                                         | State       |
 | ------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- | ----------- |
-| [02 — End activity ends with the reveal](02-end-activity-ends-with-the-reveal.md)                       | Students get a real ending (reveal included) at the bell, not a dead chat then a wipe     | In progress |
+| [02 — End activity ends with the reveal](02-end-activity-ends-with-the-reveal.md)                       | Students get a real ending (reveal included) at the bell, not a dead chat then a wipe     | Complete    |
 | [03 — The transcript send never strands](03-transcript-send-never-strands.md)                           | The teacher's wrap-up always settles — success or a failure they can act on               | Not started |
 | [05 — A sent message never just vanishes](05-a-sent-message-never-just-vanishes.md)                     | Students see their message land — or see that it didn't                                   | Not started |
 | [06 — The queue counts who can actually pair](06-the-queue-counts-who-can-actually-pair.md)             | The waiting count and Pair everyone tell the truth about sleeping phones                  | Not started |

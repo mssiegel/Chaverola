@@ -5,6 +5,48 @@ area. Entries are newest-first; add new ones at the top, and add a matching line
 to the index in the same change. Replaced decisions move to Superseded at the
 bottom of this file.
 
+### End activity ends every chat with the full ended-screen treatment; the activity-over card waits for the student's tap
+
+_2026-07-26_
+
+**Decision:** The bell at the end of a lesson gives every student in a chat the
+same ending a per-chat **End chat** does. **End activity** settles each room
+before it tears the activity down, so `chat:ended` lands with reason `teacher`
+and the name reveal when the setting is on. The wrap-up screen then holds
+against the `activity:ended` that follows a beat later: "This activity is over"
+takes the screen when the student taps out of their wrap-up, not before.
+
+- **The reveal is the payoff, and this is the ending the whole class shares.**
+  Before this, End activity flipped every chat to ended without telling anyone:
+  the room went quietly dead for the length of the transcript send, then the
+  screen was replaced mid-sentence. The one ending every student experiences at
+  once was the only one with no "And… scene!" and no "you were really chatting
+  with".
+- **The ended screen needs no socket.** It renders from state the client already
+  holds, so removal dropping the connection underneath it costs nothing. That's
+  what makes "hold the screen, wait for the tap" safe rather than a race.
+- **Its CTA changes when there's no lobby left.** "Ready for another round? 🚀 /
+  Back to the lobby" would be a lie once the activity is gone, so the button
+  reads **Done** and lands on the activity-over card.
+- **A student in the lobby still goes straight to the card.** They have no
+  ending of their own to keep, and inventing one would be worse.
+
+**Why:** "The live name reveal fires at chat-end, per the teacher's setting"
+(below) already said every ending reveals; End activity was the one path that
+contradicted it. Both teacher-side decisions stand unchanged: End activity is
+still the terminal wrap-up that emails the transcript, and removal still happens
+immediately after the send. What moved is only what the students see, and when
+their screens agree to give it up.
+
+_Implemented in the `activity:end` handler
+([teacher.ts](../../server/src/live/handlers/teacher.ts), which now settles each
+chat like `chats:end-all` does), the stage precedence in
+[JoinActivityPage](../../client/src/pages/student/JoinActivityPage.tsx), and the
+CTA in
+[ChatEndedSection](../../client/src/components/Student/Chatbox/ChatEndedSection.tsx).
+The student demo carries the beat as "Teacher ends the activity"
+([ChatStage](../../client/src/components/Student/ChatStage.tsx))._
+
 ### On a phone, the student's message box has no emoji button
 
 _2026-07-24_

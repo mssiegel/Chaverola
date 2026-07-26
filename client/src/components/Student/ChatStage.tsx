@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { GraduationCap, Pause, Play } from "lucide-react";
+import { GraduationCap, PartyPopper, Pause, Play } from "lucide-react";
 
 import { useChatDemo } from "@/components/chat/useChatDemo";
 import { ChatDemoControls } from "@/components/demo/ChatDemoControls";
@@ -25,6 +25,11 @@ interface ChatStageProps {
    */
   classPaused: boolean;
   onClassPausedChange: (paused: boolean) => void;
+  /** The page has latched the activity as over — the ended screen's CTA
+   *  closes out instead of offering a lobby that no longer exists. */
+  activityEnded: boolean;
+  /** The demo's "teacher ends the activity" beat: latch that on the page. */
+  onActivityEnds: () => void;
 }
 
 /**
@@ -41,6 +46,8 @@ export function ChatStage({
   onBackToLobby,
   classPaused,
   onClassPausedChange,
+  activityEnded,
+  onActivityEnds,
 }: ChatStageProps) {
   // Built once per mount: the scenario is this match's identity, with the
   // signed-in student's real name behind their character.
@@ -86,6 +93,7 @@ export function ChatStage({
           onBackToLobby={onBackToLobby}
           endConfirmOpen={confirmOpen}
           onEndConfirmOpenChange={setConfirmOpen}
+          activityEnded={activityEnded}
           // Sending on a phone gives the keyboard back, which is what puts
           // the steering panel below back within reach. LiveChatStage's
           // silence here is the other half: nothing is hidden below a real
@@ -116,6 +124,25 @@ export function ChatStage({
                 icon={<GraduationCap className="size-4" />}
               >
                 Teacher ends chat
+              </EventButton>
+              {/* The bell: every chat ends AND the activity closes. The
+                  wrap-up screen (reveal included) holds, and its CTA lands on
+                  the activity-over card — the live sequencing, mocked.
+                  onEndedChange is called by hand alongside the engine's own
+                  ending: the effect that normally reports it lands a render
+                  late, and the page would flip to the activity-over card
+                  before the wrap-up ever drew. */}
+              <EventButton
+                onWorld
+                onClick={() => {
+                  chat.endChat("teacher");
+                  onEndedChange(true);
+                  onActivityEnds();
+                }}
+                disabled={chat.isEnded}
+                icon={<PartyPopper className="size-4" />}
+              >
+                Teacher ends the activity
               </EventButton>
               {/* Deliberately not gated on isEnded: pause is world-level, so
                   flipping it from the ended screen sends the student back to a

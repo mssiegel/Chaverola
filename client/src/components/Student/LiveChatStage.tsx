@@ -54,6 +54,10 @@ interface LiveChatStageProps {
   /** The teacher's activity-wide pause (activity:paused / lobby:welcome).
    *  Chatbox freezes the room: banner, locked composer. Ended wins. */
   isPaused: boolean;
+  /** The activity itself ended under this screen (End activity). The wrap-up
+   *  holds — it needs no socket — but there's no lobby behind its CTA
+   *  anymore, so the button closes out onto the activity-over card. */
+  activityEnded: boolean;
   /** Sends a real message over the seat's socket (chat:send). */
   onSend: (text: string) => void;
   /** A keystroke happened — the hook throttles it into chat:typing
@@ -106,6 +110,7 @@ export function LiveChatStage({
   endedByPeerId,
   revealNames,
   isPaused,
+  activityEnded,
   onSend,
   onTyping,
   onEndChat,
@@ -195,6 +200,7 @@ export function LiveChatStage({
         endConfirmOpen={confirmOpen}
         onEndConfirmOpenChange={setConfirmOpen}
         endedSecretLine="Names stay secret. That's the whole game."
+        activityEnded={activityEnded}
       />
     </div>
   );

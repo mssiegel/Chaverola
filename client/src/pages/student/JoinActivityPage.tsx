@@ -95,6 +95,12 @@ export function JoinActivityPage() {
 
   const activityGone = activityGoneFromSocket || activityGoneFromLookup;
 
+  // Both roads to the latch: the socket's activity:ended and the demo's
+  // "teacher ends the activity" beat.
+  const latchActivityGone = () => {
+    if (activity) setGoneCode(activity.joinCode);
+  };
+
   // The demo arrives with a name ready, so the lobby is one click away; it
   // stays editable, and real codes always start blank.
   const demoPrefillName =
@@ -152,10 +158,9 @@ export function JoinActivityPage() {
       setName("");
       setRemovedByTeacher(true);
     },
-    // Latch the dead activity's code, which flips the stage to activity-gone.
-    onEnded: () => {
-      if (activity) setGoneCode(activity.joinCode);
-    },
+    // Latch the dead activity's code, which flips the stage to activity-gone
+    // — except over an ended chat, which holds the screen until its CTA.
+    onEnded: () => latchActivityGone(),
     // The teacher edited the lobby's details mid-activity (feature 17, the
     // roster added by 18): rebuild the activity field-by-field and settle it
     // into the lookup — settled state outranks the hand-off map and any
@@ -199,7 +204,15 @@ export function JoinActivityPage() {
               ? "ended"
               : "chatting"
             : "lobby";
-  const stage: StudentStage = activityGone ? "activity-gone" : baseStage;
+  // The gone latch outranks every stage but one: a student reading their
+  // ended chat keeps it. End activity settles every chat before it tears the
+  // activity down, so the wrap-up — reveal included — is already on screen
+  // when activity:ended lands, and it renders from `chatEnded` state that
+  // needs no socket. The gone card takes over on the student's own tap, when
+  // backToLobby drops baseStage out of "ended". A student still in the lobby
+  // has nothing to keep and goes straight to the card, as before.
+  const stage: StudentStage =
+    activityGone && baseStage !== "ended" ? "activity-gone" : baseStage;
 
   const { classPaused, setClassPaused, demoWifiBlip, triggerWifiBlip } =
     useDemoLobby({ stage, activity, startMatch });
@@ -310,6 +323,8 @@ export function JoinActivityPage() {
             onBackToLobby={backToLobby}
             classPaused={classPaused}
             onClassPausedChange={setClassPaused}
+            activityEnded={activityGone}
+            onActivityEnds={latchActivityGone}
           />
         ) : (
           <LiveChatStage
@@ -326,6 +341,7 @@ export function JoinActivityPage() {
             endedByPeerId={liveEndedBy}
             revealNames={revealed}
             isPaused={livePaused}
+            activityEnded={activityGone}
             onSend={sendChatMessage}
             onTyping={sendTyping}
             // The exit keeps the seat: chat:leave ends the chat (or steps
@@ -335,7 +351,10 @@ export function JoinActivityPage() {
             onEndChat={leaveChat}
             // The ended screen's Back tap: the server returns the
             // wrapping-up seat to the queue with a fresh clock, and the
-            // local match state clears.
+            // local match state clears. With the activity gone the emit is
+            // already a no-op (the presence hook dropped its socket when the
+            // latch flipped), and clearing the match is what hands the screen
+            // to the activity-over card.
             onBackToLobby={() => {
               returnToLobby();
               backToLobby();
