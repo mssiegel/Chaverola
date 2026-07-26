@@ -5,11 +5,13 @@ import { useChatDemo } from "@/components/chat/useChatDemo";
 import { ChatDemoControls } from "@/components/demo/ChatDemoControls";
 import { EventButton } from "@/components/demo/DemoControls";
 import { Chatbox } from "@/components/Student/Chatbox";
+import { scaledMs } from "@/lib/demoTime";
 import { useBackGuard } from "@/lib/useBackGuard";
 import {
   activityChatScenarios,
   type ActivityChatScenarioKey,
 } from "@/mockData";
+import { DEMO_WIFI_BLIP_MS } from "@/pages/student/join/stageTypes";
 
 interface ChatStageProps {
   /** The real name the student signed in with. */
@@ -68,6 +70,19 @@ export function ChatStage({
   const [revealNames, setRevealNames] = useState(true);
   const [confirmOpen, setConfirmOpen] = useState(false);
 
+  // The demo's own wifi blip, the lobby trigger's twin (same length, same
+  // scaledMs). It skips the live stage's debounce on purpose: a visitor who
+  // just pressed the button should see something happen.
+  const [selfBlip, setSelfBlip] = useState(false);
+  useEffect(() => {
+    if (!selfBlip) return;
+    const timer = setTimeout(
+      () => setSelfBlip(false),
+      scaledMs(DEMO_WIFI_BLIP_MS)
+    );
+    return () => clearTimeout(timer);
+  }, [selfBlip]);
+
   useEffect(() => {
     onEndedChange(chat.isEnded);
   }, [chat.isEnded, onEndedChange]);
@@ -85,7 +100,10 @@ export function ChatStage({
           self-stretch without a width lets -mx-2 actually widen the box. */}
       <div className="-mx-2 flex min-h-[min(70dvh,620px)] flex-1 animate-in flex-col self-stretch duration-500 fade-in slide-in-from-bottom-4 motion-reduce:animate-none sm:mx-0 sm:h-[min(70dvh,620px)] sm:flex-none">
         <Chatbox
-          chat={chat}
+          chat={{
+            ...chat,
+            selfConnection: selfBlip ? "reconnecting" : "connected",
+          }}
           revealNames={revealNames}
           onSend={chat.send}
           onEndChat={() => chat.endChat("student")}
@@ -115,6 +133,8 @@ export function ChatStage({
           onWorld
           revealNames={revealNames}
           onRevealNamesChange={setRevealNames}
+          selfBlipActive={selfBlip}
+          onSelfBlip={() => setSelfBlip(true)}
           extraEvents={
             <>
               <EventButton

@@ -1,6 +1,6 @@
 # 22 — You can tell when you're the one offline
 
-State: **Not started**
+State: **Complete**
 
 **The problem.** When a student's own connection drops mid-chat, everyone
 else is told and they aren't. The server fires `chat:peer-connection` to the
@@ -37,7 +37,7 @@ stacks `ChatPausedBanner` and `PeerReconnectBanner` in a sticky header.
   [`chat-behavior.md`](../../decisions/chat-behavior.md) + DECISIONS.md line
   ("Your own drop shows in the chat, without a countdown").
 
-- [ ] Prompt — The chat wears the lobby's reconnecting pill
+- [x] Prompt — The chat wears the lobby's reconnecting pill
 
 ---
 

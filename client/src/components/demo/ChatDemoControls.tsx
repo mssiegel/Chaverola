@@ -20,6 +20,9 @@ interface ChatDemoControlsProps {
   onWorld?: boolean;
   revealNames: boolean;
   onRevealNamesChange: (value: boolean) => void;
+  /** The demo's pretend blip in the student's OWN wifi, and its trigger. */
+  selfBlipActive: boolean;
+  onSelfBlip: () => void;
   /** Extra EventButtons after the built-in ones (pass them the same onWorld). */
   extraEvents?: ReactNode;
 }
@@ -36,6 +39,8 @@ export function ChatDemoControls({
   onWorld = false,
   revealNames,
   onRevealNamesChange,
+  selfBlipActive,
+  onSelfBlip,
   extraEvents,
 }: ChatDemoControlsProps) {
   const peerConnected = chat.peerState === "connected";
@@ -119,6 +124,15 @@ export function ChatDemoControls({
               icon={<DoorOpen className="size-4" />}
             >
               Partner leaves chat
+            </EventButton>
+            {/* The blip you come back from, next to the drop you don't. */}
+            <EventButton
+              onWorld={onWorld}
+              onClick={onSelfBlip}
+              disabled={selfBlipActive || chat.isEnded}
+              icon={<WifiOff className="size-4" />}
+            >
+              Your wifi blips
             </EventButton>
             <EventButton
               onWorld={onWorld}

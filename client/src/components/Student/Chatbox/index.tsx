@@ -85,6 +85,7 @@ export function Chatbox({
     reconnectSecondsLeft,
     isEnded,
     isPaused,
+    selfConnection,
     endReason,
     endedByPeerId,
   } = chat;
@@ -188,6 +189,7 @@ export function Chatbox({
         reconnectSecondsLeft={reconnectSecondsLeft}
         // The ended screen supersedes the pause banner: isEnded wins.
         isPaused={isPaused && !isEnded}
+        selfConnection={isEnded ? "connected" : selfConnection}
         characterColors={characterColors}
         onRetryMessage={onRetryMessage}
       />

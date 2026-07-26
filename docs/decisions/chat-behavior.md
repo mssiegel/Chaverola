@@ -5,6 +5,36 @@ area. Entries are newest-first; add new ones at the top, and add a matching line
 to the index in the same change. Replaced decisions move to Superseded at the
 bottom of this file.
 
+### Your own drop shows in the chat, without a countdown
+
+_2026-07-26_
+
+**Decision:** When a student's own socket goes down mid-chat, their chat wears
+the lobby's amber "Reconnecting you…" pill — same words, same spinner, in the
+sticky banner slot above the feed. It waits 1.5 seconds before appearing, so a
+blip socket.io fixes on its own never flashes amber, and it clears the instant
+the connection is back. While it's up it replaces the peer banner rather than
+stacking with it: everything we know about a partner arrived over the line
+that just died.
+
+**No countdown, deliberately.** The peer banner ticks down the 2-minute grace
+because that clock is a fact the server keeps sending. Your own clock is on
+the far side of the connection you just lost — the client would be guessing,
+and a wrong number is worse than none. The student learns how long they have
+if and when they time out, on the 📶 wrap-up.
+
+**The composer stays open, and Send still sends.** socket.io queues what you
+type while you're down and flushes it on reconnect, so blocking the box would
+throw away work the app can actually deliver. Each line carries its own
+pending → failed state (see "A sent message shows as pending until its echo"),
+which is the honest per-message answer; the banner is the honest room-level
+one.
+
+**Why at all:** everyone else already knew. The partner got the amber
+countdown, the teacher's card flipped to "lost connection", and the one person
+who couldn't tell was the student it was happening to — their chat looked live
+for a full two minutes, right up until it ended.
+
 ### The send window holds a fast typist's messages instead of dropping them
 
 _2026-07-26_

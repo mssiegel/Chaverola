@@ -361,6 +361,9 @@ export function JoinActivityPage() {
             endedByPeerId={liveEndedBy}
             revealNames={revealed}
             isPaused={livePaused}
+            // The lobby's pill and the chat's banner read one value: your
+            // own drop is the same event on either screen.
+            connection={lobbyConnection}
             activityEnded={activityGone}
             onSend={sendChatMessage}
             onRetryMessage={retryLiveMessage}

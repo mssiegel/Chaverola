@@ -1,5 +1,7 @@
 import { useEffect, useRef } from "react";
 
+import type { LobbyConnectionState } from "@chaverola/shared";
+
 import { ConversationLines } from "@/components/chat/ConversationLines";
 import { participantsById } from "@/lib/participants";
 import type {
@@ -11,6 +13,7 @@ import type {
 import { ChatPausedBanner } from "./ChatPausedBanner";
 import { PeerIsTyping } from "./PeerIsTyping";
 import { PeerReconnectBanner } from "./PeerReconnectBanner";
+import { SelfReconnectBanner } from "./SelfReconnectBanner";
 
 interface ConversationProps {
   participants: Participant[];
@@ -23,6 +26,8 @@ interface ConversationProps {
   reconnectSecondsLeft?: number | null;
   /** The teacher's activity-wide pause: a banner floats over the feed. */
   isPaused?: boolean;
+  /** The student's own link. Absent = connected (hero, teacher cards). */
+  selfConnection?: LobbyConnectionState;
   /** Distinct color (CSS var) per character id in this room. */
   characterColors: Map<string, string>;
   /** Re-send a line whose echo never arrived (the live student chat only). */
@@ -43,6 +48,7 @@ export function Conversation({
   offlinePeerId,
   reconnectSecondsLeft = null,
   isPaused = false,
+  selfConnection = "connected",
   characterColors,
   onRetryMessage,
 }: ConversationProps) {
@@ -90,16 +96,26 @@ export function Conversation({
       // past the keyboard-shrunk viewport instead of scrolling.
       className="scroll-soft relative h-0 flex-auto overflow-y-auto px-3 py-3 text-[15px] leading-6 sm:px-4"
     >
-      {(isPaused || peerState !== "connected") && (
+      {(isPaused ||
+        selfConnection === "reconnecting" ||
+        peerState !== "connected") && (
         <div className="sticky top-0 z-10 -mx-3 mb-2 flex flex-col items-center gap-1.5 px-3 sm:-mx-4 sm:px-4">
           {/* Pause on top of a still-ticking reconnect countdown: both can
               apply — the grace runs through a pause. */}
           {isPaused && <ChatPausedBanner />}
-          <PeerReconnectBanner
-            peerState={peerState}
-            peerName={offlineName}
-            reconnectSecondsLeft={reconnectSecondsLeft}
-          />
+          {/* Your own drop replaces the peer banner rather than stacking with
+              it: whatever we last heard about a partner came down the same
+              line that just died, so it's a claim this screen can't back up
+              (the lobby ranks its pills the same way). */}
+          {selfConnection === "reconnecting" ? (
+            <SelfReconnectBanner />
+          ) : (
+            <PeerReconnectBanner
+              peerState={peerState}
+              peerName={offlineName}
+              reconnectSecondsLeft={reconnectSecondsLeft}
+            />
+          )}
         </div>
       )}
 

@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react";
 
-import { CHAT_SEND_WINDOW_MS, LOBBY_GRACE_SECONDS } from "@chaverola/shared";
+import {
+  CHAT_SEND_WINDOW_MS,
+  LOBBY_GRACE_SECONDS,
+  type LobbyConnectionState,
+} from "@chaverola/shared";
 
 import { Chatbox } from "@/components/Student/Chatbox";
 import { useBackGuard } from "@/lib/useBackGuard";
@@ -54,6 +58,10 @@ interface LiveChatStageProps {
   /** The teacher's activity-wide pause (activity:paused / lobby:welcome).
    *  Chatbox freezes the room: banner, locked composer. Ended wins. */
   isPaused: boolean;
+  /** The student's own socket, straight off the presence hook — the same
+   *  value the lobby's pill reads. The stage debounces it before showing
+   *  anything (see below). */
+  connection: LobbyConnectionState;
   /** The activity itself ended under this screen (End activity). The wrap-up
    *  holds — it needs no socket — but there's no lobby behind its CTA
    *  anymore, so the button closes out onto the activity-over card. */
@@ -78,6 +86,10 @@ interface LiveChatStageProps {
   /** The ended screen's CTA: re-queue with a fresh wait clock. */
   onBackToLobby: () => void;
 }
+
+/** How long the socket has to come back on its own before the chat says
+ *  anything about it. Live wire timing — never scaledMs. */
+const SELF_RECONNECT_DELAY_MS = 1_500;
 
 /**
  * The chatting + chat-ended stages for a REAL activity: the same chatbox the
@@ -115,6 +127,7 @@ export function LiveChatStage({
   endedByPeerId,
   revealNames,
   isPaused,
+  connection,
   activityEnded,
   onSend,
   onRetryMessage,
@@ -128,6 +141,25 @@ export function LiveChatStage({
   // Same guard as the demo stage: a stray back-swipe must never silently
   // dump a student out of a live chat — it opens the exit confirm instead.
   useBackGuard(!isEnded, () => setConfirmOpen(true));
+
+  // Your own drop, held back a beat. socket.io often has the line back
+  // before a student would have noticed it went, and a banner that blinks
+  // amber for half a second reads as a glitch, not as news. Coming back is
+  // instant — good news never waits.
+  const [showReconnecting, setShowReconnecting] = useState(false);
+  useEffect(() => {
+    if (connection === "connected") return;
+    const timer = setTimeout(
+      () => setShowReconnecting(true),
+      SELF_RECONNECT_DELAY_MS
+    );
+    // The cleanup is the "you're back" half: it runs the moment connection
+    // flips (or the chat unmounts), which clears the banner without waiting.
+    return () => {
+      clearTimeout(timer);
+      setShowReconnecting(false);
+    };
+  }, [connection]);
 
   // The countdown's clock: plain real time, once a second, for the whole
   // live room (gating it on an open window would leave `now` minutes stale
@@ -199,6 +231,7 @@ export function LiveChatStage({
     reconnectSecondsLeft,
     isEnded,
     isPaused,
+    selfConnection: showReconnecting ? "reconnecting" : "connected",
     endReason: isEnded ? (endReason ?? "teacher") : null,
     endedByPeerId: isEnded ? endedByPeerId : null,
   };

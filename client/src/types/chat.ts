@@ -6,7 +6,7 @@
   realName privacy split before it ever crosses a wire.
 */
 
-import type { Character } from "@chaverola/shared";
+import type { Character, LobbyConnectionState } from "@chaverola/shared";
 
 export type { Character };
 
@@ -109,6 +109,13 @@ export interface ChatRoomState {
    * event. isEnded wins over isPaused.
    */
   isPaused: boolean;
+  /**
+   * The student's OWN link to the server, so a dropped student learns it from
+   * their chat instead of from two minutes of silence. Optional, and absent
+   * means connected: the hero chatbox and the teacher's cards never set it,
+   * so nothing changes for them.
+   */
+  selfConnection?: LobbyConnectionState;
   /** Why the chat ended; drives the wrap-up copy. Null while it's going. */
   endReason: ChatEndReason | null;
   /** Which peer ended it, when endReason is "peer". */
