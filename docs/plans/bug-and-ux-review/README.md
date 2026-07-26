@@ -23,6 +23,40 @@ prompt leaves the app working and green on its own.
   what a teacher gained; fixes get no row"). This table is the one home for
   tracking this work.
 
+## Running these unattended
+
+A goal or cloud session runs the same loop as a human-driven one, plus four
+rules:
+
+- **Prove the harness before the first doc.** `pnpm install`,
+  `pnpm typecheck`, `pnpm test`, then `pnpm verify:up --scale 10` in the
+  background with `pnpm verify:smoke` against it. The drivers launch an
+  installed Chrome or Edge (`launch()` in
+  [`tools/verify/lib.mjs`](../../../tools/verify/lib.mjs)); on a machine with
+  neither, add an env-var executable-path fallback there — keep the channel
+  attempts first — rather than skipping browser gates. If no browser can run
+  at all, stop and report the gap; don't start a doc whose Done-when you
+  can't finish.
+- **Never guess a founder call.** A prompt that needs a product decision its
+  doc doesn't settle — or that hits one of its own "surface and stop"
+  branches — goes to the inbox:
+  [`questions-for-the-founder.md`](questions-for-the-founder.md). Append the
+  question (doc, prompt, the context an answerer needs, what you need
+  decided), change the prompt's checkbox line to
+  `[blocked — question pending]`, set the doc's State — its own line and the
+  table below — to **Blocked (question pending)**, commit, and move on to the
+  next doc. Open every session by reading the inbox: an answered entry gets
+  folded into its doc as a "Settled (founder, <date>)" note, deleted from the
+  inbox, and its prompt unblocked.
+- **Deploy checks without the CLIs.** Where the Vercel/Render CLIs aren't
+  authenticated, the accepted substitute is `/healthz` reporting the new
+  server commit plus the site serving the new client build
+  ([`operations.md`](../../operations.md) has the CSS-hash technique); say so
+  when you substitute.
+- **Pushed state is the only shared state.** Each prompt still ends with its
+  own commit straight to `main`, pushed, boxes ticked — the founder, or the
+  next session, sees only what landed.
+
 ## The docs
 
 | Doc                                                                                                     | What a user gains                                                                         | State       |

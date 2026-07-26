@@ -5,3 +5,7 @@ coverage
 pnpm-lock.yaml
 *.min.js
 *.min.css
+# vendored skill, kept identical to its upstream version (formatting it
+# once glued the After: labels into the Before blockquotes)
+.agents/skills/humanizer/
+.claude/skills/humanizer/
