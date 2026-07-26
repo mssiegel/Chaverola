@@ -110,9 +110,12 @@ export interface ServerToClientEvents {
     // teacher-room only; feeds the rematch heads-up. `?? {}` on the client
     // tolerates an older server during a deploy.
     lastPartners: Record<string, string[]>;
-    // Pair-everyone left an exact pair/trio in line — the dismissible rail
-    // notice (teacher truth, so a second host device stays coherent). `?? null`
-    // on the client tolerates an older server during a deploy.
+    // The dismissible rail notice: why the last thing the teacher pressed
+    // didn't do what they expected. Two writers — pair-everyone leaving an
+    // exact pair/trio in line, and a chat:start the cast couldn't seat
+    // (feature 18) — one slot, last write wins. Teacher truth, so a second
+    // host device stays coherent. `?? null` on the client tolerates an older
+    // server during a deploy.
     rematchNotice: string | null;
     // The stored settings, teacher-room only — so a host device that slept
     // through a settings:changed re-syncs from its connect-time snapshot
@@ -273,8 +276,10 @@ export interface ClientToServerEvents {
    *  plus who, so the survivor's screen names the leaver), then releases
    *  the seat. */
   "lobby:leave": () => void;
-  /** Teacher only. Filtered to eligible students, clamped to the server
-   *  roster; no-ops below 2 eligible. */
+  /** Teacher only. Filtered to eligible students, then all or nothing: if the
+   *  server's roster has fewer characters than that, the whole start is
+   *  refused and the reason comes back as rematchNotice rather than seating
+   *  whoever fit (feature 18). No-ops below 2 eligible. */
   "chat:start": (payload: { studentIds: string[] }) => void;
   /** Teacher only. Fresh-first pairs in queue order, repairing around exact
    *  reruns; odd count seats a trailing trio when the roster has a 3rd

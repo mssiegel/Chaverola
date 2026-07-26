@@ -126,6 +126,21 @@ describe("createChat", () => {
     );
   });
 
+  // The founder's call for the under-seating case (2026-07-26): refuse the
+  // whole start rather than clamp it. Pinned here because the refusal is
+  // invisible from the client except through the rail notice the handler
+  // builds, so a regression would look like nothing at all.
+  it("refuses a request the cast can't seat instead of dropping a student", () => {
+    const activity = makeActivity(ROSTER.slice(0, 2));
+    const seats = [addSeat(activity), addSeat(activity), addSeat(activity)];
+    const ids = seats.map((s) => s.studentId);
+
+    expect(createChat(activity, ids, 10_000)).toBeNull();
+    expect(activity.chats).toHaveLength(0);
+    // The cast is the only thing refusing: two of the same three still start.
+    expect(createChat(activity, ids.slice(0, 2), 10_000)).not.toBeNull();
+  });
+
   it("deals exactly the roster's first N characters, each once", () => {
     const activity = makeActivity(ROSTER);
     const seats = [addSeat(activity), addSeat(activity), addSeat(activity)];

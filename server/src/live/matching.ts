@@ -143,20 +143,35 @@ export function eligibleWaiting(activity: StoredActivity): Seat[] {
 }
 
 /**
- * Start a chat: filter to eligible students, clamp to min(4, roster length)
- * — a teacher's locally-edited roster can diverge, so leftovers visibly stay
- * in the queue — and no-op under 2. Consuming the leftover clears the
- * highlight.
+ * The seats a manual start would actually fill: the requested students that
+ * are still eligible, in queue order. Exported so the teacher handler can tell
+ * the two refusals below apart — a cast too small is worth a word to the
+ * teacher, fewer than 2 eligible is a visible no-op.
+ */
+export function requestedSeats(
+  activity: StoredActivity,
+  studentIds: string[]
+): Seat[] {
+  return eligibleWaiting(activity).filter((seat) =>
+    studentIds.includes(seat.studentId)
+  );
+}
+
+/**
+ * Start a chat: filter to eligible students, refuse outright when the cast
+ * can't seat all of them, and no-op under 2. Four seats is the hard chat size
+ * and always was; the roster is the part two host devices can disagree about,
+ * and a teacher whose local copy ran ahead gets nothing rather than a chat
+ * that quietly drops a student in the queue (founder call, 2026-07-26 — this
+ * used to clamp). Consuming the leftover clears the highlight.
  */
 export function createChat(
   activity: StoredActivity,
   studentIds: string[],
   now: number
 ): StoredChat | null {
-  const requested = eligibleWaiting(activity).filter((seat) =>
-    studentIds.includes(seat.studentId)
-  );
-  const seated = requested.slice(0, Math.min(4, activity.characters.length));
+  const seated = requestedSeats(activity, studentIds).slice(0, 4);
+  if (seated.length > activity.characters.length) return null;
   if (seated.length < 2) return null;
 
   const cast = dealCast(activity.characters, seated.length);

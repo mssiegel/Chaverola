@@ -1,5 +1,13 @@
 import { useId } from "react";
-import { Check, Repeat2, Sparkles, UsersRound, X, Zap } from "lucide-react";
+import {
+  Check,
+  Info,
+  Repeat2,
+  Sparkles,
+  UsersRound,
+  X,
+  Zap,
+} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -22,7 +30,8 @@ export interface PairingPanelProps {
   onRequestRemove: (student: WaitingStudent) => void;
   /** Selection-time rematch heads-up (never blocks anything). */
   rematchWarning: string | null;
-  /** Pair-everyone's forced-repeat note, dismissible. */
+  /** Why the last press didn't do what the teacher expected, dismissible:
+   *  pair-everyone's forced-repeat note, or a start the cast couldn't seat. */
   rematchNotice: string | null;
   onDismissRematchNotice: () => void;
   /** Pair-everyone's odd one out, highlighted as first in line. */
@@ -184,12 +193,16 @@ export function PairingPanel({
             </div>
           )}
 
+          {/* One slot, two messages: why pair-everyone skipped a pair, and why
+              a start the cast couldn't seat did nothing (feature 18). Hence
+              the neutral icon — the box means "here's why that didn't do what
+              you expected", and only the warning above is about a rematch. */}
           {rematchNotice && (
             <div
               role="status"
               className="flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2.5 text-sm text-amber-800"
             >
-              <Repeat2 aria-hidden className="mt-0.5 size-4 shrink-0" />
+              <Info aria-hidden className="mt-0.5 size-4 shrink-0" />
               <span className="min-w-0 flex-1">{rematchNotice}</span>
               <button
                 type="button"

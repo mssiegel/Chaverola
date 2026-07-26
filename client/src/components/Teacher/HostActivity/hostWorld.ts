@@ -115,12 +115,20 @@ function assignCharacters(
   activity: HostedActivity
 ): Participant[] {
   const cast = dealCast(activity.characters, students.length);
-  return students.map((student, index) => ({
-    id: student.id,
-    realName: student.realName,
+  return students.map((student, index) => {
     // `cast` and `students` are the same length by construction.
-    character: cast[index]!,
-  }));
+    const character = cast[index]!;
+    return {
+      id: student.id,
+      realName: student.realName,
+      // A copy, not the roster reference — the demo freezes a chat's cast at
+      // deal time exactly as the server does (feature 18), so a rename in the
+      // live settings panel can't relabel a chat already running. Relying on
+      // activityFromLiveDraft rebuilding the array would freeze it by
+      // accident; a removal or an in-place edit spreads the same objects.
+      character: { id: character.id, name: character.name },
+    };
+  });
 }
 
 export function createChat(

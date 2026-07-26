@@ -107,6 +107,7 @@ git: `git log -- DECISIONS.md`.
   - [Host the Activity docks to the bottom edge at every breakpoint](docs/decisions/teacher-setup.md#host-the-activity-docks-to-the-bottom-edge-at-every-breakpoint)
   - [Setup sections each carry one brand accent; settings stays the quiet one](docs/decisions/teacher-setup.md#setup-sections-each-carry-one-brand-accent-settings-stays-the-quiet-one)
 - [Teacher live activity page](docs/decisions/teacher-live.md)
+  - [A start the cast can't seat is refused whole, not trimmed to fit](docs/decisions/teacher-live.md#a-start-the-cast-cant-seat-is-refused-whole-not-trimmed-to-fit)
   - [Removing a character is never blocked, and its row carries no live marker](docs/decisions/teacher-live.md#removing-a-character-is-never-blocked-and-its-row-carries-no-live-marker)
   - [The character roster reaches the lobby and every future chat, and its ids are minted client-side](docs/decisions/teacher-live.md#the-character-roster-reaches-the-lobby-and-every-future-chat-and-its-ids-are-minted-client-side)
   - [A chat freezes its cast the moment it starts](docs/decisions/teacher-live.md#a-chat-freezes-its-cast-the-moment-it-starts)

@@ -142,6 +142,19 @@ export function stuckInLineNotice(names: string[]): string {
   }, so they're still in line.`;
 }
 
+/** The rail notice for a manual start the cast can't seat. The teacher's own
+ *  panel may still be showing the bigger roster, since a second host device
+ *  never hears another one's edit, so the notice states the count the server
+ *  has and points at the refresh that shows it. Both counts are always 2 or
+ *  more: a chat needs two students, and the roster's first two rows can't be
+ *  removed. */
+export function tooFewCharactersNotice(
+  characterCount: number,
+  studentCount: number
+): string {
+  return `You picked ${studentCount} students, but your cast only has ${characterCount} characters, so no chat started. Refresh this page to see the current cast.`;
+}
+
 /**
  * Pair-everyone's decision, ids only — the pure half both engines share.
  * Greedy in queue order, preferring fully fresh partners, then anyone who

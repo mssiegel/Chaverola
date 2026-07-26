@@ -5,6 +5,68 @@ area. Entries are newest-first; add new ones at the top, and add a matching line
 to the index in the same change. Replaced decisions move to Superseded at the
 bottom of this file.
 
+### A start the cast can't seat is refused whole, not trimmed to fit
+
+_2026-07-26_
+
+**Decision:** When a teacher starts a chat for more students than the
+server's roster has characters, the whole start is refused. Nobody is
+seated, the selection stays exactly as tapped, and the rail shows a
+dismissible notice naming the cast size the server actually holds and
+pointing at the refresh that shows it. Two supporting calls:
+
+- **The teacher's selection is trimmed to the cast as the roster shrinks
+  under it.** Removing a character while three students are already ticked
+  drops the newest tap, so the Start button's count can never offer a chat
+  the roster has no seats for.
+- **The rail's notice slot now carries two unrelated messages** — this
+  refusal and pair-everyone's "they just chatted" skip — so its icon goes
+  neutral. The slot means "here's why that didn't do what you expected".
+
+**Why:** Founder call, 2026-07-26. `chat:start` used to clamp the request
+to the roster and return a chat for whoever fit, and nothing marked the
+student who didn't: `createChat` only ever _clears_ `leftoverStudentId`,
+and the teacher's selection is wiped the moment a chat starts. A student
+sat out a round the teacher believed they had started, with no trace of it
+on either screen. Refusing keeps the teacher's intent intact — they asked
+for a trio, and a pair is not a trio — and leaves the selection on screen
+as the thing to fix.
+
+Marking the unseated student as the leftover was the smaller change and was
+rejected on two counts: `leftoverStudentId` is a single field, so a request
+that overshoots by two can only ever explain one of them, and the tag it
+renders reads "first in line", which promises the opposite of what
+happened. Clamping with a notice bolted on was rejected because the chat it
+starts is still not the one the teacher asked for, and once it exists the
+only way out is to end it.
+
+Worth naming so the refusal isn't mistaken for dead code: the client can
+outrun the server's roster in three ways, and only one of them is a race.
+A second host device never hears another's edit (no echo, by the call
+below), so its panel can sit a character ahead for the rest of the lesson.
+An added character is in flight for a round trip. And a roster shrinking
+under an existing selection was the widest path of the three — reachable on
+one device with no race at all — which the trim above closes at the source.
+That is what makes the notice worth its words: what remains is mostly the
+teacher whose own panel disagrees with the server, so the copy states the
+server's count rather than guessing at a cause.
+
+Two consequences. `rematchNotice` is one slot, so the last writer wins and
+a successful manual start still clears it, exactly as before. And the
+four-seat chat size is unaffected: a request over four is still trimmed to
+four, because that is the product's chat size and has nothing to do with
+the roster.
+
+_Implemented in [matching.ts](../../server/src/live/matching.ts)
+(`requestedSeats`, and `createChat` refusing instead of clamping),
+[teacher.ts](../../server/src/live/handlers/teacher.ts) (the notice),
+[matchRules.ts](../../shared/src/matchRules.ts) (its copy),
+[HostActivity/index.tsx](../../client/src/components/Teacher/HostActivity/index.tsx)
+(the selection trim), and
+[PairingPanel](../../client/src/components/Teacher/HostActivity/PairingPanel.tsx)
+(the neutral icon); plan in
+[docs/plans/feature-18](../plans/feature-18-character-roster-syncs-live.md)._
+
 ### Removing a character is never blocked, and its row carries no live marker
 
 _2026-07-26_

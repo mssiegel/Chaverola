@@ -244,7 +244,7 @@ export interface ServerToClientEvents {
     leftoverStudentId: string | null; // pair-everyone's odd one out
     paused: boolean; // the world-level pause — keeps a second host device coherent
     lastPartners: Record<string, string[]>; // waiting seats' previous partners — feeds the rematch heads-up (teacher room only)
-    rematchNotice: string | null; // pair-everyone left an exact pair/trio in line — the dismissible rail notice (teacher truth)
+    rematchNotice: string | null; // the dismissible rail notice: pair-everyone left an exact pair/trio in line, or a chat:start the cast couldn't seat — one slot, last write wins (teacher truth)
     settings: ActivitySettings; // the stored settings — a woken host device re-syncs from its connect-time snapshot instead of committing its stale copy
   }) => void;
   /** Student only, targeted; re-sent on every resume while matched.
@@ -442,8 +442,10 @@ export interface ClientToServerEvents {
    *  exactly chat:remove's, minus the tombstone, and a below-2 ending
    *  records "peer" plus who), then releases the seat. */
   "lobby:leave": () => void;
-  /** Teacher only. Filtered to eligible students, clamped to the server
-   *  roster; no-ops below 2 eligible. */
+  /** Teacher only. Filtered to eligible students, then all or nothing: if the
+   *  server's roster has fewer characters than that, the whole start is
+   *  refused and the reason comes back as rematchNotice rather than seating
+   *  whoever fit (feature 18). No-ops below 2 eligible. */
   "chat:start": (payload: { studentIds: string[] }) => void;
   /** Teacher only. Fresh-first pairs in queue order, repairing around exact
    *  reruns; odd count seats a trailing trio when the roster has a 3rd
@@ -550,13 +552,20 @@ below.
 - **Characters are dealt at random from the roster's first N.** A chat of
   N seats uses characters 1..N, shuffled — so a 2-person chat always uses
   the first two characters, and who gets which is chance.
-- **Starting a chat clamps, it doesn't reject.** `chat:start` filters to
-  eligible students and takes at most `min(4, roster length)`; anyone who
-  doesn't fit visibly stays in the queue. Below 2 eligible it does
-  nothing.
+- **Starting a chat is all or nothing.** `chat:start` filters to eligible
+  students, takes at most four, and then refuses the whole start if the
+  roster has fewer characters than that: nobody is seated, and the teacher
+  gets the refusal on `rematchNotice` naming the cast size the server
+  actually holds. It used to clamp instead, which seated whoever fit and
+  left the rest in the queue with nothing to explain it (feature 18,
+  founder call 2026-07-26). Below 2 eligible it still does nothing
+  quietly — a student who got matched away or dropped is a cause the
+  teacher can see. Pair-everyone can't trip the refusal: its plan already
+  sizes every group against the roster.
 - **Every deal reads the roster it finds.** Both deal paths size and slice
   off `activity.characters` at the moment they run, so a character removed
-  mid-activity is never dealt again: the clamp above shrinks with it, and
+  mid-activity is never dealt again: a manual start for more students than
+  the shrunk cast is refused outright per the bullet above, and
   pair-everyone's odd-count rule flips from "shed a trailing trio" to
   "mark the newest joiner the leftover" the moment the roster drops below
   three. Chats already running are unaffected — they hold the cast they

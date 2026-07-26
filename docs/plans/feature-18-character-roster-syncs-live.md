@@ -143,7 +143,7 @@ prompt. Do not resolve it from this document.
 - [x] Prompt 1 — A chat's cast is fixed the moment it starts
 - [x] Prompt 2 — A renamed character reaches the lobby and every future chat
 - [x] Prompt 3 — Removing a character actually removes it
-- [ ] Prompt 4 — Nobody is silently left out of a chat, and the panel stops lying
+- [x] Prompt 4 — Nobody is silently left out of a chat, and the panel stops lying
 
 ## Shared context: the two channels
 

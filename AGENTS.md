@@ -19,6 +19,7 @@ This file is the canonical source of guidance for all AI agents (Claude Code, Cu
 | 9 · Reaped-seat return | **Complete** — a seat reaped out of a chat is remembered for the activity's life, replayed as `chat:started` + `chat:ended {self-timeout}` ("📶 You lost connection").                                                                                       | [feature-8](docs/plans/feature-8-peer-drop.md)                       |
 | 10 · Name reveal       | **Complete** — when `revealNames` is on, `chat:ended` carries each peer's real name and the ended screen names who the student was really with (the one sanctioned exception to the characterId-only wire).                                                  | [feature-10](docs/plans/feature-10-name-reveal.md)                   |
 | 17 · Details sync      | **Complete**, verified on prod 2026-07-26 — `activity:update-details` stores the host name + instructions and fans `activity:details-changed` to every seat; lobbies swap silently, late joiners read stored truth, a second host device is last-write-wins. | [feature-17](docs/plans/feature-17-host-name-and-scene-sync-live.md) |
+| 18 · Roster sync       | **Complete** — the cast rides `activity:update-details` too: lobby chips and every future deal follow the edit, a chat already running keeps the cast it froze at start, removal is never blocked, and a start the cast can't seat is refused whole.         | [feature-18](docs/plans/feature-18-character-roster-syncs-live.md)   |
 
 Every live feature has shipped: nothing on a real activity is simulated anymore.
 

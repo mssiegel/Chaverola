@@ -77,13 +77,20 @@ export function HostActivityDashboard({
     if (activity.settings.autoMatch) setAutoMatchHoldNotice(false);
   }
 
+  const maxGroupSize = Math.min(4, activity.characters.length);
+
   // Selection is derived against the live queue: a student who got matched
   // away, removed, or marked reconnecting (unmatchable — founder call)
-  // simply falls out of it.
-  const validSelectedIds = selectedIds.filter((id) =>
-    engine.waiting.some((s) => s.id === id && s.connection === "connected")
-  );
-  const maxGroupSize = Math.min(4, activity.characters.length);
+  // simply falls out of it. And never wider than the cast: removing a
+  // character under a selection already made drops the newest taps, so the
+  // Start button's count can't promise a chat the roster has no seats for
+  // (founder call, 2026-07-26). Derived rather than an effect, so the
+  // un-ticking lands in the same render as the roster edit.
+  const validSelectedIds = selectedIds
+    .filter((id) =>
+      engine.waiting.some((s) => s.id === id && s.connection === "connected")
+    )
+    .slice(0, maxGroupSize);
 
   const toggleSelect = (studentId: string) => {
     setSelectedIds(
@@ -115,8 +122,12 @@ export function HostActivityDashboard({
 
   const startSelectedChat = () => {
     if (validSelectedIds.length < 2) return;
+    // No optimistic clear. The selection is derived against the queue, so a
+    // chat that really starts empties it on its own the moment its students
+    // leave the queue — and a start the server refuses (a cast that can't
+    // seat them, founder call 2026-07-26) leaves the ticks on screen as the
+    // thing to fix, which is the whole point of refusing.
     engine.startChat(validSelectedIds);
-    setSelectedIds([]);
   };
 
   const confirmPendingAction = () => {

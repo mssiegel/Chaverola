@@ -1,4 +1,4 @@
-import { stuckInLineNotice } from "@chaverola/shared";
+import { stuckInLineNotice, tooFewCharactersNotice } from "@chaverola/shared";
 
 import {
   activityDetailsUpdateSchema,
@@ -22,6 +22,7 @@ import {
   matchedStudentIds,
   pauseChats,
   planPairEveryone,
+  requestedSeats,
   resumeChats,
 } from "../matching";
 import { removeSeat } from "../seats";
@@ -104,6 +105,32 @@ export function registerTeacherHandlers(
     }
     const current = getByHostKey(data.hostKey);
     if (!current) return;
+    // The server's roster is the arbiter (founder call, 2026-07-26). A
+    // teacher whose local copy ran ahead asked for more seats than the cast
+    // has: a second host device never hears another one's roster edit, and
+    // an add is briefly in flight before the emit lands. Seating whoever fit
+    // would leave the rest in the queue with nothing to explain it, so the
+    // whole start is refused — the selection stays put and the notice says
+    // why. createChat enforces the same rule; this branch exists to tell the
+    // teacher, since a refusal is otherwise indistinguishable from a dead
+    // button.
+    const asked = requestedSeats(current, ids).slice(0, 4);
+    if (asked.length > current.characters.length) {
+      current.rematchNotice = tooFewCharactersNotice(
+        current.characters.length,
+        asked.length
+      );
+      log.info(
+        {
+          joinCode: data.joinCode,
+          asked: asked.length,
+          characters: current.characters.length,
+        },
+        "chat start refused: the cast can't seat them"
+      );
+      broadcastState(current);
+      return;
+    }
     const chat = createChat(current, ids, Date.now());
     if (!chat) return; // fewer than 2 eligible — a visible no-op
     // A manual pairing clears any stale pair-everyone rematch notice: the
