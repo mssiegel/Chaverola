@@ -33,16 +33,21 @@ interface MessageComposerProps {
   /** Used to build a playful placeholder, e.g. "Talk as Cleopatra 👑…". */
   selfCharacterLabel?: string;
   /**
-   * The teacher paused the class: typing, sending, and the emoji picker all
-   * lock, and the placeholder says why. The draft text is kept — it comes
-   * back untouched on resume.
+   * The teacher paused the class: sending and the emoji picker lock, typing
+   * signals stop, the box dims, and the placeholder says why. The field
+   * itself stays live — no `disabled`, no `readOnly` — because a focused
+   * textarea that goes disabled is blurred by the browser, which closes the
+   * phone keyboard and collapses the world's chrome back open under the
+   * student's thumb (see DECISIONS.md → "A pause locks the composer without
+   * stealing focus or the keyboard"). Editing during a pause is drafting,
+   * which is fine; only sending is refused.
    */
-  disabled?: boolean;
+  locked?: boolean;
   /**
-   * What the locked field says while `disabled`. Defaults to the pause
-   * copy, the only locked state a room has today.
+   * What the locked field says when it's empty. Defaults to the pause copy,
+   * the only locked state a room has today.
    */
-  disabledPlaceholder?: string;
+  lockedPlaceholder?: string;
   /**
    * Sending lets go of the field instead of holding it, closing the keyboard.
    * The demo passes it: on a phone the steering panel below the composer is
@@ -76,8 +81,8 @@ export function MessageComposer({
   onSend,
   onTyping,
   selfCharacterLabel,
-  disabled = false,
-  disabledPlaceholder = "Paused. Hang tight…",
+  locked = false,
+  lockedPlaceholder = "Paused. Hang tight…",
   releaseKeyboardOnSend = false,
   holdSeconds = null,
 }: MessageComposerProps) {
@@ -108,9 +113,10 @@ export function MessageComposer({
   const handleChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     const next = clampChars(event.target.value, MAX_CHARS);
     setValue(next);
-    // Non-empty only — clearing a draft isn't typing. A disabled textarea
-    // fires no change events, so pause-suppression comes free.
-    if (next.length > 0) onTyping?.();
+    // Non-empty only — clearing a draft isn't typing. The `!locked` is
+    // explicit because the paused field stays enabled and keeps firing change
+    // events; the server dropping paused heartbeats is the belt under it.
+    if (next.length > 0 && !locked) onTyping?.();
   };
 
   const insertEmoji = ({ emoji }: EmojiClickData) => {
@@ -135,7 +141,9 @@ export function MessageComposer({
 
   const handleSend = () => {
     const trimmed = value.trim();
-    if (!trimmed || disabled) return;
+    // The only thing standing between a pause and a sent message: the field
+    // is live, so Enter and the send tap both arrive and both stop here.
+    if (!trimmed || locked) return;
     onSend(trimmed);
     setValue("");
     setPickerOpen(false);
@@ -181,7 +189,7 @@ export function MessageComposer({
           <div
             className={cn(
               "flex items-end gap-1.5 rounded-2xl border border-input bg-card px-1.5 py-1.5 shadow-sm transition-colors",
-              disabled
+              locked
                 ? "opacity-60"
                 : "focus-within:border-brand-grape focus-within:ring-2 focus-within:ring-brand-grape/20"
             )}
@@ -192,15 +200,15 @@ export function MessageComposer({
                 inserting (which refocuses the textarea) must not count as
                 focus-outside and dismiss the picker mid-multi-insert, and
                 closing must not yank focus back onto the smile button. */}
-            <Popover
-              open={pickerOpen && !disabled}
-              onOpenChange={setPickerOpen}
-            >
+            <Popover open={pickerOpen && !locked} onOpenChange={setPickerOpen}>
               <PopoverTrigger asChild>
                 <button
                   type="button"
                   aria-label="Add emoji"
-                  disabled={disabled}
+                  // Safe as a real `disabled` where the textarea isn't: the
+                  // caret lives in the field, not here (the mousedown below
+                  // sees to that), so locking this button blurs nothing.
+                  disabled={locked}
                   // Blink focuses a button on mousedown, before any handler —
                   // preventing it keeps the caret in the textarea so an
                   // inserted emoji lands where the student left off.
@@ -211,7 +219,7 @@ export function MessageComposer({
                     // is redundant. A desktop's fine pointer (no native emoji
                     // key) keeps it.
                     "grid size-9 shrink-0 place-items-center self-end rounded-full transition-colors hover:bg-accent hover:text-foreground disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-muted-foreground pointer-coarse:hidden",
-                    pickerOpen && !disabled
+                    pickerOpen && !locked
                       ? "bg-accent text-foreground"
                       : "text-muted-foreground"
                   )}
@@ -247,23 +255,39 @@ export function MessageComposer({
               // Warm the picker's chunk while the student is still typing, so
               // the first tap on the smile button opens a populated grid.
               onFocus={prefetchEmojiPicker}
-              disabled={disabled}
+              // No `disabled` and no `readOnly` while locked, deliberately —
+              // both would blur a focused field. The placeholder only paints
+              // on an empty box, so a draft stays visible and editable
+              // through the pause for free.
               placeholder={
-                disabled
-                  ? disabledPlaceholder
+                locked
+                  ? lockedPlaceholder
                   : selfCharacterLabel
                     ? `Talk as ${selfCharacterLabel}…`
                     : "Type a message…"
               }
-              className="max-h-16 flex-1 resize-none border-0 bg-transparent py-1.5 text-[15px] leading-6 text-foreground outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed"
+              className="max-h-16 flex-1 resize-none border-0 bg-transparent py-1.5 text-[15px] leading-6 text-foreground outline-none placeholder:text-muted-foreground"
             />
 
             <button
               type="button"
               onClick={handleSend}
-              disabled={disabled || !value.trim()}
+              // A tap on a live button takes focus off the textarea, and a
+              // locked one has nothing to hand it back — that blur closes the
+              // keyboard as surely as disabling the field would. Same
+              // preventDefault the emoji button uses, for the same reason.
+              // Unlocked, handleSend's own refocus covers it.
+              onMouseDown={(event) => {
+                if (locked) event.preventDefault();
+              }}
+              // aria-disabled rather than disabled for the lock: it dims and
+              // announces the same way without putting a disabled control
+              // beside a field the pause is trying not to disturb. handleSend
+              // is what actually refuses.
+              disabled={!value.trim()}
+              aria-disabled={locked}
               aria-label="Send message"
-              className="grid size-10 shrink-0 place-items-center self-end rounded-full bg-primary text-primary-foreground shadow-sm transition-all hover:bg-brand-grape-strong active:scale-95 disabled:opacity-40 disabled:hover:bg-primary"
+              className="grid size-10 shrink-0 place-items-center self-end rounded-full bg-primary text-primary-foreground shadow-sm transition-all hover:bg-brand-grape-strong active:scale-95 disabled:opacity-40 disabled:hover:bg-primary aria-disabled:opacity-40 aria-disabled:hover:bg-primary"
             >
               <SendHorizontal className="size-5" />
             </button>

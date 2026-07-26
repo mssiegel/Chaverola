@@ -30,6 +30,63 @@ the next reader has the conversation you had.
 
 ---
 
+## Doc 27 — a pause landing mid-word on a real iPhone, keyboard up
+
+_Asked 2026-07-26; the founder said up front that no handset would be in the
+room when the change ran, which is why the implementation avoids `readOnly` —
+its iOS keyboard behavior is exactly what only a device can answer._
+
+**Steps** (3 minutes, on any iPhone; production chaverola.com, or the phone
+pointed at a dev server):
+
+1. Open `/activity/join/1234` — the demo, so this needs no activity and no
+   second device. Type any name, tap **Join Activity**, and wait out the
+   auto-pair (about 20 seconds) to land in a chat.
+2. Tap the message box and type half a sentence — stop mid-word, leave the
+   keyboard up, and don't send. The corner pills and the yellow demo banner
+   should have stood down while you type; that's the state the pause has to
+   leave alone.
+3. Without dismissing the keyboard, reach the demo steering panel and tap
+   **Teacher pauses the class**. (It's hidden while the field has focus — scroll
+   or tap once outside the field to reveal it, then tap straight back into the
+   field and retype a word or two so the keyboard is up when you pause. If
+   that's fiddly, do it from a second device on `/activity/host/<key>` with a
+   real activity instead and tap **Pause all chats** → **Pause chats**.)
+4. **The whole test is this moment.** When the amber "Your teacher paused the
+   chat" banner lands: the keyboard must stay up, the chat card must not move,
+   and the corner pills and demo banner must stay hidden. Any jump or any
+   keyboard dismissal is the failure.
+5. Your half-sentence must still be in the box, and still editable — type
+   another word and it should appear. Tap the send button: nothing sends, and
+   the keyboard still doesn't close.
+6. Tap **Teacher resumes the class**. Keep typing without tapping the field
+   again — the characters must go into your draft. Send it; it goes.
+
+**What it would mean if it fails:** step 4 is the change itself. The field is
+left fully enabled precisely so no browser can force a blur, so a keyboard
+that closes anyway means iOS is dropping focus for a reason we haven't found —
+and the ~72px chrome-collapse chain
+(`max-sm:group-has-[textarea:focus]` in `StudentWorldLayout`, `DemoBanner`,
+`ChatStage`) will follow it every time. Step 5's send tap is the second guard:
+the send button is `aria-disabled` rather than `disabled` and cancels its own
+mousedown while locked, and a keyboard that closes there means Safari focuses
+buttons on touch through a prevented mousedown — in which case that button
+needs the real `disabled` back. Step 6 failing means the draft or the focus
+didn't survive the resume re-render, which is the "costs a tap" complaint the
+whole doc was written about.
+
+**Coverage in the meantime:** ran headless on 2026-07-26 at 390×844 with touch
+— `tools/verify/scratch/doc27-pause-lock.mjs` (24/24, live activity) and
+`doc27-demo-parity.mjs` (10/10, the demo flow), alongside `verify:smoke` 7/7
+and the full unit suite. Those assert the observable half of every step above:
+`document.activeElement` is still the textarea across the pause, the world
+column's computed `padding-top` stays 8px, the corner bar stays
+`display: none`, the draft survives and keeps taking input, a forced tap on the
+locked send button sends nothing and drops no focus, and resume sends without a
+re-tap. What headless cannot do is show a keyboard at all — Chromium has none,
+so "the keyboard stays up" is inferred from focus never moving, which is the
+one link in the chain this entry exists to check.
+
 ## Doc 25 — the composer clear of the home indicator, on a notched iPhone
 
 _Asked 2026-07-26; the founder said up front that no handset would be in the

@@ -73,7 +73,7 @@ rules:
 | [24 — Removal lands gently](24-removal-lands-gently.md)                                                 | A removed student gets a real ending and an explanation, not a keyboard in the face       | Complete    |
 | [25 — The composer clears the home bar](25-the-composer-clears-the-home-bar.md)                         | The send button stops sharing pixels with the iPhone home indicator                       | Complete    |
 | [26 — Scrolling up means you get to read](26-scrolling-up-means-you-get-to-read.md)                     | Re-reading the chat stops getting yanked to the bottom on every new line                  | Complete    |
-| [27 — Pause doesn't slam the keyboard](27-pause-doesnt-slam-the-keyboard.md)                            | A pause mid-typing stops closing the keyboard and jumping the layout                      | Not started |
+| [27 — Pause doesn't slam the keyboard](27-pause-doesnt-slam-the-keyboard.md)                            | A pause mid-typing stops closing the keyboard and jumping the layout                      | Complete    |
 | [28 — Endings talk like the game](28-endings-talk-like-the-game.md)                                     | The two ops-voice endings ("server restarted", "signed out") speak the product's language | Not started |
 | [31 — The host page stops re-downloading the class](31-the-host-page-stops-re-downloading-the-class.md) | The teacher dashboard stays fast in round three                                           | Not started |
 | [32 — Students download the student app](32-students-download-the-student-app.md)                       | 30 phones on one AP stop pulling the teacher dashboard to type four digits                | Not started |

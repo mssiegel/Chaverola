@@ -5,6 +5,50 @@ area. Entries are newest-first; add new ones at the top, and add a matching line
 to the index in the same change. Replaced decisions move to Superseded at the
 bottom of this file.
 
+### A pause locks the composer without stealing focus or the keyboard
+
+_2026-07-26_
+
+**Decision:** When the teacher pauses, the student's message box refuses to
+send and says so — dimmed, "Paused. Hang tight…" in an empty field, the send
+button reading as disabled, typing signals stopped — but the field itself
+stays live. No `disabled`, no `readOnly`. Focus stays where the student left
+it, the phone keyboard stays up, the layout does not move, and the draft
+stays visible and editable. Resume hands them straight back to the sentence
+they were writing, no re-tap.
+
+**Why:** a focused `<textarea>` that becomes `disabled` is blurred by the
+browser. That blur dropped the `group-has-[textarea:focus]` state four
+separate rules hang off — the corner pills un-hid, the world column's top pad
+went from 8px back to 80px, and on demo flows the banner and steering panel
+reappeared — so the chat card jumped ~72px under the student's thumb in the
+same frame the paused banner landed, and the keyboard closed. A pause is the
+moment the teacher is asking for calm; it was producing the most violent
+frame in the app.
+
+**The lock is behavior, not the DOM.** `handleSend` refuses while locked, and
+that is now the only thing standing between a pause and a sent message, since
+an enabled field delivers Enter. The send button is `aria-disabled` rather
+than `disabled` — and prevents its own mousedown while locked, because a tap
+on a live button takes focus off the field just as surely as disabling it
+would. `onTyping` needs an explicit `!locked` gate; the free suppression the
+`disabled` attribute used to give is gone. The server refusing paused sends
+and dropping paused heartbeats stays the belt under all of it — the composer
+was never the enforcement.
+
+**Editing during a pause is allowed, deliberately.** They can keep drafting;
+they just can't send. Taking the field away to prevent a sentence nobody can
+send yet buys nothing and costs the keyboard.
+
+**`readOnly` was rejected without a handset.** It is the tidier-looking
+answer, but whether iOS keeps the keyboard up for a read-only field is a
+question only a real device can settle, and none was available. The
+fully-enabled field has no such unknown on any platform. The handset check is
+logged in [pending-manual-tests.md](../pending-manual-tests.md).
+
+_Implemented in [MessageComposer.tsx](../../client/src/components/chat/MessageComposer.tsx)
+and [Chatbox/index.tsx](../../client/src/components/Student/Chatbox/index.tsx)._
+
 ### The feed follows the newest line only from the bottom, except your own send
 
 _2026-07-26_

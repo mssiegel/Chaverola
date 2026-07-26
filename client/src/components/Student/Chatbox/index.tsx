@@ -212,7 +212,7 @@ export function Chatbox({
           onSend={onSend}
           onTyping={onTyping}
           selfCharacterLabel={self.character.name}
-          disabled={isPaused}
+          locked={isPaused}
           holdSeconds={holdSeconds}
           releaseKeyboardOnSend={releaseKeyboardOnSend}
         />

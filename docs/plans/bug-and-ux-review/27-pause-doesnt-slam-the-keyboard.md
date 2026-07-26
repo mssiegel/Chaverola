@@ -1,6 +1,6 @@
 # 27 — Pause doesn't slam the keyboard
 
-State: **Not started**
+State: **Complete**
 
 **The problem.** When the teacher pauses the class while a student is
 mid-word on a phone, the whole layout convulses in one frame. The chain,
@@ -34,7 +34,7 @@ jump reads as a glitch — during the exact moment the teacher wants calm.
   [`chat-behavior.md`](../../decisions/chat-behavior.md) + DECISIONS.md line
   ("A pause locks the composer without stealing focus or the keyboard").
 
-- [ ] Prompt — Lock the composer without blurring it
+- [x] Prompt — Lock the composer without blurring it
 
 ---
 
@@ -84,6 +84,36 @@ to restore — only never _steal_ focus. Desktop is unaffected by the
 chrome-collapse chain (it's `max-sm`) but gets the same no-blur lock.
 
 **Tests:** none — focus/keyboard behavior; browser + handset verify.
+
+---
+
+## What landed
+
+**One prop, not two.** Step 1's split assumed a terminal-state caller passing
+`disabled`. There isn't one: the ended path swaps the whole composer for
+`ChatEndedSection` (`Chatbox/index.tsx:198`), and the only other call site,
+`HeroChatbox`, passes nothing. So `disabled` had exactly one meaning already —
+pause — and it was renamed to `locked` and given the new behavior, rather than
+adding a second mode beside a branch nothing calls. Founder confirmed before
+the work started.
+
+**The send button was the second blur, and the browser pass caught it.** With
+the textarea left enabled, a tap on the locked send button still took focus off
+the field — the same keyboard-and-layout slam by another route, and one the
+real `disabled` used to hide. It now cancels its own mousedown while locked,
+the trick the emoji button already used to protect the caret. Everything else
+held first time: the pause moves nothing.
+
+**Verified** with two scratch drivers (gitignored, so listed here rather than
+committed), both at 390×844 with touch. A live 1:1 room, 24/24 —
+`document.activeElement` is still the textarea across the pause, the world
+column's `padding-top` stays 8px, the corner bar stays hidden, no `disabled` or
+`readOnly` lands on the field, the draft survives and keeps taking input, a
+forced tap on the locked send button sends nothing and drops no focus, the peer
+receives nothing, and resume sends without a re-tap. The demo flow, 10/10, same
+invariants through the demo engines. Plus `verify:smoke` 7/7 and the full unit
+suite. Playwright refusing to click the `aria-disabled` send button unaided was
+its own small proof.
 
 **Done when:** `pnpm typecheck` green; browser pass (`verify:up --scale
 10`, phone width): with a draft mid-word, teacher pauses → banner appears,
