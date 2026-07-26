@@ -170,6 +170,7 @@ git: `git log -- DECISIONS.md`.
   - [Teacher chat cards: collapsed to the last 5 lines, End chat asks first](docs/decisions/monitoring.md#teacher-chat-cards-collapsed-to-the-last-5-lines-end-chat-asks-first)
   - [Teacher view: character colors follow participant order](docs/decisions/monitoring.md#teacher-view-character-colors-follow-participant-order)
 - [Homepage & hero](docs/decisions/homepage.md)
+  - [The homepage has a two-plan section, and the free plan stays the whole product](docs/decisions/homepage.md#the-homepage-has-a-two-plan-section-and-the-free-plan-stays-the-whole-product)
   - [The highlighter mark appears once on the homepage, under "In character"](docs/decisions/homepage.md#the-highlighter-mark-appears-once-on-the-homepage-under-in-character)
   - [The homepage has a "see it in action" section with doorways into both demos](docs/decisions/homepage.md#the-homepage-has-a-see-it-in-action-section-with-doorways-into-both-demos)
   - [On phones the live chat comes before the setup steps](docs/decisions/homepage.md#on-phones-the-live-chat-comes-before-the-setup-steps)

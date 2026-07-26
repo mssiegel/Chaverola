@@ -5,6 +5,39 @@ area. Entries are newest-first; add new ones at the top, and add a matching line
 to the index in the same change. Replaced decisions move to Superseded at the
 bottom of this file.
 
+### The homepage has a two-plan section, and the free plan stays the whole product
+
+_2026-07-26_
+
+**Decision:** Between how-it-works and the founder's note sits a "Plans"
+section — heading "The free plan is the whole thing." — with two cards. The
+**Free** card lists everything the product does today and ends in the standard
+outline Host CTA; it is never described as limited, trial-like, or a tier.
+The **Complete Implementation** card (team training on curriculum fit and on
+running lessons, Google Classroom-type integrations, teacher accounts with
+saved characters, mid-activity tasks pushed into student chats) lists no
+price — its secondary "Write to Moshe" CTA opens a dialog with a prefilled
+mailto to siegel.moshes@gmail.com plus the raw address as select-all text.
+The paid card's accent is a grape-tinted border and one rotated sticker tag
+("With the Chaverola team") — no badges, ribbons, price columns, or icon
+grids, and no `HighlightMark`. The how-it-works facts row's first item
+becomes "Free plan for every teacher".
+
+**Why:** Founder call (2026-07-26). The paid plan is hands-on service priced
+per classroom or school, so a contact CTA is honest where a price table would
+be made up. Placed above the founder's note so the ask ("write to Moshe")
+lands right before the letter signed by the same person. This **amends**
+[The how-it-works footer answers cost, accounts, and devices](#the-how-it-works-footer-answers-cost-accounts-and-devices)
+— that entry required a founder call before softening "free", and this is
+that call (the row structure stands) — and extends
+[The hero looks hand-made and never mentions AI](#the-hero-looks-hand-made-and-never-mentions-ai)
+and [Solid grape is reserved for Join](#solid-grape-is-reserved-for-join-both-host-buttons-are-outline).
+
+_Implemented in
+[PlansSection](../../client/src/components/home/PlansSection.tsx),
+[HomePage](../../client/src/pages/HomePage.tsx), and
+[HowItWorksSection](../../client/src/components/home/HowItWorksSection.tsx)._
+
 ### The highlighter mark appears once on the homepage, under "In character"
 
 _2026-07-16_
@@ -77,6 +110,11 @@ to print and nothing to install." The claims are founder-approved facts —
 free for teachers, students enter a code and a name with no accounts or
 emails, any device with a browser. Don't add pricing tiers or soften "free"
 without a new founder call.
+
+_Note (2026-07-26): that founder call happened — see
+[The homepage has a two-plan section, and the free plan stays the whole product](#the-homepage-has-a-two-plan-section-and-the-free-plan-stays-the-whole-product).
+The row structure stands; its first item is now "Free plan for every
+teacher"._
 
 **Why:** Founder call (2026-07-15). Cost, student accounts, and devices are
 the first practical questions teachers check before trying a classroom tool,

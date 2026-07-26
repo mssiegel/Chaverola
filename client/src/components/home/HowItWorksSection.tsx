@@ -63,11 +63,13 @@ export function HowItWorksSection() {
           </LocaleLink>
         </Button>
         {/* The practical facts teachers check before trying a tool. The
-            claims (free, no student accounts, any browser) are founder-
-            approved — see DECISIONS.md → "The how-it-works footer answers
-            cost, accounts, and devices". */}
+            claims are founder-approved — see DECISIONS.md → "The how-it-works
+            footer answers cost, accounts, and devices". "Free plan" (not
+            "free to use") since the plans section below added a paid tier —
+            see DECISIONS.md → "The homepage has a two-plan section, and the
+            free plan stays the whole product". */}
         <ul className="flex flex-col items-center gap-1 text-center text-sm text-muted-foreground sm:flex-row sm:gap-2.5">
-          <li>Free to use</li>
+          <li>Free plan for every teacher</li>
           <li aria-hidden className="hidden text-brand-grape sm:block">
             ·
           </li>
