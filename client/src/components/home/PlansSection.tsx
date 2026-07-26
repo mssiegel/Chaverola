@@ -72,14 +72,21 @@ export function PlansSection() {
           bullets={[
             "Training from our team on fitting activities into your curriculum",
             "Training on running lessons that teach the material and that students love",
-            "Connections to Google Classroom and the other tools your school already uses",
+            <>
+              Connections to{" "}
+              <span className="whitespace-nowrap">
+                <GoogleClassroomLogo />
+                &nbsp;Google Classroom
+              </span>{" "}
+              and the other tools your school already uses
+            </>,
             "A teacher account, so your characters are saved and ready for the next activity",
             "Mid-activity tasks: write them ahead of time, then push each one into your students' chats when the room is ready for it",
           ]}
           footer={
             <>
               <p className="text-sm text-muted-foreground">
-                Priced per classroom or school.
+                Priced per teacher or school.
               </p>
               <CompleteContactDialog />
             </>
@@ -100,7 +107,7 @@ function PlanCard({
 }: {
   name: string;
   tagline: string;
-  bullets: string[];
+  bullets: ReactNode[];
   footer: ReactNode;
   sticker?: string;
   highlighted?: boolean;
@@ -126,8 +133,8 @@ function PlanCard({
         </p>
       </div>
       <ul className="space-y-2 text-[15px] text-foreground/90">
-        {bullets.map((bullet) => (
-          <li key={bullet} className="flex gap-2.5">
+        {bullets.map((bullet, index) => (
+          <li key={index} className="flex gap-2.5">
             <span aria-hidden className="shrink-0 font-bold text-brand-grape">
               ·
             </span>
@@ -139,6 +146,34 @@ function PlanCard({
         {footer}
       </div>
     </div>
+  );
+}
+
+/**
+ * The Google Classroom logo (gold frame, green board, three figures, eraser),
+ * redrawn as a tiny inline SVG so nothing loads from Google's servers. Sits
+ * inline with the integrations bullet; decorative, the text names the product.
+ */
+function GoogleClassroomLogo() {
+  return (
+    <svg
+      aria-hidden
+      viewBox="0 0 24 24"
+      className="inline-block size-4 -translate-y-px align-text-bottom"
+    >
+      <rect x="0.5" y="2.5" width="23" height="19" rx="2" fill="#ffc112" />
+      <rect x="2.5" y="4.5" width="19" height="15" fill="#21a464" />
+      <circle cx="7.4" cy="10.9" r="1.5" fill="#57bb8a" />
+      <path d="M4.4 15.6c0-1.2 1.4-2.2 3-2.2s3 1 3 2.2v.7h-6z" fill="#57bb8a" />
+      <circle cx="16.6" cy="10.9" r="1.5" fill="#57bb8a" />
+      <path
+        d="M13.6 15.6c0-1.2 1.4-2.2 3-2.2s3 1 3 2.2v.7h-6z"
+        fill="#57bb8a"
+      />
+      <circle cx="12" cy="9.6" r="2.1" fill="#fff" />
+      <path d="M7.9 16.3c0-1.8 1.8-3.1 4.1-3.1s4.1 1.3 4.1 3.1h-8.2z" fill="#fff" />
+      <rect x="14.5" y="20.2" width="5" height="1.6" fill="#f1f1f1" />
+    </svg>
   );
 }
 
@@ -160,9 +195,10 @@ function CompleteContactDialog() {
         <DialogHeader>
           <DialogTitle>Let's figure out what fits</DialogTitle>
           <DialogDescription>
-            Complete Implementation is shaped around your classroom or school,
-            and so is the price. Write to Moshe with a little about what
-            you're planning, and we'll take it from there.
+            Whether you're one teacher or a whole school, Complete
+            Implementation is shaped around you, and so is the price. Write to
+            Moshe with a little about what you're planning, and we'll take it
+            from there.
           </DialogDescription>
         </DialogHeader>
         <Button asChild variant="secondary">

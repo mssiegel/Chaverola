@@ -20,12 +20,16 @@ price — its secondary "Write to Moshe" CTA opens a dialog with a prefilled
 mailto to siegel.moshes@gmail.com plus the raw address as select-all text.
 The paid card's accent is a grape-tinted border and one rotated sticker tag
 ("With the Chaverola team") — no badges, ribbons, price columns, or icon
-grids, and no `HighlightMark`. The how-it-works facts row's first item
-becomes "Free plan for every teacher".
+grids, and no `HighlightMark`. The one exception to the no-logos look: the
+integrations bullet carries a small inline Google Classroom logo (redrawn as
+an SVG in the component, nothing loaded from Google), founder-requested
+(2026-07-26). The how-it-works facts row's first item becomes "Free plan for
+every teacher".
 
 **Why:** Founder call (2026-07-26). The paid plan is hands-on service priced
-per classroom or school, so a contact CTA is honest where a price table would
-be made up. Placed above the founder's note so the ask ("write to Moshe")
+per teacher or school (an individual teacher gets an account too — it's not
+schools-only), so a contact CTA is honest where a price table would be made
+up. Placed above the founder's note so the ask ("write to Moshe")
 lands right before the letter signed by the same person. This **amends**
 [The how-it-works footer answers cost, accounts, and devices](#the-how-it-works-footer-answers-cost-accounts-and-devices)
 — that entry required a founder call before softening "free", and this is
