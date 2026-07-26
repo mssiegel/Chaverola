@@ -35,9 +35,9 @@ export function PlansSection() {
         <SectionEyebrow>Plans</SectionEyebrow>
         <SectionHeading>The free plan is the whole thing.</SectionHeading>
         <p className="max-w-2xl text-lg text-pretty text-muted-foreground">
-          Everything on this page is free for every teacher: the characters,
-          the live dashboard, the reveal at the end. The second plan is for
-          teachers and schools who want us working alongside them.
+          Everything on this page is free for every teacher: the characters, the
+          live dashboard, the reveal at the end. The second plan is for teachers
+          and schools who want us working alongside them.
         </p>
       </div>
 
@@ -170,7 +170,10 @@ function GoogleClassroomLogo() {
         fill="#57bb8a"
       />
       <circle cx="12" cy="9.6" r="2.1" fill="#fff" />
-      <path d="M7.9 16.3c0-1.8 1.8-3.1 4.1-3.1s4.1 1.3 4.1 3.1h-8.2z" fill="#fff" />
+      <path
+        d="M7.9 16.3c0-1.8 1.8-3.1 4.1-3.1s4.1 1.3 4.1 3.1h-8.2z"
+        fill="#fff"
+      />
       <rect x="14.5" y="20.2" width="5" height="1.6" fill="#f1f1f1" />
     </svg>
   );
