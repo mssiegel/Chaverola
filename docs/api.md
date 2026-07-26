@@ -238,9 +238,12 @@ export interface ServerToClientEvents {
    *  waiters, and wrappingUp alike (the pause is activity-wide). Live
    *  flips only; connect-time state rides lobby:welcome. */
   "activity:paused": (payload: { paused: boolean }) => void;
-  /** Teacher room; also emitted to a teacher socket the moment it joins. */
+  /** Teacher room; also emitted to a teacher socket the moment it joins.
+   *  Comes in two sizes — a seat event omits `messages` on chats that have
+   *  already ENDED (see below); anything that changes a chat carries
+   *  everything. */
   "chats:snapshot": (payload: {
-    chats: ChatSnapshot[];
+    chats: ChatSnapshot[]; // ended chats may arrive without `messages` on a seat event
     leftoverStudentId: string | null; // pair-everyone's odd one out
     paused: boolean; // the world-level pause — keeps a second host device coherent
     lastPartners: Record<string, string[]>; // waiting seats' previous partners — feeds the rematch heads-up (teacher room only)
@@ -416,7 +419,25 @@ exception:** `chat:transcript-line` is a per-message delta, because a
 full snapshot per message would be far too fat. It stays safe under the
 same rule, since `chats:snapshot` also carries the transcript — a dropped
 delta heals on the next seat change or reconnect; the delta is an
-optimization, never the only path. `queue:snapshot` excludes
+optimization, never the only path.
+
+**One thing a snapshot may leave out: an already-ended chat's
+transcript.** Chats never expire from a record, so by round three a whole
+lesson rides every emit — and seat churn is the noisiest emitter of all (a
+class of 30 tapping "Back to the lobby" in the same few seconds). So
+`chats:snapshot` has two modes. A **slim** one sends ended chats with
+`messages` absent, which the teacher's page reads as "unchanged" and
+answers from the lines it already holds; every other field still travels,
+and an **active** chat always carries its transcript in either mode. A
+**full** one carries everything. Seat events are slim: student
+connect/resume, the 4s disconnect gate, `lobby:back`, a `lobby:leave` from
+the queue, a `chat:leave` that leaves the room going. Everything that
+changes a chat's status or lines is full — every teacher command, every
+ending (including a `chat:leave` or `lobby:leave` that ends a room, and a
+grace expiry that empties one), and the teacher's connect snapshot. That
+split is what makes it safe: an ended transcript is complete on the wire
+at the moment it becomes immutable, and any staleness after that heals at
+the next full snapshot. `queue:snapshot` excludes
 matched and wrapping-up seats, so the queue is exactly the pool the
 pairing rail can act on. The queue clock (`waitSeconds`) is computed
 server-side at emit and ticked locally by the client between snapshots —

@@ -166,13 +166,20 @@ export function toLobbyWelcome(
 /** The teacher's chat card (room lobby:${joinCode}) — real names are fine
  *  here; never a token. `character` is the member's frozen snapshot,
  *  captured at chat start — never re-resolved against the roster, so a
- *  roster edit relabels nothing already on a card. */
+ *  roster edit relabels nothing already on a card.
+ *
+ *  `transcript: "omit"` is the card WITHOUT its lines — what a seat-level
+ *  broadcast sends for an already-ended chat, whose transcript is immutable
+ *  and already on the teacher's page (absent means "unchanged" on the wire).
+ *  The lines are ASSIGNED onto the literal rather than spread in, so the
+ *  field list below stays the whole allowlist either way. */
 export function toChatSnapshot(
   chat: StoredChat,
   activity: StoredActivity,
-  now: number
+  now: number,
+  transcript: "include" | "omit" = "include"
 ): ChatSnapshot {
-  return {
+  const card: ChatSnapshot = {
     id: chat.id,
     participants: chat.members.map((member) => ({
       id: member.studentId,
@@ -186,10 +193,13 @@ export function toChatSnapshot(
         return seat !== undefined && isReconnecting(seat, now);
       })
       .map((member) => member.studentId),
-    messages: chat.lines.map((line) => toChatTranscriptLine(chat, line)),
     status: chat.status,
     endReason: chat.endReason,
   };
+  if (transcript === "include") {
+    card.messages = chat.lines.map((line) => toChatTranscriptLine(chat, line));
+  }
+  return card;
 }
 
 /** The teacher projection of a transcript line — real name attached, same

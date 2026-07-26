@@ -5,6 +5,47 @@ area. Entries are newest-first; add new ones at the top, and add a matching line
 to the index in the same change. Replaced decisions move to Superseded at the
 bottom of this file.
 
+### Seat events stop re-shipping ended transcripts; full snapshots heal
+
+_2026-07-27_
+
+**Decision:** A `chats:snapshot` triggered by seat churn — a student
+connecting or resuming, the 4s disconnect gate, a "Back to the lobby" tap, a
+`lobby:leave` from the queue, a `chat:leave` that leaves the room going —
+sends already-ended chats **without their `messages`**. The teacher's page
+reads an absent transcript as "unchanged" and keeps the lines it holds.
+Anything that changes a chat's status or lines still sends everything: every
+teacher command, every ending (including a student exit or a grace expiry
+that empties a room), and the snapshot a teacher device gets on connect.
+Active chats always carry their transcript, in either mode.
+
+**Why:** Chats never expire from an activity, so a class doing three or four
+rounds accumulates 45–60 of them, and every seat event was re-sending all of
+their transcripts. The worst moment was the worst possible one: a round ends
+and thirty students tap "Back to the lobby" within seconds, each tap
+shipping the whole lesson to one laptop on school wifi. The dashboard got
+slower the further into the lesson you were — exactly backwards. A two-line
+ended chat drops from 755 to 366 bytes on the wire; a 200-line one from
+about 20 KB to the same 366.
+
+Snapshots-over-deltas is untouched, and that's the point: this is a smaller
+snapshot, not a delta. Ended transcripts are immutable, and the ending
+itself always ships full, so the lines are complete on the wire at the
+moment they stop changing. Every ordering worry answers the same way — the
+next full snapshot heals it, and a teacher's own connect is full. When a
+call site is ambiguous, it stays full; slim is an optimization, never a
+correctness rule. Extends [Message lines are the one delta on the teacher
+wire](#message-lines-are-the-one-delta-on-the-teacher-wire) rather than
+replacing it: the transcript delta still keeps live cards moving.
+
+_Implemented in
+[lobbyContext.ts](../../server/src/live/lobbyContext.ts) (`SnapshotMode`,
+`chatsPayload`, `broadcastState`),
+[projections.ts](../../server/src/store/projections.ts)
+(`toChatSnapshot`'s `transcript` argument), and
+[hostChats.ts](../../client/src/components/Teacher/HostActivity/hostChats.ts)
+(the merge that holds what the payload didn't repeat)._
+
 ### A selection survives a reconnect; only leaving the queue clears it
 
 _2026-07-26_

@@ -188,6 +188,25 @@ describe("toChatSnapshot (teacher chat card)", () => {
     });
   });
 
+  it("drops only `messages` when the transcript is omitted", () => {
+    const slim = toChatSnapshot(fullChat, fullRecord, 30_000, "omit");
+    expect(Object.keys(slim).sort()).toEqual([
+      "endReason",
+      "id",
+      "inactiveStudentIds",
+      "participants",
+      "reconnectingStudentIds",
+      "status",
+    ]);
+    // Not "messages: []" — absent, which is what the wire reads as
+    // "unchanged". An empty array would blank the teacher's card.
+    expect("messages" in slim).toBe(false);
+    // Everything the card renders live still travels.
+    expect(slim.participants).toHaveLength(3);
+    expect(slim.inactiveStudentIds).toEqual(["student-3"]);
+    expect(slim.status).toBe("active");
+  });
+
   it("projects transcript lines with the sender resolved off the members", () => {
     const snapshot = toChatSnapshot(fullChat, fullRecord, 30_000);
     // `?? []` only satisfies the wire type, where `messages` is optional

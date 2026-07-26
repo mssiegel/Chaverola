@@ -322,7 +322,12 @@ How the layer is put together (`server/src/live/`):
   fat), and it is safe under the same rule because `chats:snapshot`
   also carries the transcript, so a dropped delta heals on the next
   snapshot (see DECISIONS.md → "Message lines are the one delta on the
-  teacher wire"). Students get only targeted emits (`lobby:welcome`,
+  teacher wire"). `broadcastState` takes a `SnapshotMode`: seat churn
+  passes `"slim"`, which leaves already-ended chats' `messages` off the
+  wire (the teacher's page holds them), and everything that touches a
+  chat stays `"full"` and heals whatever slim left — the payload shapes
+  and the call-site split are in
+  [api.md](api.md#server--client). Students get only targeted emits (`lobby:welcome`,
   `lobby:removed`, `activity:ended`, `chat:started`, `chat:update`,
   `chat:line`, `chat:peer-typing`, `chat:ended`), never a snapshot.
 - **Teacher commands live on teacher sockets only.** `chat:start`,

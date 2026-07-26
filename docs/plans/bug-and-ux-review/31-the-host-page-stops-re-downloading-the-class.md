@@ -1,7 +1,6 @@
 # 31 — The host page stops re-downloading the class
 
-State: **In progress** — Prompt 1 done (client tolerates an absent
-`messages`); Prompt 2 waits on that build being live on Vercel.
+State: **Complete**
 
 **The problem.** Every seat-level event re-sends the teacher **every
 message of every chat that has ever existed** in the activity:
@@ -51,7 +50,7 @@ Client-ahead is harmless in the other direction.
   ("Seat events stop re-shipping ended transcripts; full snapshots heal").
 
 - [x] Prompt 1 — The client keeps what it knows
-- [ ] Prompt 2 — The server stops repeating itself
+- [x] Prompt 2 — The server stops repeating itself
 
 ---
 

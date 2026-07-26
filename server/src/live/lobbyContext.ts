@@ -80,6 +80,23 @@ export function room(joinCode: string): string {
   return `lobby:${joinCode}`;
 }
 
+/**
+ * How much of the class a `chats:snapshot` carries.
+ *
+ * **full** — every chat with its transcript. The healing snapshot: whatever a
+ * slim emit or a dropped `chat:transcript-line` left stale, this fixes.
+ * **slim** — ended chats ride as headers, no `messages` (the wire reads an
+ * absent `messages` as "unchanged"; the teacher's page keeps the lines it
+ * has). Active chats always carry their transcript in either mode.
+ *
+ * Slim is for seat churn — a class of 30 tapping "Back to the lobby" at the
+ * end of a round used to re-ship every transcript of the whole lesson, once
+ * per tap. It is an optimization, never a correctness rule: every path that
+ * changes a chat's status goes **full**, so an ended card's transcript is
+ * complete the moment it becomes immutable. When in doubt, full.
+ */
+export type SnapshotMode = "full" | "slim";
+
 export interface LobbyContext {
   io: LobbyServer;
   log: Logger;
@@ -90,7 +107,8 @@ export interface LobbyContext {
   queuePayload(record: StoredActivity, now: number): { students: QueueEntry[] };
   chatsPayload(
     record: StoredActivity,
-    now: number
+    now: number,
+    mode?: SnapshotMode
   ): {
     chats: ChatSnapshot[];
     leftoverStudentId: string | null;
@@ -99,7 +117,7 @@ export interface LobbyContext {
     rematchNotice: string | null;
     settings: ActivitySettings;
   };
-  broadcastState(record: StoredActivity): void;
+  broadcastState(record: StoredActivity, mode?: SnapshotMode): void;
   sendPeerConnection(
     record: StoredActivity,
     chat: StoredChat,
@@ -129,7 +147,11 @@ export function createLobbyContext(
     return { students: toQueueEntries(record, now, matchedStudentIds(record)) };
   }
 
-  function chatsPayload(record: StoredActivity, now: number) {
+  function chatsPayload(
+    record: StoredActivity,
+    now: number,
+    mode: SnapshotMode = "full"
+  ) {
     // The leftover highlight only makes sense while that student still
     // waits — lazily null it at snapshot build (same rule as the demo).
     if (record.leftoverStudentId !== null) {
@@ -143,7 +165,17 @@ export function createLobbyContext(
       }
     }
     return {
-      chats: record.chats.map((chat) => toChatSnapshot(chat, record, now)),
+      // Chats never expire from the record, so by round three this is the
+      // whole lesson. A slim snapshot sends the ended ones as headers — the
+      // teacher's page holds their transcripts already.
+      chats: record.chats.map((chat) =>
+        toChatSnapshot(
+          chat,
+          record,
+          now,
+          mode === "slim" && chat.status === "ended" ? "omit" : "include"
+        )
+      ),
       leftoverStudentId: record.leftoverStudentId,
       paused: record.pausedAt !== null,
       lastPartners: toRematchPartners(record),
@@ -153,8 +185,17 @@ export function createLobbyContext(
   }
 
   /** Every seat or chat change re-snapshots the teacher room — snapshots
-   *  over deltas, so a missed emit can never wedge a card. */
-  function broadcastState(record: StoredActivity): void {
+   *  over deltas, so a missed emit can never wedge a card.
+   *
+   *  `mode` trades size for freshness on the chat half only (see
+   *  SnapshotMode): seat churn passes "slim" and leaves ended transcripts
+   *  off the wire, everything that touches a chat's status or lines stays
+   *  "full" and heals whatever slim left behind. Defaulting to "full" means a
+   *  new call site is safe by omission. */
+  function broadcastState(
+    record: StoredActivity,
+    mode: SnapshotMode = "full"
+  ): void {
     const now = Date.now();
     io.to(room(record.joinCode)).emit(
       "queue:snapshot",
@@ -162,7 +203,7 @@ export function createLobbyContext(
     );
     io.to(room(record.joinCode)).emit(
       "chats:snapshot",
-      chatsPayload(record, now)
+      chatsPayload(record, now, mode)
     );
   }
 
@@ -198,7 +239,9 @@ export function createLobbyContext(
       // banner flip together (a refresh reconnects faster and shows
       // neither).
       onBroadcastDelay: () => {
-        broadcastState(record);
+        // Pure seat news — a member's card gains a reconnecting tag, no
+        // transcript anywhere changes.
+        broadcastState(record, "slim");
         // findActiveChatOf does double duty: it keeps the wrappingUp
         // re-arm path (settleMembershipChange) quiet — an ended chat's
         // members must not hear a ghost drop — and it guarantees
@@ -240,6 +283,10 @@ export function createLobbyContext(
         // A chat seat's reap is remembered (the returning token replays the
         // ended chat as "self-timeout"); a waiting seat's stays silent.
         reapSeat(record, seat, chat?.id);
+        // Full, not slim: the markInactive above can have just ENDED a chat
+        // (a below-2 room whose partner's grace ran out), and every ending
+        // ships the finished transcript once. Rare enough that the size
+        // doesn't matter — one seat, two minutes after it dropped.
         broadcastState(record);
       },
     });

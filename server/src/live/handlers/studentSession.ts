@@ -134,7 +134,10 @@ export function registerStudentSession(
       );
     }
   }
-  broadcastState(record);
+  // Slim: a connect or resume adds a queue row or clears a reconnecting tag
+  // and touches no transcript. This is the one that fires 30 times as a class
+  // arrives, and once more per phone that wakes up.
+  broadcastState(record, "slim");
 
   // A student socket deliberately gets NO teacher handlers — a student
   // emitting queue:remove / chat:start / chat:remove / chat:end /
@@ -159,7 +162,10 @@ export function registerStudentSession(
         "student left"
       );
     }
-    if (left || chat) broadcastState(current);
+    // Leaving from a chat can have ended it (markInactive below 2) — that
+    // ending owns the transcript, so it ships full. Leaving the queue is pure
+    // seat news.
+    if (left || chat) broadcastState(current, chat ? "full" : "slim");
   });
 
   // The chat room's own exit, and the only one that keeps the seat: the
@@ -185,7 +191,8 @@ export function registerStudentSession(
       },
       "student left their chat"
     );
-    if (others.length < 2) {
+    const endsTheRoom = others.length < 2;
+    if (endsTheRoom) {
       // Nobody left to talk to, so this ends the room for everyone — the
       // same act as the teacher's chat:end, and modelled as one: membership
       // stays intact, so both seats go wrappingUp and both stay resumable
@@ -203,7 +210,9 @@ export function registerStudentSession(
       markWrappingUp(own);
       socket.emit("chat:ended", { reason: "self-left" });
     }
-    broadcastState(current);
+    // A tap that ended the room ships that transcript whole, once; a walkout
+    // from a room still going changes only who's in it.
+    broadcastState(current, endsTheRoom ? "full" : "slim");
   });
 
   socket.on("lobby:back", () => {
@@ -216,7 +225,9 @@ export function registerStudentSession(
       { joinCode: data.joinCode, studentId: data.studentId },
       "student back in the queue"
     );
-    broadcastState(current);
+    // The one the whole change is for: 30 taps in the seconds after a round
+    // ends, each of which used to re-send every transcript of the lesson.
+    broadcastState(current, "slim");
   });
 
   registerStudentChatHandlers(ctx, socket, data);
