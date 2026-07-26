@@ -1,6 +1,6 @@
 # 25 — The composer clears the home bar
 
-State: **Not started**
+State: **Complete**
 
 **The problem.** The student world reserves no safe-area insets, so on
 notched/home-indicator iPhones the send button — the most-tapped control in
@@ -34,7 +34,7 @@ with the system swipe. The evidence:
   [`docs/pending-manual-tests.md`](../../pending-manual-tests.md) is part of
   the prompt itself, not a fallback; the check runs later from that file.
 
-- [ ] Prompt — viewport-fit=cover plus insets where the world touches the edges
+- [x] Prompt — viewport-fit=cover plus insets where the world touches the edges
 
 ---
 
@@ -82,6 +82,53 @@ every route, including the navbar'd teacher pages — glance at the navbar
 and the setup dock (which already pads) on the handset too.
 
 **Tests:** none — device chrome; the handset IS the verification.
+
+---
+
+## What shipped (2026-07-26)
+
+`viewport-fit=cover` in [`client/index.html`](../../../client/index.html), plus
+inset pads on every edge the app now touches. Twelve arbitrary values in four
+files; the emitted CSS was checked class by class in the built bundle, because a
+mistyped one emits nothing and silently collapses its pad to 0.
+
+- **The world column** ([`StudentWorldLayout.tsx`](../../../client/src/components/layout/StudentWorldLayout.tsx)):
+  `pb-2` → `pb-[max(0.5rem,env(safe-area-inset-bottom))]`, `sm:pb-8` likewise.
+  The corner bar's `pt-4` took the top inset.
+- **`pt-20` needed a `calc`, not a bare `max()`.** Those 80px are bar-pad (16) +
+  pill (~40) + gap (24), so once the bar's own pad grows to the inset the column
+  has to grow with it or the pills land on the card:
+  `pt-[max(5rem,calc(4rem+env(safe-area-inset-top)))]`. The typing collapse's
+  `pt-2` took an inset too — the corner bar hides while typing, the status bar
+  does not.
+- **The demo banner tracks both.** Its own comment already recorded that
+  `top-20` must equal the column's top pad, so the world variant got the
+  identical expression; the teacher variant's `top-16` / `sm:top-[4.5rem]` now
+  carry the inset the navbar gained.
+- **Two extras beyond steps 1–5, both founder calls this session.** `cover` is
+  global, so the `sticky top-0` navbar in
+  [`AppLayout.tsx`](../../../client/src/components/layout/AppLayout.tsx) gained
+  `pt-[env(safe-area-inset-top)]` — without it the one link home sits behind the
+  status bar on every teacher and homepage route, which this change would have
+  caused. `ActivitySetup`'s `sticky top-20` needed nothing: it's inside
+  `hidden lg:block` and never renders on a phone.
+
+**Step 6, the landscape call: corner bar only.** `pl`/`pr` insets went on the
+fixed corner pills — the two tap targets a rotated notch actually eats — and
+the content column keeps plain `px-4`. Worth doing at all because `cover` makes
+landscape strictly _worse_ than before (iOS letterboxed it until now), so this
+is regression containment rather than polish; not worth extending to the column
+because the `-mx-2` card would still sit a few pixels inside the strip and
+landscape is not a chat surface.
+
+**Verified:** `pnpm typecheck`, 163 unit tests, `verify:smoke` 7/7, and a
+purpose-built regression pass (`tools/verify/scratch/doc25-safe-area.mjs`,
+18/18) asserting that every padded edge still computes to its pre-change pixel
+value at 390px and 1280px — insets are 0 in desktop Chromium, so identical-to-
+before IS the check. The handset leg is logged in
+[`docs/pending-manual-tests.md`](../../pending-manual-tests.md) with the four
+asks, and names step 3 (no double gap with the keyboard open) as the one
+assumption taken on faith.
 
 **Done when:** `pnpm typecheck` green; browser pass at phone width for
 regressions (insets are 0 there — everything must look identical); the

@@ -42,7 +42,14 @@ export function AppLayout() {
 
   return (
     <div className="flex min-h-dvh flex-col bg-background">
-      <header className="sticky top-0 z-20 border-b border-border/70 bg-background/80 backdrop-blur-sm">
+      {/* The top pad is the notch inset (0 everywhere else). index.html's
+          viewport-fit=cover runs the document under the status bar, and this
+          bar is `sticky top-0` — without the pad the logo and the language
+          switcher would sit behind it. Padding the header rather than the page
+          means the bar's own blur extends behind the status bar, which is what
+          we want; the cost is that anything pinned below it (DemoBanner's
+          teacher variant) has to carry the same inset in its offset. */}
+      <header className="sticky top-0 z-20 border-b border-border/70 bg-background/80 pt-[env(safe-area-inset-top)] backdrop-blur-sm">
         <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between gap-2 px-4 sm:h-16">
           {!hostingLiveActivity && (
             <LocaleLink

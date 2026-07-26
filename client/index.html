@@ -5,10 +5,16 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <!-- interactive-widget: the on-screen keyboard resizes the layout viewport
          (Android Chrome), so dvh-sized screens shrink and inputs land above
-         the keys instead of the browser panning the page. iOS ignores it. -->
+         the keys instead of the browser panning the page. iOS ignores it.
+         viewport-fit=cover: without it iOS letterboxes the page inside the
+         notch and home-indicator bars AND reports every env(safe-area-inset-*)
+         as 0. With it the page runs edge to edge under that chrome, and the
+         env() paddings in StudentWorldLayout, AppLayout's navbar, DemoBanner,
+         and the teacher setup dock are what keep content out of it. Never add
+         one without the other. -->
     <meta
       name="viewport"
-      content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content"
+      content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content, viewport-fit=cover"
     />
     <meta name="theme-color" content="#6C4BE0" />
     <meta

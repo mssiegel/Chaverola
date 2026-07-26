@@ -18,24 +18,28 @@ import { LocaleLink } from "@/components/layout/LocaleLink";
  * this band.
  *
  * `onWorld`: a golden card for the purple student world, label only — no
- * teacher nudges inside the student experience. It pins too: `top-20` equals
- * the world column's `pt-20` (StudentWorldLayout), so the card sticks exactly
- * where it first renders — below the corner pills — and the stages scroll
- * underneath it. On phones it stands down while a student types, along with
- * the rest of the world's chrome: the keyboard leaves ~300px of world, and the
- * chatbox needs every one of them. (That also spares the pinning from having
- * to follow the collapsing `pt-20`.)
+ * teacher nudges inside the student experience. It pins too, and its offset is
+ * copied character for character from the world column's top pad
+ * (StudentWorldLayout) — that equality is what makes the card stick exactly
+ * where it first renders, below the corner pills, with the stages scrolling
+ * underneath it. Change one, change both. On phones it stands down while a
+ * student types, along with the rest of the world's chrome: the keyboard
+ * leaves ~300px of world, and the chatbox needs every one of them. (That also
+ * spares the pinning from having to follow the collapsed pad.)
  */
 export function DemoBanner({ onWorld = false }: { onWorld?: boolean }) {
   if (onWorld) {
     return (
-      <p className="sticky top-20 z-10 w-full rounded-2xl bg-brand-sun px-4 py-2.5 text-center text-sm font-semibold text-brand-grape-strong shadow-lg max-sm:group-has-[textarea:focus]:hidden sm:text-base">
+      <p className="sticky top-[max(5rem,calc(4rem+env(safe-area-inset-top)))] z-10 w-full rounded-2xl bg-brand-sun px-4 py-2.5 text-center text-sm font-semibold text-brand-grape-strong shadow-lg max-sm:group-has-[textarea:focus]:hidden sm:text-base">
         This is the demo. The other students are pretend.
       </p>
     );
   }
+  // The teacher variant pins under AppLayout's navbar, whose own height now
+  // includes the notch inset — so this offset carries it too, or the banner
+  // would tuck behind the bar on a notched phone.
   return (
-    <div className="sticky top-16 z-20 px-4 sm:top-[4.5rem]">
+    <div className="sticky top-[calc(4rem+env(safe-area-inset-top))] z-20 px-4 sm:top-[calc(4.5rem+env(safe-area-inset-top))]">
       <p className="mx-auto flex w-fit max-w-full flex-wrap items-center justify-center gap-x-2 rounded-2xl bg-brand-sun px-5 py-2.5 text-center text-sm font-semibold text-foreground shadow-lg lg:py-1.5">
         This is the demo class. The students are pretend.
         <LocaleLink

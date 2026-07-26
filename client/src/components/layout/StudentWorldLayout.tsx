@@ -52,8 +52,15 @@ export function StudentWorldLayout() {
       {/* Corner chrome, navbar-style: brand pill (or, mid-chat, the name
           badge) starts, language pill ends. The bar itself must not block
           clicks on the world below it. On phones it stands down while the
-          student types, handing its band to the chatbox. */}
-      <div className="pointer-events-none fixed inset-x-0 top-0 z-20 flex items-center justify-between gap-3 px-4 pt-4 max-sm:group-has-[textarea:focus]:hidden">
+          student types, handing its band to the chatbox.
+
+          Every pad is an inset with today's spacing as its floor (the setup
+          dock's idiom), because index.html's viewport-fit=cover runs the page
+          under the notch. The left/right ones are the landscape half: rotate a
+          notched iPhone and the notch eats the corner the language pill sits
+          in. `pl`/`pr`, not `ps`/`pe` — the env() vars are physical, and this
+          app mirrors under /he. */}
+      <div className="pointer-events-none fixed inset-x-0 top-0 z-20 flex items-center justify-between gap-3 pt-[max(1rem,env(safe-area-inset-top))] pr-[max(1rem,env(safe-area-inset-right))] pl-[max(1rem,env(safe-area-inset-left))] max-sm:group-has-[textarea:focus]:hidden">
         {chatStudentName === null ? (
           <LocaleLink
             to="/"
@@ -69,9 +76,19 @@ export function StudentWorldLayout() {
         <LanguageSwitcher className="pointer-events-auto ms-auto shrink-0 rounded-full bg-white/90 text-foreground shadow-md backdrop-blur-sm hover:bg-white hover:text-foreground" />
       </div>
 
-      {/* pt-20 clears the corner bar; when that bar stands down for the
-          keyboard the padding goes with it, or the chatbox would gain nothing. */}
-      <div className="relative z-10 flex flex-1 flex-col items-center gap-6 px-4 pt-20 pb-2 max-sm:group-has-[textarea:focus]:pt-2 sm:pb-8">
+      {/* The top pad clears the corner bar; when that bar stands down for the
+          keyboard the padding goes with it, or the chatbox would gain nothing.
+          80px is bar-pad (16) + pill (~40) + gap (24), so once the bar's own
+          pad grows to the notch inset this has to grow with it — hence
+          `4rem + inset` (the 64px of bar-and-gap) under a 5rem floor, which is
+          exactly today's pt-20 wherever the inset is 0. The collapsed pad
+          takes an inset too: the corner bar hides while typing, the status bar
+          does not, so a bare pt-2 would slide the chat card under it.
+
+          The bottom pad is the one this whole change is for: it's what holds
+          the composer's send button out of the home-indicator strip. The chat
+          card's -mx-2 stretch is horizontal only, so it can't bypass this. */}
+      <div className="relative z-10 flex flex-1 flex-col items-center gap-6 px-4 pt-[max(5rem,calc(4rem+env(safe-area-inset-top)))] pb-[max(0.5rem,env(safe-area-inset-bottom))] max-sm:group-has-[textarea:focus]:pt-[max(0.5rem,env(safe-area-inset-top))] sm:pb-[max(2rem,env(safe-area-inset-bottom))]">
         <main className="flex w-full flex-1 flex-col items-center">
           <Outlet
             context={{ setChatStudentName } satisfies StudentWorldOutletContext}

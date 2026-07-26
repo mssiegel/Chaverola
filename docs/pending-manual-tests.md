@@ -30,6 +30,63 @@ the next reader has the conversation you had.
 
 ---
 
+## Doc 25 — the composer clear of the home indicator, on a notched iPhone
+
+_Asked 2026-07-26; the founder said up front that no handset would be in the
+room when the change ran, so logging it was part of the prompt rather than a
+fallback._
+
+**Steps** (2 minutes, on an iPhone with a home indicator — X or later, no home
+button; production chaverola.com, or the phone pointed at a dev server):
+
+1. Open `/activity/join/1234` — the demo, so this needs no activity and no
+   second device. Type any name, tap **Join Activity**, and wait out the
+   auto-pair (about 20 seconds) to land in a chat.
+2. **Keyboard closed, look at the bottom of the screen:** the text field and
+   the send button must sit fully above the home-indicator strip. Swipe up from
+   the very bottom edge — that should be the system gesture, not a tap on send.
+3. Tap the text field to open the keyboard. There must be **no gap** between
+   the composer and the top of the keys. A band of purple or card-coloured
+   space there is the failure.
+4. Send a message, dismiss the keyboard, and check step 2 again — the clearance
+   has to come back.
+5. **Rotate to landscape** while still in the chat. The language pill (top end)
+   and the name badge (top start) must both clear the notch bar rather than sit
+   under it.
+6. Back in portrait, tap **Leave**, then **Back to the lobby**. Neither screen
+   may run under the notch or the indicator.
+7. The teacher side, same phone: on the homepage, the Chaverola logo and the
+   language pill must sit below the status bar, not behind the clock and
+   battery. Then `/activity/create`, scrolled to the bottom — the **Host
+   activity** dock must clear the home indicator too.
+
+**What it would mean if it fails:** step 2 means either `viewport-fit=cover`
+isn't reaching the device or the world column's
+`pb-[max(0.5rem,env(safe-area-inset-bottom))]` isn't resolving. Those two are
+one mechanism, and `cover` without the pad is worse than neither, so a failure
+here is the whole change not landing. Step 3 is the one assumption this change
+makes on faith: that iOS reports `env(safe-area-inset-bottom)` as 0 while the
+keyboard is up, so the pad vanishes exactly when the indicator does. A gap
+means that's wrong, and the pad needs scoping to the layout's existing
+`max-sm:group-has-[textarea:focus]` collapse — the hook is already there, it
+just isn't used for this. Step 5 means the corner bar's left/right insets
+aren't landing; note the deliberate limit, that the content column below keeps
+plain `px-4`, so a card edge a few pixels into the notch strip is expected
+there rather than a bug. Step 7 means `cover` un-letterboxed the teacher routes
+without the navbar's own top pad taking effect, which would put the one link
+home behind the status bar on every route that has a navbar.
+
+**Coverage in the meantime:** the regression half ran headless on 2026-07-26
+(`tools/verify/scratch/doc25-safe-area.mjs`, 18/18, alongside `verify:smoke`
+7/7 and the full unit suite). Desktop Chromium reports every inset as 0, so
+what those 18 checks prove is only this: each padded edge still computes to its
+pre-change number — 80px above the world column, 8px below it, 16px around the
+corner pills — which is what catches a mistyped Tailwind arbitrary value
+silently emitting nothing. What headless cannot do is
+produce a non-zero inset at all, so every number above 0 in this change is
+unexercised until this entry runs. `/activity/join/1234` needs no server and no
+second device, which is why it's step 1.
+
 ## Feature 18 — a roster edit landing on a real student's phone, and a phone as the stale second host
 
 _Asked 2026-07-26; the founder chose to log it rather than run it in the
