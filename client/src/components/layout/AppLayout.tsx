@@ -1,14 +1,18 @@
+import { Suspense } from "react";
 import { Outlet, useLocation } from "react-router-dom";
+// Straight from shared, not via `@/mockData` — the layout is eager, and the
+// barrel would bring the demo fixtures with it. Same constant either way.
+import { DEMO_JOIN_CODE } from "@chaverola/shared";
 
 import { Logo } from "@/components/brand/Logo";
 import { Button } from "@/components/ui/button";
 import { localePrefix } from "@/lib/locale";
 import { useHeroCtaPassed } from "@/lib/useHeroCtaPassed";
 import { cn } from "@/lib/utils";
-import { DEMO_JOIN_CODE } from "@/mockData";
 
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { LocaleLink } from "./LocaleLink";
+import { PageSpinner } from "./PageSpinner";
 
 /**
  * App shell: navbar (logo home, language switcher, the student Join CTA)
@@ -96,8 +100,12 @@ export function AppLayout() {
           </div>
         </div>
       </header>
+      {/* Inside the shell, not around it: pages load as their own chunks now,
+          and the navbar has no reason to blink while one arrives. */}
       <main className="flex flex-1 flex-col">
-        <Outlet />
+        <Suspense fallback={<PageSpinner />}>
+          <Outlet />
+        </Suspense>
       </main>
     </div>
   );

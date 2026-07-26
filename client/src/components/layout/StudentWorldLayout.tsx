@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { Outlet } from "react-router-dom";
 
 import { ChaverolaPill } from "@/components/brand/ChaverolaPill";
@@ -6,6 +6,7 @@ import { DriftingDoodles } from "@/components/decor/DriftingDoodles";
 
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { LocaleLink } from "./LocaleLink";
+import { PageSpinner } from "./PageSpinner";
 
 /**
  * What the layout hands its pages through the router Outlet. The chat stage
@@ -89,10 +90,19 @@ export function StudentWorldLayout() {
           the composer's send button out of the home-indicator strip. The chat
           card's -mx-2 stretch is horizontal only, so it can't bypass this. */}
       <div className="relative z-10 flex flex-1 flex-col items-center gap-6 px-4 pt-[max(5rem,calc(4rem+env(safe-area-inset-top)))] pb-[max(0.5rem,env(safe-area-inset-bottom))] max-sm:group-has-[textarea:focus]:pt-[max(0.5rem,env(safe-area-inset-top))] sm:pb-[max(2rem,env(safe-area-inset-bottom))]">
+        {/* Around the Outlet, never in place of it — the Outlet is what hands
+            the page its context. The world and its doodles stay up while the
+            join chunk arrives, which is the whole point of splitting inside
+            the layout rather than above it. White, not grape: the spinner's
+            usual colour vanishes against the purple. */}
         <main className="flex w-full flex-1 flex-col items-center">
-          <Outlet
-            context={{ setChatStudentName } satisfies StudentWorldOutletContext}
-          />
+          <Suspense fallback={<PageSpinner className="text-white" />}>
+            <Outlet
+              context={
+                { setChatStudentName } satisfies StudentWorldOutletContext
+              }
+            />
+          </Suspense>
         </main>
       </div>
     </div>

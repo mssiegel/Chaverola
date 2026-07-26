@@ -11,13 +11,19 @@ import "@fontsource/nunito/400.css";
 import "@fontsource/nunito/600.css";
 import "@fontsource/nunito/700.css";
 
+import { PageErrorBoundary } from "@/components/layout/PageErrorBoundary";
+
 import "./index.css";
 import App from "./App.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <BrowserRouter>
-      <App />
-    </BrowserRouter>
+    {/* Outside the router: a page chunk that never arrives would otherwise
+        take the whole screen down with it, and so would any render crash. */}
+    <PageErrorBoundary>
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
+    </PageErrorBoundary>
   </StrictMode>
 );

@@ -1,6 +1,6 @@
 # 32 — Students download the student app
 
-State: **Not started**
+State: **Complete**
 
 **The problem.** There is no route-level code splitting:
 [`App.tsx:8-12`](../../../client/src/App.tsx) imports every page eagerly, so
@@ -27,7 +27,7 @@ Only the emoji picker is split today
 - "Routes are canonical" — no route changes, only how their elements
   load.
 
-- [ ] Prompt — Lazy pages behind fallbacks that match the app
+- [x] Prompt — Lazy pages behind fallbacks that match the app
 
 ---
 
@@ -76,6 +76,52 @@ restricted post-launch).
 
 **Tests:** none — build topology; the chunk report and the browser are
 the verification.
+
+### What landed (2026-07-27)
+
+Five pages behind `lazyPage()` ([`lib/lazyPage.ts`](../../../client/src/lib/lazyPage.ts)),
+one `Suspense` inside each layout, fallback a wordless spinner
+([`PageSpinner`](../../../client/src/components/layout/PageSpinner.tsx)) so
+nothing had to claim "Finding your activity…" over an empty code screen.
+
+Bytes of JS, measured against the same build with and without the change
+(gzip is what crosses the AP):
+
+|                                         | raw     | gzip    |
+| --------------------------------------- | ------- | ------- |
+| Before — one chunk, every route         | 634,550 | 198,280 |
+| After — eager shell                     | 367,709 | 120,437 |
+| After — `/activity/join` (shell + page) | 512,847 | 169,774 |
+| After — `/` homepage                    | 441,968 | 146,662 |
+
+So a joining student pulls **28.5 KB less gzip (14%)**, and the shell everyone
+starts from is **39% smaller**. `Pair everyone`, `Wrap up` and the setup form
+are absent from every chunk the join route touches; the only `hostKey` left in
+the entry is the route-table string. Vite's own "chunks are larger than 500 kB"
+warning is gone. CSS hash unchanged (`index-uO9oVjN6.css`), `useMemoCache` still
+6 across chunks.
+
+Three things worth keeping:
+
+- **Splitting the homepage broke the navbar, invisibly.**
+  [`useHeroCtaPassed`](../../../client/src/lib/useHeroCtaPassed.ts) ran a
+  layout effect keyed on `pathname` that looked for `#hero-join-cta` — an
+  element only `HomePage` renders. Lazy, it fired while the fallback was up,
+  found nothing, bailed, and never re-ran, so the mobile Join button never
+  appeared on a cold load of `/`. It now waits for a late hero with a
+  `MutationObserver`, gated to the home route so a body-wide observer isn't
+  left running on the host dashboard. **Any hook that reaches into another
+  route's DOM has this bug.**
+- **Direct navigation costs one extra round trip** (html → entry → page
+  chunk); a dynamic import can't be discovered until the entry parses. Worth
+  it on a congested AP, but it is a trade, not a pure win.
+- **A split build can fail in a way a single bundle can't.** `lazyPage` retries
+  once, then reloads once behind a `sessionStorage` guard (a deploy rotates
+  chunk hashes; `index.html` knows the new ones), and
+  [`PageErrorBoundary`](../../../client/src/components/layout/PageErrorBoundary.tsx)
+  is the floor — the client had no error boundary at all before this. A
+  boundary's "try again" cannot re-run a failed `lazy()` on its own: React
+  caches the rejected promise, so reloading is the only recovery.
 
 **Done when:** `pnpm typecheck` + `pnpm build` green; chunk report shows
 the teacher app out of the join path (record before/after main-chunk KB

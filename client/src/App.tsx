@@ -3,13 +3,49 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { ScrollToTop } from "@/components/layout/ScrollToTop";
 import { StudentWorldLayout } from "@/components/layout/StudentWorldLayout";
+// The code itself, not the `@/mockData` re-export of it. This module is eager,
+// and reaching through the barrel drags every demo fixture (the host's seeded
+// chats and chatter lines included) into the chunk a student loads first.
+import { DEMO_JOIN_CODE } from "@chaverola/shared";
+
+import { lazyPage } from "@/lib/lazyPage";
 import { useLocalePath } from "@/lib/locale";
-import { DEMO_JOIN_CODE } from "@/mockData";
-import { HomePage } from "@/pages/HomePage";
-import { NotFoundPage } from "@/pages/NotFoundPage";
-import { JoinActivityPage } from "@/pages/student/JoinActivityPage";
-import { CreateActivityPage } from "@/pages/teacher/CreateActivityPage";
-import { HostActivityPage } from "@/pages/teacher/HostActivityPage";
+
+/*
+  Every page is split out of the entry chunk, because the join screen is the
+  moment a whole class waits on at once: thirty phones on one school AP, all
+  fetching four digits' worth of screen. A student typing a code has no use
+  for the teacher dashboard, the setup form, or the homepage, so none of it
+  rides along any more.
+
+  Each page is a named export, hence the `default` adapters. The pages export
+  named components everywhere else in the app, and that stays true — only the
+  split point needs the shape `lazy()` wants.
+
+  Declared at module scope, so the two locale trees below (`/` and `/he`)
+  share one chunk and one promise rather than fetching a page twice.
+*/
+const HomePage = lazyPage(() =>
+  import("@/pages/HomePage").then((m) => ({ default: m.HomePage }))
+);
+const NotFoundPage = lazyPage(() =>
+  import("@/pages/NotFoundPage").then((m) => ({ default: m.NotFoundPage }))
+);
+const JoinActivityPage = lazyPage(() =>
+  import("@/pages/student/JoinActivityPage").then((m) => ({
+    default: m.JoinActivityPage,
+  }))
+);
+const CreateActivityPage = lazyPage(() =>
+  import("@/pages/teacher/CreateActivityPage").then((m) => ({
+    default: m.CreateActivityPage,
+  }))
+);
+const HostActivityPage = lazyPage(() =>
+  import("@/pages/teacher/HostActivityPage").then((m) => ({
+    default: m.HostActivityPage,
+  }))
+);
 
 /**
  * A speakable demo URL. Always a redirect into the real flow, never a page of
