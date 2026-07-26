@@ -135,7 +135,7 @@ function PlanCard({
           </li>
         ))}
       </ul>
-      <div className="mt-auto flex flex-col items-start gap-2.5 pt-2">
+      <div className="mt-auto flex flex-col items-center gap-2.5 pt-2 text-center">
         {footer}
       </div>
     </div>
