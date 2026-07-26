@@ -122,7 +122,13 @@ export function JoinActivityPage() {
   const demoPrefillName =
     activity?.joinCode === DEMO_JOIN_CODE ? DEMO_STUDENT_NAME : "";
   const [name, setName] = useState(demoPrefillName);
-  const [removedByTeacher, setRemovedByTeacher] = useState(false);
+  // Why the gate is showing a removal notice, and how much of it to say:
+  // "lobby" is a removal with nothing to wrap up, so the notice explains
+  // itself; "chat" means the wrap-up screen already did the explaining and
+  // the notice is just the instruction. Null is the ordinary gate.
+  const [removedNotice, setRemovedNotice] = useState<"lobby" | "chat" | null>(
+    null
+  );
   // Code-entry state lives here, not in JoinGateCard: the page persists
   // across the /activity/join ↔ /activity/join/:code SPA navigation, so a
   // page-level seed keeps the last-typed code through a browser-back from the
@@ -140,6 +146,17 @@ export function JoinActivityPage() {
     activity !== undefined &&
     isSignedIn;
 
+  // The removal landing, wherever it is reached from: signed out, blank name
+  // field, and the notice that says why. The field stays blank on real
+  // activities by founder call — most removals target a fake name, so don't
+  // hand it back for one-tap re-entry; a mistyped real name is quick to
+  // retype.
+  const landOnNameStep = (from: "lobby" | "chat") => {
+    signOut();
+    setName("");
+    setRemovedNotice(from);
+  };
+
   const {
     match,
     chatEnded,
@@ -147,6 +164,7 @@ export function JoinActivityPage() {
     liveEndReason,
     liveEndedBy,
     revealed,
+    removedMidChat,
     startMatch,
     backToLobby,
     presence,
@@ -167,16 +185,9 @@ export function JoinActivityPage() {
     seated,
     isRealActivity,
     activityGoneFromSocket,
-    // Removal drives the same flow the demo button does — except the name
-    // field stays blank on real activities (founder call: most removals
-    // target a fake name, so don't hand it back for one-tap re-entry; a
-    // mistyped real name is quick to retype). Mid-chat removals clear the
-    // match with the seat (in the hook).
-    onRemoved: () => {
-      signOut();
-      setName("");
-      setRemovedByTeacher(true);
-    },
+    // Reached only for a removal with no chat on screen — the hook turns a
+    // mid-chat one into an ending and defers this to that screen's CTA.
+    onRemoved: () => landOnNameStep("lobby"),
     // Latch the dead activity's code, which flips the stage to activity-gone
     // — except over an ended chat, which holds the screen until its CTA.
     onEnded: () => latchActivityGone(),
@@ -257,7 +268,7 @@ export function JoinActivityPage() {
     const resolvedToCodeEntry =
       joinCodeParam === undefined || lookup.state === "not-found";
     if (!resolvedToCodeEntry) return;
-    setRemovedByTeacher(false);
+    setRemovedNotice(null);
     if (session && !activityGoneFromLookup) signOut();
   }, [joinCodeParam, lookup.state, session, signOut, activityGoneFromLookup]);
 
@@ -315,7 +326,7 @@ export function JoinActivityPage() {
   const teacherRemovesStudent = () => {
     signOut();
     setName(demoPrefillName);
-    setRemovedByTeacher(true);
+    setRemovedNotice("lobby");
   };
 
   // The name-stage submit's page effects: a fresh sign-in must not inherit a
@@ -324,7 +335,7 @@ export function JoinActivityPage() {
   // behind (e.g. after hopping via the URL bar).
   const handleJoinActivity = () => {
     if (!activity) return;
-    setRemovedByTeacher(false);
+    setRemovedNotice(null);
     setGoneCode(null);
     backToLobby();
     signIn({ name: name.trim(), joinCode: activity.joinCode });
@@ -396,6 +407,14 @@ export function JoinActivityPage() {
             // latch flipped), and clearing the match is what hands the screen
             // to the activity-over card.
             onBackToLobby={() => {
+              // A removal took the seat with the chat, so there's no queue
+              // to be returned to — the tap runs the sign-out the ending
+              // screen deferred and lands on the name step instead.
+              if (removedMidChat) {
+                backToLobby();
+                landOnNameStep("chat");
+                return;
+              }
               returnToLobby();
               backToLobby();
             }}
@@ -457,7 +476,7 @@ export function JoinActivityPage() {
           onCodeChange={setCode}
           name={name}
           onNameChange={setName}
-          removedByTeacher={removedByTeacher}
+          removedNotice={removedNotice}
           onJoinActivity={handleJoinActivity}
           onDeliverLookup={deliverLookup}
         />

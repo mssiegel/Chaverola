@@ -94,6 +94,8 @@ export function useActiveMatch({
   // wrap-up, delivered on their return), "teacher" everything else. Beside
   // chatEnded rather than on the match state: it describes the ending, and
   // it resets on the same edges.
+  // ("removed" is the one value that never comes from a payload — see the
+  // onRemoved wrapper below and the ChatEndReason doc comment.)
   const [liveEndReason, setLiveEndReason] = useState<
     | "teacher"
     | "student"
@@ -101,8 +103,13 @@ export function useActiveMatch({
     | "self-left"
     | "peer-timeout"
     | "self-timeout"
+    | "removed"
     | null
   >(null);
+  // A removal landed on a live chat, so the wrap-up screen is standing in
+  // for the sign-out the page would otherwise have run on the spot. The
+  // ended screen's CTA is what finally runs it (backToLobby, below).
+  const [removedMidChat, setRemovedMidChat] = useState(false);
   // Who ended it — the leaver's characterId, riding only with "peer" (null
   // otherwise, and from an older server: the ended screen then falls back
   // to "Your partner"). Same edges as liveEndReason.
@@ -146,6 +153,8 @@ export function useActiveMatch({
   };
 
   // Back to the queue: only ever by the student's own tap (see DECISIONS.md).
+  // After a removal there is no queue to go back to — the caller pairs this
+  // with the deferred sign-out, and the student lands on the name step.
   const backToLobby = () => {
     liveChatIdRef.current = null;
     setMatch(null);
@@ -153,6 +162,7 @@ export function useActiveMatch({
     setLiveEndReason(null);
     setLiveEndedBy(null);
     setRevealed(false);
+    setRemovedMidChat(false);
   };
 
   // The live seat. Active through the whole seated life of a real activity
@@ -160,8 +170,12 @@ export function useActiveMatch({
   // socket lives on and a refresh resumes into the chat; the demo (1234)
   // keeps zero network by construction.
   // - onRemoved (the socket event, or a tombstoned token on a reconnect
-  //   attempt) drives the same flow the demo button does; the caller clears
-  //   the session and name, and this hook clears the match with the seat.
+  //   attempt) splits on whether a chat is on screen. From the lobby it
+  //   drives the same flow the demo button does: the caller clears the
+  //   session and name, and this hook clears the match with the seat. From a
+  //   chat it becomes an ENDING instead — the room closes with the "removed"
+  //   reason and the caller's sign-out is deferred to the CTA, so a student
+  //   pulled out mid-sentence gets a screen rather than a teleport.
   // - onEnded latches the dead activity's code (caller), which flips the
   //   stage to the activity-gone screen.
   // - onChatStarted is both the match and every resume into it; the reducer
@@ -188,6 +202,23 @@ export function useActiveMatch({
     session,
     updateSession,
     onRemoved: () => {
+      // Mid-chat, the removal IS the ending: the room stays on screen and
+      // closes like any other, and the sign-out waits for the CTA. Keyed off
+      // liveChatIdRef for the same reason onChatEnded is — it's the
+      // synchronous truth about whether this connection ever had a chat.
+      if (liveChatIdRef.current !== null) {
+        setChatEnded(true);
+        // Defensive, not load-bearing: a chat that already ended keeps the
+        // reason it ended for (and any reveal that arrived with it). There
+        // is no way to reach that today — a student reading a wrap-up holds
+        // a wrappingUp seat, which the teacher's queue excludes, and an
+        // ended chat card hides its remove buttons — so nothing depends on
+        // what the CTA would say there.
+        setLiveEndReason((prev) => prev ?? "removed");
+        setRemovedMidChat(true);
+        return;
+      }
+      // In the lobby there's nothing to wrap up: straight to the gate.
       onRemoved();
       liveChatIdRef.current = null;
       setMatch(null);
@@ -380,6 +411,7 @@ export function useActiveMatch({
     liveEndReason,
     liveEndedBy,
     revealed,
+    removedMidChat,
     startMatch,
     backToLobby,
     presence,

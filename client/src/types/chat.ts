@@ -62,6 +62,12 @@ export type ChatStatus = "active" | "ended";
  * seen when they finally get back in. "self-left" is the student walking out
  * of a group that keeps going without them — only reachable with 3+ active
  * people, since a 2-person room offers End, not Leave (see DECISIONS.md).
+ *
+ * "removed" is the odd one out: it is CLIENT-LOCAL, never on the wire. The
+ * server's removal is a seat event (`lobby:removed`), and it disconnects the
+ * student before the chat's own settling reaches them — so the client names
+ * the ending itself. It is also the one reason that can never carry a
+ * reveal: no chat:ended arrives, so there is nothing to reveal with.
  */
 export type ChatEndReason =
   | "student"
@@ -69,7 +75,8 @@ export type ChatEndReason =
   | "teacher"
   | "peer-timeout"
   | "self-timeout"
-  | "self-left";
+  | "self-left"
+  | "removed";
 
 /** A chat message before a demo engine stamps an id on it. */
 export type SeedMessage = Omit<ChatMessage, "id">;

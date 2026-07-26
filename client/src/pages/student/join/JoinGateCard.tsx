@@ -25,7 +25,7 @@ import {
  * The one form serving both gate stages — code entry and name entry — on one
  * route; only the input and the button label change between them. Owns the
  * code-entry submit machinery (the state and the lookup);
- * `name` / `removedByTeacher` arrive as props because socket and demo flows
+ * `name` / `removedNotice` arrive as props because socket and demo flows
  * write them. The name-stage submit's page effects (sign-in, latch clears)
  * are `onJoinActivity`; the same-URL resubmit hands its fetched activity back
  * through `onDeliverLookup`.
@@ -39,7 +39,7 @@ export function JoinGateCard({
   onCodeChange,
   name,
   onNameChange,
-  removedByTeacher,
+  removedNotice,
   onJoinActivity,
   onDeliverLookup,
 }: {
@@ -56,7 +56,8 @@ export function JoinGateCard({
   onCodeChange: (value: string) => void;
   name: string;
   onNameChange: (value: string) => void;
-  removedByTeacher: boolean;
+  /** A removal sent them here, and from where — null on an ordinary gate. */
+  removedNotice: "lobby" | "chat" | null;
   onJoinActivity: () => void;
   onDeliverLookup: (activity: Activity) => void;
 }) {
@@ -160,13 +161,17 @@ export function JoinGateCard({
           )}
         </div>
 
-        {removedByTeacher && (
+        {removedNotice && (
           <div
             role="alert"
             className="w-full rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm font-medium text-destructive"
           >
-            Your teacher removed you from the activity. Enter your name to join
-            again.
+            {/* Arriving from a chat, the wrap-up screen already said what
+                happened — repeating it here would just be the same sentence
+                twice, so this variant is only the instruction. */}
+            {removedNotice === "lobby" &&
+              "Your teacher removed you from the activity. "}
+            Enter your name to join again.
           </div>
         )}
 
@@ -176,7 +181,7 @@ export function JoinGateCard({
               value={name}
               onChange={(event) => onNameChange(event.target.value)}
               autoFocus={
-                isDesktopViewport || (name === "" && !removedByTeacher)
+                isDesktopViewport || (name === "" && removedNotice === null)
               }
               maxLength={STUDENT_NAME_MAX_CHARS}
               aria-label="Your name"

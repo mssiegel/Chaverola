@@ -8,7 +8,12 @@ import {
 
 import { Chatbox } from "@/components/Student/Chatbox";
 import { useBackGuard } from "@/lib/useBackGuard";
-import type { ChatMessage, ChatRoomState, Participant } from "@/types/chat";
+import type {
+  ChatEndReason,
+  ChatMessage,
+  ChatRoomState,
+  Participant,
+} from "@/types/chat";
 
 interface LiveChatStageProps {
   /** The student's own seat in the room (realName from the session). */
@@ -36,16 +41,10 @@ interface LiveChatStageProps {
    *  group that kept going (the 👋 one), "peer" is a partner's leave — the
    *  🎭 wrap-up naming their character — "peer-timeout" a 1:1 partner's
    *  expired grace (the 🔌 wrap-up), "self-timeout" the student's own (the
-   *  📶 wrap-up on their return), "teacher" everything else. Null while the
-   *  chat is going. */
-  endReason:
-    | "teacher"
-    | "student"
-    | "peer"
-    | "self-left"
-    | "peer-timeout"
-    | "self-timeout"
-    | null;
+   *  📶 wrap-up on their return), "teacher" everything else, and "removed"
+   *  the client-local one the seat's removal names (the 🚪 wrap-up). Null
+   *  while the chat is going. */
+  endReason: ChatEndReason | null;
   /** Who ended it — the leaver's characterId, riding chat:ended only with
    *  reason "peer" (null otherwise; also null from an older server, which
    *  falls back to the generic "Your partner" copy). */

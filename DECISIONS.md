@@ -47,6 +47,7 @@ git: `git log -- DECISIONS.md`.
 ## Index
 
 - [Student join flow & lobby](docs/decisions/student-join.md)
+  - [A mid-chat removal ends like a chat, then lands on the name step](docs/decisions/student-join.md#a-mid-chat-removal-ends-like-a-chat-then-lands-on-the-name-step)
   - [The lobby says so when no teacher device is connected](docs/decisions/student-join.md#the-lobby-says-so-when-no-teacher-device-is-connected)
   - [The lobby has a leave door and acknowledges a long wait](docs/decisions/student-join.md#the-lobby-has-a-leave-door-and-acknowledges-a-long-wait)
   - [An unreachable lookup retries itself; a signed-in student waits it out on a reconnecting screen, never the code gate](docs/decisions/student-join.md#an-unreachable-lookup-retries-itself-a-signed-in-student-waits-it-out-on-a-reconnecting-screen-never-the-code-gate)

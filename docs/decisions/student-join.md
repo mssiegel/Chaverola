@@ -5,6 +5,52 @@ area. Entries are newest-first; add new ones at the top, and add a matching line
 to the index in the same change. Replaced decisions move to Superseded at the
 bottom of this file.
 
+### A mid-chat removal ends like a chat, then lands on the name step
+
+_2026-07-26_
+
+**Decision:** Removing a student who is in a **live chat** closes their room
+the way every other ending does: the transcript greys out under a seventh
+wrap-up card (🚪 "Your teacher took you out of the activity" / "That ends this
+chat too. You can join again with your name."), and the sign-out waits for its
+CTA. Tapping **Join again** is what signs them out and lands them on the name
+step. A student removed from the **lobby** keeps the old behavior — nothing to
+wrap up, so they go straight to the gate.
+
+The wrap-up **never** shows a reveal. The server sends no `chat:ended` for a
+removal, so no names arrive, and the screen refuses the reveal block outright
+rather than trusting that. `"removed"` is a **client-local** end reason: it
+never appears on the wire, because the removal reaches the student as the seat
+event `lobby:removed`, which the server emits just before it drops their
+socket. The gate's notice comes in two lengths, since the wrap-up already did
+the explaining — the lobby path reads "Your teacher removed you from the
+activity. Enter your name to join again.", the post-wrap-up path only the
+second sentence.
+
+**Why:** Founder call (2026-07-26). Every other way a chat can end gets a
+screen; removal was the one exit that teleported a student straight to a name
+form mid-sentence, with no acknowledgement that a conversation had just
+vanished. The room stays readable underneath because the last thing they typed
+is the thing they'll wonder about.
+
+The teacher's side is untouched: the removal is still a **quiet exit** for the
+room (no group notice, the partner's chat settles exactly as before). Quiet for
+the room and an ending for the person removed are not in conflict.
+
+_Not reachable: a removal landing on an ALREADY-ended chat. A student reading a
+wrap-up holds a `wrappingUp` seat, which the teacher's queue excludes, and an
+ended chat card hides its remove buttons — so the teacher has no remove control
+for them in that window. The reason is still written defensively (an existing
+reason is never overwritten), but there is no UI path to it._
+
+_Implemented in
+[useActiveMatch](../../client/src/pages/student/join/useActiveMatch.ts) (the
+`onRemoved` split),
+[ChatEndedSection](../../client/src/components/Student/Chatbox/ChatEndedSection.tsx)
+(the 🚪 reason) and
+[JoinActivityPage](../../client/src/pages/student/JoinActivityPage.tsx) (the
+deferred sign-out and the notice variant)._
+
 ### The lobby says so when no teacher device is connected
 
 _2026-07-26_
@@ -673,6 +719,12 @@ the identity: the join code in the URL is still a real activity, so making
 the student retype a code they're looking at would be pure friction. The
 notice tells them why they got bounced; rejoining stays possible because
 removal is sometimes a mix-up (and the teacher can always remove them again).
+
+**Amended 2026-07-26:** the name step is still the destination, but a removal
+that lands on a **live chat** now shows that chat's ending on the way, and the
+sign-out waits for its CTA rather than firing on the spot. See
+[A mid-chat removal ends like a chat, then lands on the name step](#a-mid-chat-removal-ends-like-a-chat-then-lands-on-the-name-step).
+A removal from the lobby is unchanged.
 
 _Implemented in [studentSession.ts](../../client/src/lib/studentSession.ts) and
 [JoinActivityPage](../../client/src/pages/student/JoinActivityPage.tsx)._

@@ -80,6 +80,14 @@ function endedCopy(
         title: "You left the chat",
         body: "The others are still chatting away. Nicely played! 👏",
       };
+    case "removed":
+      // No applause on this one: it's the only ending the student neither
+      // chose nor lost to the wifi. Say what happened and where they land.
+      return {
+        tile: "🚪",
+        title: "Your teacher took you out of the activity",
+        body: "That ends this chat too. You can join again with your name.",
+      };
     default:
       return {
         tile: "🎭",
@@ -119,6 +127,10 @@ export function ChatEndedSection({
   // A leaver's chat is still going for everyone else, so the mystery must
   // hold — no reveal for them, whatever the teacher's setting says.
   const chatGoesOnWithoutYou = endReason === "self-left";
+  // A removal carries no reveal by construction (it never rides a
+  // chat:ended), but the screen refuses one outright rather than trusting
+  // that: a removed student is out of the activity, not owed its secrets.
+  const removed = endReason === "removed";
 
   return (
     <div className="border-t border-border bg-gradient-to-b from-brand-grape-soft/60 to-card px-4 py-6 text-center">
@@ -141,7 +153,7 @@ export function ChatEndedSection({
               Names stay secret. This chat is still going without you.
             </span>
           </div>
-        ) : revealNames ? (
+        ) : revealNames && !removed ? (
           <div className="w-full rounded-xl border border-border bg-card p-3 text-left shadow-sm">
             <SectionLabel className="mb-2 text-center">
               You were really chatting with
@@ -176,7 +188,15 @@ export function ChatEndedSection({
         )}
 
         <div className="w-full space-y-2 pt-1">
-          {activityEnded ? (
+          {removed ? (
+            // The seat went with the removal, so there is no lobby and no
+            // rematch to offer. The tap runs the sign-out this screen
+            // deferred and lands them on the name step.
+            <Button size="lg" className="w-full" onClick={onBackToLobby}>
+              Join again
+              <ArrowRight className="size-4" />
+            </Button>
+          ) : activityEnded ? (
             // No rematch to promise and no lobby to return to — the tap just
             // closes the wrap-up out onto the activity-over screen.
             <Button size="lg" className="w-full" onClick={onBackToLobby}>

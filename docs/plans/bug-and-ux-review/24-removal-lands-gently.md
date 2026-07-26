@@ -1,6 +1,6 @@
 # 24 — Removal lands gently
 
-State: **In progress** — prompt 1 landed, prompt 2 open
+State: **Complete**
 
 **The problem.** A student the teacher removes — possibly out of a _live
 chat_ — is teleported straight to the name form, and on a phone the
@@ -54,7 +54,7 @@ case. If Prompt 2 lands first, the gate notice it hands off to is still
 today's — fine; Prompt 1 warms it.
 
 - [x] Prompt 1 — The gate lands gently
-- [ ] Prompt 2 — A mid-chat removal is an ending, not a teleport
+- [x] Prompt 2 — A mid-chat removal is an ending, not a teleport
 
 ---
 
@@ -133,13 +133,13 @@ this one" wrap-up, no reveal — and one tap lands them on the name step.
    step" / better — humanizer). The CTA runs the deferred
    `signOut(); setName(""); setRemovedByTeacher(true)` so the gate shows
    Prompt 1's (shorter) notice.
-3. **Wire check:** no server change expected — the removal event the
-   client already receives is the trigger; the chat's server-side end for
-   the partner is untouched ("quiet exit" stands). Verify the removed
-   student's event actually arrives before the socket drops in the
-   mid-chat case (trace it live; if removal reaches the client only as a
-   disconnect, surface that finding and stop — that would need a small
-   server ordering fix, its own decision).
+3. **Wire check:** no server change needed, and none made. `chat:remove`
+   emits `lobby:removed` to the student's own socket and only then calls
+   `disconnect(true)`
+   ([teacher.ts:220-225](../../../server/src/live/handlers/teacher.ts)),
+   so the event does arrive ahead of the drop — verified live at phone
+   width, the ending renders every time. The chat's server-side end for
+   the partner is untouched ("quiet exit" stands).
 4. **Demo parity:** not a demo event — note and move on.
 5. Decision entry: the amendment described at the top of this doc
    ([`student-join.md`](../../decisions/student-join.md)) + DECISIONS.md
@@ -147,12 +147,14 @@ this one" wrap-up, no reveal — and one tap lands them on the name step.
    step").
 
 **Edge cases:** removal racing a chat end (teacher ends the chat, then
-removes): `chatEnded` is already set with the real reason — the removal
-should NOT overwrite the reason; it just means the CTA's destination is
-the gate (the seat is gone). Removal racing the reveal: reveal came from
-`chat:ended` before the removal — keep whatever was on screen; the CTA
-still exits to the gate. Back-guard: the ended screen disarms it
-(`useBackGuard(!isEnded…)`) — unchanged.
+removes) turned out to be **unreachable**: a student reading a wrap-up
+holds a `wrappingUp` seat, which `queuePayload` excludes from the
+teacher's queue, and `ChatCardHeader` hides its remove buttons on an
+ended card — so the teacher has no remove control for them in that
+window. The reason is still written defensively (`prev ?? "removed"`
+never overwrites an existing one), but no CTA-destination plumbing was
+built for a state nothing can produce. Back-guard: the ended screen
+disarms it (`useBackGuard(!isEnded…)`) — unchanged.
 
 **Tests:** if the removal routing lands in the pure reducers
 ([`liveMatchState.ts`](../../../client/src/pages/student/join/liveMatchState.ts)),
