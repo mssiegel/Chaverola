@@ -1,6 +1,6 @@
 # 24 — Removal lands gently
 
-State: **Not started**
+State: **In progress** — prompt 1 landed, prompt 2 open
 
 **The problem.** A student the teacher removes — possibly out of a _live
 chat_ — is teleported straight to the name form, and on a phone the
@@ -53,7 +53,7 @@ directly on the name step with the warmer notice.
 case. If Prompt 2 lands first, the gate notice it hands off to is still
 today's — fine; Prompt 1 warms it.
 
-- [ ] Prompt 1 — The gate lands gently
+- [x] Prompt 1 — The gate lands gently
 - [ ] Prompt 2 — A mid-chat removal is an ending, not a teleport
 
 ---
@@ -76,15 +76,22 @@ stays one tap away.
    (once Prompt 2 ships) after the wrap-up screen's tap — the
    post-wrap-up variant can be shorter, since the ending screen already
    explained the chat. Copy through the **humanizer**.
-3. **Demo parity:** removal isn't a student-demo event (the demo's
-   steering panel has no remove; the teacher demo's remove acts on
-   pretend students). Nothing to show; note it here.
+3. **Demo parity:** the student demo _does_ have a remove (the lobby's
+   steering panel, `onTeacherRemove`) — it shares the notice, so the new
+   copy reaches it for free, and its name stays prefilled, so the phone
+   never autofocused there anyway. Nothing to build.
 4. Decision: amend-note on "A removed student retypes their name" (notice
-   and focus behavior) + DECISIONS.md line.
+   and focus behavior). No DECISIONS.md line — that index is generated
+   from area-file headings, and an amend-note adds none.
 
 **Edge cases:** the notice must not collide with the gate's other error
-renders (`UNREACHABLE_COPY`, not-found) — they're mutually exclusive
-states; verify. Tapping the field still focuses and types normally.
+renders (`UNREACHABLE_COPY`, not-found). They are _not_ mutually
+exclusive as written: the notice renders above the form on every gate
+stage while the code errors render inside the code-stage branch, and
+`removedByTeacher` only cleared on a rejoin — so a removed student who
+backed out to code entry and mistyped a code got both alerts at once.
+Fixed here by clearing the flag when the gate resolves to code entry.
+Tapping the field still focuses and types normally.
 
 **Tests:** none — copy + a focus condition; browser-verified.
 

@@ -80,9 +80,10 @@ export function JoinGateCard({
 
   // Autofocusing an input on a phone pops the keyboard over half the world,
   // so phones only get it when there's typing to do: never on the code input
-  // (fresh landing, let the page breathe first) and not on a prefilled demo
-  // name. Desktop always autofocuses — no keyboard to pop, and Enter submits
-  // the prefilled name straight away.
+  // (fresh landing, let the page breathe first), not on a prefilled demo name,
+  // and not after a removal — the notice above the field is the whole point of
+  // that landing, and the keyboard would cover it. Desktop always autofocuses
+  // — no keyboard to pop, and Enter submits the prefilled name straight away.
   const isDesktopViewport = window.matchMedia("(min-width: 640px)").matches;
 
   const isCodeComplete = /^\d{4}$/.test(code);
@@ -164,8 +165,8 @@ export function JoinGateCard({
             role="alert"
             className="w-full rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm font-medium text-destructive"
           >
-            Your teacher removed you from the activity, so you're signed out.
-            Enter your name to join again.
+            Your teacher removed you from the activity. Enter your name to join
+            again.
           </div>
         )}
 
@@ -174,7 +175,9 @@ export function JoinGateCard({
             <input
               value={name}
               onChange={(event) => onNameChange(event.target.value)}
-              autoFocus={isDesktopViewport || name === ""}
+              autoFocus={
+                isDesktopViewport || (name === "" && !removedByTeacher)
+              }
               maxLength={STUDENT_NAME_MAX_CHARS}
               aria-label="Your name"
               placeholder="Your name"

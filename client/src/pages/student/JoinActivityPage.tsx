@@ -248,10 +248,17 @@ export function JoinActivityPage() {
   // once the server answers again. The activity-gone screen also holds the
   // session (it renders FROM it) — its CTA lands here signed-in on purpose,
   // and that's when the sign-out finally runs.
+  // The removal notice clears here too, and not only on a rejoin: it sits
+  // above the form on every gate stage, so a removed student who backs out to
+  // code entry would otherwise read it stacked on top of a "recheck your Join
+  // Code" error. Landing at code entry is the same moment the session ends,
+  // so the notice about losing a seat has nothing left to explain.
   useEffect(() => {
     const resolvedToCodeEntry =
       joinCodeParam === undefined || lookup.state === "not-found";
-    if (resolvedToCodeEntry && session && !activityGoneFromLookup) signOut();
+    if (!resolvedToCodeEntry) return;
+    setRemovedByTeacher(false);
+    if (session && !activityGoneFromLookup) signOut();
   }, [joinCodeParam, lookup.state, session, signOut, activityGoneFromLookup]);
 
   // While a chat is on screen (live or just ended) the layout swaps its brand

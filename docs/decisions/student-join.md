@@ -183,9 +183,22 @@ over prefill-for-one-tap-rejoin: most real removals target a fake name, and
 handing the same name back would make the re-offense friction-free. A student
 who mistyped a real name just retypes it.
 
+**Update (2026-07-26):** the blank field stands, and on phones it now stays
+**unfocused** as well. Autofocus used to key off the empty name, so the
+keyboard slid up over the red notice the removal landing exists to deliver;
+the notice is the point of that screen, so it gets read before anything opens.
+Desktop still autofocuses (no keyboard to cover anything), and tapping the
+field works normally everywhere. The notice itself dropped "so you're signed
+out" — account-speak in a product with no accounts. It also clears when the
+gate resolves to code entry, not only on a rejoin: it renders above the form
+on both gate stages, so a removed student who backed out and mistyped a code
+saw it stacked on top of "recheck your Join Code".
+
 _Implemented in
 [JoinActivityPage](../../client/src/pages/student/JoinActivityPage.tsx) (the
-presence hook's `onRemoved` callback)._
+presence hook's `onRemoved` callback) and
+[JoinGateCard](../../client/src/pages/student/join/JoinGateCard.tsx) (the
+notice and the name input's `autoFocus`)._
 
 ### The real lobby still says Waiting for your match until matching ships
 
