@@ -1,6 +1,10 @@
 import { useRef, useState } from "react";
 
-import { TYPING_INDICATOR_TTL_MS } from "@chaverola/shared";
+import {
+  CHAT_SEND_WINDOW_LIMIT,
+  CHAT_SEND_WINDOW_MS,
+  TYPING_INDICATOR_TTL_MS,
+} from "@chaverola/shared";
 
 import { nextId } from "@/lib/random";
 import type { Activity } from "@/types/activity";
@@ -121,6 +125,16 @@ export function useActiveMatch({
   // SYNCHRONOUSLY (a ref, not state) so onChatEnded can trust it inside
   // the same event burst. Cleared wherever the match clears.
   const liveChatIdRef = useRef<string | null>(null);
+  // The client's copy of the server's send window: the timestamps of the
+  // sends that have actually gone out, plus whatever is waiting for a slot
+  // and the one timer that lets them go. Refs, not state — the composer
+  // reads none of this; only the wait below is rendered.
+  const sendTimesRef = useRef<number[]>([]);
+  const heldRef = useRef<{ pendingId: string; text: string }[]>([]);
+  const holdTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // When the held messages get their slot (epoch ms), or null when nothing
+  // is waiting. The chat stage turns it into the composer's wait notice.
+  const [holdUntil, setHoldUntil] = useState<number | null>(null);
 
   const startMatch = (scenarioKey: ActivityChatScenarioKey) => {
     setChatEnded(false);
@@ -263,20 +277,87 @@ export function useActiveMatch({
     },
   });
 
-  // The send the live chat actually calls: the line goes on screen first,
-  // marked pending, and the server's echo replaces it. Nothing here waits on
-  // the wire, so the message appears at thumb speed even on classroom wifi —
-  // and if the echo never comes, the line says so instead of vanishing.
-  const sendLiveMessage = (text: string) => {
-    const pendingId = nextId("pending");
-    setMatch((prev) => appendPendingLine(prev, pendingId, text));
+  // The actual emit, plus the timer that admits the echo never came. Every
+  // path into the wire goes through here so one place owns the window's
+  // bookkeeping.
+  const emitLiveMessage = (pendingId: string, text: string) => {
+    sendTimesRef.current.push(Date.now());
+    sendChatMessage(text);
     // No cleanup bookkeeping: once the echo resolves the line, this id is
     // gone from the feed and failPendingLine is a no-op — the same guarded
     // late-fire contract the typing TTL and 🎉 flash timers use.
     setTimeout(() => {
       setMatch((prev) => failPendingLine(prev, pendingId));
     }, PENDING_ECHO_TIMEOUT_MS);
-    sendChatMessage(text);
+  };
+
+  // Let out whatever the window now has room for, and re-arm for the rest.
+  const drainHeldMessages = () => {
+    holdTimerRef.current = null;
+    const now = Date.now();
+    sendTimesRef.current = sendTimesRef.current.filter(
+      (t) => now - t < CHAT_SEND_WINDOW_MS
+    );
+    while (
+      heldRef.current.length > 0 &&
+      sendTimesRef.current.length < CHAT_SEND_WINDOW_LIMIT
+    ) {
+      // Length-checked on the line above.
+      const next = heldRef.current.shift()!;
+      emitLiveMessage(next.pendingId, next.text);
+    }
+    if (heldRef.current.length === 0) {
+      setHoldUntil(null);
+      return;
+    }
+    const readyAt = oldestSendExpiry();
+    setHoldUntil(readyAt);
+    holdTimerRef.current = setTimeout(
+      drainHeldMessages,
+      Math.max(0, readyAt - Date.now())
+    );
+  };
+
+  /** When the oldest send in the window falls out of it, freeing a slot. */
+  const oldestSendExpiry = () =>
+    // Only ever called with a full window, so [0] is there.
+    sendTimesRef.current[0]! + CHAT_SEND_WINDOW_MS;
+
+  // The send the live chat actually calls: the line goes on screen first,
+  // marked pending, and the server's echo replaces it. Nothing here waits on
+  // the wire, so the message appears at thumb speed even on classroom wifi —
+  // and if the echo never comes, the line says so instead of vanishing.
+  //
+  // A send that would blow the shared rate-limit window is HELD, not
+  // dropped: the server would have thrown it away without a word, so the
+  // composer keeps it, shows the wait, and lets it go the moment the window
+  // opens. The line sits pending the whole time, which is the truth.
+  const sendLiveMessage = (text: string) => {
+    const pendingId = nextId("pending");
+    setMatch((prev) => appendPendingLine(prev, pendingId, text));
+
+    const now = Date.now();
+    sendTimesRef.current = sendTimesRef.current.filter(
+      (t) => now - t < CHAT_SEND_WINDOW_MS
+    );
+    const windowIsFull =
+      sendTimesRef.current.length >= CHAT_SEND_WINDOW_LIMIT ||
+      // Anything already queued goes first, or the feed's order would lie.
+      heldRef.current.length > 0;
+
+    if (!windowIsFull) {
+      emitLiveMessage(pendingId, text);
+      return;
+    }
+    heldRef.current.push({ pendingId, text });
+    const readyAt = oldestSendExpiry();
+    setHoldUntil(readyAt);
+    if (holdTimerRef.current === null) {
+      holdTimerRef.current = setTimeout(
+        drainHeldMessages,
+        Math.max(0, readyAt - now)
+      );
+    }
   };
 
   // "Tap to retry" on a failed line: drop it and send the text again as a
@@ -308,6 +389,7 @@ export function useActiveMatch({
     leaveChat,
     sendChatMessage: sendLiveMessage,
     retryLiveMessage,
+    sendHoldUntil: holdUntil,
     sendTyping,
   };
 }

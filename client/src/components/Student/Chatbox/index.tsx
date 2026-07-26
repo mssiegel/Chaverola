@@ -24,6 +24,8 @@ export interface ChatboxProps {
   /** Re-send one of the student's own lines whose echo never arrived. Live
    *  rooms only: the demo echoes locally, so nothing there can fail. */
   onRetryMessage?: (messageId: string) => void;
+  /** Seconds until rate-limit-held messages go out (null: nothing waiting). */
+  holdSeconds?: number | null;
   onEndChat: () => void;
   onLeaveChat: () => void;
   onBackToLobby: () => void;
@@ -62,6 +64,7 @@ export function Chatbox({
   onSend,
   onTyping,
   onRetryMessage,
+  holdSeconds,
   onEndChat,
   onLeaveChat,
   onBackToLobby,
@@ -208,6 +211,7 @@ export function Chatbox({
           onTyping={onTyping}
           selfCharacterLabel={self.character.name}
           disabled={isPaused}
+          holdSeconds={holdSeconds}
           releaseKeyboardOnSend={releaseKeyboardOnSend}
         />
       )}

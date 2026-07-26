@@ -63,7 +63,7 @@ rules:
 | ------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- | ----------- |
 | [02 — End activity ends with the reveal](02-end-activity-ends-with-the-reveal.md)                       | Students get a real ending (reveal included) at the bell, not a dead chat then a wipe     | Complete    |
 | [03 — The transcript send never strands](03-transcript-send-never-strands.md)                           | The teacher's wrap-up always settles — success or a failure they can act on               | Complete    |
-| [05 — A sent message never just vanishes](05-a-sent-message-never-just-vanishes.md)                     | Students see their message land — or see that it didn't                                   | Not started |
+| [05 — A sent message never just vanishes](05-a-sent-message-never-just-vanishes.md)                     | Students see their message land — or see that it didn't                                   | Complete    |
 | [06 — The queue counts who can actually pair](06-the-queue-counts-who-can-actually-pair.md)             | The waiting count and Pair everyone tell the truth about sleeping phones                  | Not started |
 | [07 — A wifi blip keeps your tick](07-a-wifi-blip-keeps-your-tick.md)                                   | A selected student who blinks offline stays selected                                      | Not started |
 | [08 — Back means back](08-back-means-back.md)                                                           | The back button works on the first press, even after four rounds                          | Not started |

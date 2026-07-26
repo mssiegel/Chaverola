@@ -5,6 +5,33 @@ area. Entries are newest-first; add new ones at the top, and add a matching line
 to the index in the same change. Replaced decisions move to Superseded at the
 bottom of this file.
 
+### The send window holds a fast typist's messages instead of dropping them
+
+_2026-07-26_
+
+**Decision:** `CHAT_SEND_WINDOW_MS` and `CHAT_SEND_WINDOW_LIMIT` (10 messages
+per 10 seconds) live in `@chaverola/shared`, and the student's chat enforces
+the same window locally before the server sees it. A send that would exceed
+the window is **held, not blocked**: the line is already in the feed as
+pending, the composer says "You're on a roll. Sending these in Ns", and the
+queue lets itself out in order the moment a slot frees. The server's own
+check is untouched, and still drops what a hostile client sends anyway.
+
+**Why:** The limit is reachable in ordinary play. A kid firing "wait" / "no"
+/ "lol" hits ten in a few seconds, and the server's rejection is a silent
+`return` — the eleventh message was simply gone, with nothing telling anyone
+a limit existed.
+
+**Held rather than refused, deliberately.** The plan sketched disabling send
+briefly. Holding is better: the student's thought is already typed and
+already on screen, and taking it away to protect a limit they can't see is
+the original bug wearing a nicer hat. Typing stays open the whole time. The
+composer's notice is an explanation, not a gate.
+
+Because both sides now read the same numbers, the server limiter should
+never fire for an honest client. When it somehow does, the pending line's
+timeout still catches it and offers the retry.
+
 ### A sent message shows as pending until its echo, and says so if it never lands
 
 _2026-07-26_

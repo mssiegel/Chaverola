@@ -52,6 +52,13 @@ interface MessageComposerProps {
    * hidden below them, so the keyboard stays for the next message.
    */
   releaseKeyboardOnSend?: boolean;
+  /**
+   * Seconds until messages held by the send window go out (null when
+   * nothing is waiting). Typing and sending stay open the whole time — the
+   * held messages are already in the feed and will send themselves; this
+   * only explains the delay so the wait doesn't read as a bug.
+   */
+  holdSeconds?: number | null;
 }
 
 /**
@@ -72,6 +79,7 @@ export function MessageComposer({
   disabled = false,
   disabledPlaceholder = "Paused. Hang tight…",
   releaseKeyboardOnSend = false,
+  holdSeconds = null,
 }: MessageComposerProps) {
   const [value, setValue] = useState("");
   const [pickerOpen, setPickerOpen] = useState(false);
@@ -153,6 +161,11 @@ export function MessageComposer({
     // would be the thing that gets crushed.
     <div className="shrink-0 border-t border-border bg-card/70">
       <div className="px-2 py-2 sm:px-4 sm:py-2.5">
+        {holdSeconds !== null && (
+          <div className="mb-1.5 px-1 text-xs font-medium text-muted-foreground">
+            You&apos;re on a roll. Sending these in {holdSeconds}s
+          </div>
+        )}
         <div className="relative">
           {showCounter && (
             <div

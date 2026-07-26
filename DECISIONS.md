@@ -68,6 +68,7 @@ git: `git log -- DECISIONS.md`.
   - [One page serves both join routes; a wrong code never changes the URL](docs/decisions/student-join.md#one-page-serves-both-join-routes-a-wrong-code-never-changes-the-url)
   - [Student sign-in lives in the tab, and removal sends you to the name step](docs/decisions/student-join.md#student-sign-in-lives-in-the-tab-and-removal-sends-you-to-the-name-step)
 - [Chat behavior](docs/decisions/chat-behavior.md)
+  - [The send window holds a fast typist's messages instead of dropping them](docs/decisions/chat-behavior.md#the-send-window-holds-a-fast-typists-messages-instead-of-dropping-them)
   - [A sent message shows as pending until its echo, and says so if it never lands](docs/decisions/chat-behavior.md#a-sent-message-shows-as-pending-until-its-echo-and-says-so-if-it-never-lands)
   - [End activity ends every chat with the full ended-screen treatment; the activity-over card waits for the student's tap](docs/decisions/chat-behavior.md#end-activity-ends-every-chat-with-the-full-ended-screen-treatment-the-activity-over-card-waits-for-the-students-tap)
   - [On a phone, the student's message box has no emoji button](docs/decisions/chat-behavior.md#on-a-phone-the-students-message-box-has-no-emoji-button)

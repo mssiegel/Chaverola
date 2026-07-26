@@ -1,6 +1,6 @@
 # 05 — A sent message never just vanishes
 
-State: **Not started**
+State: **Complete**
 
 **The problem.** Sending is fire-and-forget with no feedback of any kind. The
 composer clears the box the instant Send is tapped
@@ -66,7 +66,7 @@ echo with honest failure (the big win). Prompt 2 alone = pre-empted rate
 limit with friendly copy.
 
 - [x] Prompt 1 — Local echo with an honest failure state
-- [ ] Prompt 2 — The rate limit stops being a secret
+- [x] Prompt 2 — The rate limit stops being a secret
 
 ---
 

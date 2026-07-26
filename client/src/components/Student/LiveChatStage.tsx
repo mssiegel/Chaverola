@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import { LOBBY_GRACE_SECONDS } from "@chaverola/shared";
+import { CHAT_SEND_WINDOW_MS, LOBBY_GRACE_SECONDS } from "@chaverola/shared";
 
 import { Chatbox } from "@/components/Student/Chatbox";
 import { useBackGuard } from "@/lib/useBackGuard";
@@ -62,6 +62,9 @@ interface LiveChatStageProps {
   onSend: (text: string) => void;
   /** Re-send a line the server never echoed back. */
   onRetryMessage?: (messageId: string) => void;
+  /** When held-back messages get their slot in the send window (epoch ms),
+   *  or null when nothing is waiting. */
+  sendHoldUntil?: number | null;
   /** A keystroke happened — the hook throttles it into chat:typing
    *  heartbeats. */
   onTyping: () => void;
@@ -115,6 +118,7 @@ export function LiveChatStage({
   activityEnded,
   onSend,
   onRetryMessage,
+  sendHoldUntil = null,
   onTyping,
   onEndChat,
   onBackToLobby,
@@ -164,6 +168,18 @@ export function LiveChatStage({
         )
       : null;
 
+  // The wait the composer explains, off the same one-second tick as the
+  // reconnect countdown, and clamped the same way: `now` can be up to a
+  // second stale, which would otherwise advertise a wait longer than the
+  // window itself. Floored at 1, since "in 0s" is a lie either way.
+  const sendHoldSeconds =
+    sendHoldUntil === null
+      ? null
+      : Math.min(
+          CHAT_SEND_WINDOW_MS / 1000,
+          Math.max(1, Math.ceil((sendHoldUntil - now) / 1000))
+        );
+
   // The room, live messages, typing, the teacher's pause, the peer-drop
   // banner, and the honest end reason included. The "teacher" fallback keeps
   // the derivation total if the ended flag ever lands without a reason.
@@ -197,6 +213,7 @@ export function LiveChatStage({
         revealNames={revealNames}
         onSend={onSend}
         onRetryMessage={onRetryMessage}
+        holdSeconds={sendHoldSeconds}
         onTyping={onTyping}
         onEndChat={onEndChat}
         onLeaveChat={onEndChat}

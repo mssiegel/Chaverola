@@ -1,4 +1,9 @@
-import { CHAT_MESSAGE_MAX_CHARS, TYPING_HEARTBEAT_MS } from "@chaverola/shared";
+import {
+  CHAT_MESSAGE_MAX_CHARS,
+  CHAT_SEND_WINDOW_LIMIT,
+  CHAT_SEND_WINDOW_MS,
+  TYPING_HEARTBEAT_MS,
+} from "@chaverola/shared";
 
 import { getByJoinCode } from "../../store/activityStore";
 import {
@@ -14,12 +19,10 @@ import type {
 } from "../lobbyContext";
 import { activeMembers, appendLine, findActiveChatOf } from "../matching";
 
-/** chat:send's sliding window: 10 messages per 10 seconds per socket —
- *  loose enough that chained one-word messages never trip it, tight enough
- *  that a script gets nowhere. The first unbounded student→server event in
- *  the system; Express's limiters provably don't reach sockets. */
-const CHAT_SEND_WINDOW_MS = 10_000;
-const CHAT_SEND_WINDOW_LIMIT = 10;
+/* chat:send's sliding window now lives in @chaverola/shared — the composer
+   holds sends against the same numbers, so a student gets a short wait
+   instead of a message this handler drops without a word. The check below is
+   unchanged: it is the belt against a client that ignores the window. */
 
 /** chat:typing's floor between relays: half the client's heartbeat, so
  *  timer jitter can never drop a legitimate heartbeat, while a hostile

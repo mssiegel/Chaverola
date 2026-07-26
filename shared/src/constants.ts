@@ -29,6 +29,19 @@ export const CHAT_MESSAGE_MAX_CHARS = 75;
  *  ~10 minutes of chat — nobody is building a message archive here. */
 export const CHAT_TRANSCRIPT_MAX_LINES = 200;
 
+/**
+ * chat:send's sliding window: 10 messages per 10 seconds per socket — loose
+ * enough that chained one-word messages never trip it, tight enough that a
+ * script gets nowhere. Shared because both sides enforce it: the server
+ * drops what exceeds it (silently, the belt against a hostile client), and
+ * the composer holds a send that would exceed it and lets it go when the
+ * window opens, so an excited kid gets a wait instead of a vanished message.
+ * One source, or the client's idea of the limit drifts from the one that
+ * actually drops messages.
+ */
+export const CHAT_SEND_WINDOW_MS = 10_000;
+export const CHAT_SEND_WINDOW_LIMIT = 10;
+
 export const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 /** RFC 5321's practical ceiling for a whole address. */
 export const EMAIL_MAX_CHARS = 254;
