@@ -91,11 +91,15 @@ export interface ServerToClientEvents {
   "queue:snapshot": (payload: { students: QueueEntry[] }) => void;
   /** Student only. Persist studentId + token into the session for resume;
    *  `paused` is the activity-wide pause at connect time (session-state
-   *  only, never persisted) so a refresh mid-pause stays frozen. */
+   *  only, never persisted) so a refresh mid-pause stays frozen, and
+   *  `teacherPresent` says whether any teacher device is connected right
+   *  now — a student joining while the teacher's laptop is shut arrives
+   *  already knowing, rather than waiting on the next flip. */
   "lobby:welcome": (payload: {
     studentId: string;
     token: string;
     paused: boolean;
+    teacherPresent: boolean;
   }) => void;
   /** Student only: the teacher removed you → name step + notice. */
   "lobby:removed": () => void;
@@ -232,6 +236,17 @@ export interface ServerToClientEvents {
    *  waiters, and wrappingUp alike (the pause is activity-wide). Connect-time
    *  state rides lobby:welcome instead; this event only carries live flips. */
   "activity:paused": (payload: { paused: boolean }) => void;
+  /** Student only, every connected seat, same reach as activity:paused: a
+   *  teacher device connected or the last one left. It carries no student
+   *  data at all — a boolean about the far end of the room.
+   *
+   *  Fired on the 0↔1 teacher-socket transitions, the exact moments
+   *  auto-match arms and releases: while it's false, nothing is pairing
+   *  anyone, and only the lobby renders that (a chat runs fine without a
+   *  teacher watching). The away edge is debounced server-side so a teacher
+   *  refresh doesn't flash the away lobby across thirty phones; coming back
+   *  is immediate. Connect-time state rides lobby:welcome. */
+  "activity:teacher-presence": (payload: { present: boolean }) => void;
   /** Teacher room minus the sender — keeps a second host device coherent. */
   "settings:changed": (payload: { settings: ActivitySettings }) => void;
   /** Student only, targeted at every connected seat — the student-visible

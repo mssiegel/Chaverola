@@ -16,6 +16,12 @@ interface WaitingLobbyProps {
   isPaused?: boolean;
   /** The lobby's live connection; "reconnecting" swaps the pill to amber. */
   connection?: LobbyConnectionState;
+  /**
+   * No teacher device is connected, so nothing is pairing anyone. Defaults
+   * to present — the demo has no teacher socket and must keep the happy
+   * path, and an older server sends nothing to say otherwise.
+   */
+  teacherAway?: boolean;
   /** The leave door: hand the student back to code entry, signed out. */
   onLeaveActivity: () => void;
 }
@@ -38,6 +44,7 @@ export function WaitingLobby({
   studentName,
   isPaused = false,
   connection = "connected",
+  teacherAway = false,
   onLeaveActivity,
 }: WaitingLobbyProps) {
   // How long this lobby has been on screen, in two steps. The lobby unmounts
@@ -64,6 +71,30 @@ export function WaitingLobby({
         ? "Still finding you a partner. Hang tight, your chat opens right here."
         : `${activity.hostName} is picking who chats with who. When it's your turn, the chat opens right here.`;
 
+  // One precedence, read by both the pill and the line above it. Connection
+  // trouble outranks the rest: while this socket is down, "paused" and "your
+  // teacher's away" are both claims the screen can't back up — it lost the
+  // line that would tell it otherwise.
+  const hold =
+    connection === "reconnecting"
+      ? "reconnecting"
+      : isPaused
+        ? "paused"
+        : teacherAway
+          ? "teacher-away"
+          : "waiting";
+
+  const bodyLine =
+    hold === "paused"
+      ? "Your teacher hit pause for a moment. When things start back up, your chat opens right here."
+      : hold === "teacher-away"
+        ? // "Can't reach" rather than "your teacher stepped away": all the
+          // server knows is that no teacher device is connected, which could
+          // be a shut laptop, a closed tab, or their wifi. It puts the
+          // uncertainty on us instead of pinning a story on the teacher.
+          "We can't reach your teacher's screen right now, so nobody's getting matched. When they're back, your chat opens right here."
+        : waitingLine;
+
   return (
     <section className="flex w-full animate-in flex-col items-center gap-6 text-center duration-500 fade-in slide-in-from-bottom-4 motion-reduce:animate-none">
       <div className="space-y-2 pt-2">
@@ -71,15 +102,11 @@ export function WaitingLobby({
           You're in, {studentName}! 🎉
         </h1>
         <p className="text-muted-foreground" aria-live="polite">
-          {isPaused
-            ? "Your teacher hit pause for a moment. When things start back up, your chat opens right here."
-            : waitingLine}
+          {bodyLine}
         </p>
       </div>
 
-      {/* Connection trouble outranks the pause pill: while the socket is
-          down, "paused" is a claim this screen can't back up. */}
-      {connection === "reconnecting" ? (
+      {hold === "reconnecting" ? (
         <div
           className="flex items-center gap-2.5 rounded-full border border-amber-200 bg-amber-50 px-4 py-2 text-sm font-semibold text-amber-800"
           aria-live="polite"
@@ -90,13 +117,23 @@ export function WaitingLobby({
           />
           Reconnecting you…
         </div>
-      ) : isPaused ? (
+      ) : hold === "paused" ? (
         <div
           className="flex items-center gap-2.5 rounded-full border border-amber-200 bg-amber-50 px-4 py-2 text-sm font-semibold text-amber-800"
           aria-live="polite"
         >
           <Pause aria-hidden className="size-4" />
           Class is paused
+        </div>
+      ) : hold === "teacher-away" ? (
+        // The waiting pill's own colors, minus the dots. Amber would read as
+        // a warning about something the student can't fix, and the dots would
+        // keep promising a matchmaker that isn't running (founder call).
+        <div
+          className="flex items-center gap-2.5 rounded-full border border-brand-grape/25 bg-brand-grape-soft px-4 py-2 text-sm font-semibold text-brand-grape-strong"
+          aria-live="polite"
+        >
+          Waiting for your teacher
         </div>
       ) : (
         <div

@@ -97,6 +97,13 @@ function buildStudentAuth(
  * activity:paused. State, not a callback: every seated stage — lobby,
  * chat, ended — renders it, and it must survive stage changes.
  *
+ * `teacherPresent` rides the same two channels (lobby:welcome for the
+ * connect-time answer, activity:teacher-presence for the flips) and is
+ * false only while no teacher device is connected — which is exactly when
+ * nothing is pairing anyone. It defaults to true and reads an absent field
+ * as true, so an older server looks like it always did. Only the lobby
+ * renders it; a running chat doesn't care.
+ *
  * `leaveChat` is the chat room's exit (End chat, or Leave in a group): the
  * seat survives it, and the wrap-up screen arrives as a chat:ended like any
  * other. `returnToLobby` is that screen's Back tap: it asks the server to
@@ -188,6 +195,7 @@ export function useLobbyPresence({
 }): {
   presence: LobbyPresence;
   paused: boolean;
+  teacherPresent: boolean;
   retrying: boolean;
   retry: () => void;
   returnToLobby: () => void;
@@ -197,6 +205,11 @@ export function useLobbyPresence({
 } {
   const [presence, setPresence] = useState<LobbyPresence>("connected");
   const [paused, setPaused] = useState(false);
+  // Present until the server says otherwise — the honest default while a
+  // welcome is in flight, and the one that keeps an older server (which
+  // sends neither the field nor the event) looking exactly like it did
+  // before this shipped.
+  const [teacherPresent, setTeacherPresent] = useState(true);
   const [retrying, setRetrying] = useState(false);
   const socketRef = useRef<LobbySocket | null>(null);
   const sessionRef = useLatestRef(session);
@@ -245,17 +258,24 @@ export function useLobbyPresence({
       // lobby:removed / activity:ended, and that must not read as a blip.
       setPresence((p) => (isTerminal(p) ? p : "reconnecting"));
     });
-    socket.on("lobby:welcome", ({ studentId, token, paused: pausedNow }) => {
+    socket.on("lobby:welcome", (payload) => {
+      const { studentId, token } = payload;
       // Destructured on purpose: only the seat credentials may reach the
-      // persisted session — `paused` is live state and must never survive
-      // in sessionStorage past the truth that minted it.
+      // persisted session — `paused` and `teacherPresent` are live state and
+      // must never survive in sessionStorage past the truth that minted them.
       updateSessionRef.current({ studentId, token });
       // `=== true` tolerates the deploy window where an older server's
       // welcome has no paused field yet.
-      setPaused(pausedNow === true);
+      setPaused(payload.paused === true);
+      // `!== false` for the same window, the other way round: an older
+      // server omits teacherPresent, and absence must read as present.
+      setTeacherPresent(payload.teacherPresent !== false);
     });
     socket.on("activity:paused", (payload) => {
       setPaused(payload.paused === true);
+    });
+    socket.on("activity:teacher-presence", (payload) => {
+      setTeacherPresent(payload.present === true);
     });
     socket.on("activity:details-changed", (payload) => {
       onActivityDetailsRef.current?.(payload);
@@ -422,6 +442,7 @@ export function useLobbyPresence({
   return {
     presence,
     paused,
+    teacherPresent,
     retrying,
     retry,
     returnToLobby,

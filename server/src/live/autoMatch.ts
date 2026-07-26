@@ -50,12 +50,14 @@ function autoMatchTick(ctx: LobbyContext, joinCode: string): void {
 }
 
 /** Arm on the 0→1st teacher socket: a 1s tick (scaled) that reads
- *  everything else fresh each firing. */
-export function armAutoMatch(ctx: LobbyContext, joinCode: string): void {
+ *  everything else fresh each firing. Returns true on that 0→1 transition —
+ *  the moment the students' `teacherPresent` flips too, read off this
+ *  refcount rather than a second one (feature 23 prompt 2). */
+export function armAutoMatch(ctx: LobbyContext, joinCode: string): boolean {
   const state = autoMatchTimers.get(joinCode);
   if (state) {
     state.teacherCount += 1;
-    return;
+    return false;
   }
   const timer = setInterval(
     () => autoMatchTick(ctx, joinCode),
@@ -63,16 +65,27 @@ export function armAutoMatch(ctx: LobbyContext, joinCode: string): void {
   );
   timer.unref();
   autoMatchTimers.set(joinCode, { timer, teacherCount: 1, nextAt: 0 });
+  return true;
 }
 
-/** The last teacher disconnecting stops the timer (reconnect re-arms). */
-export function releaseAutoMatch(joinCode: string): void {
+/** The last teacher disconnecting stops the timer (reconnect re-arms).
+ *  Returns true on that 1→0 transition. */
+export function releaseAutoMatch(joinCode: string): boolean {
   const state = autoMatchTimers.get(joinCode);
-  if (!state) return;
+  if (!state) return false;
   state.teacherCount -= 1;
-  if (state.teacherCount > 0) return;
+  if (state.teacherCount > 0) return false;
   clearInterval(state.timer);
   autoMatchTimers.delete(joinCode);
+  return true;
+}
+
+/** Whether any teacher device is connected to this activity — the same
+ *  refcount the timer arms on, which is the point: "a teacher is connected"
+ *  and "auto-match is running" are one fact, so a student's lobby can't
+ *  disagree with the matchmaker. Read by lobby:welcome. */
+export function hasConnectedTeacher(joinCode: string): boolean {
+  return autoMatchTimers.has(joinCode);
 }
 
 /** Activity removal: stop the interval outright, whatever the refcount —

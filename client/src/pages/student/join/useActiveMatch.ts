@@ -175,6 +175,7 @@ export function useActiveMatch({
   const {
     presence,
     paused,
+    teacherPresent,
     retrying,
     retry,
     returnToLobby,
@@ -383,6 +384,7 @@ export function useActiveMatch({
     backToLobby,
     presence,
     paused,
+    teacherPresent,
     retrying,
     retry,
     returnToLobby,

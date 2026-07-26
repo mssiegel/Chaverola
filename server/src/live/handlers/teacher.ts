@@ -8,6 +8,7 @@ import {
 import { sendTranscriptEmail } from "../../email/sendTranscript";
 import { getByHostKey, removeActivity } from "../../store/activityStore";
 import { armAutoMatch, clearAutoMatch, releaseAutoMatch } from "../autoMatch";
+import { onTeacherConnected, onTeacherDisconnected } from "../teacherPresence";
 import { armTranscriptFallback } from "../transcriptFallback";
 import { room } from "../lobbyContext";
 import type {
@@ -65,8 +66,10 @@ export function registerTeacherHandlers(
   if (!record) return;
   log.info({ joinCode: data.joinCode }, "teacher connected");
   // Auto-match runs only while a teacher is connected (founder call);
-  // the matching disconnect handler below releases this.
-  armAutoMatch(ctx, data.joinCode);
+  // the matching disconnect handler below releases this. The same 0→1 is
+  // what the waiting students' lobbies key off — one refcount, so the
+  // screens and the matchmaker can't disagree.
+  onTeacherConnected(ctx, data.joinCode, armAutoMatch(ctx, data.joinCode));
   const now = Date.now();
   socket.emit("queue:snapshot", queuePayload(record, now));
   socket.emit("chats:snapshot", chatsPayload(record, now));
@@ -432,7 +435,9 @@ export function registerTeacherHandlers(
 
   socket.on("disconnect", (reason) => {
     clearInterval(keepAlive);
-    releaseAutoMatch(data.joinCode);
+    // Debounced inside: a refresh drops the last socket and reconnects
+    // seconds later, and the lobbies should never have flinched.
+    onTeacherDisconnected(ctx, data.joinCode, releaseAutoMatch(data.joinCode));
     // Arm the best-effort transcript fallback unconditionally: re-arm replaces,
     // so a second host tab or a reconnect just resets the 10-minute clock, and
     // whether a teacher is actually still around is settled when the timer

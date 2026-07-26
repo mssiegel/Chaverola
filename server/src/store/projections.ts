@@ -141,19 +141,25 @@ export function toQueueEntry(
 
 /** The student's lobby:welcome payload: the resume pair, plus the
  *  activity-wide pause at connect time (a refresh mid-pause stays frozen —
- *  the client keeps `paused` out of the persisted session). */
+ *  the client keeps `paused` out of the persisted session) and whether a
+ *  teacher device is connected. `teacherPresent` is passed in rather than
+ *  read off the record: it lives in the socket layer's teacher refcount, and
+ *  this module stays pure. */
 export function toLobbyWelcome(
   seat: Seat,
-  activity: StoredActivity
+  activity: StoredActivity,
+  teacherPresent: boolean
 ): {
   studentId: string;
   token: string;
   paused: boolean;
+  teacherPresent: boolean;
 } {
   return {
     studentId: seat.studentId,
     token: seat.token,
     paused: activity.pausedAt !== null,
+    teacherPresent,
   };
 }
 

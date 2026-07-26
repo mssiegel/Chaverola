@@ -151,6 +151,7 @@ export function JoinActivityPage() {
     backToLobby,
     presence,
     paused: livePaused,
+    teacherPresent,
     retrying,
     retry,
     returnToLobby,
@@ -410,6 +411,10 @@ export function JoinActivityPage() {
                 studentName={session.name}
                 isPaused={isRealActivity ? livePaused : classPaused}
                 connection={lobbyConnection}
+                // Real activities only. The demo has no teacher socket, so
+                // it is structurally always "present" — the demo's job is
+                // the happy path, and it gets no steering event for this.
+                teacherAway={isRealActivity && !teacherPresent}
                 onLeaveActivity={leaveActivity}
               />
             </div>

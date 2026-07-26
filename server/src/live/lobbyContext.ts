@@ -109,6 +109,7 @@ export interface LobbyContext {
   ): void;
   sendChatStarted(record: StoredActivity, chat: StoredChat): void;
   sendActivityPaused(record: StoredActivity, paused: boolean): void;
+  sendTeacherPresence(record: StoredActivity, present: boolean): void;
   sendActivityDetails(record: StoredActivity): void;
   settleMembershipChange(
     record: StoredActivity,
@@ -274,6 +275,21 @@ export function createLobbyContext(
     }
   }
 
+  /** A teacher device connected, or the last one left. Same reach as the
+   *  pause flip — every connected seat, chat members included — and only the
+   *  lobby renders it: a chat doesn't need a teacher watching, but nothing
+   *  pairs anyone while this is false. The debounce that keeps a teacher
+   *  refresh from flashing this lives in teacherPresence.ts; by the time it
+   *  calls here, the flip is one the screens should show. */
+  function sendTeacherPresence(record: StoredActivity, present: boolean): void {
+    for (const seat of record.seats.byId.values()) {
+      if (!seat.connected) continue;
+      io.sockets.sockets
+        .get(seat.currentSocketId)
+        ?.emit("activity:teacher-presence", { present });
+    }
+  }
+
   /** The student-visible details changed (the roster, host name, or
    *  instructions) — every connected seat hears it, exactly like the pause
    *  flip: chat members, lobby waiters, and wrappingUp seats alike, so a
@@ -335,6 +351,7 @@ export function createLobbyContext(
     sendPeerConnection,
     sendChatStarted,
     sendActivityPaused,
+    sendTeacherPresence,
     sendActivityDetails,
     settleMembershipChange,
     armSeatTimers,

@@ -4,6 +4,7 @@ import {
   toChatStarted,
   toLobbyWelcome,
 } from "../../store/projections";
+import { hasConnectedTeacher } from "../autoMatch";
 import type {
   LobbyContext,
   LobbySocket,
@@ -51,7 +52,12 @@ export function registerStudentSession(
     { joinCode: data.joinCode, studentId: data.studentId },
     "student connected"
   );
-  socket.emit("lobby:welcome", toLobbyWelcome(seat, record));
+  // A student joining while the teacher's laptop is shut learns it here,
+  // not on the next flip that may never come.
+  socket.emit(
+    "lobby:welcome",
+    toLobbyWelcome(seat, record, hasConnectedTeacher(data.joinCode))
+  );
   // Resume-into-chat: refresh, wifi recovery, and duplicate-tab takeover
   // all land here — an active chat member gets their room back, a
   // wrappingUp seat gets its ended screen back.

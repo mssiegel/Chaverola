@@ -7,6 +7,7 @@ import type { Config } from "../config";
 import type { Mailer } from "../email/mailer";
 import { onActivityRemoved } from "../store/activityStore";
 import { clearAutoMatch } from "./autoMatch";
+import { cancelTeacherPresence } from "./teacherPresence";
 import { cancelTranscriptFallback } from "./transcriptFallback";
 import { createAuthMiddleware } from "./auth";
 import { registerStudentSession } from "./handlers/studentSession";
@@ -84,6 +85,9 @@ export function attachLobby(
     // Covers the explicit End path (End removes the record) and sweep/TTL, so a
     // pending fallback can never fire against an activity that's already gone.
     cancelTranscriptFallback(record.joinCode);
+    // Same reasoning for the away broadcast: "your teacher's away" is not the
+    // news for a class that just ended.
+    cancelTeacherPresence(record.joinCode);
     for (const socket of io.sockets.sockets.values()) {
       if (socket.data.joinCode !== record.joinCode) continue;
       if (socket.data.role === "student") socket.emit("activity:ended");

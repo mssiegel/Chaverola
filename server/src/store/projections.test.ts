@@ -153,12 +153,10 @@ describe("toQueueEntry (teacher queue row)", () => {
 });
 
 describe("toLobbyWelcome (student resume pair + pause state)", () => {
-  it("exposes exactly studentId, token, and paused", () => {
-    expect(Object.keys(toLobbyWelcome(fullSeat, fullRecord)).sort()).toEqual([
-      "paused",
-      "studentId",
-      "token",
-    ]);
+  it("exposes exactly studentId, token, paused, and teacherPresent", () => {
+    expect(
+      Object.keys(toLobbyWelcome(fullSeat, fullRecord, true)).sort()
+    ).toEqual(["paused", "studentId", "teacherPresent", "token"]);
   });
 });
 

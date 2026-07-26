@@ -5,6 +5,66 @@ area. Entries are newest-first; add new ones at the top, and add a matching line
 to the index in the same change. Replaced decisions move to Superseded at the
 bottom of this file.
 
+### The lobby says so when no teacher device is connected
+
+_2026-07-26_
+
+**Decision:** While no teacher socket is connected to an activity, waiting
+students see an honest variant of the lobby instead of dots: the pill reads
+"Waiting for your teacher" in the waiting pill's own grape, **without** the
+mint dots, and the body line reads "We can't reach your teacher's screen
+right now, so nobody's getting matched. When they're back, your chat opens
+right here." The leave door stays available. A `teacherPresent` boolean rides
+`lobby:welcome` for the connect-time answer, and
+`activity:teacher-presence { present }` carries the flips to every connected
+seat.
+
+Precedence in the lobby is reconnecting > paused > teacher-away > waiting.
+The screen's own connection outranks the other two because while this socket
+is down, "paused" and "your teacher's away" are equally claims it can't back
+up — it lost the line that would say otherwise.
+
+**Why:** Auto-match runs only while a teacher socket is connected, and manual
+pairing obviously needs the teacher too. So when the laptop shuts, every
+student's lobby kept chirping "Waiting for your match" for a matchmaker that
+was not running — the screen was lying, politely, for as long as the teacher
+was away. Amber was rejected for the pill: it reads as a warning about
+something the student can't fix, and this is not their problem to solve. The
+dots had to go, because bouncing dots are the promise that something is
+happening.
+
+**The invariant is untouched:** "auto-match runs only while a teacher socket
+is connected — a closed laptop holding pairing is the product, not a bug"
+(AGENTS.md, founder call) fully stands. This slice changes what students are
+_told_ about it, and changes nothing about matching.
+
+**One refcount, not two:** the fact comes off the same teacher count that
+arms and releases the auto-match timer (`armAutoMatch` / `releaseAutoMatch`
+now return their 0↔1 transitions). A second count is how the lobby and the
+matchmaker would end up disagreeing about the same laptop.
+
+**The away edge is debounced, the return is not.** The commonest way an
+activity loses its last teacher socket is the teacher pressing refresh, so
+the away broadcast waits out the same window the "lost connection" surfaces
+already gate on (`LOBBY_DISCONNECT_BROADCAST_DELAY_MS`, 4s, scaled in dev). A
+refresh inside that window is silent on both edges: the pending away is
+cancelled, and the return says nothing, because nobody was told anything
+changed. Coming back after a real absence lands immediately.
+
+**Chats don't render it.** The event reaches every connected seat, like the
+pause flip, but only the lobby shows it: a chat runs fine without a teacher
+watching.
+
+**Demo parity:** the demo lobby has no teacher socket, so it is structurally
+always present and never shows this. No steering control was added for it on
+purpose — the demo's job is the happy path.
+
+_Implemented in [teacherPresence.ts](../../server/src/live/teacherPresence.ts)
+over the refcount in [autoMatch.ts](../../server/src/live/autoMatch.ts),
+projected by `toLobbyWelcome`, rendered by
+[WaitingLobby](../../client/src/components/Student/WaitingLobby.tsx) off
+[useLobbyPresence](../../client/src/pages/student/useLobbyPresence.ts)._
+
 ### The lobby has a leave door and acknowledges a long wait
 
 _2026-07-26_

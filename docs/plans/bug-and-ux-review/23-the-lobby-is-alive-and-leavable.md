@@ -1,6 +1,6 @@
 # 23 — The lobby is alive and leavable
 
-State: **In progress** — prompt 1 landed, prompt 2 open
+State: **Complete**
 
 **The problem.** The waiting lobby is the product's longest dead moment, and
 it has two honesty gaps and a missing door:
@@ -44,7 +44,7 @@ it has two honesty gaps and a missing door:
 (follow [docs/adding-a-wire-event.md](../../adding-a-wire-event.md)).
 
 - [x] Prompt 1 — A door and a pulse
-- [ ] Prompt 2 — The lobby knows when the teacher's away
+- [x] Prompt 2 — The lobby knows when the teacher's away
 
 ---
 
