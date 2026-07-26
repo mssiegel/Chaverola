@@ -107,6 +107,7 @@ git: `git log -- DECISIONS.md`.
   - [Host the Activity docks to the bottom edge at every breakpoint](docs/decisions/teacher-setup.md#host-the-activity-docks-to-the-bottom-edge-at-every-breakpoint)
   - [Setup sections each carry one brand accent; settings stays the quiet one](docs/decisions/teacher-setup.md#setup-sections-each-carry-one-brand-accent-settings-stays-the-quiet-one)
 - [Teacher live activity page](docs/decisions/teacher-live.md)
+  - [The homepage's "full transcript" claim stands: the 200-line cap is per chat](docs/decisions/teacher-live.md#the-homepages-full-transcript-claim-stands-the-200-line-cap-is-per-chat)
   - [A start the cast can't seat is refused whole, not trimmed to fit](docs/decisions/teacher-live.md#a-start-the-cast-cant-seat-is-refused-whole-not-trimmed-to-fit)
   - [Removing a character is never blocked, and its row carries no live marker](docs/decisions/teacher-live.md#removing-a-character-is-never-blocked-and-its-row-carries-no-live-marker)
   - [The character roster reaches the lobby and every future chat, and its ids are minted client-side](docs/decisions/teacher-live.md#the-character-roster-reaches-the-lobby-and-every-future-chat-and-its-ids-are-minted-client-side)
@@ -230,6 +231,8 @@ git: `git log -- DECISIONS.md`.
   - _Superseded_
     - [Teachers set up at class start, and a warm-up ping hides the cold start](docs/decisions/backend-api.md#teachers-set-up-at-class-start-and-a-warm-up-ping-hides-the-cold-start)
 - [Process & tooling](docs/decisions/process.md)
+  - [The status table is what a teacher gained; fixes get no row](docs/decisions/process.md#the-status-table-is-what-a-teacher-gained-fixes-get-no-row)
+  - [Doc drift is fixed at the source: one home, and pointers follow the code](docs/decisions/process.md#doc-drift-is-fixed-at-the-source-one-home-and-pointers-follow-the-code)
   - [AGENTS.md is a router: a status table, invariants, and a task router, not a narrative](docs/decisions/process.md#agentsmd-is-a-router-a-status-table-invariants-and-a-task-router-not-a-narrative)
   - [DECISIONS.md is an index; entries live in docs/decisions/ per area](docs/decisions/process.md#decisionsmd-is-an-index-entries-live-in-docsdecisions-per-area)
   - [The per-feature prod pass trims to cold-wake, a smoke, and one network leg](docs/decisions/process.md#the-per-feature-prod-pass-trims-to-cold-wake-a-smoke-and-one-network-leg)

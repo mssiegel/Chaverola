@@ -1,5 +1,10 @@
 # Feature 20 — The repo docs stop describing a product that no longer exists
 
+> **✅ COMPLETED 2026-07-26.** Docs only, no code path changed. See
+> **As built** at the bottom for what the sweep actually found — features 11,
+> 17 and 18 all shipped between this plan being written and being run, so
+> several of its citations describe history rather than current state.
+
 [`AGENTS.md:22`](../../AGENTS.md) says: _"Every live feature has shipped: nothing
 on a real activity is simulated anymore."_ It is the first thing any agent reads
 about this codebase, and it is false twice over.
@@ -55,7 +60,7 @@ entry at [`:8-38`](../decisions/teacher-live.md)). Nothing here supersedes it.
 The job is to make the docs say what that decision actually decided, instead of a
 blanket sentence that contradicts it.
 
-- [ ] Prompt — Every claim in the live docs matches the code
+- [x] Prompt — Every claim in the live docs matches the code
 
 ---
 
@@ -151,3 +156,71 @@ commit straight to `main` — and push it **on its own**, not stacked on a code
 commit: a docs-only tip commit touches neither `client/`, `shared/`, nor a root
 manifest, so Vercel's skip check fires and any client code sitting under it never
 rebuilds ([`AGENTS.md:188`](../../AGENTS.md)). Checkbox ticked.
+
+---
+
+## As built (2026-07-26)
+
+**The plan's own premise had moved on.** Features 11, 17 and 18 all shipped
+between this doc being written and being run, so the reproduce in the opening
+paragraph no longer reproduces: `withCurrentCharacters` is deleted, and
+`AGENTS.md`'s "nothing on a real activity is simulated" had become **true**
+rather than false. Feature 11 is complete (all four prompts, 2026-07-23), not
+"prompt 1 of 4 landed". The line numbers in items 1–5 had all moved. What
+remained was real drift in other places, which is what got fixed.
+
+**Founder calls this session (2026-07-26)**, all four recorded in
+`docs/decisions/`:
+
+- **The one home is `AGENTS.md`'s Status block.** The duplicate claim was
+  deleted from `architecture.md`'s realtime section, and the Status block's
+  sentence now names what actually syncs and points at the frozen-cast
+  decision instead of restating it.
+- **Fixes get no status row.** Feature 11 got a row (it gave a teacher
+  something new); 12–16 and 19–20 get none, and the rule is stated above the
+  table so it isn't re-asked at feature 21.
+- **All the moved pointers, not just the misleading ones.** 16 of the 20
+  `live/lobby.ts` pointers in `docs/decisions/` were repointed at
+  `handlers/teacher.ts`, `handlers/studentSession.ts`,
+  `handlers/studentChat.ts`, `lobbyContext.ts` and `autoMatch.ts`. The other 4
+  were verified **correct** and left alone — `applyTimeScale` / `attachLobby`
+  and the `onActivityRemoved` hook really do live in `lobby.ts`.
+- **The homepage copy stands.** Item 6's inherited copy item (feature 11
+  prompt 2 handed "the stale full-transcript claim" here) was checked against
+  the code and the premise was wrong: `CHAT_TRANSCRIPT_MAX_LINES` caps each
+  chat at 200 messages, not the activity, so every chat is in the email and
+  only a single 200+ message chat loses anything — and the email says so per
+  chat. No user-facing string changed. Recorded so it isn't re-flagged.
+
+**Item 7 — what the shipped prompts missed.** Five of the six sites were
+correctly cleaned by 17/18 (`HostActivity/index.tsx`, `HostActivityPage.tsx`,
+`projections.ts`, `tools/verify/README.md`, and `api.md`'s roster-sync bullet).
+One was missed: [`api.md`](../api.md)'s `ChatParticipant.character` note still
+justified the field with "character edits stay local to the teacher's page" —
+the opposite of why it's frozen now. Rewritten.
+
+**Found beyond the plan's list:**
+
+- [`README.md`](../../README.md) still called the name reveal "an honest
+  placeholder", four features after it shipped. The scope note now covers the
+  reveal, the panel's full sync, and End activity + the transcript email.
+- [`backend-api.md`](../decisions/backend-api.md)'s "Starting a chat clamps to
+  the server's roster" entry asserted behavior feature 18 reversed, with no
+  supersession note — its "Why" also rests on "character edits are local-only".
+  Given a roster-half supersession note; the 4-seat clamp and below-2 no-op it
+  also records still stand.
+- [`teacher-live.md`](../decisions/teacher-live.md)'s feature-12 entry carried
+  an open instruction ("Whoever finishes 18 widens the copy to _that_") that
+  had in fact been carried out. Closed with a one-line note.
+- **Link and anchor audit** (mechanical, over every live prose doc + all of
+  `docs/decisions/`): every relative link resolves and every `#anchor` matches
+  a real heading. The only two misses are the deliberate template placeholders
+  in [`DECISIONS.md`](../../DECISIONS.md)'s how-to block.
+- [`docs/pending-manual-tests.md`](../pending-manual-tests.md) is **not**
+  empty, contrary to this doc's parenthetical — it holds the feature-18 and
+  feature-14 handset asks. `AGENTS.md`'s description of it was already
+  accurate, so nothing changed.
+
+**Checked and found clean:** `Shared_Project_Context.md`, `docs/operations.md`,
+`docs/adding-a-wire-event.md` (already reflects the `handlers/` split),
+`tools/verify/README.md`, and the remaining `docs/decisions/` area files.

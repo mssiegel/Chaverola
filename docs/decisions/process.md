@@ -5,6 +5,59 @@ area. Entries are newest-first; add new ones at the top, and add a matching line
 to the index in the same change. Replaced decisions move to Superseded at the
 bottom of this file.
 
+### The status table is what a teacher gained; fixes get no row
+
+_2026-07-26_
+
+**Decision:** `AGENTS.md`'s status table lists features that gave a teacher
+something new. A feature that **fixes** one already in the table gets no row —
+features 12–16 and 19–20 are all fixes and stay out of it, with their plan
+docs in `docs/plans/` as the record. The rule is stated above the table so it
+doesn't get re-litigated every few features.
+
+**Why:** Founder call, 2026-07-26, asked while adding the missing feature-11
+row. The alternative was a row per feature with "Fixed" in the State column,
+and it fails on its own terms: "12 · Panel truth — **Fixed**" sits next to
+"1 · Create & join — **Complete**" claiming the same kind of thing about work
+the row above already covers, and the table stops being scannable as
+"what can a teacher do" exactly when it gets long enough to need scanning.
+The cost is accepted: a fix is invisible in the table, and you find it by
+reading its plan doc.
+
+### Doc drift is fixed at the source: one home, and pointers follow the code
+
+_2026-07-26_
+
+**Decision:** Three rules for prose docs, decided together while cleaning up
+feature 20's backlog:
+
+- **A fact that has drifted into two docs gets deleted from one, never synced
+  in both.** "Nothing on a real activity is simulated" lived in both
+  `AGENTS.md`'s Status block and `architecture.md`'s realtime section; the
+  Status block keeps it and the architecture copy is gone.
+- **Status-shaped claims live in `AGENTS.md`, mechanism lives in
+  `architecture.md`.** The Status block is read first and already changes
+  every feature, so a sentence that goes stale every feature belongs there.
+  `architecture.md` explains how a thing works and shouldn't carry a
+  scoreboard.
+- **When code moves, every `_Implemented in …_` pointer moves with it — all of
+  them, in one pass.** The speedup refactor split `live/lobby.ts` into
+  `handlers/`, `lobbyContext.ts` and `autoMatch.ts` and left 16 pointers aimed
+  at the old file.
+
+**Why:** Founder call, 2026-07-26. Fixing only the pointers a reader would
+follow _today_ was rejected: the value of a pointer is that you can trust it
+without checking, and a half-fixed set is worth about as much as a broken one
+— the next agent still opens the file to find out. The one-home rule already
+existed ([AGENTS.md's "Every fact has ONE home"](#agentsmd-is-a-router-a-status-table-invariants-and-a-task-router-not-a-narrative));
+what's new is the tie-breaker for which home wins, which is what made the
+duplicate survive two features.
+
+_Applied in [AGENTS.md](../../AGENTS.md) (the Status block),
+[architecture.md](../architecture.md) (claim deleted), and the pointer fixes
+across [chat-behavior.md](chat-behavior.md) and [teacher-live.md](teacher-live.md);
+plan in [docs/plans/feature-20](../plans/feature-20-docs-and-copy-drift-cleanup.md)._
+
 ### AGENTS.md is a router: a status table, invariants, and a task router, not a narrative
 
 _2026-07-22_

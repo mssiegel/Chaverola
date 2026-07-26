@@ -424,9 +424,11 @@ while the class is paused it's computed against the pause anchor instead
 (frozen), the client's local tick stands down, and resume shifts the stored
 timestamps so the clock continues without a jump.
 
-`ChatParticipant.character` is the **server's** roster copy on purpose:
-character edits stay local to the teacher's page, so a locally renamed
-roster would otherwise leave a card unable to resolve its own labels.
+`ChatParticipant.character` is the member's **frozen** character, captured at
+chat start and never re-resolved against `activity.characters` — the same
+snapshot the student's `chat:started.cast` carries. A roster edit relabels
+nothing already on a card, which is what keeps the teacher's view and the two
+students' views of a running chat saying the same thing (feature 18).
 
 ### Client → server
 

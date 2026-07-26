@@ -194,6 +194,15 @@ roster size)`; whoever doesn't fit visibly stays in the queue. Below 2
 eligible members the command does nothing and the next snapshot corrects the
 rail.
 
+_Roster half superseded 2026-07-26 by
+[A start the cast can't seat is refused whole, not trimmed to fit](teacher-live.md#a-start-the-cast-cant-seat-is-refused-whole-not-trimmed-to-fit):
+**a start the roster can't seat is now refused outright**, with a notice
+naming the cast size the server holds. The premise below — that character
+edits are local-only — stopped holding when feature 18 shipped roster sync;
+what remains is a second host device that never hears the first one's edit.
+The rest of this entry stands: the eligibility filter, the hard 4-seat slice
+(a request over four is still trimmed to four), and the below-2 no-op._
+
 **Why:** Character edits are local-only, so the teacher's roster can briefly
 disagree with the server's — and a selected student can drop in the instant
 before the tap lands. Rejecting the whole command on either mismatch makes

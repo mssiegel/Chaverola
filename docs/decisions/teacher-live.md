@@ -5,6 +5,32 @@ area. Entries are newest-first; add new ones at the top, and add a matching line
 to the index in the same change. Replaced decisions move to Superseded at the
 bottom of this file.
 
+### The homepage's "full transcript" claim stands: the 200-line cap is per chat
+
+_2026-07-26_
+
+**Decision:** The homepage keeps promising teachers "the full transcript of
+every chat"
+([TeacherViewSection](../../client/src/components/home/TeacherViewSection.tsx)),
+and the setup form keeps "We'll email you every chat from the activity once it
+wraps up". Neither is softened.
+
+**Why:** Founder call, 2026-07-26. Feature 11 flagged this as copy drift
+against `CHAT_TRANSCRIPT_MAX_LINES` and handed it to feature 20; checking the
+code first showed the premise was wrong. The cap is **200 messages per chat**,
+not 200 across the activity — `appendLine` splices each chat's own `lines`
+([matching.ts](../../server/src/live/matching.ts)) — so every chat in the class
+is in the email however many there are, and only a single chat that runs past
+200 messages loses its oldest lines. At a classroom round's length that is
+close to unreachable, and the email marks it honestly when it happens
+("Showing the most recent 200 messages", per chat, in
+[transcript.ts](../../server/src/email/transcript.ts)). Copy that hedges
+against an unreachable edge case costs every reader something to protect
+nobody.
+
+Recorded because this was flagged as drift once already and would otherwise be
+re-flagged by the next agent who greps the constant without reading the splice.
+
 ### A start the cast can't seat is refused whole, not trimmed to fit
 
 _2026-07-26_
@@ -499,6 +525,11 @@ future chats, and a chat already in progress deliberately keeps its cast. Whoeve
 finishes 18 widens the copy to _that_, never back to "what students see
 mid-chat".
 
+_Done 2026-07-26: 17 and 18 shipped and the paragraph was widened to exactly
+that scope — every edit reaches the server on the pause, lobbies follow, and
+a running chat keeps its cast. The instruction above is closed; the "never
+widen back to mid-chat" half is the part that still binds._
+
 _Implemented in
 [LiveSettingsPanel](../../client/src/components/Teacher/HostActivity/LiveSettingsPanel.tsx)
 (the paragraph and the collapsed hint) and the `paused` prop on
@@ -728,8 +759,10 @@ needed no changes at all: the whole paused UI shipped back in the demo
 era and was waiting on real state.
 
 _Implemented in [matching.ts](../../server/src/live/matching.ts)
-(`pauseChats`/`resumeChats`), [lobby.ts](../../server/src/live/lobby.ts) (the
-handlers, guards, and `sendActivityPaused`),
+(`pauseChats`/`resumeChats`),
+[handlers/teacher.ts](../../server/src/live/handlers/teacher.ts) (the two
+handlers and their guards) with `sendActivityPaused` in
+[lobbyContext.ts](../../server/src/live/lobbyContext.ts),
 [projections.ts](../../server/src/store/projections.ts) (the clockNow split),
 [useHostActivityLive](../../client/src/components/Teacher/HostActivity/useHostActivityLive.ts)
 (the emitters, `paused`, and the held tick), and
@@ -780,7 +813,8 @@ sub-second, and the just-ended students are wrappingUp-ineligible either
 way.
 
 _Implemented in [matching.ts](../../server/src/live/matching.ts) (`endChat`),
-[lobby.ts](../../server/src/live/lobby.ts) (the two handlers),
+[handlers/teacher.ts](../../server/src/live/handlers/teacher.ts) (the
+`chat:end` and `chats:end-all` handlers),
 [useHostActivityLive](../../client/src/components/Teacher/HostActivity/useHostActivityLive.ts)
 (the emitters and `pausingEnabled: false`), and
 [ChatsInProgressSection](../../client/src/components/Teacher/HostActivity/ChatsInProgressSection.tsx)
@@ -846,8 +880,9 @@ optimization, never the only path. The same shape as the student side's
 payload for truth. Don't extend deltas to membership, status, or clocks;
 those stay snapshot-only.
 
-_Implemented in [lobby.ts](../../server/src/live/lobby.ts) (the `chat:send`
-handler's room emit) and
+_Implemented in
+[handlers/studentChat.ts](../../server/src/live/handlers/studentChat.ts) (the
+`chat:send` handler's room emit) and
 [useHostActivityLive.ts](../../client/src/components/Teacher/HostActivity/useHostActivityLive.ts)
 (the id-deduped, cap-mirroring merge)._
 
@@ -960,9 +995,10 @@ gives students the banner and live countdown (`ChatPeer` itself stays
 pinned to `characterId`; the connection state rides its own event). See
 [Students see a partner's drop and return, on the teacher's own 4s gate](chat-behavior.md#students-see-a-partners-drop-and-return-on-the-teachers-own-4s-gate).
 
-_Implemented in [lobby.ts](../../server/src/live/lobby.ts) (`armSeatTimers`'s grace
-expiry now settles chat membership before reaping; the disconnect handler
-arms the grace unconditionally) and
+_Implemented in [lobbyContext.ts](../../server/src/live/lobbyContext.ts)
+(`armSeatTimers`'s grace expiry now settles chat membership before reaping),
+[handlers/studentSession.ts](../../server/src/live/handlers/studentSession.ts)
+(the disconnect handler arms the grace unconditionally), and
 [useLobbyPresence](../../client/src/pages/student/useLobbyPresence.ts)
 (`LEAVE_RETRY_MS`). Reproduction and regression test:
 `f3p5-leave-offline-repro.mjs`, described in
@@ -1045,7 +1081,9 @@ and
 _Implemented across the feature (shipped 2026-07-20, plan in
 [docs/plans/feature-3-real-matching.md](../../docs/plans/feature-3-real-matching.md)):
 the pairing rules in [matching.ts](../../server/src/live/matching.ts), the
-socket wiring in [lobby.ts](../../server/src/live/lobby.ts), the student's room
+socket wiring in
+[handlers/teacher.ts](../../server/src/live/handlers/teacher.ts) and
+[lobbyContext.ts](../../server/src/live/lobbyContext.ts), the student's room
 in [LiveChatStage](../../client/src/components/Student/LiveChatStage.tsx), and
 the teacher's dashboard in
 [useHostActivityLive](../../client/src/components/Teacher/HostActivity/useHostActivityLive.ts)
@@ -1073,9 +1111,9 @@ fully unattended pairing puts kids in rooms no teacher is monitoring, and a
 placeholder switch makes the rail's footer copy a lie now that the page can
 keep the promise.
 
-_Implemented in [lobby.ts](../../server/src/live/lobby.ts) — the `joinCode →
-{ timer, teacherCount, nextAt }` map, armed on the 0→1st teacher socket
-and cleared on the last disconnect — with the pairing itself in
+_Implemented in [autoMatch.ts](../../server/src/live/autoMatch.ts) — the
+`joinCode → { timer, teacherCount, nextAt }` map, armed on the 0→1st teacher
+socket and cleared on the last disconnect — with the pairing itself in
 [matching.ts](../../server/src/live/matching.ts) (`findAutoMatchPair`).
 Verified 2026-07-20: with no teacher connected, two students past the
 threshold sat unpaired; the teacher's arrival matched them within a
@@ -1106,7 +1144,10 @@ timed drop would kick students out of chats that lose nothing by waiting,
 and a peer-countdown banner would alarm the remaining student over nothing.
 Both activate when messaging ships.
 
-_Implemented in [lobby.ts](../../server/src/live/lobby.ts) and
+_Implemented in [lobbyContext.ts](../../server/src/live/lobbyContext.ts)
+(`armSeatTimers`' 4s broadcast),
+[handlers/studentSession.ts](../../server/src/live/handlers/studentSession.ts)
+(the disconnect), and
 [ChatCardHeader](../../client/src/components/Teacher/ChatCard/ChatCardHeader.tsx)
 (the dimmed row and its "lost connection" pill, reusing the queue-row
 styling)._
@@ -1135,6 +1176,12 @@ host-name edits remain local-only exactly as recorded in
 _Update (2026-07-22): the `revealNames` half no longer holds — feature 10
 reveals names at chat-end when the setting is on, see
 [The live name reveal fires at chat-end, per the teacher's setting](chat-behavior.md#the-live-name-reveal-fires-at-chat-end-per-the-teachers-setting)._
+
+_Update (2026-07-22): the `autoEndChats` half no longer holds either, in the
+other direction — the setting was deleted outright, along with
+`autoEndMinutes`, the `"timer"` end reason, and the wire's `elapsedSeconds`.
+Nothing stores it and nothing reads it. See
+[Chats show no timer or clock — the teacher ends them by hand](#chats-show-no-timer-or-clock--the-teacher-ends-them-by-hand)._
 
 _Update (2026-07-23): the teacher's email joined the synced side — see
 [The teacher's email syncs live; the rest of the roster still doesn't](#the-teachers-email-syncs-live-the-rest-of-the-roster-still-doesnt).
@@ -1171,7 +1218,7 @@ those propagate to students' lobbies — a bigger feature than a settings
 echo. Founder call (feature-3 planning).
 
 _Implemented in the `settings:update` handler in
-[lobby.ts](../../server/src/live/lobby.ts) (zod-validated against the same
+[handlers/teacher.ts](../../server/src/live/handlers/teacher.ts) (zod-validated against the same
 schema `POST /activities` uses, echoing `settings:changed` to the room
 minus the sender) and
 [HostActivityPage](../../client/src/pages/teacher/HostActivityPage.tsx), whose

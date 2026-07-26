@@ -393,7 +393,7 @@ How the layer is put together (`server/src/live/`):
   real name and the student's ended screen names who they were really with
   — the **one** sanctioned exception to the characterIds-only student wire,
   gated on the setting at end time and pinned by `toChatEnded`'s allowlist
-  test. Nothing on real activities is simulated anymore.
+  test.
 - **The teacher socket is the TTL keep-alive:** while one is connected,
   a ~5-minute `.unref()`ed interval calls `getByHostKey`, so a live
   class can't expire at the 12h TTL mid-lesson. Student sockets never

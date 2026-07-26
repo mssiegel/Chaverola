@@ -23,7 +23,13 @@ automatically via Vercel).
 > real name, on the host page's chat cards, **can end any chat (or
 > all of them) whenever the round is over, and can pause the whole
 > class** — composers lock, clocks freeze, matchmaking waits, and one
-> tap resumes. The name reveal is an honest placeholder for now. See
+> tap resumes. **The name reveal is real:** turn it on and each student's
+> ended screen names who they were actually talking to. Every field on the
+> live settings panel reaches the server too — settings, the host name, the
+> student instructions and the character roster all follow the teacher's
+> edit to students' lobbies. And **End activity wraps the class up**: every
+> chat ends, the join code dies, and the teacher gets the whole class's
+> transcript emailed to them. See
 > [Shared_Project_Context.md](Shared_Project_Context.md)
 > for the full brief and [docs/plans/](docs/plans/) for the current feature plan.
 

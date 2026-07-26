@@ -257,7 +257,8 @@ re-queued and could be auto-matched into a new chat while still reading
 about losing the last one.
 
 _Implemented in [seats.ts](../../server/src/live/seats.ts) (the reap memory),
-[lobby.ts](../../server/src/live/lobby.ts) (the return replay), and
+[handlers/studentSession.ts](../../server/src/live/handlers/studentSession.ts)
+(the return replay), and
 [JoinActivityPage](../../client/src/pages/student/JoinActivityPage.tsx) (the
 burst-safe ended handler)._
 
@@ -303,8 +304,10 @@ banner would flash "lost connection" at children on every partner refresh.
 The spinner cut and the pause-ticking rule are both the same principle: the
 banner shows what is actually true on the wire, not theater.
 
-_Implemented in [lobby.ts](../../server/src/live/lobby.ts) (`sendPeerConnection`,
-fanned from the 4s broadcast timer and the resume handler),
+_Implemented in [lobbyContext.ts](../../server/src/live/lobbyContext.ts)
+(`sendPeerConnection`, fanned from `armSeatTimers`' 4s broadcast timer) and
+[handlers/studentSession.ts](../../server/src/live/handlers/studentSession.ts)
+(the resume that announces a return),
 [JoinActivityPage](../../client/src/pages/student/JoinActivityPage.tsx) (the
 offline map + 🎉 flash state), and
 [LiveChatStage](../../client/src/components/Student/LiveChatStage.tsx) (the
@@ -356,8 +359,9 @@ socket blipped around the ending still gets the 🔌 screen.
 
 _Implemented in [matching.ts](../../server/src/live/matching.ts)
 (`markInactive`'s reason parameter — the grace-expiry path in
-[lobby.ts](../../server/src/live/lobby.ts) is the only `"peer-timeout"` call
-site), [projections.ts](../../server/src/store/projections.ts) (`toChatEnded`
+[lobbyContext.ts](../../server/src/live/lobbyContext.ts) (`armSeatTimers`) is
+the only `"peer-timeout"` call site),
+[projections.ts](../../server/src/store/projections.ts) (`toChatEnded`
 projects the stored reason), and
 [JoinActivityPage](../../client/src/pages/student/JoinActivityPage.tsx)
 (`liveEndReason` + the `shrinkToPeers` notice heuristic). Ships with
@@ -379,8 +383,9 @@ concurrent chats is noise, and the teacher wire stays snapshots-plus-one-
 delta (message lines) on purpose. Recorded so nobody "completes" the teacher
 side later without a founder call — the omission is the feature.
 
-_Implemented in [lobby.ts](../../server/src/live/lobby.ts)'s `chat:typing` relay,
-which fans out only to the chat's other students (ships with
+_Implemented in
+[handlers/studentChat.ts](../../server/src/live/handlers/studentChat.ts)'s
+`chat:typing` relay, which fans out only to the chat's other students (ships with
 [feature 5](../../docs/plans/feature-5-typing-indicator.md))._
 
 ### Typing is a heartbeat that dies in five seconds, never a stored fact
@@ -405,7 +410,8 @@ If undone (typing stored or snapshotted), a refresh could replay a stale
 "is typing" as fact.
 
 _Implemented in [socket.ts](../../shared/src/socket.ts) (`TYPING_HEARTBEAT_MS`,
-`TYPING_INDICATOR_TTL_MS`), [lobby.ts](../../server/src/live/lobby.ts), and
+`TYPING_INDICATOR_TTL_MS`),
+[handlers/studentChat.ts](../../server/src/live/handlers/studentChat.ts), and
 [JoinActivityPage](../../client/src/pages/student/JoinActivityPage.tsx)'s TTL
 timer (ships with feature 5)._
 
@@ -454,7 +460,9 @@ What would change this: messaging without a teacher present (homework mode,
 async play). That removes the oversight this decision leans on, and the
 question genuinely reopens.
 
-_Implemented in [lobby.ts](../../server/src/live/lobby.ts)'s `chat:send` handler._
+_Implemented in
+[handlers/studentChat.ts](../../server/src/live/handlers/studentChat.ts)'s
+`chat:send` handler._
 
 ### Leaving a live chat means leaving the activity (until messaging ships)
 
@@ -493,7 +501,8 @@ _Implemented in
 pill and the back-guard confirm both route to the leave flow) and
 [JoinActivityPage](../../client/src/pages/student/JoinActivityPage.tsx)
 (back-as-reset → `lobby:leave`); the partner's chat ends server-side in
-[lobby.ts](../../server/src/live/lobby.ts)._
+[handlers/studentSession.ts](../../server/src/live/handlers/studentSession.ts)
+(the leave handlers, through `settleMembershipChange`)._
 
 ### The live ended screen returns to the lobby only on a tap, and shows no reveal
 
@@ -516,7 +525,8 @@ wait for yet.
 
 _Implemented in [seats.ts](../../server/src/live/seats.ts) (the seat's
 `wrappingUp` flag and `returnToQueue`), the `lobby:back` handler in
-[lobby.ts](../../server/src/live/lobby.ts), and
+[handlers/studentSession.ts](../../server/src/live/handlers/studentSession.ts),
+and
 [LiveChatStage](../../client/src/components/Student/LiveChatStage.tsx) (the
 neutral ended screen and its back CTA)._
 
