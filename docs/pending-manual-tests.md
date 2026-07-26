@@ -30,6 +30,48 @@ the next reader has the conversation you had.
 
 ---
 
+## Feature 18 — a roster edit landing on a real student's phone, and a phone as the stale second host
+
+_Asked 2026-07-26; the founder chose to log it rather than run it in the
+session, so the whole feature was driven headless against production instead._
+
+**Steps** (4 minutes, on production chaverola.com, two devices):
+
+1. On a laptop, create a real activity with **three** characters and land on
+   the host page. Join from a phone on **cellular** (not the room's wifi) with
+   the real join code, and leave the phone sitting in the lobby, screen on.
+2. On the laptop, open **Edit activity settings** and rename character 3.
+   Pause typing and wait about two seconds.
+3. **Look, don't touch the phone:** its lobby's character list must show the
+   new name, with no refresh and no flicker of a loading state.
+4. Lock the phone for ten seconds, unlock it, and check the lobby again: still
+   the new name.
+5. Pair the phone's student into a chat. While that chat is live, rename the
+   same character again on the laptop. The phone's chat must **not** relabel:
+   it keeps the name it was dealt.
+6. Now make the phone the second **host** device: open the same
+   `/activity/host/<hostKey>` URL on it. On the laptop, remove a character.
+   The phone's panel keeps showing the old cast, which is correct. On the
+   phone, tick three students and press **Start their chat** — nothing should
+   start, and an amber notice should say the cast only has two characters.
+
+**What it would mean if it fails:** step 3 not updating means
+`activity:details-changed` isn't reaching a real handset's socket, which would
+also mean feature 17's name and instructions sync is broken on phones (the
+roster rides the same event). Step 4 failing but step 3 passing points at the
+lobby's copy being lost across a background/foreground cycle rather than at the
+event. Step 5 relabelling means the frozen cast isn't reaching the phone's
+client, so a student would watch their character get renamed mid-roleplay,
+which is the exact thing feature 18 promises never happens. Step 6 seating two
+students instead of refusing means the all-or-nothing rule regressed and a
+student is silently sitting out a round again.
+
+**Coverage in the meantime:** all six steps passed headless against production
+on 2026-07-26 (`tools/verify/scratch/f18-prod.mjs`, 19/19, plus coldwake 4/4
+and `verify:smoke --prod` 7/7). What headless can't imitate is a phone's radio,
+its background/foreground cycle, and a small viewport rendering the notice on a
+real device rather than an emulated 390px one.
+
 ## Feature 14 — the two-device settings wake, with a real phone as the sleeper
 
 _Asked 2026-07-24; blocked because the founder's laptop was running on the
