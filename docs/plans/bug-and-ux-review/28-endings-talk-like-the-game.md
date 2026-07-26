@@ -1,6 +1,6 @@
 # 28 — Endings talk like the game
 
-State: **Not started**
+State: **Complete**
 
 **The problem.** The product's endings copy is genuinely great — 🎬 "And…
 scene!", "Nicely played! 👏", "Eyes up front! 👀" — but the single
@@ -31,7 +31,7 @@ reading "server restarted" concludes the app broke.
 - The humanizer pass is mandatory here — this prompt is almost entirely
   copy.
 
-- [ ] Prompt — Rewrite the goodbye
+- [x] Prompt — Rewrite the goodbye
 
 ---
 

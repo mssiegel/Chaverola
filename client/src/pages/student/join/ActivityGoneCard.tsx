@@ -8,8 +8,11 @@ import { STUDENT_CARD_CLASS } from "./stageTypes";
 /**
  * The screen for an activity that died under a seated student — a deploy or
  * restart wiped the in-memory store, or the 12h TTL reaped it. Honest about
- * what happened instead of blaming the student's code, and the sign-out is
- * deferred to the CTA (the session is the evidence this screen exists).
+ * what happened instead of blaming the student's code, but in the game's
+ * voice: this is the whole class's goodbye at the bell, not an incident
+ * report, so the copy says "something cut the activity short" and names no
+ * servers. The sign-out is deferred to the CTA (the session is the evidence
+ * this screen exists).
  */
 export function ActivityGoneCard({
   onEnterNewCode,
@@ -29,9 +32,8 @@ export function ActivityGoneCard({
             This activity is over
           </h1>
           <p className="text-muted-foreground">
-            Your class wrapped up, or Chaverola's server restarted and cut the
-            activity short. If class is still going, ask your teacher for a
-            fresh code.
+            Your class wrapped up. Thanks for playing! If class is still going,
+            something cut the activity short. Ask your teacher for a fresh code.
           </p>
         </div>
         <Button

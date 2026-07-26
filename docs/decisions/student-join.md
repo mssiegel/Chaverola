@@ -313,6 +313,18 @@ exist. The seat token is what distinguishes "this code was never real" from
 the session immediately would destroy the very evidence the ended screen
 renders from.
 
+**Amended 2026-07-27:** the honesty stands, the vocabulary doesn't. The card
+used to say "Chaverola's server restarted and cut the activity short" — true,
+but a 13-year-old reads that as the app breaking. It now leads with the
+normal ending and keeps the cut-short case blame-free: "Your class wrapped
+up. Thanks for playing! If class is still going, something cut the activity
+short. Ask your teacher for a fresh code." Same two truths, no infrastructure
+vocabulary. This card is what the whole class reads at the bell, so it speaks
+like the rest of the endings ("And… scene!", "Eyes up front!") rather than
+like an ops dashboard. The unreachable copy is deliberately excepted and
+stays plain (founder, 2026-07-26): a network failure is the one moment plain
+speech beats charm.
+
 _Implemented in
 [JoinActivityPage](../../client/src/pages/student/JoinActivityPage.tsx) (the
 ended stage, both the socket and REST-404-with-token paths) over
