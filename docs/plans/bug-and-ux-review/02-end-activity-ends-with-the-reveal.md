@@ -1,6 +1,6 @@
 # 02 — End activity ends with the reveal
 
-State: **Not started**
+State: **In progress** — prompt 1 landed; prompt 2 owns the decision entry.
 
 **The problem.** "End activity" is the normal end of every real lesson, and it
 gives every student still in a chat the worst ending in the product. The
@@ -64,7 +64,7 @@ lands); Prompt 2 first is a visual no-op until Prompt 1 ships. No wire shape
 changes in either — `chat:ended` and `activity:ended` already exist, so there
 is no deploy race in either direction.
 
-- [ ] Prompt 1 — The server settles every chat before it tears down
+- [x] Prompt 1 — The server settles every chat before it tears down
 - [ ] Prompt 2 — The ended screen outlives the activity
 
 ---

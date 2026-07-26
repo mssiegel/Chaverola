@@ -372,10 +372,18 @@ export function registerTeacherHandlers(
     // students we just freed into fresh chats during the send await.
     clearAutoMatch(data.joinCode);
     // Flip every active chat to ended before the await so the transcript is
-    // frozen for the send. No settleMembershipChange: removal (step below)
-    // boots the students wholesale, and settling here would flash a second
-    // ended screen first.
-    for (const chat of current.chats) endChat(current, chat.id);
+    // frozen for the send — and settle each one exactly like chats:end-all,
+    // so the class gets the real ending (reason "teacher", name reveal when
+    // the setting is on) instead of the chat going quietly dead under them
+    // for the length of the send. endChat only mutates the chat in place, so
+    // iterating current.chats directly is safe. Until doc 02 prompt 2 lands,
+    // the client's gone latch may still replace that ended screen with the
+    // activity-over card once removal fires below.
+    for (const chat of current.chats) {
+      const result = endChat(current, chat.id);
+      if (!result) continue; // already-ended chats in the list
+      settleMembershipChange(current, result);
+    }
     const result = await sendTranscriptEmail(current, mailer, log);
     // To the clicking socket only — the room never hears it. If the teacher
     // already vanished this emit goes nowhere and removal still runs.
