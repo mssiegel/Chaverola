@@ -25,6 +25,8 @@ interface ConversationProps {
   isPaused?: boolean;
   /** Distinct color (CSS var) per character id in this room. */
   characterColors: Map<string, string>;
+  /** Re-send a line whose echo never arrived (the live student chat only). */
+  onRetryMessage?: (messageId: string) => void;
 }
 
 /**
@@ -42,6 +44,7 @@ export function Conversation({
   reconnectSecondsLeft = null,
   isPaused = false,
   characterColors,
+  onRetryMessage,
 }: ConversationProps) {
   const byId = participantsById(participants);
 
@@ -105,6 +108,7 @@ export function Conversation({
         messages={messages}
         characterColors={characterColors}
         selfId={selfId}
+        onRetryMessage={onRetryMessage}
       />
 
       <PeerIsTyping characterName={typingName} isGroup={isGroup} />

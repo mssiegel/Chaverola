@@ -65,7 +65,7 @@ don't reach for it first.
 echo with honest failure (the big win). Prompt 2 alone = pre-empted rate
 limit with friendly copy.
 
-- [ ] Prompt 1 — Local echo with an honest failure state
+- [x] Prompt 1 — Local echo with an honest failure state
 - [ ] Prompt 2 — The rate limit stops being a secret
 
 ---

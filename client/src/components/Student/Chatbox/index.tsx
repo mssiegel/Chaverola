@@ -21,6 +21,9 @@ export interface ChatboxProps {
    *  chat:typing heartbeats. Demo callers pass nothing, so the demo
    *  engines never see it. */
   onTyping?: () => void;
+  /** Re-send one of the student's own lines whose echo never arrived. Live
+   *  rooms only: the demo echoes locally, so nothing there can fail. */
+  onRetryMessage?: (messageId: string) => void;
   onEndChat: () => void;
   onLeaveChat: () => void;
   onBackToLobby: () => void;
@@ -58,6 +61,7 @@ export function Chatbox({
   revealNames,
   onSend,
   onTyping,
+  onRetryMessage,
   onEndChat,
   onLeaveChat,
   onBackToLobby,
@@ -182,6 +186,7 @@ export function Chatbox({
         // The ended screen supersedes the pause banner: isEnded wins.
         isPaused={isPaused && !isEnded}
         characterColors={characterColors}
+        onRetryMessage={onRetryMessage}
       />
 
       {/* Bottom section */}

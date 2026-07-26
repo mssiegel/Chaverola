@@ -36,6 +36,13 @@ export interface ChatMessage {
    * peer got dropped after a disconnect) instead of a spoken message.
    */
   kind?: "notice";
+  /**
+   * Only on the student's own live sends, and only until the server's echo
+   * lands: "pending" is on screen but unconfirmed, "failed" is a send whose
+   * echo never came. Absent everywhere else — the demo echoes locally with
+   * no round trip, and the teacher's cards only ever render server truth.
+   */
+  delivery?: "pending" | "failed";
 }
 
 /**

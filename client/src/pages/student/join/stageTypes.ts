@@ -75,6 +75,12 @@ export const FALLBACK_CHARACTER_NAME = "Mystery guest";
  *  wire timing is never compressed. */
 export const RETURNED_FLASH_MS = 2500;
 
+/** How long a sent message stays "pending" before the feed admits it never
+ *  landed. The server echoes in a round trip, so anything past this is a
+ *  swallowed send: a rate-limit drop, a pause or end race, or a dead socket.
+ *  Real time, never scaled — live wire timing is never compressed. */
+export const PENDING_ECHO_TIMEOUT_MS = 5000;
+
 export const PAGE_TITLES: Record<StudentStage, string> = {
   code: "Join an Activity",
   loading: "Join an Activity",

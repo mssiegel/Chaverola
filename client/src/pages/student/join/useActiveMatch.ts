@@ -2,14 +2,20 @@ import { useRef, useState } from "react";
 
 import { TYPING_INDICATOR_TTL_MS } from "@chaverola/shared";
 
+import { nextId } from "@/lib/random";
 import type { Activity } from "@/types/activity";
 import type { Character } from "@/types/chat";
 import type { StudentSession } from "@/lib/studentSession";
 import type { ActivityChatScenarioKey } from "@/mockData";
 import { useLobbyPresence } from "@/pages/student/useLobbyPresence";
 
-import { RETURNED_FLASH_MS, type ActiveMatch } from "./stageTypes";
 import {
+  PENDING_ECHO_TIMEOUT_MS,
+  RETURNED_FLASH_MS,
+  type ActiveMatch,
+} from "./stageTypes";
+import {
+  appendPendingLine,
   applyChatLine,
   applyChatStarted,
   applyChatUpdate,
@@ -19,6 +25,8 @@ import {
   applyReveal,
   clearReturnedFlash,
   clearTypingPeer,
+  dropPendingLine,
+  failPendingLine,
 } from "./liveMatchState";
 
 /**
@@ -255,6 +263,34 @@ export function useActiveMatch({
     },
   });
 
+  // The send the live chat actually calls: the line goes on screen first,
+  // marked pending, and the server's echo replaces it. Nothing here waits on
+  // the wire, so the message appears at thumb speed even on classroom wifi —
+  // and if the echo never comes, the line says so instead of vanishing.
+  const sendLiveMessage = (text: string) => {
+    const pendingId = nextId("pending");
+    setMatch((prev) => appendPendingLine(prev, pendingId, text));
+    // No cleanup bookkeeping: once the echo resolves the line, this id is
+    // gone from the feed and failPendingLine is a no-op — the same guarded
+    // late-fire contract the typing TTL and 🎉 flash timers use.
+    setTimeout(() => {
+      setMatch((prev) => failPendingLine(prev, pendingId));
+    }, PENDING_ECHO_TIMEOUT_MS);
+    sendChatMessage(text);
+  };
+
+  // "Tap to retry" on a failed line: drop it and send the text again as a
+  // fresh pending message, which lands at the bottom where a new send belongs.
+  const retryLiveMessage = (messageId: string) => {
+    if (match?.kind !== "live") return;
+    const failed = match.messages.find(
+      (m) => m.id === messageId && m.delivery === "failed"
+    );
+    if (!failed) return;
+    setMatch((prev) => dropPendingLine(prev, messageId));
+    sendLiveMessage(failed.text);
+  };
+
   return {
     match,
     chatEnded,
@@ -270,7 +306,8 @@ export function useActiveMatch({
     retry,
     returnToLobby,
     leaveChat,
-    sendChatMessage,
+    sendChatMessage: sendLiveMessage,
+    retryLiveMessage,
     sendTyping,
   };
 }

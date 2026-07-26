@@ -60,6 +60,8 @@ interface LiveChatStageProps {
   activityEnded: boolean;
   /** Sends a real message over the seat's socket (chat:send). */
   onSend: (text: string) => void;
+  /** Re-send a line the server never echoed back. */
+  onRetryMessage?: (messageId: string) => void;
   /** A keystroke happened — the hook throttles it into chat:typing
    *  heartbeats. */
   onTyping: () => void;
@@ -112,6 +114,7 @@ export function LiveChatStage({
   isPaused,
   activityEnded,
   onSend,
+  onRetryMessage,
   onTyping,
   onEndChat,
   onBackToLobby,
@@ -193,6 +196,7 @@ export function LiveChatStage({
         chat={chat}
         revealNames={revealNames}
         onSend={onSend}
+        onRetryMessage={onRetryMessage}
         onTyping={onTyping}
         onEndChat={onEndChat}
         onLeaveChat={onEndChat}

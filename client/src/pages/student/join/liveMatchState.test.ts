@@ -9,6 +9,9 @@ import {
   applyChatLine,
   applyChatStarted,
   applyChatUpdate,
+  appendPendingLine,
+  dropPendingLine,
+  failPendingLine,
   applyPeerDropped,
   applyPeerReturned,
   resolveCharacter,
@@ -441,5 +444,119 @@ describe("applyPeerReturned", () => {
     }) as LiveMatch;
     expect(next.offlinePeers).toEqual({});
     expect(next.returnedFlashId).toBe("brutus");
+  });
+});
+
+describe("pending sends", () => {
+  it("appends the student's own line as pending, from self", () => {
+    const next = appendPendingLine(liveMatch(), "p1", "et tu?") as LiveMatch;
+    expect(next.messages.at(-1)).toEqual({
+      id: "p1",
+      senderId: "antony",
+      text: "et tu?",
+      delivery: "pending",
+    });
+  });
+
+  it("the echo replaces the pending line in place, server id and all", () => {
+    const pending = appendPendingLine(liveMatch(), "p1", "et tu?");
+    const next = applyChatLine(pending, {
+      chatId: "chat-1",
+      line: line("l9", "antony", "et tu?"),
+    }) as LiveMatch;
+    expect(next.messages).toHaveLength(2);
+    expect(next.messages.at(-1)).toEqual({
+      id: "l9",
+      senderId: "antony",
+      text: "et tu?",
+    });
+  });
+
+  it("identical texts resolve oldest-first, so the feed keeps its order", () => {
+    let match = appendPendingLine(liveMatch(), "p1", "wait");
+    match = appendPendingLine(match, "p2", "wait");
+    const next = applyChatLine(match, {
+      chatId: "chat-1",
+      line: line("l9", "antony", "wait"),
+    }) as LiveMatch;
+    expect(next.messages.map((m) => m.id)).toEqual(["l1", "l9", "p2"]);
+  });
+
+  it("a line with nothing pending to match is appended normally", () => {
+    const next = applyChatLine(liveMatch(), {
+      chatId: "chat-1",
+      line: line("l9", "antony", "a line from another tab"),
+    }) as LiveMatch;
+    expect(next.messages).toHaveLength(2);
+    expect(next.messages.at(-1)?.delivery).toBeUndefined();
+  });
+
+  it("the timeout flips only that line, and only while it is pending", () => {
+    const pending = appendPendingLine(liveMatch(), "p1", "et tu?");
+    const failed = failPendingLine(pending, "p1") as LiveMatch;
+    expect(failed.messages.at(-1)?.delivery).toBe("failed");
+    // A resolved line's late timer is a no-op: the id is gone from the feed.
+    const resolved = applyChatLine(pending, {
+      chatId: "chat-1",
+      line: line("l9", "antony", "et tu?"),
+    });
+    expect(failPendingLine(resolved, "p1")).toBe(resolved);
+  });
+
+  it("a late echo still resolves a line already marked failed", () => {
+    const pending = appendPendingLine(liveMatch(), "p1", "et tu?");
+    const failed = failPendingLine(pending, "p1");
+    const next = applyChatLine(failed, {
+      chatId: "chat-1",
+      line: line("l9", "antony", "et tu?"),
+    }) as LiveMatch;
+    expect(next.messages).toHaveLength(2);
+    expect(next.messages.at(-1)).toEqual({
+      id: "l9",
+      senderId: "antony",
+      text: "et tu?",
+    });
+  });
+
+  it("a resume backlog folds onto the pending line instead of doubling it", () => {
+    const pending = appendPendingLine(liveMatch(), "p1", "et tu?") as LiveMatch;
+    const next = applyChatStarted(
+      pending,
+      {
+        chatId: "chat-1",
+        selfCharacterId: "antony",
+        peers: [{ characterId: "brutus" }, { characterId: "cleo" }],
+        everPeers: [{ characterId: "brutus" }, { characterId: "cleo" }],
+        lines: [line("l1", "brutus", "hi"), line("l9", "antony", "et tu?")],
+      },
+      roster,
+      "Rachel"
+    );
+    expect(next.messages.map((m) => m.id)).toEqual(["l1", "l9"]);
+    expect(next.messages.at(-1)?.delivery).toBeUndefined();
+  });
+
+  it("a pending line the backlog doesn't know about survives the resume", () => {
+    const pending = appendPendingLine(liveMatch(), "p1", "still waiting");
+    const next = applyChatStarted(
+      pending,
+      {
+        chatId: "chat-1",
+        selfCharacterId: "antony",
+        peers: [{ characterId: "brutus" }, { characterId: "cleo" }],
+        everPeers: [{ characterId: "brutus" }, { characterId: "cleo" }],
+        lines: [line("l1", "brutus", "hi")],
+      },
+      roster,
+      "Rachel"
+    );
+    expect(next.messages.map((m) => m.id)).toEqual(["l1", "p1"]);
+  });
+
+  it("dropping a failed line takes it off the feed for the retry", () => {
+    const pending = appendPendingLine(liveMatch(), "p1", "et tu?");
+    const failed = failPendingLine(pending, "p1");
+    const next = dropPendingLine(failed, "p1") as LiveMatch;
+    expect(next.messages.map((m) => m.id)).toEqual(["l1"]);
   });
 });

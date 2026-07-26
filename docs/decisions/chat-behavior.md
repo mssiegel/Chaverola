@@ -5,6 +5,38 @@ area. Entries are newest-first; add new ones at the top, and add a matching line
 to the index in the same change. Replaced decisions move to Superseded at the
 bottom of this file.
 
+### A sent message shows as pending until its echo, and says so if it never lands
+
+_2026-07-26_
+
+**Decision:** A student's message appears in their own feed the moment they
+hit send, dimmed, and stays that way until the server's `chat:line` echo
+replaces it. If no echo arrives within 5 seconds the line stops being dim and
+starts being honest: it keeps the text and gains a "Didn't send. Try again"
+button that re-sends it as a fresh message. A late echo still resolves the
+line, even after it was marked failed.
+
+**Why:** Sending was fire and forget. The composer cleared on tap, the emit
+had no ack, and every server-side rejection is a silent `return` (the rate
+limit, a send racing a pause, a send racing the chat's end). A kid firing
+one-word lines hits the 10-per-10-seconds window in normal play, and message
+eleven simply ceased to exist with nothing anywhere saying so. On classroom
+wifi even the happy path felt broken, because the text vanished from the box
+and reappeared a round trip later. The homepage demo echoes instantly, so the
+real product felt worse than the demo of it.
+
+The reconciliation is local: the echo matches the oldest unconfirmed line
+with the same text, so nothing new rides the wire and there is no deploy
+race. Identical texts back to back stay in order because the oldest wins.
+
+**Watch out:** the retry button keeps the caret in the composer
+(`onMouseDown` preventDefault). That is not a nicety. Focusing a button
+inside the feed blurs the textarea, which un-collapses the phone's world
+chrome and slides the feed about 72 pixels down between press and release,
+so the release lands on a different line and the tap never becomes a click.
+Any future control rendered inside the student's chat feed needs the same
+guard.
+
 ### End activity ends every chat with the full ended-screen treatment; the activity-over card waits for the student's tap
 
 _2026-07-26_

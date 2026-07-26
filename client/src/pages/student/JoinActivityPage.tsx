@@ -140,6 +140,7 @@ export function JoinActivityPage() {
     returnToLobby,
     leaveChat,
     sendChatMessage,
+    retryLiveMessage,
     sendTyping,
   } = useActiveMatch({
     activity,
@@ -343,6 +344,7 @@ export function JoinActivityPage() {
             isPaused={livePaused}
             activityEnded={activityGone}
             onSend={sendChatMessage}
+            onRetryMessage={retryLiveMessage}
             onTyping={sendTyping}
             // The exit keeps the seat: chat:leave ends the chat (or steps
             // out of a group), the server answers with chat:ended, and the

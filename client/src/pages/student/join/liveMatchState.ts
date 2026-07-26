@@ -178,9 +178,22 @@ export function applyChatStarted(
     // membership, so a "left the chat" notice discovered on the same
     // resume lands after the lines it follows: the true order.
     const known = new Set(prev.messages.map((m) => m.id));
-    const missed = payload.lines
-      .filter((line) => !known.has(line.id))
-      .map(toLiveMessage);
+    const missed = payload.lines.filter((line) => !known.has(line.id));
+    // A send that went out just before the blip comes back in this backlog,
+    // and its pending line is still on screen — fold each missed line onto
+    // its pending twin the same way a live echo would, or the student sees
+    // their own message twice.
+    let merged = prev.messages;
+    if (missed.length > 0) {
+      merged = [...prev.messages];
+      for (const line of missed) {
+        const resolved =
+          line.characterId === prev.self.id
+            ? resolvePendingLine(merged, line)
+            : null;
+        merged = resolved ?? [...merged, toLiveMessage(line)];
+      }
+    }
     // The spread keeps prev.typingPeerId on purpose: the TTL covers
     // staleness, and after a real refresh `prev` is gone anyway, so
     // the indicator is simply absent until the next heartbeat ≤2s
@@ -188,8 +201,7 @@ export function applyChatStarted(
     const caughtUp: LiveMatch = {
       ...prev,
       everPeers: payload.everPeers.map((p) => toParticipant(roster, p)),
-      messages:
-        missed.length > 0 ? [...prev.messages, ...missed] : prev.messages,
+      messages: merged,
     };
     // Membership reconciles against the OLD offline map on purpose:
     // a peer who timed out while this phone was dark still earns the
@@ -233,6 +245,91 @@ export function applyChatStarted(
   };
 }
 
+/**
+ * The student's own line, on screen the instant they hit send and marked
+ * `pending` until the server echoes it back. `pendingId` is local and
+ * temporary: the echo replaces the whole message with the server's line, id
+ * included, so nothing downstream has to know this ever happened.
+ */
+export function appendPendingLine(
+  prev: ActiveMatch | null,
+  pendingId: string,
+  text: string
+): ActiveMatch | null {
+  if (prev?.kind !== "live") return prev;
+  return {
+    ...prev,
+    messages: [
+      ...prev.messages,
+      {
+        id: pendingId,
+        senderId: prev.self.id,
+        text,
+        delivery: "pending",
+      },
+    ],
+  };
+}
+
+/**
+ * The echo landing on its pending line: the oldest unconfirmed message with
+ * the same text becomes the server's line, in place, so the order the student
+ * watched is the order that stays. Returns null when nothing matches, which
+ * is the signal to append normally.
+ *
+ * Matching on text rather than an id is what keeps this off the wire (no
+ * clientTag round trip). Two identical texts back to back stay in order
+ * because the oldest wins; a `failed` line still resolves, since an echo
+ * arriving after the timeout means it did land after all.
+ */
+function resolvePendingLine(
+  messages: ChatMessage[],
+  line: ChatLine
+): ChatMessage[] | null {
+  const index = messages.findIndex(
+    (m) =>
+      m.delivery !== undefined &&
+      m.senderId === line.characterId &&
+      m.text === line.text
+  );
+  if (index === -1) return null;
+  const next = [...messages];
+  next[index] = toLiveMessage(line);
+  return next;
+}
+
+/** A pending line whose echo never came, per the hook's timer. A no-op once
+ *  the echo already resolved it — the same "a late fire can only re-null a
+ *  null" contract as the typing and flash timers. */
+export function failPendingLine(
+  prev: ActiveMatch | null,
+  pendingId: string
+): ActiveMatch | null {
+  if (prev?.kind !== "live") return prev;
+  const index = prev.messages.findIndex(
+    (m) => m.id === pendingId && m.delivery === "pending"
+  );
+  if (index === -1) return prev;
+  const messages = [...prev.messages];
+  // Can't miss: findIndex just found it.
+  messages[index] = { ...messages[index]!, delivery: "failed" };
+  return { ...prev, messages };
+}
+
+/** Take a failed line off the feed — the retry re-sends it as a fresh
+ *  pending message at the bottom, where a new send belongs. */
+export function dropPendingLine(
+  prev: ActiveMatch | null,
+  pendingId: string
+): ActiveMatch | null {
+  if (prev?.kind !== "live") return prev;
+  if (!prev.messages.some((m) => m.id === pendingId)) return prev;
+  return {
+    ...prev,
+    messages: prev.messages.filter((m) => m.id !== pendingId),
+  };
+}
+
 /** chat:line — an incoming message (the student's own send echoes here too). */
 export function applyChatLine(
   prev: ActiveMatch | null,
@@ -244,6 +341,11 @@ export function applyChatLine(
   // A live line can race a resume backlog that already carried it —
   // the id dedupe makes the replay harmless.
   if (prev.messages.some((m) => m.id === payload.line.id)) return prev;
+  // Our own echo: it belongs to a line already on screen.
+  const resolved =
+    payload.line.characterId === prev.self.id
+      ? resolvePendingLine(prev.messages, payload.line)
+      : null;
   return {
     ...prev,
     // The peer's message landing clears THEIR bubble, instantly —
@@ -251,7 +353,7 @@ export function applyChatLine(
     // late fire can only re-null a null.
     typingPeerId:
       payload.line.characterId === prev.typingPeerId ? null : prev.typingPeerId,
-    messages: [...prev.messages, toLiveMessage(payload.line)],
+    messages: resolved ?? [...prev.messages, toLiveMessage(payload.line)],
   };
 }
 
