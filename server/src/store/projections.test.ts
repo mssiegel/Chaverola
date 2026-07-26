@@ -190,10 +190,14 @@ describe("toChatSnapshot (teacher chat card)", () => {
 
   it("projects transcript lines with the sender resolved off the members", () => {
     const snapshot = toChatSnapshot(fullChat, fullRecord, 30_000);
+    // `?? []` only satisfies the wire type, where `messages` is optional
+    // (absent = "unchanged" on a future slim broadcast) — this projection
+    // always sends the array, which the length pin below holds it to.
+    const messages = snapshot.messages ?? [];
     // Guard the loop below against a fixture regression to lines: [] —
     // an empty array would pass the key pin while proving nothing.
-    expect(snapshot.messages).toHaveLength(1);
-    for (const line of snapshot.messages) {
+    expect(messages).toHaveLength(1);
+    for (const line of messages) {
       expect(Object.keys(line).sort()).toEqual([
         "characterId",
         "id",
@@ -205,7 +209,7 @@ describe("toChatSnapshot (teacher chat card)", () => {
     }
     // `!` — length pinned to 1 just above. The name and characterId are
     // the resolved sender's, not anyone else's.
-    expect(snapshot.messages[0]!).toMatchObject({
+    expect(messages[0]!).toMatchObject({
       studentId: "student-2",
       name: "Noa",
       characterId: "caesar",

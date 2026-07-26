@@ -8,8 +8,6 @@ import {
 import type {
   ActivitySettings,
   Character,
-  ChatSnapshot,
-  ChatTranscriptLine,
   LobbyConnectionState,
   QueueEntry,
 } from "@chaverola/shared";
@@ -17,8 +15,7 @@ import type {
 import { createLobbySocket, type LobbySocket } from "@/lib/socket";
 import { useLatestRef } from "@/lib/useLatestRef";
 
-import type { ChatMessage } from "@/types/chat";
-
+import { mergeHostedChats, toTranscriptMessage } from "./hostChats";
 import type { HostEnded, HostEngine } from "./hostEngine";
 import type { HostedChat, WaitingStudent } from "./hostWorld";
 
@@ -57,37 +54,6 @@ function toWaitingStudent(entry: QueueEntry): WaitingStudent {
     realName: entry.name,
     waitSeconds: entry.waitSeconds,
     connection: entry.connection,
-  };
-}
-
-/** Server truth → the card's message shape. `senderId` is the STUDENT id —
- *  what toHostedChat keys participants by — and `ChatSnapshot.participants`
- *  is everyone ever in the room, so a removed student's lines still resolve
- *  instead of silently disappearing from the card. */
-function toTranscriptMessage(line: ChatTranscriptLine): ChatMessage {
-  return {
-    id: line.id,
-    senderId: line.studentId,
-    text: line.text,
-  };
-}
-
-/** Server truth → the chat shape the dashboard renders. The wire's
- *  `character` is the chat's frozen snapshot (captured at chat start), and
- *  the cards render it as-is — a roster edit never relabels a card. */
-function toHostedChat(snapshot: ChatSnapshot): HostedChat {
-  return {
-    id: snapshot.id,
-    participants: snapshot.participants.map((p) => ({
-      id: p.id,
-      realName: p.name,
-      character: p.character,
-    })),
-    inactiveStudentIds: snapshot.inactiveStudentIds,
-    messages: snapshot.messages.map(toTranscriptMessage),
-    status: snapshot.status,
-    endReason: snapshot.endReason,
-    reconnectingStudentIds: snapshot.reconnectingStudentIds,
   };
 }
 
@@ -203,7 +169,9 @@ export function useHostActivityLive({
       setWaiting(students.map(toWaitingStudent));
     });
     socket.on("chats:snapshot", (payload) => {
-      setChats(payload.chats.map(toHostedChat));
+      // A merge, not a replace: a chat that arrives without its `messages` is
+      // saying "unchanged", so the lines we hold survive (see hostChats.ts).
+      setChats((prev) => mergeHostedChats(prev, payload.chats));
       setLeftoverStudentId(payload.leftoverStudentId);
       // `=== true` / `?? {}` / `?? null` tolerate the deploy window where an
       // older server's snapshot has no paused / lastPartners / rematchNotice

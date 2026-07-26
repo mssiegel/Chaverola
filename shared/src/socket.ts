@@ -40,7 +40,12 @@ export interface ChatSnapshot {
   participants: ChatParticipant[]; // everyone ever in the room, seat order
   inactiveStudentIds: string[]; // removed / left mid-chat
   reconnectingStudentIds: string[]; // active members dropped past the 4s delay
-  messages: ChatTranscriptLine[]; // the whole capped transcript, oldest first
+  // The whole capped transcript, oldest first. ABSENT means "no change since
+  // your last full snapshot" — an ended chat whose transcript the teacher's
+  // page already holds. A compatible loosening: the server still sends it on
+  // every snapshot today, and any staleness a future slim emit leaves behind
+  // heals at the next full one.
+  messages?: ChatTranscriptLine[];
   status: "active" | "ended";
   // "peer-timeout": a below-2 ending caused by a partner's expired grace.
   // "peer": a student's own exit (chat:leave, or lobby:leave) ended it.

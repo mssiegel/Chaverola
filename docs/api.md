@@ -376,7 +376,7 @@ export interface ChatSnapshot {
   participants: ChatParticipant[]; // everyone ever in the room, seat order
   inactiveStudentIds: string[]; // removed / left mid-chat
   reconnectingStudentIds: string[]; // active members dropped past the 4s delay
-  messages: ChatTranscriptLine[]; // the whole capped transcript, oldest first
+  messages?: ChatTranscriptLine[]; // the whole capped transcript, oldest first; absent = unchanged since your last full snapshot (the teacher's page holds it)
   status: "active" | "ended";
   // "peer-timeout": a below-2 ending caused by a partner's expired grace.
   // "peer": a student's own exit (chat:leave, or lobby:leave) ended it.
