@@ -1,6 +1,6 @@
 # 08 — Back means back
 
-State: **Not started**
+State: **Complete**
 
 **The problem.** The back-guard leaks one swallowed history entry per chat.
 [`useBackGuard.ts:22-33`](../../../client/src/lib/useBackGuard.ts) pushes a
@@ -26,7 +26,7 @@ wart" — it didn't anticipate the per-chat accumulation.
 - "Landing on code entry signs the student out" — the escape this doc
   repairs; unchanged.
 
-- [ ] Prompt — One sentinel, ever
+- [x] Prompt — One sentinel, ever
 
 ---
 
@@ -79,3 +79,31 @@ step (or costs exactly the one documented swallow, floor version); the
 mid-chat back still opens the confirm. Same sweep on the demo. `pnpm
 format`, one commit to `main`, push, tick this box, flip doc + README
 state to Complete.
+
+---
+
+## Outcome (2026-07-26)
+
+**Shipped the floor. The stretch was not attempted** — founder call, made
+before implementation, not a discovery mid-flight. `history.back()` is async,
+so a fast re-arm (or StrictMode's dev double-arm) leaves the guard armed with
+no sentinel behind it, and the next back press then pops to a genuinely
+different page — trading a swallowed press for a lost chat. The payoff was one
+back press on a screen whose designed exit is its own button. Don't re-attempt
+it without a way to close that window.
+
+The marker (`__chaverolaBackGuard`, stamped into the cloned `history.state`)
+also fixes the StrictMode double-arm for free: the second pass sees the mark
+and pushes nothing, so dev now behaves like prod.
+
+**Measured**, three demo rounds via `tools/verify/scratch/back-guard.mjs`
+(gitignored; a 90-line Playwright driver over `?fast=10`, worth re-authoring
+if this area is touched again). `history.length` growth across the three
+rounds: **6 before, 1 after** — 6 because a dev build arms twice per mount.
+Back still opened the exit confirm on every round including 2 and 3, the ones
+that now arm without pushing. From the lobby, press 1 is the documented
+swallow and press 2 lands on code entry, signed out.
+
+**Verification was demo-only, not the full live sweep** (founder call): the
+demo runs the identical hook through the identical per-match remount, and the
+guard never touches the socket.

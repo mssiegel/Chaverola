@@ -277,7 +277,8 @@ through the existing confirmation reuses a decision the student already
 understands instead of inventing a second "are you sure" pattern.
 
 _Implemented in [useBackGuard](../../client/src/lib/useBackGuard.ts), armed by
-[ChatStage](../../client/src/components/Student/ChatStage.tsx)._
+[LiveChatStage](../../client/src/components/Student/LiveChatStage.tsx) and the
+demo's [ChatStage](../../client/src/components/Student/ChatStage.tsx)._
 
 ### One URL for the whole student journey
 
