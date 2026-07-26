@@ -48,8 +48,8 @@ export function PlansSection() {
           bullets={[
             "Create activities and hand out secret characters",
             "Students chat in character from any browser, with no accounts and nothing to install",
-            "A live dashboard with a card for every chat in the room",
-            "The name reveal at the end",
+            "A live teacher dashboard where you watch every student chat",
+            "The name reveal at the end of each chat, when students find out who was who",
             "Transcripts emailed to you when class wraps up",
           ]}
           footer={
