@@ -176,6 +176,7 @@ Load-bearing — trip over them before you break one:
 - Files: `server/src/config.ts`, `server/src/app.ts`, `client/vercel.json` (rewrites only — the Vercel skip config is dashboard-only and ungreppable from the repo).
 - Runbook: [docs/operations.md](docs/operations.md) — deploy checks, production logs, env vars.
 - Decisions: [backend-api.md](docs/decisions/backend-api.md), [process.md](docs/decisions/process.md).
+- Plan (deferred): [capacity-alerts](docs/plans/capacity-alerts.md) — an email when the instance nears 80% of memory, CPU, or its fd ceiling. Shelved 2026-07-27 (pre-launch, ~8× headroom); the doc holds the research, the triggers for picking it up, and the open `ulimit` question.
 - Verify: `/healthz` for the server commit + Vercel Ready for the expected SHA, on every push.
 
 ## Conventions
