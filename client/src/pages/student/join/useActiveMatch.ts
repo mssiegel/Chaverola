@@ -336,6 +336,19 @@ export function useActiveMatch({
   };
 
   // Let out whatever the window now has room for, and re-arm for the rest.
+  //
+  // The two `Date.now()` reads below are a react-hooks/purity false positive,
+  // and the cause is the RE-ARM on the last line: this function names itself,
+  // and the compiler can't place a function that sits in its own reference
+  // cycle, so it falls back to assuming render. Measured — breaking the cycle
+  // silences both reports with nothing else changed, and routing the re-arm
+  // through a `scheduleDrain` hop does not count as breaking it: the rule sees
+  // mutual recursion too. Nothing calls this during render; it is
+  // only ever a setTimeout callback, and reading the clock is the entire job.
+  // Restructuring the drain into a holdUntil-keyed effect would satisfy the
+  // rule, but it would rewrite the send window's timing on a path with no
+  // tests to catch a regression. Revisit if the compiler learns recursion.
+  /* eslint-disable react-hooks/purity -- see above */
   const drainHeldMessages = () => {
     holdTimerRef.current = null;
     const now = Date.now();
@@ -361,6 +374,7 @@ export function useActiveMatch({
       Math.max(0, readyAt - Date.now())
     );
   };
+  /* eslint-enable react-hooks/purity */
 
   /** When the oldest send in the window falls out of it, freeing a slot. */
   const oldestSendExpiry = () =>

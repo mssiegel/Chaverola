@@ -324,18 +324,31 @@ export function JoinActivityPage() {
   // once the server answers again. The activity-gone screen also holds the
   // session (it renders FROM it) — its CTA lands here signed-in on purpose,
   // and that's when the sign-out finally runs.
-  // The removal notice clears here too, and not only on a rejoin: it sits
-  // above the form on every gate stage, so a removed student who backs out to
-  // code entry would otherwise read it stacked on top of a "recheck your Join
-  // Code" error. Landing at code entry is the same moment the session ends,
-  // so the notice about losing a seat has nothing left to explain.
-  useEffect(() => {
-    const resolvedToCodeEntry =
-      joinCodeParam === undefined || lookup.state === "not-found";
-    if (!resolvedToCodeEntry) return;
+  const resolvedToCodeEntry =
+    joinCodeParam === undefined || lookup.state === "not-found";
+  // The removal notice clears on the same landing, and not only on a rejoin:
+  // it sits above the form on every gate stage, so a removed student who backs
+  // out to code entry would otherwise read it stacked on top of a "recheck
+  // your Join Code" error. Landing at code entry is the same moment the
+  // session ends, so the notice about losing a seat has nothing left to
+  // explain.
+  // Reset DURING RENDER, not in the effect below, which is React's own answer
+  // for state that a change in props/URL invalidates
+  // (https://react.dev/learn/you-might-not-need-an-effect). It converges on the
+  // spot — the guard makes the second pass a no-op — so the gate never paints
+  // one frame carrying a notice it is about to drop. Not derived away instead
+  // (rendering the notice only off the stage): the state has to actually clear,
+  // or retyping a code would bring the notice back on the name step it already
+  // left behind.
+  if (resolvedToCodeEntry && removedNotice !== null) {
     setRemovedNotice(null);
+  }
+  // The sign-out stays an effect — it reaches outside React, and it is the one
+  // thing here that must not run twice.
+  useEffect(() => {
+    if (!resolvedToCodeEntry) return;
     if (session && !activityGoneFromLookup) signOut();
-  }, [joinCodeParam, lookup.state, session, signOut, activityGoneFromLookup]);
+  }, [resolvedToCodeEntry, session, signOut, activityGoneFromLookup]);
 
   // While a chat is on screen (live or just ended) the layout swaps its brand
   // pill for the student's name badge — same condition that renders ChatStage
