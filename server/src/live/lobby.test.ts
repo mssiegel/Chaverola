@@ -255,19 +255,25 @@ describe("the live lobby", () => {
     const teacher = connect({ role: "teacher", hostKey: activity.hostKey });
     await nextSnapshot(teacher); // the initial empty queue
 
+    // Seated one at a time, and the sequencing is load-bearing: connect() only
+    // starts the handshake, so connecting both back-to-back lets the two
+    // sockets race and the queue can come out Boaz-first. The notice asserted
+    // below carries names in QUEUE order, so the queue has to be built in a
+    // known one. Awaiting each welcome is what pins it — the welcome is sent
+    // after the seat exists.
     const studentA = connect({
       role: "student",
       joinCode: activity.joinCode,
       name: "Ana",
       nonce: "n-a",
     });
+    const welcomeA = await nextWelcome(studentA);
     const studentB = connect({
       role: "student",
       joinCode: activity.joinCode,
       name: "Boaz",
       nonce: "n-b",
     });
-    const welcomeA = await nextWelcome(studentA);
     const welcomeB = await nextWelcome(studentB);
 
     // They just chatted — seed the one-round memory directly so pair-everyone
