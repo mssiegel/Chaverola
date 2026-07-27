@@ -1,6 +1,6 @@
 # 06 — Somebody is watching the search console
 
-State: **Not started**
+State: **Complete**
 
 **The problem.** Everything else in this directory is a claim made into the
 void. Canonical tags, hreflang pairs, a sitemap and structured data all
@@ -27,6 +27,29 @@ the web; reciprocity failures are silent by design.
   [`operations.md`](../../operations.md), beside the Vercel and Render
   runbooks, not duplicated here.
 
+**Settled (founder, 2026-07-28).** The **DNS TXT route**, on a Domain property,
+with the domain's DNS at Squarespace. So **step 1 below shipped no code**:
+neither the meta tag nor the token file was built, because a verified Domain
+property makes both dead weight, and a token committed against a route nobody
+took is worse than no token. Recorded as a decision in
+[`analytics.md`](../../decisions/analytics.md#search-console-is-verified-by-dns-not-by-a-tag-on-the-page)
+— it is the entry that keeps "no third-party scripts" intact, since a Google
+Analytics-based verification was the one route that would have broken it.
+
+**Google only.** Bing was skipped in the same call, so step 2's "do not verify
+separately" advice is now the cheap way back rather than the thing that was done.
+The verified property, the submitted sitemap and the URL Inspection passes on `/`
+and `/he` are all Google's.
+
+One thing step 1 gets wrong, written down because the next person will hit it:
+the meta tag could **not** have gone through doc 01's `head[]`. That list reaches
+the ten prerendered pages and misses `app.html`, which
+[`prerender-head.mjs`](../../../client/scripts/prerender-head.mjs) never stamps
+on purpose — it is the template every other file is re-stamped from, so touching
+it would destroy idempotence. `client/index.html` is the only file that reaches
+all ten pages and both fallback shells, so that is where a tag would have had to
+live.
+
 **Prompt order.** One prompt, run **last** — after doc
 [04](04-crawlers-get-a-map-and-a-fence.md)'s sitemap is live in production,
 because submitting a sitemap that 404s starts the relationship badly.
@@ -37,7 +60,7 @@ make the code side ready and write the checklist; it cannot click through
 someone else's console. Do the half you can, then follow the blocked path
 in the [README](README.md) rather than stalling the prompt.
 
-- [ ] Prompt — Verified, submitted, and watched
+- [x] Prompt — Verified, submitted, and watched
 
 ---
 

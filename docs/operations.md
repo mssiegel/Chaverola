@@ -90,6 +90,80 @@ tea-d8f90l0g4nts738mebhg -o json --confirm` if it's ever missing). We
   `.env.local` instead of inside agent config (see DECISIONS.md → "Agents
   read Render logs through the CLI").
 
+## Search Console — the four numbers worth watching
+
+Canonical tags, hreflang pairs, a sitemap and structured data all shipped from
+the [SEO effort](plans/seo/README.md) without producing any feedback in the repo.
+Search Console is the only place that says whether Google accepted them, ignored
+them, or found them contradictory.
+
+### Verification: a Domain property, by DNS TXT
+
+`chaverola.com` is registered at **Squarespace**: Domains → chaverola.com → DNS
+→ DNS Settings → Custom Records, then host `@`, type `TXT`, data the whole
+`google-site-verification=…` string Search Console hands you. A DNS change takes
+a while to publish, so a first Verify that fails means wait and retry, not
+reissue the token.
+
+Verify a **Domain** property, not a URL prefix. A Domain property covers the
+apex, `www`, and both protocols at once, and `www.chaverola.com` 308s to the apex
+— so a URL-prefix property on `www` reports almost nothing, forever, and reads as
+an SEO failure rather than a mis-picked property. DNS verification also survives
+a hosting change, which a tag on the page or a file in the output does not.
+
+There is deliberately **no verification meta tag in the HTML and no token file in
+`client/public/`** — see DECISIONS.md → [Search Console is verified by DNS, not
+by a tag on the
+page](decisions/analytics.md#search-console-is-verified-by-dns-not-by-a-tag-on-the-page).
+
+### Bing: not set up, and one step away if it ever matters
+
+**Only Google is verified** (founder call, 2026-07-28 — Bing wasn't worth the
+attention at this stage). Nothing in the repo depends on that, and reversing it is
+cheap: Bing Webmaster Tools imports a verified Search Console property in one step
+and brings the sitemap with it. Do that rather than verifying Bing on its own,
+which is repeated work for the same result.
+
+**IndexNow is deliberately skipped.** It pushes instant change notifications for
+large, fast-moving sites. Ten static URLs that change a few times a year gain
+nothing from it, and it would be one more key to hold.
+
+### Once, right after verifying
+
+- **Submit the sitemap** at `https://chaverola.com/sitemap.xml`. It is generated
+  at build time by `client/scripts/prerender-head.mjs`, so confirm it serves
+  `application/xml` and lists ten `<loc>` entries before submitting — when a
+  push's client build is skipped that URL answers 200 with the SPA shell instead
+  (see [Recovering a skipped client build](#recovering-a-skipped-client-build)),
+  and a sitemap that resolves to HTML starts the relationship badly.
+- **Run URL Inspection on `/` and `/he`.** It is the one place that shows the
+  **crawled** HTML beside the **rendered** HTML, which makes it the direct proof
+  that the prerendered heads reached the bytes and not only the browser.
+
+### Then four numbers, and only four
+
+- **Performance → Queries.** Which words teachers actually arrive on. The only
+  feedback loop that can say whether the meta copy guessed right, and worth more
+  than the other three put together.
+- **Page indexing → whether `/he` URLs are indexed at all.** Hebrew is equal
+  priority for this product, and this is the number that says whether that
+  landed. Search Console **retired its International Targeting report in 2022**,
+  so hreflang errors surface nowhere in the UI — don't hunt for a report that no
+  longer exists. Validate the tags with a third-party hreflang checker instead.
+- **Page indexing → Soft 404.** Every unknown path answers HTTP 200 with the
+  shell (the catch-all rewrite in `client/vercel.json`), so Google will report
+  soft 404s. This count is the honest way to decide whether fixing that is worth
+  the work: small and stable means it isn't.
+- **Page indexing → "Duplicate without user-selected canonical"** and
+  **"Alternate page with proper canonical tag".** The first should stay empty. If
+  it fills, a canonical tag and the sitemap's `<loc>` disagree somewhere —
+  classically by a trailing slash. Both come from `pageUrls()` in
+  `client/src/lib/prerenderMeta.ts`, one function precisely so they can't, which
+  makes a disagreement a sign that something started building URLs a second way.
+
+**Expect nothing for weeks.** A new site with no backlinks gets crawled slowly,
+so an empty report in week one carries no information. Check monthly, not daily.
+
 ## Gmail app password (the transcript email)
 
 The transcript email (feature 11) sends over Gmail SMTP. It needs two env

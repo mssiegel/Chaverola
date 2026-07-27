@@ -11,9 +11,11 @@ folds it into the doc as a "Settled (founder, <date>)" entry, deletes the entry
 here, and unblocks the prompt. An empty inbox is the good state — leave the
 file in place.
 
-One question in this directory is known to be founder-shaped before anyone
-starts: doc 06's console verification, which needs an account an agent doesn't
-have. The other was doc 01's third prompt, a real rendered body — **answered no
-on 2026-07-27** and recorded as a decision, so it never needed this inbox.
+Two questions in this directory were founder-shaped, and neither ended up needing
+this file. Doc 01's third prompt, a real rendered body, was **answered no on
+2026-07-27**. Doc 06's console verification needed an account an agent doesn't
+have, and was **answered live on 2026-07-28** — DNS TXT on a Domain property,
+Google only — during the session that ran the prompt. Both are recorded as
+decisions instead.
 
 _No open questions._

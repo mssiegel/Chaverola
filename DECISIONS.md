@@ -272,6 +272,7 @@ git: `git log -- DECISIONS.md`.
   - _Superseded_
     - [Teachers set up at class start, and a warm-up ping hides the cold start](docs/decisions/backend-api.md#teachers-set-up-at-class-start-and-a-warm-up-ping-hides-the-cold-start)
 - [Analytics](docs/decisions/analytics.md)
+  - [Search Console is verified by DNS, not by a tag on the page](docs/decisions/analytics.md#search-console-is-verified-by-dns-not-by-a-tag-on-the-page)
   - [Analytics never reports a hostKey or a live join code](docs/decisions/analytics.md#analytics-never-reports-a-hostkey-or-a-live-join-code)
   - [Analytics is Vercel Web Analytics, not Google](docs/decisions/analytics.md#analytics-is-vercel-web-analytics-not-google)
 - [Process & tooling](docs/decisions/process.md)

@@ -5,6 +5,38 @@ area. Entries are newest-first; add new ones at the top, and add a matching line
 to the index in the same change. Replaced decisions move to Superseded at the
 bottom of this file.
 
+### Search Console is verified by DNS, not by a tag on the page
+
+_2026-07-28_
+
+**Decision:** `chaverola.com` is verified as a Search Console **Domain property**
+through a DNS TXT record at Squarespace, the registrar. No
+`google-site-verification` meta tag ships in `client/index.html`, and no token
+file sits in `client/public/`. **Google only:** Bing Webmaster Tools is not set
+up, and IndexNow is not used.
+
+**Why:** Founder call, 2026-07-28. A Domain property is the only shape that sees
+both sides of the `www` → apex redirect ([branding.md](branding.md)), so a
+URL-prefix property on `www` would report almost nothing; and DNS verification
+keeps working through a hosting change, which a tag or a file does not. Neither
+code route was built, because both become dead weight the moment the Domain
+property verifies — and the tag would have had to live in `client/index.html`
+rather than a prerendered head, since `scripts/prerender-head.mjs` deliberately
+never stamps `app.html`, the file Google fetches for every unmatched URL.
+
+Bing was skipped in the same call, on attention rather than on principle. It
+costs nothing to add later, because Bing Webmaster Tools imports a verified
+Search Console property in one step and brings the sitemap with it, so nothing
+here needs to change first.
+
+A Google Analytics-based verification was **never on the table**: it would have
+loaded the first third-party script this codebase has ever served, against
+[Analytics is Vercel Web Analytics, not Google](#analytics-is-vercel-web-analytics-not-google).
+Search Console itself adds no script — it reads the site the way a crawler does.
+
+_Operational half in
+[operations.md](../operations.md#search-console--the-four-numbers-worth-watching)._
+
 ### Analytics never reports a hostKey or a live join code
 
 _2026-07-27_
