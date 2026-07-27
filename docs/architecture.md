@@ -118,7 +118,12 @@ pieces those surfaces share.
   crawler reads each page's own words without running any JS. `/` and `/he`
   additionally get a small `<noscript>` block after `#root` carrying the
   homepage's own headline, pitch and steps from the same catalog keys, so
-  those readers get the product and not only its name. The live
+  those readers get the product and not only its name. That block is the
+  whole of what a JS-less reader gets: **nothing here renders React on the
+  server**, by [recorded
+  decision](decisions/branding.md#no-server-rendered-body--the-locale-flash-costs-a-hebrew-visitor-more-than-a-crawler-gains) —
+  so no component in this repo is under any SSR-safety rule, and
+  `window.matchMedia` during render stays legal. The live
   lobby/host sockets are `pages/student/useLobbyPresence.ts` (student —
   stays mounted through the chat and ended stages) and
   `Teacher/HostActivity/useHostActivityLive.ts` (teacher), both through

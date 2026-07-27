@@ -51,7 +51,7 @@ i18next instance so a prerender can render both locales in one process; and
 
 | Doc                                                                                           | What a user gains                                                                               | State       |
 | --------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- | ----------- |
-| [01 — Every URL ships its own head](01-every-url-ships-its-own-head.md)                       | A link, a search result and an AI answer each show that page's own words, in the right language | Not started |
+| [01 — Every URL ships its own head](01-every-url-ships-its-own-head.md)                       | A link, a search result and an AI answer each show that page's own words, in the right language | Complete    |
 | [02 — A pasted link shows the product](02-a-pasted-link-shows-the-product.md)                 | A Chaverola link unfurls as a branded card instead of a bare text row                           | Not started |
 | [03 — Google knows which URL is the real one](03-google-knows-which-url-is-the-real-one.md)   | The Hebrew and English pages stop competing with each other, and `/demo` resolves for a bot     | Not started |
 | [04 — Crawlers get a map and a fence](04-crawlers-get-a-map-and-a-fence.md)                   | A leaked classroom URL can't be indexed, and every real page is listed once                     | Not started |
@@ -62,8 +62,10 @@ i18next instance so a prerender can render both locales in one process; and
 the only one that doesn't need the emitter. Otherwise: **01 → 02 → 03 →
 04/2 → 05 → 06.** 01 builds the head emitter everything else extends; 02's
 first prompt settles `SITE_ORIGIN`, which 03, 04 and 05 all import; 06 runs
-last, after the sitemap is live. 01's third prompt is gated on a founder
-call and may never run.
+last, after the sitemap is live. 01's third prompt was gated on a founder
+call and the answer was no — [there is no server-rendered
+body](../../decisions/branding.md#no-server-rendered-body--the-locale-flash-costs-a-hebrew-visitor-more-than-a-crawler-gains),
+and nothing downstream needed one.
 
 ## What's deliberately not here
 

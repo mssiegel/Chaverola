@@ -1,6 +1,6 @@
 # 01 — Every URL ships its own head
 
-State: **Not started**
+State: **Complete**
 
 **The problem.** Ten public URLs share one `<head>`. `usePageMeta`
 ([`usePageMeta.ts`](../../../client/src/lib/usePageMeta.ts)) sets the title
@@ -50,13 +50,15 @@ a `// prerender-safe` guard. Consume all three; don't rebuild them.
 
 **Prompt order.** Sequential. Prompt 1 builds the emitter every other doc
 in this directory extends; nothing else here works without it. Prompt 2 is
-purely additive on top of it. **Prompt 3 is gated on a founder call** — read
-its risk record before starting it, and do not run it just because it is
-next.
+purely additive on top of it. **Prompt 3 was gated on a founder call and the
+answer was no** (2026-07-27) — it is closed, not pending, and its risk record
+is kept below as the reasoning behind a shipped decision.
 
 - [x] Prompt 1 — Ten URLs, ten heads
 - [x] Prompt 2 — The words are in the HTML, without a rendered body
-- [ ] Prompt 3 — A rendered body (gated — read the risk record first)
+- [x] Prompt 3 — A rendered body — **declined by the founder, 2026-07-27.** A
+      deliberate no is a finished prompt. Do not reopen it without reading the
+      decision entry it produced.
 
 ---
 
@@ -502,3 +504,22 @@ decision entry either way. If the answer is no, tick this box, write the
 "not doing this, and why" entry in
 [`branding.md`](../../decisions/branding.md), and flip the doc to Complete
 — a deliberate no is a finished prompt, not an open one.
+
+**Settled (founder, 2026-07-27): no.** The call named the locale flash as the
+deciding cost — "a real regression, not a nitpick" — which is the line this
+risk record leads with, so the record did the job it was written for. Nothing
+was built; the "if the founder says run it anyway" shape above stays as the
+record of what was weighed, not as a plan anyone is executing.
+
+Recorded as [No server-rendered body — the locale flash costs a Hebrew visitor
+more than a crawler
+gains](../../decisions/branding.md#no-server-rendered-body--the-locale-flash-costs-a-hebrew-visitor-more-than-a-crawler-gains),
+which also states the only two things that would reopen it: Search Console
+evidence (doc 06) that the homepage fails to index on its rendered content, or a
+named AI crawler that needs more than the `<noscript>` block. Neither is an
+argument anyone can make from first principles — both need data this repo does
+not have yet.
+
+Nothing in docs 02-05 depended on this prompt: they extend the head emitter from
+prompt 1, which shipped. The `<noscript>` block from prompt 2 is what a JS-less
+reader gets, and it is now the final answer rather than a stepping stone.

@@ -5,6 +5,71 @@ area. Entries are newest-first; add new ones at the top, and add a matching line
 to the index in the same change. Replaced decisions move to Superseded at the
 bottom of this file.
 
+### No server-rendered body — the locale flash costs a Hebrew visitor more than a crawler gains
+
+_2026-07-27_
+
+**Decision:** Chaverola does not and will not server-render or prerender a React
+body. What a reader who never runs JavaScript gets is the per-URL `<head>` from
+[The prerendered shell splits in
+two…](#the-prerendered-shell-splits-in-two-and-apphtml-is-the-one-that-keeps-the-generic-pair)
+plus the homepage's [`<noscript>`
+block](#the-homepage-ships-its-words-in-a-noscript-block-and-the-demo-urls-get-none),
+and that is the end of the delivery story. `renderToString`, `prerender` from
+`react-dom/static` and `hydrateRoot` are all off the table.
+
+**Why:** Founder call, on the risk record written to make this call an informed
+one ([doc 01's prompt
+3](../plans/seo/01-every-url-ships-its-own-head.md#prompt-3--a-rendered-body-gated--read-the-risk-record-first)),
+which argues against itself.
+
+The deciding cost is the locale flash, and it is a regression rather than a
+nitpick. A Hebrew-preferring visitor landing on `/` would read a fully painted
+**English** homepage — headline, CTAs, plans, founder note — for roughly
+150-350 ms on desktop and 1-1.5 s on a mid-tier Android on school wifi, then
+watch it reflow right-to-left, blank, spinner, Hebrew. Four visual states
+instead of two, and if the JS never lands they are stranded on a dead English
+page rather than a blank one. [The meta title is written for a search
+result…](#the-meta-title-is-written-for-a-search-result-not-for-the-page-and-the-demo-carries-its-own)
+already refuses to put a _single English sentence_ in `<title>` for exactly this
+reason; a whole painted page is the same harm an order of magnitude larger.
+`hydrateRoot` is worse rather than better: `applyBootLocale` has rewritten the
+URL to `/he` by then, so a Hebrew tree would hydrate against English DOM and
+mismatch wholesale.
+
+Three costs behind it, none of them the reason on their own. `pnpm build` would
+stop being static analysis and start executing the app, so every future
+component author inherits a transitive, invisible rule — no `window`,
+`document` or `localStorage` at module scope or during render, in anything
+reachable from a prerendered route — that **no cheap gate enforces**:
+`pnpm typecheck` passes `window.matchMedia` happily and `client/vitest.config.ts`
+is `environment: "node"` with no jsdom, so no test in this repo renders a
+component. Two crashes are already in the tree: `window.matchMedia` in the
+render phase at
+[`JoinGateCard.tsx`](../../client/src/pages/student/join/JoinGateCard.tsx),
+which `MessageComposer` cites as its model and is therefore a sanctioned idiom
+rather than an accident, and [`api.ts`](../../client/src/lib/api.ts) throwing at
+module init without `VITE_API_URL`, which would make builds env-dependent. And
+what it buys is smaller than it looks:
+[`useChatDemo`](../../client/src/components/chat/useChatDemo.ts) seeds the hero
+conversation inside a `useEffect` and effects never run during SSR, so a
+prerendered homepage would ship the marketing copy and an **empty hero
+chatbox** — the running demo this repo calls the proof would be the one thing
+not in the HTML.
+
+What would reopen it, and nothing else: Search Console evidence (doc 06) that
+the homepage is failing to index on its rendered content, or a named AI crawler
+that demonstrably needs more than the `<noscript>` block. Googlebot renders
+JavaScript, and every consumer that doesn't is already served. If it is ever
+reopened, start from the minimum-risk shape in that prompt — `/he` only, since a
+locale already in the URL is the visitor's own choice and cannot flash the wrong
+language at anyone — and keep `createRoot`, whose container wipe is what
+guarantees the post-mount experience is byte-identical to today's.
+
+_No code, and that is the decision. The prompt stays in
+[doc 01](../plans/seo/01-every-url-ships-its-own-head.md) as the record of what
+was weighed rather than being deleted._
+
 ### The homepage ships its words in a `<noscript>` block, and the demo URLs get none
 
 _2026-07-27_

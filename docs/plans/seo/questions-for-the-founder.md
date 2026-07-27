@@ -11,9 +11,9 @@ folds it into the doc as a "Settled (founder, <date>)" entry, deletes the entry
 here, and unblocks the prompt. An empty inbox is the good state — leave the
 file in place.
 
-Two questions in this directory are known to be founder-shaped before anyone
-starts: doc 01's third prompt (a real rendered body, which its own risk record
-argues against) and doc 06's console verification, which needs an account an
-agent doesn't have.
+One question in this directory is known to be founder-shaped before anyone
+starts: doc 06's console verification, which needs an account an agent doesn't
+have. The other was doc 01's third prompt, a real rendered body — **answered no
+on 2026-07-27** and recorded as a decision, so it never needed this inbox.
 
 _No open questions._
