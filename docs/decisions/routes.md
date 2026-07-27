@@ -5,6 +5,52 @@ area. Entries are newest-first; add new ones at the top, and add a matching line
 to the index in the same change. Replaced decisions move to Superseded at the
 bottom of this file.
 
+### The demo URLs redirect at the edge, and the React route is now its dev twin
+
+_2026-07-27_
+
+**Decision:** `/demo`, `/demo/teacher` and `/demo/student`, plus their three
+`/he` twins, are 308 redirects served by Vercel from
+[`vercel.json`](../../client/vercel.json). The `<Navigate>` routes in
+[`App.tsx`](../../client/src/App.tsx) stay exactly as they are and are now the
+**dev twin**: `vite dev` never reads `vercel.json`, so deleting them would break
+the demo links for anyone working locally. Six rules, one per locale per source,
+because a static redirect can't read a visitor's language preference.
+
+This does not replace
+[`/demo`, `/demo/teacher`, and `/demo/student` are thin
+redirects, never pages](#demo-demoteacher-and-demostudent-are-thin-redirects-never-pages),
+which still stands. What changed is _where_ the redirect happens, not what it
+is — a demo URL that grew its own UI would still be the diverging second path
+that entry deleted.
+
+**Why:** A client-side redirect is invisible to anything that doesn't run
+JavaScript. A crawler or a link unfurler fetching `/demo` got HTTP 200 and the
+generic fallback shell, and never reached the demo page — so the one URL that
+goes into a pitch email was also the one that could say least about itself.
+Following a real 308, an unfurler now lands on `/activity/host/1234` and reads
+that page's own card.
+
+The English targets still land correctly for a Hebrew-preferring visitor:
+`applyBootLocale` rewrites `/activity/host/1234` to its `/he` twin at boot,
+exactly as it does today.
+
+**The trade, stated so nobody rediscovers it as a bug:** 308 is permanent, and
+browsers cache it indefinitely. If the demo's target ever moves, anyone who has
+visited `/demo` keeps the old destination until they clear it. That is the right
+trade for URLs whose entire purpose is being stable enough to say out loud, and
+it is why these are 308 rather than 307.
+
+`vercel.json` spells `1234` out six times rather than reading `DEMO_JOIN_CODE`,
+because JSON can neither import nor carry a comment explaining itself.
+[`pageMeta.ts`](../../client/src/lib/pageMeta.ts) already makes the same
+admission about the same literal; the note lives on `DemoRedirect` in `App.tsx`.
+
+_Implemented in [vercel.json](../../client/vercel.json) and
+[App.tsx](../../client/src/App.tsx)._
+
+---
+
 ### A namespace can register on more than one page, and `chat` registers on four
 
 _2026-07-27_

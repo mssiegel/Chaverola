@@ -55,6 +55,18 @@ const HostActivityPage = lazyPage(() =>
  * A speakable demo URL. Always a redirect into the real flow, never a page of
  * its own — standalone /demo pages were tried and deleted for diverging from
  * the real components (see DECISIONS.md → "Routes & app structure").
+ *
+ * THIS IS THE DEV TWIN, NOT DEAD CODE. In production the demo URLs 308 at the
+ * edge from `vercel.json`, because a client-side redirect is invisible to
+ * everything that doesn't run JavaScript: a crawler or a link unfurler fetching
+ * `/demo` got HTTP 200 and the fallback shell, and `/demo` is the URL that goes
+ * into a pitch email. But `vite dev` never reads `vercel.json`, so deleting
+ * this would break the demo links for everyone developing locally. Both stay.
+ *
+ * `vercel.json` spells `1234` out six times — one rule per locale per source —
+ * rather than reading `DEMO_JOIN_CODE`, since JSON can neither import nor hold
+ * a comment saying so. `lib/pageMeta.ts` makes the same admission about the
+ * same literal. If the demo code ever moves, grep for it.
  */
 function DemoRedirect({ to }: { to: string }) {
   const localePath = useLocalePath();

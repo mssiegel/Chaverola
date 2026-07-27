@@ -1,3 +1,35 @@
 {
+  "redirects": [
+    {
+      "source": "/demo",
+      "destination": "/activity/host/1234",
+      "permanent": true
+    },
+    {
+      "source": "/demo/teacher",
+      "destination": "/activity/host/1234",
+      "permanent": true
+    },
+    {
+      "source": "/demo/student",
+      "destination": "/activity/join/1234",
+      "permanent": true
+    },
+    {
+      "source": "/he/demo",
+      "destination": "/he/activity/host/1234",
+      "permanent": true
+    },
+    {
+      "source": "/he/demo/teacher",
+      "destination": "/he/activity/host/1234",
+      "permanent": true
+    },
+    {
+      "source": "/he/demo/student",
+      "destination": "/he/activity/join/1234",
+      "permanent": true
+    }
+  ],
   "rewrites": [{ "source": "/(.*)", "destination": "/app.html" }]
 }

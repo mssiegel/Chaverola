@@ -99,6 +99,48 @@ function socialCard(
   ];
 }
 
+/**
+ * The page's canonical address and every language twin of it.
+ *
+ * `hreflang` takes the BARE language tags — `en` and `he`, never `en-US` /
+ * `he-IL`. This is language targeting, not regional: a region subtag would
+ * restrict the Hebrew page to searchers in Israel, and there is nothing
+ * Israel-specific about it beyond the language. `OG_LOCALE` above uses the
+ * territory form for the same two locales because Facebook's format demands it,
+ * NOT because anyone chose regional targeting — the asymmetry is deliberate and
+ * neither one should be "fixed" to match the other.
+ *
+ * Alternates come from `url` rather than from the unprefixed route so they are
+ * built from the same string the canonical is, character for character.
+ * `switchLocalePath` strips whatever prefix is already there, so it round-trips.
+ * Doc 04's sitemap has to match these `href`s exactly, and deriving both from
+ * one string is what makes that free rather than vigilant.
+ *
+ * Every page lists ITSELF as well as its twin. Reciprocity is the part that
+ * fails silently: if `/he` names `/` and `/` doesn't name `/he`, Google discards
+ * the pair and neither page is helped. One function emits both sides, so they
+ * cannot drift.
+ */
+function pageLinks(url: string): string[] {
+  const alternate = (hreflang: string, path: string) =>
+    `<link rel="alternate" hreflang="${hreflang}" href="${escapeHtml(`${SITE_ORIGIN}${path}`)}" />`;
+
+  return [
+    // Self-referencing, which is the right shape here: there is no
+    // duplicate-parameter problem to consolidate. The tag's job is to name the
+    // hostname that won (the apex — see SITE_ORIGIN) and to pin the URL against
+    // whatever tracking parameter someone appends to it later.
+    `<link rel="canonical" href="${escapeHtml(`${SITE_ORIGIN}${url}`)}" />`,
+    ...LOCALES.map((locale) =>
+      alternate(locale, switchLocalePath(url, locale))
+    ),
+    // Where to send a language we don't publish. English, because it is the
+    // unprefixed tree — a third language would add its own prefix rather than
+    // pushing English onto `/en` (see docs/decisions/routes.md).
+    alternate("x-default", switchLocalePath(url, DEFAULT_LOCALE)),
+  ];
+}
+
 export interface PrerenderPage {
   /** Path under `dist/`, e.g. `he/activity/join/1234.html`. */
   file: string;
@@ -110,9 +152,9 @@ export interface PrerenderPage {
   description: string;
   /**
    * Extra tags to insert before `</head>`, one per line, already whole. The
-   * Open Graph card is what fills it today; canonical, hreflang and the
-   * structured-data node (docs 03 and 05) append to the same list, which is what
-   * keeps the writer script free of string logic of its own.
+   * Open Graph card and the canonical/hreflang set fill it today; the
+   * structured-data node (doc 05) appends to the same list, which is what keeps
+   * the writer script free of string logic of its own.
    */
   head: string[];
   /**
@@ -274,7 +316,10 @@ export async function prerenderPages(): Promise<PrerenderPage[]> {
         dir: LOCALE_DIR[locale],
         title: meta.title,
         description: meta.description,
-        head: socialCard(common, locale, url, meta.title, meta.description),
+        head: [
+          ...socialCard(common, locale, url, meta.title, meta.description),
+          ...pageLinks(url),
+        ],
         noscript: route === "/" ? homeNoscript(t, common, locale) : null,
       });
     }

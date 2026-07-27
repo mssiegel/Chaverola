@@ -45,7 +45,8 @@ address, and nothing tells a search engine which address is the real one.
 [01](01-every-url-ships-its-own-head.md)'s emitter plus `SITE_ORIGIN` from
 doc [02](02-a-pasted-link-shows-the-product.md)'s first prompt.
 
-- [ ] Prompt 1 — Every page names itself and its twin
+- [x] Prompt 1 — Every page names itself and its twin (the 308s land with the
+      next deploy — `vite preview` doesn't read `vercel.json`)
 - [ ] Prompt 2 — A Hebrew visitor's dead end is in Hebrew
 
 ---
