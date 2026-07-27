@@ -154,6 +154,7 @@ Load-bearing — trip over them before you break one:
 - Files: [client/src/pages/HomePage.tsx](client/src/pages/HomePage.tsx) + `components/home/`, `components/layout/` (`AppLayout`, navbar), `Logo.tsx`, `lib/useHeroCtaPassed.ts`.
 - Invariants: the navbar↔homepage contract (`HERO_JOIN_CTA_ID`) · the brand-gradient token mirrors in `Logo.tsx`/`favicon.svg`.
 - Decisions: [homepage.md](docs/decisions/homepage.md), [navbar.md](docs/decisions/navbar.md), [branding.md](docs/decisions/branding.md).
+- Plan: [docs/plans/seo/](docs/plans/seo/README.md) — Open Graph, canonical, hreflang, robots/sitemap, prerendering. One prompt each; `curl`, not a browser, is the gate for most of them.
 - Verify: a browser pass, desktop and phone (the mobile navbar mode swap on hero-CTA scroll).
 
 **Styling & tokens**
