@@ -1,6 +1,8 @@
+import { DirectionProvider } from "@radix-ui/react-direction";
 import { Navigate, Route, Routes } from "react-router-dom";
 
 import { AppLayout } from "@/components/layout/AppLayout";
+import { LocaleEffects } from "@/components/layout/LocaleEffects";
 import { ScrollToTop } from "@/components/layout/ScrollToTop";
 import { StudentWorldLayout } from "@/components/layout/StudentWorldLayout";
 // The code itself, not the `@/mockData` re-export of it. This module is eager,
@@ -9,7 +11,7 @@ import { StudentWorldLayout } from "@/components/layout/StudentWorldLayout";
 import { DEMO_JOIN_CODE } from "@chaverola/shared";
 
 import { lazyPage } from "@/lib/lazyPage";
-import { useLocalePath } from "@/lib/locale";
+import { LOCALE_DIR, useLocale, useLocalePath } from "@/lib/locale";
 
 /*
   Every page is split out of the entry chunk, because the join screen is the
@@ -59,7 +61,7 @@ function DemoRedirect({ to }: { to: string }) {
 
 /**
  * The canonical route tree (see Shared_Project_Context.md). Rendered once at
- * the root and once under `/he` (Hebrew variant — same English text for now).
+ * the root and once under `/he` (the Hebrew variant — Hebrew copy, RTL).
  * Two pathless layout groups: most pages live under the navbar shell
  * (AppLayout), while the student join flow gets the immersive, navbar-free
  * StudentWorldLayout.
@@ -102,13 +104,21 @@ function LocalizedRoutes() {
 }
 
 export default function App() {
+  // Radix's own useDirection() falls back to "ltr" with no provider, which
+  // would leave the language dropdown's align="end", the emoji and roster
+  // popovers' align="start", and menu arrow-key navigation all pointing at
+  // physical left under /he. It has to live inside the router, since main.tsx
+  // doesn't re-render on a language switch.
+  const dir = LOCALE_DIR[useLocale()];
+
   return (
-    <>
+    <DirectionProvider dir={dir}>
       <ScrollToTop />
+      <LocaleEffects />
       <Routes>
         <Route path="/">{LocalizedRoutes()}</Route>
         <Route path="/he">{LocalizedRoutes()}</Route>
       </Routes>
-    </>
+    </DirectionProvider>
   );
 }

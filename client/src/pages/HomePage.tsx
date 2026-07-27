@@ -1,5 +1,11 @@
 import type { ReactNode } from "react";
+import { Trans, useTranslation } from "react-i18next";
 import { GraduationCap, MessageCircle } from "lucide-react";
+
+// Side-effect import: registers the `home` namespace for both locales into
+// this page's chunk. Every module that reads home:* strings must be reachable
+// from here.
+import "@/i18n/ns/home";
 
 import { DemoSection } from "@/components/home/DemoSection";
 import { FounderNote } from "@/components/home/FounderNote";
@@ -15,8 +21,8 @@ import { LocaleLink } from "@/components/layout/LocaleLink";
 import { Button } from "@/components/ui/button";
 import { useChatDemo } from "@/components/chat/useChatDemo";
 import { HERO_JOIN_CTA_ID } from "@/lib/useHeroCtaPassed";
-import { usePageTitle } from "@/lib/usePageTitle";
-import { heroChatScenario } from "@/mockData";
+import { usePageMeta } from "@/lib/usePageMeta";
+import { heroChatScenario, heroCopyNames } from "@/mockData";
 
 /**
  * The homepage: hero (student-side live chat), the teacher's view of that
@@ -34,7 +40,10 @@ import { heroChatScenario } from "@/mockData";
  * → "The teacher preview mirrors the hero chat live".
  */
 export function HomePage() {
-  usePageTitle("A Classroom Activity That Students Love");
+  // "home" first, so unprefixed keys resolve there; "common" for the shared
+  // navbar-grade strings this page reuses (the Join CTA).
+  const { t } = useTranslation(["home", "common"]);
+  usePageMeta(t("meta.title"), t("meta.description"));
   const chat = useChatDemo(heroChatScenario);
 
   return (
@@ -49,18 +58,21 @@ export function HomePage() {
       <section className="mx-auto grid w-full max-w-6xl flex-1 items-center gap-10 px-4 pt-6 pb-6 sm:pt-14 lg:grid-cols-2 lg:gap-x-14 lg:gap-y-6 lg:pt-16 lg:pb-12">
         {/* Pitch */}
         <div className="flex animate-in flex-col items-start gap-5 duration-700 fade-in slide-in-from-bottom-4 motion-reduce:animate-none sm:gap-6 lg:self-end">
-          <SectionEyebrow>A classroom activity for teachers</SectionEyebrow>
+          <SectionEyebrow>{t("hero.eyebrow")}</SectionEyebrow>
 
-          <h1 className="text-4xl leading-[1.12] font-bold tracking-tight text-balance text-foreground sm:text-5xl xl:text-6xl">
-            Get your whole class talking.{" "}
-            <HighlightMark>In character.</HighlightMark>
+          <h1 className="text-4xl leading-[1.12] font-bold tracking-tight text-balance text-foreground sm:text-5xl xl:text-6xl rtl:tracking-normal">
+            {/* One <Trans>, not two keys: which half of this sentence the
+                highlighter lands on is a word-order decision, and Hebrew
+                makes it differently. */}
+            <Trans
+              t={t}
+              i18nKey="hero.title"
+              components={{ 1: <HighlightMark /> }}
+            />
           </h1>
 
           <p className="max-w-lg text-lg text-pretty text-muted-foreground">
-            You pick the topic and hand out secret characters. Students chat
-            with each other about your lesson, and behind every character is a
-            real classmate. Nobody knows who's who until you reveal it at the
-            end.
+            {t("hero.pitch")}
           </p>
 
           <div className="flex w-full flex-col gap-3 pt-1 sm:w-auto sm:flex-row">
@@ -71,46 +83,44 @@ export function HomePage() {
             >
               {/* The navbar watches this id to swap modes on mobile. */}
               <LocaleLink id={HERO_JOIN_CTA_ID} to="/activity/join">
+                {/* A speech bubble and a mortarboard: not directional. */}
                 <MessageCircle className="size-5" />
-                Join an Activity
+                {t("common:nav.joinLong")}
               </LocaleLink>
             </Button>
             <Button asChild size="lg" variant="outline">
               <LocaleLink to="/activity/create">
                 <GraduationCap className="size-5 text-brand-grape" />
-                Host an Activity
+                {t("cta.host")}
               </LocaleLink>
             </Button>
           </div>
         </div>
 
-        {/* Live sample chat. "the Moon" / "Neil" in this copy must match
-            mockData/heroChatDemo.ts — renaming there means updating this
-            copy too (with a humanizer pass). */}
+        {/* Live sample chat. The cast's names come from `heroCopyNames`, so
+            this copy can't drift from the chat rendered beside it. */}
         <div className="flex animate-in flex-col gap-3 duration-700 fade-in slide-in-from-bottom-6 motion-reduce:animate-none lg:col-start-2 lg:row-span-2 lg:row-start-1">
           <p className="text-center text-sm font-semibold text-brand-grape">
-            This is the student side, live. Go ahead, type as the Moon.
+            {t("hero.chatCaption", { self: heroCopyNames.self })}
           </p>
           <HeroChatbox chat={chat} />
           <div className="mx-auto max-w-[92%] -rotate-1 rounded-xl border border-border bg-card px-4 py-2.5 text-sm text-muted-foreground shadow-md">
-            🤫 In a real round, the Moon and Neil are both your students. Only
-            you know who's playing who, until the reveal at the end.
+            {t("hero.chatNote", {
+              self: heroCopyNames.self,
+              peerShort: heroCopyNames.peerShort,
+            })}
           </div>
         </div>
 
         {/* Setup steps */}
         <div className="animate-in space-y-2.5 duration-700 fade-in slide-in-from-bottom-4 motion-reduce:animate-none lg:col-start-1 lg:self-start">
           <p className="text-sm font-semibold text-foreground/80">
-            Setup takes about a minute:
+            {t("hero.stepsLabel")}
           </p>
           <ol className="space-y-2 text-[15px] text-foreground/90">
-            <HowStep n={1}>
-              Create an activity and pick your characters.
-            </HowStep>
-            <HowStep n={2}>Put the join code on the board.</HowStep>
-            <HowStep n={3}>
-              Students chat. You watch, then reveal who was who.
-            </HowStep>
+            <HowStep n={1}>{t("hero.step1")}</HowStep>
+            <HowStep n={2}>{t("hero.step2")}</HowStep>
+            <HowStep n={3}>{t("hero.step3")}</HowStep>
           </ol>
         </div>
       </section>
@@ -134,7 +144,12 @@ export function HomePage() {
 function HowStep({ n, children }: { n: number; children: ReactNode }) {
   return (
     <li className="flex gap-2.5">
-      <span className="w-5 shrink-0 font-bold text-brand-grape">{n}.</span>
+      {/* dir="ltr" on the marker: "1." is a digit followed by a neutral, which
+          an RTL line reorders into ".1". Same fix in HowItWorksSection's
+          numbered list. */}
+      <span dir="ltr" className="w-5 shrink-0 font-bold text-brand-grape">
+        {n}.
+      </span>
       <span>{children}</span>
     </li>
   );

@@ -49,7 +49,9 @@ export function ChatHeader({
     // `h-0 flex-auto`, so its flex base is 0 and it absorbs NONE of an
     // overflow. Without this the header is what gets crushed when the card
     // runs short of room.
-    <header className="flex shrink-0 items-center justify-between gap-3 bg-gradient-to-r from-brand-grape to-brand-grape-strong px-4 py-3 text-white">
+    // CSS gradients have no logical direction, so the RTL twin is explicit —
+    // the darker stop belongs at the inline end in both languages.
+    <header className="flex shrink-0 items-center justify-between gap-3 bg-gradient-to-r from-brand-grape to-brand-grape-strong px-4 py-3 text-white rtl:bg-gradient-to-l">
       {/* Both lines wrap rather than truncate: names are teacher-authored, so
           a single long one can outgrow any width. */}
       <div className="min-w-0 leading-tight">
@@ -60,7 +62,7 @@ export function ChatHeader({
 
         {firstPeer && (
           <Popover>
-            <PopoverTrigger className="block rounded-md text-left text-sm leading-snug text-white/85 transition-colors hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/70">
+            <PopoverTrigger className="block rounded-md text-start text-sm leading-snug text-white/85 transition-colors hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/70">
               <span className="text-white/60">with </span>
               {firstPeer.character.name}
               {hiddenPeerCount > 0 && (

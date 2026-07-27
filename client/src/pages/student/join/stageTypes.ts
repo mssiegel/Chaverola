@@ -84,16 +84,24 @@ export const RETURNED_FLASH_MS = 2500;
  *  Real time, never scaled — live wire timing is never compressed. */
 export const PENDING_ECHO_TIMEOUT_MS = 5000;
 
-export const PAGE_TITLES: Record<StudentStage, string> = {
-  code: "Join an Activity",
-  loading: "Join an Activity",
-  reconnecting: "Reconnecting",
-  name: "Join an Activity",
-  lobby: "Waiting Lobby",
-  chatting: "Chatting",
-  ended: "Chat Ended",
-  "activity-gone": "Activity Ended",
-};
+/**
+ * The `<title>` per stage — catalog KEYS, not strings, so this module stays
+ * pure (no React, no `t`) and the exhaustive `Record<StudentStage, …>` still
+ * fails to compile the day a stage is added.
+ *
+ * `as const satisfies` is load-bearing: it keeps the literal union, which is
+ * what lets the typed `t(STAGE_TITLE_KEYS[stage])` at the call site check.
+ */
+export const STAGE_TITLE_KEYS = {
+  code: "title.join",
+  loading: "title.join",
+  reconnecting: "title.reconnecting",
+  name: "title.join",
+  lobby: "title.lobby",
+  chatting: "title.chatting",
+  ended: "title.ended",
+  "activity-gone": "title.activityGone",
+} as const satisfies Record<StudentStage, `title.${string}`>;
 
 /**
  * How long the demo lobby waits before the pretend teacher pairs the student

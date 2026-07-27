@@ -107,7 +107,9 @@ export function DemoToggle({
       aria-checked={checked}
       onClick={() => onChange(!checked)}
       className={cn(
-        "relative h-6 w-11 shrink-0 rounded-full transition-colors",
+        // Mirrored whole, like ui/switch.tsx — the thumb's travel is a
+        // physical translate and this control holds no text or asymmetric art.
+        "relative h-6 w-11 shrink-0 rounded-full transition-colors rtl:-scale-x-100",
         checked ? "bg-primary" : "bg-input"
       )}
     >

@@ -1,5 +1,9 @@
 <!doctype html>
-<html lang="en">
+<!-- lang/dir are the ENGLISH shell's values. main.tsx rewrites both before
+     React mounts, so a /he load paints RTL on frame 1; they're spelled out
+     here so the attributes always exist and the first layout can't reflow
+     from a missing dir. -->
+<html lang="en" dir="ltr">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />

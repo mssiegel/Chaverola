@@ -145,7 +145,7 @@ export function WaitingLobby({
         </div>
       )}
 
-      <div className="w-full space-y-4 rounded-2xl border border-border bg-card p-5 text-left shadow-sm">
+      <div className="w-full space-y-4 rounded-2xl border border-border bg-card p-5 text-start shadow-sm">
         <div>
           <SectionLabel>Hosted by</SectionLabel>
           <p className="mt-0.5 font-medium text-foreground">

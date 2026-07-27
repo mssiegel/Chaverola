@@ -59,7 +59,9 @@ export function HostHeader({
       {/* The hero stat. */}
       <div
         ref={heroStatRef}
-        className="mt-5 flex items-center gap-4 rounded-2xl border border-border bg-gradient-to-r from-brand-grape-soft/70 to-card p-4 shadow-sm sm:gap-5 sm:p-5"
+        // Gradients have no logical direction — explicit RTL twin, like
+        // ChatHeader's.
+        className="mt-5 flex items-center gap-4 rounded-2xl border border-border bg-gradient-to-r from-brand-grape-soft/70 to-card p-4 shadow-sm sm:gap-5 sm:p-5 rtl:bg-gradient-to-l"
       >
         <span className="min-w-16 text-center text-5xl font-bold text-brand-grape-strong tabular-nums sm:min-w-20 sm:text-6xl">
           {/* Keyed by value: every change replays the pop animation. */}

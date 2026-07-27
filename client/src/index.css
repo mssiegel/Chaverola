@@ -13,6 +13,23 @@
 :root {
   --radius: 0.9rem;
 
+  /*
+    The app face. Fredoka does ship a Hebrew subset, but it's a Latin display
+    face with a bolt-on Hebrew — tight counters that read badly at 15px on a
+    phone. The RTL locale swaps to Rubik, drawn for Hebrew UI text.
+
+    This lives here rather than inside `@theme inline` because @theme INLINES
+    its values into the generated utilities: redefining --font-sans in the
+    [dir] block below would reach the `body` rule but not the `font-sans`
+    utility. Same two-layer shape as --primary / --color-primary.
+  */
+  --font-app: "Fredoka", "Nunito", ui-sans-serif, system-ui, sans-serif;
+
+  /* Fredoka's Latin wants the tracking pulled in. Hebrew has no caps, and
+     negative tracking closes its already-tight counters — so the RTL block
+     zeroes it. Tokenised so the heading rule stays one rule. */
+  --tracking-heading: -0.01em;
+
   /* Surfaces & text */
   --background: #f6f5fc;
   --foreground: #221f3b;
@@ -158,7 +175,18 @@
   --color-brand-gradient-from: var(--brand-gradient-from);
   --color-brand-gradient-to: var(--brand-gradient-to);
 
-  --font-sans: "Fredoka", "Nunito", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-app);
+}
+
+/*
+  The RTL overrides. Keyed on [dir="rtl"], not :lang(he) — it follows the one
+  attribute LocaleEffects sets, so a third right-to-left language inherits all
+  of this for free. Fredoka stays behind Rubik as the swap fallback.
+*/
+[dir="rtl"] {
+  --font-app:
+    "Rubik", "Fredoka", "Nunito", ui-sans-serif, system-ui, sans-serif;
+  --tracking-heading: normal;
 }
 
 @layer base {
@@ -185,7 +213,7 @@
   h2,
   h3 {
     font-weight: 600;
-    letter-spacing: -0.01em;
+    letter-spacing: var(--tracking-heading);
   }
 }
 
@@ -262,8 +290,22 @@
   }
 }
 
-/* A soft, friendly custom scrollbar for the chat regions. */
 @layer utilities {
+  /*
+    Icon mirroring for RTL. Applied per icon and NEVER as a sweep: an arrow
+    meaning "forward" flips, but a vertical chevron, a media transport control
+    (play, fast-forward — these stay LTR in RTL UIs by both Material's and
+    Apple's guidance), a cycle glyph, and the brand mark all do not.
+
+    Nothing carrying this class may also carry a Tailwind transform
+    (animate-spin, rotate-*) — they write the same property and the last one
+    wins.
+  */
+  [dir="rtl"] .flip-rtl {
+    transform: scaleX(-1);
+  }
+
+  /* A soft, friendly custom scrollbar for the chat regions. */
   .scroll-soft {
     scrollbar-width: thin;
     scrollbar-color: var(--border) transparent;

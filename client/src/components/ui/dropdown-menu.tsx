@@ -93,12 +93,12 @@ function DropdownMenuRadioItem({
     <DropdownMenuPrimitive.RadioItem
       data-slot="dropdown-menu-radio-item"
       className={cn(
-        "relative flex cursor-default items-center gap-2 rounded-lg py-2 pr-2.5 pl-8 text-sm font-medium outline-none select-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+        "relative flex cursor-default items-center gap-2 rounded-lg py-2 ps-8 pe-2.5 text-sm font-medium outline-none select-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
         className
       )}
       {...props}
     >
-      <span className="pointer-events-none absolute left-2.5 flex size-4 items-center justify-center">
+      <span className="pointer-events-none absolute start-2.5 flex size-4 items-center justify-center">
         <DropdownMenuPrimitive.ItemIndicator>
           <CheckIcon className="size-4 text-brand-grape" />
         </DropdownMenuPrimitive.ItemIndicator>

@@ -311,7 +311,7 @@ export function PairingPanel({
                     // out of pairing anyone at all.
                     disabled={!selected && (dropped || selectionFull)}
                     className={cn(
-                      "flex min-w-0 flex-1 items-center gap-2.5 rounded-lg px-2 py-1.5 text-left transition-colors hover:bg-accent/60 disabled:cursor-not-allowed disabled:opacity-60",
+                      "flex min-w-0 flex-1 items-center gap-2.5 rounded-lg px-2 py-1.5 text-start transition-colors hover:bg-accent/60 disabled:cursor-not-allowed disabled:opacity-60",
                       // A ticked dropped row is still tappable (to untick), so
                       // the dim has to come from the drop, not from disabled.
                       dropped && "opacity-60"

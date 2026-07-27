@@ -1,7 +1,13 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useOutletContext, useParams } from "react-router-dom";
 
 import type { LobbyConnectionState } from "@chaverola/shared";
+
+// Side-effect imports: register the `student` and `chat` namespaces into
+// this page chunk, which is the only chunk that renders their strings.
+import "@/i18n/ns/student";
+import "@/i18n/ns/chat";
 
 import { DemoBanner } from "@/components/demo/DemoBanner";
 import type { StudentWorldOutletContext } from "@/components/layout/StudentWorldLayout";
@@ -11,7 +17,7 @@ import { WaitingLobby } from "@/components/Student/WaitingLobby";
 import { useLocaleNavigate } from "@/lib/locale";
 import { useStudentSession } from "@/lib/studentSession";
 import { useActivityLookup } from "@/lib/useActivityLookup";
-import { usePageTitle } from "@/lib/usePageTitle";
+import { usePageMeta } from "@/lib/usePageMeta";
 import { cn } from "@/lib/utils";
 import { DEMO_JOIN_CODE, DEMO_STUDENT_NAME } from "@/mockData";
 import type { Activity } from "@/types/activity";
@@ -23,7 +29,7 @@ import { LoadingCard } from "./join/LoadingCard";
 import { LobbyDemoControls } from "./join/LobbyDemoControls";
 import { ReconnectingCard } from "./join/ReconnectingCard";
 import {
-  PAGE_TITLES,
+  STAGE_TITLE_KEYS,
   STUDENT_CARD_CLASS,
   type StudentStage,
 } from "./join/stageTypes";
@@ -61,6 +67,7 @@ import { useDemoLobby } from "./join/useDemoLobby";
  * session and its latches, and the render dispatch.
  */
 export function JoinActivityPage() {
+  const { t } = useTranslation("student");
   const { joinCode: joinCodeParam } = useParams();
   const navigate = useLocaleNavigate();
   const { setChatStudentName } = useOutletContext<StudentWorldOutletContext>();
@@ -282,7 +289,7 @@ export function JoinActivityPage() {
     return () => setChatStudentName(null);
   }, [chatStudentName, setChatStudentName]);
 
-  usePageTitle(PAGE_TITLES[stage]);
+  usePageMeta(t(STAGE_TITLE_KEYS[stage]), t("join.meta.description"));
 
   // Match changes swap the screen on this same route (lobby → chat, rematch,
   // back to lobby) without navigating, so ScrollToTop can't see them — open

@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { Trans, useTranslation } from "react-i18next";
 import { GraduationCap, Mail } from "lucide-react";
 
 import {
@@ -17,9 +18,15 @@ import {
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 
-/** Same address as the founder's note, with a plan-specific subject. */
-const CONTACT_MAILTO =
-  "mailto:siegel.moshes@gmail.com?subject=Chaverola%20Complete%20Implementation&body=Hi%20Moshe%2C%0A%0A";
+/** Same address as the founder's note; the subject and greeting come from the
+ *  catalog, so a Hebrew visitor's draft opens in Hebrew. */
+export const CONTACT_EMAIL = "siegel.moshes@gmail.com";
+
+export function mailtoHref(subject: string, body: string): string {
+  return `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(
+    subject
+  )}&body=${encodeURIComponent(body)}`;
+}
 
 /**
  * The two plans, right above the founder's note. The free plan is the whole
@@ -29,28 +36,28 @@ const CONTACT_MAILTO =
  * product".
  */
 export function PlansSection() {
+  const { t } = useTranslation("home");
+
   return (
     <section className="mx-auto w-full max-w-6xl px-4 py-14 sm:py-20">
       <div className="flex flex-col items-start gap-5 sm:gap-6">
-        <SectionEyebrow>Plans</SectionEyebrow>
-        <SectionHeading>The free plan is the whole thing.</SectionHeading>
+        <SectionEyebrow>{t("plans.eyebrow")}</SectionEyebrow>
+        <SectionHeading>{t("plans.heading")}</SectionHeading>
         <p className="max-w-2xl text-lg text-pretty text-muted-foreground">
-          Everything on this page is free for every teacher: the characters, the
-          live dashboard, the reveal at the end. The second plan is for teachers
-          and schools who want us working alongside them.
+          {t("plans.body")}
         </p>
       </div>
 
       <div className="mx-auto mt-8 grid w-full max-w-md gap-6 sm:mt-10 lg:max-w-4xl lg:grid-cols-2 lg:gap-8">
         <PlanCard
-          name="Free"
-          tagline="Everything Chaverola does today, for any teacher who wants it."
+          name={t("plans.free.name")}
+          tagline={t("plans.free.tagline")}
           bullets={[
-            "Create activities and hand out secret characters",
-            "Students chat in character from any browser, with no accounts and nothing to install",
-            "A live teacher dashboard where you watch every student chat",
-            "The name reveal at the end of each chat, when students find out who was who",
-            "Transcripts emailed to you when class wraps up",
+            t("plans.free.bullet1"),
+            t("plans.free.bullet2"),
+            t("plans.free.bullet3"),
+            t("plans.free.bullet4"),
+            t("plans.free.bullet5"),
           ]}
           footer={
             /* Matches the other Host buttons: solid grape stays reserved
@@ -58,7 +65,7 @@ export function PlansSection() {
             <Button asChild size="lg" variant="outline">
               <LocaleLink to="/activity/create">
                 <GraduationCap className="size-5 text-brand-grape" />
-                Host an Activity
+                {t("cta.host")}
               </LocaleLink>
             </Button>
           }
@@ -66,26 +73,34 @@ export function PlansSection() {
 
         <PlanCard
           highlighted
-          sticker="With the Chaverola team"
-          name="Complete Implementation"
-          tagline="For teachers and schools that want help making Chaverola part of how they teach."
+          sticker={t("plans.complete.sticker")}
+          name={t("plans.complete.name")}
+          tagline={t("plans.complete.tagline")}
           bullets={[
-            "Training from our team on fitting activities into your curriculum",
-            <>
-              Connections to{" "}
-              <span className="whitespace-nowrap">
-                <GoogleClassroomLogo />
-                &nbsp;Google Classroom
-              </span>{" "}
-              and the other tools your school already uses
-            </>,
-            "A teacher account, so your characters are saved and ready for the next activity",
-            "Mid-activity tasks: write them ahead of time, then push each one into your students' chats when the room is ready for it",
+            t("plans.complete.bullet1"),
+            // <Trans> because the logo and the product name have to stay
+            // glued together mid-sentence, and where in the sentence they
+            // land is a word-order decision.
+            <Trans
+              key="classroom"
+              t={t}
+              i18nKey="plans.complete.bullet2"
+              components={{
+                1: (
+                  <span className="whitespace-nowrap">
+                    <GoogleClassroomLogo />
+                    &nbsp;
+                  </span>
+                ),
+              }}
+            />,
+            t("plans.complete.bullet3"),
+            t("plans.complete.bullet4"),
           ]}
           footer={
             <>
               <p className="text-sm text-muted-foreground">
-                Priced per teacher or school.
+                {t("plans.complete.price")}
               </p>
               <CompleteContactDialog />
             </>
@@ -185,35 +200,36 @@ function GoogleClassroomLogo() {
  * for anyone without a mail app wired up.
  */
 function CompleteContactDialog() {
+  const { t } = useTranslation("home");
+
   return (
     <Dialog>
       <DialogTrigger asChild>
         <Button size="lg" variant="secondary">
           <Mail className="size-5 text-brand-grape" />
-          Write to Moshe
+          {t("plans.complete.cta")}
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Let's figure out what fits</DialogTitle>
-          <DialogDescription>
-            Whether you're one teacher or a whole school, Complete
-            Implementation is shaped around you, and so is the price. Write to
-            Moshe with a little about what you're planning, and we'll take it
-            from there.
-          </DialogDescription>
+          <DialogTitle>{t("plans.dialog.title")}</DialogTitle>
+          <DialogDescription>{t("plans.dialog.body")}</DialogDescription>
         </DialogHeader>
         <Button asChild variant="secondary">
-          <a href={CONTACT_MAILTO}>
+          <a
+            href={mailtoHref(t("plans.mailto.subject"), t("plans.mailto.body"))}
+          >
             <Mail className="size-5 text-brand-grape" />
-            Email Moshe
+            {t("plans.dialog.emailCta")}
           </a>
         </Button>
         <p className="text-center text-sm text-muted-foreground">
-          Or copy the address:{" "}
-          <span className="font-semibold text-brand-grape select-all">
-            siegel.moshes@gmail.com
-          </span>
+          {t("plans.dialog.copyLabel")}{" "}
+          {/* A Latin address inside Hebrew prose: <bdi> keeps the dot and the
+              @ from jumping to the wrong end of the run. */}
+          <bdi className="font-semibold text-brand-grape select-all">
+            {CONTACT_EMAIL}
+          </bdi>
         </p>
       </DialogContent>
     </Dialog>

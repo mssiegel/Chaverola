@@ -1,8 +1,11 @@
+import { useTranslation } from "react-i18next";
+
 import {
   SectionEyebrow,
   SectionHeading,
 } from "@/components/home/SectionHeading";
 import { ChatCard } from "@/components/Teacher/ChatCard";
+import { heroCopyNames } from "@/mockData";
 import type { ChatMessage, Participant } from "@/types/chat";
 
 interface TeacherViewSectionProps {
@@ -27,6 +30,8 @@ export function TeacherViewSection({
   participants,
   messages,
 }: TeacherViewSectionProps) {
+  const { t } = useTranslation("home");
+
   return (
     <section className="border-y border-border/70 bg-brand-grape-soft/30">
       {/* grid-cols-1 (not the implicit auto track) so the chat card clamps
@@ -34,44 +39,33 @@ export function TeacherViewSection({
       <div className="mx-auto grid w-full max-w-6xl grid-cols-1 items-center gap-10 px-4 py-14 sm:py-20 lg:grid-cols-2 lg:gap-14">
         {/* Pitch */}
         <div className="flex flex-col items-start gap-5">
-          <SectionEyebrow>The teacher's view</SectionEyebrow>
+          <SectionEyebrow>{t("teacherView.eyebrow")}</SectionEyebrow>
 
-          <SectionHeading>
-            Students see characters. You see who's who.
-          </SectionHeading>
+          <SectionHeading>{t("teacherView.heading")}</SectionHeading>
 
           {/* No "this card" here: on phones the card renders well below this
               text, so spatial pointing breaks. The caption right above the
-              card does the pointing instead — see DECISIONS.md.
-              "the Moon" / "Neil Armstrong" / "Dana K" below must match
-              mockData/heroChatDemo.ts — renaming there means updating this
-              copy too (with a humanizer pass). */}
+              card does the pointing instead — see DECISIONS.md. The cast's
+              names come from `heroCopyNames`, so this copy can't drift from
+              the chat it describes. */}
           <p className="max-w-lg text-lg text-pretty text-muted-foreground">
-            At the top of this page, someone plays the Moon and someone plays
-            Neil Armstrong. As the teacher, you see that same chat with each
-            student's real name next to their character.
+            {t("teacherView.body", {
+              self: heroCopyNames.self,
+              peer: heroCopyNames.peer,
+            })}
           </p>
 
-          <ul className="max-w-lg list-disc space-y-2.5 pl-5 text-[15px] text-foreground/90 marker:text-brand-grape">
-            <li>
-              Students only see each other's characters. Nobody is anonymous to
-              you, so if anyone gets out of line, you'll know exactly who.
-            </li>
-            <li>
-              Every chat in your activity gets its own live card, so you can
-              watch the whole room at once.
-            </li>
-            <li>
-              When the activity wraps up, Chaverola can email you the full
-              transcript of every chat.
-            </li>
+          <ul className="max-w-lg list-disc space-y-2.5 ps-5 text-[15px] text-foreground/90 marker:text-brand-grape">
+            <li>{t("teacherView.bullet1")}</li>
+            <li>{t("teacherView.bullet2")}</li>
+            <li>{t("teacherView.bullet3")}</li>
           </ul>
         </div>
 
         {/* The real monitoring card, live */}
         <div className="flex flex-col gap-3">
           <p className="text-center text-sm font-semibold text-brand-grape">
-            This is the teacher side, live. Same chat, now with names.
+            {t("teacherView.caption")}
           </p>
           <div className="mx-auto w-full max-w-md">
             <ChatCard
@@ -81,9 +75,10 @@ export function TeacherViewSection({
             />
           </div>
           <div className="mx-auto max-w-[92%] rotate-1 rounded-xl border border-border bg-card px-4 py-2.5 text-sm text-muted-foreground shadow-md">
-            🕵️ Try it: say something as the Moon up top, then check back here.
-            In this demo you're borrowing Dana K's seat, so the message shows up
-            with her name on it.
+            {t("teacherView.note", {
+              self: heroCopyNames.self,
+              seat: heroCopyNames.seat,
+            })}
           </div>
         </div>
       </div>

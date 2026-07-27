@@ -5,6 +5,68 @@ area. Entries are newest-first; add new ones at the top, and add a matching line
 to the index in the same change. Replaced decisions move to Superseded at the
 bottom of this file.
 
+### The brand is חברולה in Hebrew, and the logo mark never mirrors
+
+_2026-07-27_
+
+**Decision:** Under `/he` the brand reads **חברולה** everywhere the app writes
+it: the navbar wordmark, the student world's pill, the `<title>` suffix, and
+body copy. What stays Latin is the domain (`www.chaverola.com`, which a teacher
+reads out loud to the class) and the email From-name.
+
+The logo mark itself is never flipped. Its speech-bubble tail points
+bottom-left in both languages.
+
+**Why:** "Chaverola" is a Hebrew word already (Chaver + Olah), so spelling it
+in Latin on a Hebrew page reads as a foreign product rather than a local one.
+The exceptions are the two places the Latin string is the identifier rather
+than the name.
+
+The mark stays put because `public/favicon.svg` is a pinned mirror of
+`Logo.tsx` and can't follow a CSS transform. A mirrored wordmark beside an
+unmirrored favicon looks broken in a way a tail on the "wrong" side does not.
+The same reasoning covers media transport icons (play, fast-forward), which
+keep pointing right in RTL by both Material's and Apple's guidance.
+
+---
+
+### Hebrew uses Rubik, and it's a quality call rather than a missing-glyph fix
+
+_2026-07-27_
+
+**Decision:** `[dir="rtl"]` swaps `--font-app` to Rubik (Hebrew subsets only,
+four weights) with Fredoka behind it, and zeroes the headings' `-0.01em`
+tracking.
+
+**Why:** Fredoka already ships a Hebrew subset, so there was never any tofu to
+fix. Rubik is here because Fredoka's Hebrew is a bolt-on to a Latin display
+face with counters that close up at 15px on a phone, while Rubik is drawn for
+Hebrew UI text. Worth writing down so nobody later removes the dependency as
+unnecessary after checking that Fredoka "already works".
+
+The tracking goes with it: negative letter-spacing is a Latin adjustment, and
+Hebrew has no caps for it to help. Four `tracking-tight` utilities override the
+token directly and carry an `rtl:tracking-normal` twin.
+
+---
+
+### Hebrew is written in masculine second person
+
+_2026-07-27_
+
+**Decision:** Hebrew copy addresses the reader in the masculine, always. Never
+slash forms (`אתה/את`, `הצטרף/י`).
+
+**Why:** Founder call (2026-07-27). Slashes are standard on Israeli forms and
+school paperwork, which is exactly the register this product is trying not to
+have. It is a game-like product for teenagers, and buttons in particular can't
+carry the clutter. The cost is real and accepted: half of any class is
+addressed in the wrong gender. Where a phrasing can sidestep gender without
+sounding stilted (an infinitive on a button, a noun label instead of a verb),
+it does.
+
+---
+
 ### The name's story is Chaver + Olah ("rising up"), not Chaver + Crayola
 
 _2026-07-18_

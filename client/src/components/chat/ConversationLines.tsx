@@ -82,7 +82,7 @@ export function ConversationLines({
             >
               {sender.character.name}
               {isSelf && (
-                <span className="ml-1 align-middle text-[11px] font-medium text-muted-foreground">
+                <span className="ms-1 align-middle text-[11px] font-medium text-muted-foreground">
                   (you)
                 </span>
               )}

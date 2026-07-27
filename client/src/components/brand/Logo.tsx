@@ -1,3 +1,5 @@
+import { useTranslation } from "react-i18next";
+
 import { cn } from "@/lib/utils";
 
 interface LogoProps {
@@ -19,13 +21,18 @@ interface LogoProps {
  * favicon are pinned mirrors — update all three together.
  */
 export function LogoMark({ size = 36 }: { size?: number }) {
+  const { t } = useTranslation();
   return (
     <svg
       width={size}
       height={size}
       viewBox="0 0 64 64"
       role="img"
-      aria-label="Chaverola"
+      aria-label={t("brand.name")}
+      // Never carries `flip-rtl`: the tail points bottom-left, and
+      // public/favicon.svg is a pinned mirror that can't follow. A mirrored
+      // logo beside an unmirrored favicon is worse than a tail on the
+      // "wrong" side. See DECISIONS.md → branding.
       className="shrink-0"
     >
       <defs>
@@ -56,17 +63,20 @@ export function Logo({
   className,
   wordmarkClassName,
 }: LogoProps) {
+  const { t } = useTranslation();
   return (
     <span className={cn("inline-flex items-center gap-2", className)}>
       <LogoMark size={size} />
       {withWordmark && (
         <span
           className={cn(
-            "text-xl font-semibold tracking-tight text-foreground",
+            // Negative tracking is a Latin adjustment; it closes Hebrew's
+            // already-tight counters, so RTL resets it.
+            "text-xl font-semibold tracking-tight text-foreground rtl:tracking-normal",
             wordmarkClassName
           )}
         >
-          Chaverola
+          {t("brand.name")}
         </span>
       )}
     </span>

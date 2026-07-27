@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { useTranslation } from "react-i18next";
 import { Outlet, useLocation } from "react-router-dom";
 // Straight from shared, not via `@/mockData` — the layout is eager, and the
 // barrel would bring the demo fixtures with it. Same constant either way.
@@ -29,6 +30,7 @@ import { PageSpinner } from "./PageSpinner";
  * see DECISIONS.md. From `sm` up the bar is static.
  */
 export function AppLayout() {
+  const { t } = useTranslation();
   const heroCtaPassed = useHeroCtaPassed();
   // null = no hero CTA, i.e. not the homepage → no navbar Join CTA at all.
   const onHomepage = heroCtaPassed !== null;
@@ -59,14 +61,16 @@ export function AppLayout() {
             <LocaleLink
               to="/"
               className="rounded-lg transition-opacity hover:opacity-80"
-              aria-label="Chaverola home"
+              aria-label={t("brand.home")}
             >
               <Logo
                 size={30}
                 wordmarkClassName={cn(
                   "max-w-32 overflow-hidden transition-all duration-300 ease-out motion-reduce:transition-none",
+                  // Explicit rtl: variants rather than -scale-x-100: this one
+                  // wraps the wordmark, and mirroring would reverse the text.
                   heroCtaPassed === true &&
-                    "max-sm:max-w-0 max-sm:-translate-x-2 max-sm:opacity-0"
+                    "max-sm:max-w-0 max-sm:-translate-x-2 max-sm:opacity-0 rtl:max-sm:translate-x-2"
                 )}
               />
             </LocaleLink>
@@ -79,7 +83,9 @@ export function AppLayout() {
               <>
                 {/* From `sm` up: always there, full label, no swap. */}
                 <Button asChild size="sm" className="max-sm:hidden">
-                  <LocaleLink to="/activity/join">Join an Activity</LocaleLink>
+                  <LocaleLink to="/activity/join">
+                    {t("nav.joinLong")}
+                  </LocaleLink>
                 </Button>
                 {/* Phones: hidden while the hero's own Join CTA is on screen. */}
                 <div
@@ -87,12 +93,16 @@ export function AppLayout() {
                   className={cn(
                     "overflow-hidden transition-all duration-300 ease-out motion-reduce:transition-none sm:hidden",
                     heroCtaPassed
-                      ? "visible max-w-36 translate-x-0 opacity-100"
-                      : "invisible max-w-0 translate-x-4 opacity-0"
+                      ? // translate-x-0 is direction-neutral; the offscreen
+                        // resting spot is not, so it gets an rtl: twin.
+                        "visible max-w-36 translate-x-0 opacity-100"
+                      : "invisible max-w-0 translate-x-4 opacity-0 rtl:-translate-x-4"
                   )}
                 >
                   <Button asChild size="sm">
-                    <LocaleLink to="/activity/join">Join Activity</LocaleLink>
+                    <LocaleLink to="/activity/join">
+                      {t("nav.joinShort")}
+                    </LocaleLink>
                   </Button>
                 </div>
               </>

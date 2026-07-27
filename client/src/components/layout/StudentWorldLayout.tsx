@@ -1,4 +1,5 @@
 import { Suspense, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Outlet } from "react-router-dom";
 
 import { ChaverolaPill } from "@/components/brand/ChaverolaPill";
@@ -36,6 +37,7 @@ export interface StudentWorldOutletContext {
  * the world's chrome gets out of the way"). Both come back on blur.
  */
 export function StudentWorldLayout() {
+  const { t } = useTranslation();
   // While a chat is on screen the brand pill disappears (one stray tap on it
   // would dump the student on the homepage and kill the chat) and the
   // student's name badge fills the vacated corner.
@@ -59,13 +61,16 @@ export function StudentWorldLayout() {
           dock's idiom), because index.html's viewport-fit=cover runs the page
           under the notch. The left/right ones are the landscape half: rotate a
           notched iPhone and the notch eats the corner the language pill sits
-          in. `pl`/`pr`, not `ps`/`pe` — the env() vars are physical, and this
-          app mirrors under /he. */}
+          in. `pl`/`pr`, not `ps`/`pe` — the env() vars are PHYSICAL, and this
+          app now really does mirror under /he, so a logical
+          `ps-[…inset-left]` would put the left notch's inset on the right
+          edge. These two are the one deliberate exception to the logical-
+          property sweep; leave them physical. */}
       <div className="pointer-events-none fixed inset-x-0 top-0 z-20 flex items-center justify-between gap-3 pt-[max(1rem,env(safe-area-inset-top))] pr-[max(1rem,env(safe-area-inset-right))] pl-[max(1rem,env(safe-area-inset-left))] max-sm:group-has-[textarea:focus]:hidden">
         {chatStudentName === null ? (
           <LocaleLink
             to="/"
-            aria-label="Chaverola home"
+            aria-label={t("brand.home")}
             className="pointer-events-auto inline-flex rounded-full transition-opacity hover:opacity-90"
           >
             <ChaverolaPill />
@@ -73,8 +78,18 @@ export function StudentWorldLayout() {
         ) : (
           <StudentNameBadge name={chatStudentName} />
         )}
-        {/* `ms-auto` keeps the switcher pinned end even with no start chrome. */}
-        <LanguageSwitcher className="pointer-events-auto ms-auto shrink-0 rounded-full bg-white/90 text-foreground shadow-md backdrop-blur-sm hover:bg-white hover:text-foreground" />
+        {/* The switcher goes away for the same reason the brand pill does:
+            `/` and `/he` are separate route mounts, so switching language
+            remounts the page — which mid-chat means a dropped socket and a
+            reset conversation. A student picks their language at the join
+            gate; mid-roleplay is the worst moment to offer a reset. See
+            DECISIONS.md → "The language switcher disappears once a student is
+            seated".
+
+            `ms-auto` keeps it pinned end even with no start chrome. */}
+        {chatStudentName === null && (
+          <LanguageSwitcher className="pointer-events-auto ms-auto shrink-0 rounded-full bg-white/90 text-foreground shadow-md backdrop-blur-sm hover:bg-white hover:text-foreground" />
+        )}
       </div>
 
       {/* The top pad clears the corner bar; when that bar stands down for the
@@ -118,10 +133,14 @@ export function StudentWorldLayout() {
  * the world. Just the name: no avatar disc, since students never have one.
  */
 function StudentNameBadge({ name }: { name: string }) {
+  const { t } = useTranslation();
   return (
     <p className="min-w-0 truncate rounded-full bg-brand-grape-strong/60 px-4 py-2 text-sm font-semibold text-white backdrop-blur-sm">
-      <span className="sr-only">Signed in as </span>
-      {name}
+      <span className="sr-only">{t("student.signedInAs")}</span>
+      {/* The name is student-typed, so it may be a different script from the
+          UI around it — <bdi> keeps it from dragging neighbouring
+          punctuation to the wrong side. */}
+      <bdi>{name}</bdi>
     </p>
   );
 }

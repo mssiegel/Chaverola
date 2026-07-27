@@ -23,7 +23,7 @@ export function FieldLabelRow({
       >
         {label}
         {optional && (
-          <span className="ml-1.5 font-normal text-muted-foreground">
+          <span className="ms-1.5 font-normal text-muted-foreground">
             (optional)
           </span>
         )}

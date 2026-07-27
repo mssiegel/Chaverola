@@ -1,6 +1,10 @@
 import { useState, type ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 import { Loader2, RotateCw } from "lucide-react";
 import { useParams } from "react-router-dom";
+
+// Side-effect import: registers the `teacher` namespace into this page chunk.
+import "@/i18n/ns/teacher";
 
 import { DemoBanner } from "@/components/demo/DemoBanner";
 import { LocaleLink } from "@/components/layout/LocaleLink";
@@ -11,7 +15,7 @@ import { useHostActivityLive } from "@/components/Teacher/HostActivity/useHostAc
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { sameRoster } from "@/lib/hostActivity";
-import { usePageTitle } from "@/lib/usePageTitle";
+import { usePageMeta } from "@/lib/usePageMeta";
 import { useHostedActivityLookup } from "@/lib/useHostedActivityLookup";
 import { DEMO_JOIN_CODE, demoHostedActivity } from "@/mockData";
 import type { ActivitySettings, HostedActivity } from "@/types/activity";
@@ -32,7 +36,10 @@ import type { ActivitySettings, HostedActivity } from "@/types/activity";
  */
 export function HostActivityPage() {
   const { hostKey } = useParams();
-  usePageTitle("Your Live Activity");
+  const { t } = useTranslation("teacher");
+  // The host page is behind an unguessable key and never indexed, so its
+  // description is just the title again rather than its own catalog key.
+  usePageMeta(t("host.meta.title"), t("host.meta.title"));
 
   // The demo never consults this: the hook settles `1234` (or any other
   // non-key-shaped param) as not-found without a network trip.

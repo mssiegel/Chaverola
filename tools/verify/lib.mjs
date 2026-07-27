@@ -98,6 +98,9 @@ export async function createActivity({
 export async function openTeacher(browser, hostKey, label = "teacher") {
   const ctx = await browser.newContext({
     viewport: { width: 1440, height: 900 },
+    // Pinned: a bare URL now falls back to navigator.language, so without this
+    // the drivers' English selectors would depend on the machine's locale.
+    locale: "en-US",
   });
   const page = await ctx.newPage();
   let sawSocket = false;
@@ -160,6 +163,8 @@ export async function joinStudent(browser, joinCode, name) {
     viewport: { width: 390, height: 844 },
     isMobile: true,
     hasTouch: true,
+    // Same reason as openTeacher: keep the English tree deterministic.
+    locale: "en-US",
   });
   const page = await ctx.newPage();
   await page.goto(`${CLIENT}/activity/join/${joinCode}`);

@@ -70,8 +70,12 @@ You may take **loose** inspiration from Frempco.com, but do **not** copy it.
 
 Every route also exists with an `/he` prefix (e.g., `/he/activity/join`).
 
-For now, `/he` routes render the **same English text** — no translation and no RTL yet.
-That comes later.
+`/he` renders **Hebrew copy, right to left**. English is the unprefixed locale and stays
+that way. Hebrew is written in **masculine second person** throughout, never slash forms.
+
+Teacher-authored text is **never translated**, in any locale: character names, the host's
+name, the student instructions, student names, and every chat message pass through
+verbatim.
 
 ---
 
@@ -79,8 +83,11 @@ That comes later.
 
 - Should look like it belongs in a middle school / high school: **fun, friendly,
   energetic, but clean.**
-- **Font: Fredoka** (fallback: **Nunito**). Hebrew will use Rubik later — **do not add it
-  now.**
+- **Font: Fredoka** (fallback: **Nunito**). Hebrew uses **Rubik** (Fredoka behind it):
+  Fredoka does ship Hebrew glyphs, but it's a Latin display face with a bolt-on Hebrew,
+  and Rubik is drawn for Hebrew UI text.
+- **Brand name:** **Chaverola** in English, **חברולה** in Hebrew. The domain
+  (`www.chaverola.com`) stays Latin in both.
 - **Logo & favicon:** generate an SVG — one large rounded speech bubble with a friendly
   face (two dot eyes and a small smile) filling most of the tile, tail at the bottom left.
   Flat and minimal, **no sparkles.** Set on a rounded-square app-icon tile. **Use the same

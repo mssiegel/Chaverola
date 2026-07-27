@@ -21,11 +21,35 @@ import type { ChatScenario, Participant } from "@/types/chat";
   header tight. See DECISIONS.md → "Demo students have short names, and the
   teacher is never one of them".
 
-  Coupling: "the Moon", "Neil"/"Neil Armstrong", and "Dana K" appear verbatim
-  in homepage copy (HomePage.tsx and TeacherViewSection.tsx). Renaming anyone
-  here is a coordinated copy change across those files — and copy changes go
-  through the humanizer pass (see AGENTS.md).
+  The homepage copy names these characters, and it reads them from
+  `heroCopyNames` below rather than repeating them — so a recast can't leave
+  the page describing a chat that isn't on it. Copy changes still go through
+  the humanizer pass (see AGENTS.md).
 */
+
+/**
+ * The names the homepage prose interpolates. Emoji-free and short, because the
+ * copy wants "Neil" and "the Moon" where the roster carries "Neil Armstrong 🚀"
+ * and "the Moon 🌕" — hence a record of its own rather than reaching into the
+ * participants below.
+ */
+export interface HeroCopyNames {
+  /** The character the visitor plays. */
+  self: string;
+  /** The partner's full character name. */
+  peer: string;
+  /** The partner, as prose refers to them in passing. */
+  peerShort: string;
+  /** The demo student whose seat the visitor is borrowing. */
+  seat: string;
+}
+
+export const heroCopyNames: HeroCopyNames = {
+  self: "the Moon",
+  peer: "Neil Armstrong",
+  peerShort: "Neil",
+  seat: "Dana K",
+};
 
 const moon: Participant = {
   id: "self-moon",

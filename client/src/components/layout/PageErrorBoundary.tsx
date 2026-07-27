@@ -2,6 +2,7 @@ import { Component } from "react";
 import type { ReactNode } from "react";
 
 import { Button } from "@/components/ui/button";
+import { i18n } from "@/i18n";
 
 import { PlaceholderPage } from "./PlaceholderPage";
 
@@ -36,14 +37,21 @@ export class PageErrorBoundary extends Component<
   render() {
     if (!this.state.failed) return this.props.children;
 
+    // getFixedT, not useTranslation: this is a class OUTSIDE BrowserRouter and
+    // outside any provider, and it's the floor under the whole app — it must
+    // never itself throw. `common` is the one namespace loaded at init, so
+    // it's the only one this component may read. If i18next somehow never
+    // initialized, t() hands back the key: ugly, not a white screen.
+    //
+    // <html dir> is a DOM mutation, not React state, so it survives the crash
+    // that unmounted LocaleEffects — this fallback still renders RTL under /he.
+    const t = i18n.getFixedT(null, "common");
+
     return (
       <div className="flex min-h-dvh flex-col bg-background">
-        <PlaceholderPage
-          title="That didn't load 🫠"
-          description="Something got stuck on the way here. Another go usually does it."
-        >
+        <PlaceholderPage title={t("error.title")} description={t("error.body")}>
           <Button size="lg" onClick={() => window.location.reload()}>
-            Try again
+            {t("error.retry")}
           </Button>
         </PlaceholderPage>
       </div>

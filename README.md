@@ -75,8 +75,10 @@ either side alone; the server needs no env vars in dev
 | `/demo` · `/demo/teacher`  | Redirects to the teacher demo (`/activity/host/1234`)                   |
 | `/demo/student`            | Redirects into the student demo (`/activity/join/1234`, name prefilled) |
 
-Every route also exists under an `/he` prefix (Hebrew variant — same English text for
-now). Routes are canonical: don't invent new ones beyond the project brief's table.
+Every route also exists under an `/he` prefix: Hebrew copy, right to left, set in Rubik.
+English is the unprefixed locale. A first visit to a bare URL is redirected to `/he` when
+the browser asks for Hebrew, and the choice is remembered; an explicit prefix in the URL
+always wins. Routes are canonical: don't invent new ones beyond the project brief's table.
 
 ## Common scripts (run from the repo root)
 

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Gamepad2, Presentation } from "lucide-react";
 
 import {
@@ -6,7 +7,7 @@ import {
 } from "@/components/home/SectionHeading";
 import { LocaleLink } from "@/components/layout/LocaleLink";
 import { Button } from "@/components/ui/button";
-import { DEMO_JOIN_CODE } from "@/mockData";
+import { DEMO_JOIN_CODE, DEMO_STUDENT_NAME } from "@/mockData";
 
 /**
  * "See it in action": the homepage's two demo doorways, straight into the
@@ -20,47 +21,47 @@ import { DEMO_JOIN_CODE } from "@/mockData";
  * grape stays reserved for the hero's Join CTA, outline for Host.
  */
 export function DemoSection() {
+  const { t } = useTranslation("home");
+
   return (
     <section className="mx-auto w-full max-w-6xl px-4 py-14 sm:py-16">
       <div className="flex flex-col items-start gap-5 sm:gap-6">
-        <SectionEyebrow>See it in action</SectionEyebrow>
-        <SectionHeading>Poke around a live class.</SectionHeading>
+        <SectionEyebrow>{t("demo.eyebrow")}</SectionEyebrow>
+        <SectionHeading>{t("demo.heading")}</SectionHeading>
         <p className="max-w-2xl text-lg text-pretty text-muted-foreground">
-          Both sides of Chaverola, running on pretend students. Click around all
-          you like: you don't need to sign up, and you can't break anything.
+          {t("demo.body")}
         </p>
       </div>
 
       <div className="mt-8 grid gap-8 sm:mt-10 sm:grid-cols-2 sm:gap-12">
         <div className="flex flex-col items-start gap-3">
           <h3 className="text-lg font-semibold text-foreground">
-            The teacher view
+            {t("demo.teacherTitle")}
           </h3>
           <p className="text-[15px] text-pretty text-muted-foreground">
-            A class in the middle of an activity. Students trickle in and wait
-            to be paired, and every chat gets its own live card. You run the
-            room.
+            {t("demo.teacherBody")}
           </p>
           <Button asChild variant="secondary">
             <LocaleLink to={`/activity/host/${DEMO_JOIN_CODE}`}>
               <Presentation className="size-5 text-brand-grape" />
-              Open the teacher demo
+              {t("demo.teacherCta")}
             </LocaleLink>
           </Button>
         </div>
 
         <div className="flex flex-col items-start gap-3">
           <h3 className="text-lg font-semibold text-foreground">
-            The student side
+            {t("demo.studentTitle")}
           </h3>
           <p className="text-[15px] text-pretty text-muted-foreground">
-            You join the demo class as a student named Rachel and get matched
-            into a character chat. It's the same trip your students will take.
+            {/* Read from the fixture, never spelled out — the demo's prefilled
+                name and this sentence have to agree. */}
+            {t("demo.studentBody", { studentName: DEMO_STUDENT_NAME })}
           </p>
           <Button asChild variant="secondary">
             <LocaleLink to={`/activity/join/${DEMO_JOIN_CODE}`}>
               <Gamepad2 className="size-5 text-brand-grape" />
-              Try the student side
+              {t("demo.studentCta")}
             </LocaleLink>
           </Button>
         </div>

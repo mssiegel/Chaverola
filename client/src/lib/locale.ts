@@ -1,20 +1,54 @@
 import { useLocation, useNavigate } from "react-router-dom";
 
 /**
- * Chaverola mirrors every route under an `/he` prefix (Hebrew variant). For now
- * `/he` renders the same English text — no translation, no RTL — but internal
- * navigation must preserve whichever prefix the user is currently under so they
- * never accidentally fall out of the Hebrew tree.
+ * Chaverola mirrors every route under a locale prefix. English is the
+ * unprefixed one (`/`), Hebrew lives at `/he` and renders right-to-left. The
+ * URL is the single source of truth for the active language: `LocaleEffects`
+ * pushes it into i18next and onto `<html lang/dir>`, and nothing pushes back.
+ *
+ * Adding a third language is three entries — `LOCALES`, `LOCALE_DIR`,
+ * `LOCALE_NAME` — plus its catalog files. Nothing else in this file changes.
  */
-export type Locale = "en" | "he";
+export const LOCALES = ["en", "he"] as const;
+export type Locale = (typeof LOCALES)[number];
 
-export function localePrefix(pathname: string): "" | "/he" {
-  return pathname === "/he" || pathname.startsWith("/he/") ? "/he" : "";
+/** The unprefixed locale. Also the fallback whenever nothing else decides. */
+export const DEFAULT_LOCALE: Locale = "en";
+
+export const LOCALE_DIR: Record<Locale, "ltr" | "rtl"> = {
+  en: "ltr",
+  he: "rtl",
+};
+
+/** Compact trigger label for the navbar switcher. */
+export const LOCALE_INITIALS: Record<Locale, string> = {
+  en: "EN",
+  he: "עב",
+};
+
+/** Each language's name in itself — a Hebrew reader looks for עברית. */
+export const LOCALE_NAME: Record<Locale, string> = {
+  en: "English",
+  he: "עברית",
+};
+
+const PREFIXED = LOCALES.filter((locale) => locale !== DEFAULT_LOCALE);
+
+export function localePrefix(pathname: string): string {
+  const hit = PREFIXED.find(
+    (locale) => pathname === `/${locale}` || pathname.startsWith(`/${locale}/`)
+  );
+  return hit ? `/${hit}` : "";
+}
+
+/** The locale a pathname is under. Unprefixed means the default. */
+export function localeFromPathname(pathname: string): Locale {
+  const prefix = localePrefix(pathname);
+  return prefix ? (prefix.slice(1) as Locale) : DEFAULT_LOCALE;
 }
 
 export function useLocale(): Locale {
-  const { pathname } = useLocation();
-  return localePrefix(pathname) === "/he" ? "he" : "en";
+  return localeFromPathname(useLocation().pathname);
 }
 
 /**
@@ -24,11 +58,11 @@ export function useLocale(): Locale {
  * language switcher to swap locales in place.
  */
 export function switchLocalePath(pathname: string, locale: Locale): string {
-  const bare =
-    localePrefix(pathname) === "/he" ? pathname.slice("/he".length) : pathname;
+  const prefix = localePrefix(pathname);
+  const bare = prefix ? pathname.slice(prefix.length) : pathname;
   const normalized = bare === "" ? "/" : bare;
-  if (locale === "en") return normalized;
-  return normalized === "/" ? "/he" : `/he${normalized}`;
+  if (locale === DEFAULT_LOCALE) return normalized;
+  return normalized === "/" ? `/${locale}` : `/${locale}${normalized}`;
 }
 
 /**

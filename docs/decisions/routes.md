@@ -5,6 +5,65 @@ area. Entries are newest-first; add new ones at the top, and add a matching line
 to the index in the same change. Replaced decisions move to Superseded at the
 bottom of this file.
 
+### `/he` is Hebrew and right-to-left; English stays unprefixed
+
+_2026-07-27_
+
+**Decision:** `/he` renders Hebrew copy, right-to-left, in Rubik. English keeps
+the bare paths (`/`, `/activity/join`), and a third language would add its own
+prefix rather than pushing English onto `/en`. `lib/locale.ts` reads a locale
+list, so adding one is three entries there plus its catalog files.
+
+**Why:** Founder call (2026-07-27), when the switcher was made to actually do
+something. Keeping English unprefixed means chaverola.com is still the English
+homepage with no redirect, every link already in the wild keeps working, and
+nothing that a search engine has indexed moves. The asymmetry costs one
+`DEFAULT_LOCALE` constant.
+
+---
+
+### Locale is detected once at boot and remembered, and the URL always wins
+
+_2026-07-27_
+
+**Decision:** Precedence, highest first: an explicit locale prefix in the URL,
+then the activity's own locale once a join code resolves, then the visitor's
+saved choice, then `navigator.language`, then English. A bare path means "no
+preference", not "explicit English" — that is what lets an activity's language
+reach a student who typed the plain URL.
+
+Detection runs exactly once per page load, in `main.tsx` before `createRoot`,
+and rewrites the URL with `replaceState`. Picking a language in the switcher
+saves it to `localStorage` before navigating.
+
+**Why:** An Israeli teacher shouldn't have to know to type `/he`, and a visitor
+who deliberately picks English shouldn't be bounced back by their own phone
+settings on the next click. Running before React exists means frame 1 of a
+Hebrew load is already Hebrew and RTL instead of flashing English, and it keeps
+the redirect out of render, where it would break the Rules of React. Only
+unprefixed URLs are ever rewritten, so a shared `/he` link is never overridden
+and the redirect cannot loop.
+
+---
+
+### The language switcher disappears once a student is seated
+
+_2026-07-27_
+
+**Decision:** On the student world, the floating language pill is visible at
+the join gate and in the lobby, and gone from the moment a chat is on screen
+(the same signal that hides the brand pill). The teacher's dashboard keeps its
+switcher.
+
+**Why:** `/` and `/he` are two separate route mounts, so switching language
+gives the page a different identity and React unmounts and remounts it. Mid-chat
+that means a dropped socket and a reset conversation. A student picks their
+language at the gate; mid-roleplay is the worst possible moment to offer a
+reset. Collapsing the two mounts into one optional-segment route would remove
+the hazard, and was deliberately not attempted inside the localization work.
+
+---
+
 ### Clicking to a new page opens it at the top
 
 _2026-07-16_

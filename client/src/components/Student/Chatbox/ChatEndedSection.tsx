@@ -154,7 +154,7 @@ export function ChatEndedSection({
             </span>
           </div>
         ) : revealNames && !removed ? (
-          <div className="w-full rounded-xl border border-border bg-card p-3 text-left shadow-sm">
+          <div className="w-full rounded-xl border border-border bg-card p-3 text-start shadow-sm">
             <SectionLabel className="mb-2 text-center">
               You were really chatting with
             </SectionLabel>

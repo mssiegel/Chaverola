@@ -85,7 +85,7 @@ export function FormSection({
           <h2 className="text-lg font-semibold text-foreground">
             {title}
             {optional && (
-              <span className="ml-2 text-sm font-normal text-muted-foreground">
+              <span className="ms-2 text-sm font-normal text-muted-foreground">
                 optional
               </span>
             )}

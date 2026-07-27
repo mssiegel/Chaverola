@@ -1,6 +1,11 @@
+import { useTranslation } from "react-i18next";
+
+// Side-effect import: registers the `teacher` namespace into this page chunk.
+import "@/i18n/ns/teacher";
+
 import { ActivitySetupForm } from "@/components/Teacher/ActivitySetup";
 import { Badge } from "@/components/ui/badge";
-import { usePageTitle } from "@/lib/usePageTitle";
+import { usePageMeta } from "@/lib/usePageMeta";
 
 /**
  * `/activity/create` — the teacher sets up an activity on one scrolling form
@@ -10,12 +15,16 @@ import { usePageTitle } from "@/lib/usePageTitle";
  * for it.
  */
 export function CreateActivityPage() {
-  usePageTitle("Set Up Your Activity");
+  const { t } = useTranslation("teacher");
+  usePageMeta(t("setup.meta.title"), t("setup.meta.description"));
 
   return (
     <div className="relative isolate">
       {/* Soft brand glow behind the header — decoration only, clipped so it
-          can never cause sideways scroll on phones. */}
+          can never cause sideways scroll on phones. Physical left/right on
+          purpose: the scatter is composition, not reading order, so mirroring
+          it under /he would buy nothing. Same call in HostActivityPage and
+          LobbyPreview. */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 -z-10 overflow-hidden"

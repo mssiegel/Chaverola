@@ -5,6 +5,36 @@ area. Entries are newest-first; add new ones at the top, and add a matching line
 to the index in the same change. Replaced decisions move to Superseded at the
 bottom of this file.
 
+### react-i18next is the client's i18n layer; the server takes no i18n dependency
+
+_2026-07-27_
+
+**Decision:** The client uses `i18next` + `react-i18next`, overturning the
+standing "no i18n libraries in the client" line in the dependency policy. The
+server takes nothing: the transcript email, the only prose it ships, will be a
+hand-rolled `Record<Locale, EmailCopy>`.
+
+Catalogs are flat, typed, and split by namespace. Completeness is a **compile**
+check, not a test: English catalogs are `as const satisfies Catalog`, Hebrew
+ones are annotated `HebrewOf<EnCatalog>`, and `registerBundle` takes
+`Record<Locale, …>`. A missing Hebrew key is a type error, a typo is an
+excess-property error, and adding a language breaks every registration site
+until its files exist.
+
+**Why:** Hand-rolling was the obvious alternative and loses on plurals.
+Hebrew's CLDR categories are one / two / other, and `_two` fires at exactly 2,
+which on a teacher's dashboard is the single most common count. i18next
+delegates to `Intl.PluralRules` and gets that right for every language we might
+add; a hand-rolled helper gets it right for the languages we thought about.
+`<Trans>` also comes along, which is what makes a styled fragment inside a
+sentence (the hero's highlighter mark) survive a word-order change.
+
+The server is the opposite call for the opposite reason: a handful of strings,
+no plural machinery worth importing, and a typed record makes a missing string
+a build failure where i18next would make it a silent runtime fallback.
+
+---
+
 ### The API runs on a paid Render instance, because free web services block outbound SMTP
 
 _2026-07-24_

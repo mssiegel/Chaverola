@@ -178,7 +178,7 @@ export function MessageComposer({
           {showCounter && (
             <div
               className={cn(
-                "absolute -top-5 right-1 text-xs font-semibold tabular-nums transition-colors",
+                "absolute end-1 -top-5 text-xs font-semibold tabular-nums transition-colors",
                 atLimit ? "text-destructive" : "text-muted-foreground"
               )}
             >

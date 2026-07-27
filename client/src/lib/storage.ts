@@ -1,10 +1,45 @@
 /*
-  Tiny sessionStorage helpers behind the app's per-tab persistence (student
-  session, setup draft, hosted-activity hand-off). Storage can be blocked or
-  hold corrupt JSON on classroom devices, so every call absorbs failures:
-  reads fall back to null, writes become no-ops and the in-memory state keeps
-  working.
+  Tiny web-storage helpers behind the app's persistence. sessionStorage is the
+  default and holds everything per-tab (student session, setup draft,
+  hosted-activity hand-off) — one tab, one student, which matters on shared
+  classroom computers. localStorage has exactly one tenant: the language the
+  visitor picked, which has to outlive the tab.
+
+  Storage can be blocked or hold corrupt JSON on classroom devices, so every
+  call absorbs failures: reads fall back to null, writes become no-ops and the
+  in-memory state keeps working.
 */
+
+/*
+  The store arrives as a thunk, not a value: Safari in private mode throws a
+  SecurityError on merely *touching* `localStorage`, so the access itself has
+  to happen inside the try.
+*/
+function readJsonFrom<T>(
+  getStore: () => Storage,
+  key: string,
+  validate: (parsed: unknown) => T | null
+): T | null {
+  try {
+    const raw = getStore().getItem(key);
+    if (raw === null) return null;
+    return validate(JSON.parse(raw));
+  } catch {
+    return null;
+  }
+}
+
+function writeJsonTo(
+  getStore: () => Storage,
+  key: string,
+  value: unknown
+): void {
+  try {
+    getStore().setItem(key, JSON.stringify(value));
+  } catch {
+    // Storage unavailable — callers keep working from memory.
+  }
+}
 
 /**
  * Read and validate a JSON value from sessionStorage. Returns null when the
@@ -15,21 +50,27 @@ export function readSessionJson<T>(
   key: string,
   validate: (parsed: unknown) => T | null
 ): T | null {
-  try {
-    const raw = sessionStorage.getItem(key);
-    if (raw === null) return null;
-    return validate(JSON.parse(raw));
-  } catch {
-    return null;
-  }
+  return readJsonFrom(() => sessionStorage, key, validate);
 }
 
 export function writeSessionJson(key: string, value: unknown): void {
-  try {
-    sessionStorage.setItem(key, JSON.stringify(value));
-  } catch {
-    // Storage unavailable — callers keep working from memory.
-  }
+  writeJsonTo(() => sessionStorage, key, value);
+}
+
+/**
+ * The same absorb-everything read, over localStorage. A deliberately smaller
+ * door than the session helpers: only the remembered language belongs here,
+ * because it's the one preference that should survive closing the tab.
+ */
+export function readLocalJson<T>(
+  key: string,
+  validate: (parsed: unknown) => T | null
+): T | null {
+  return readJsonFrom(() => localStorage, key, validate);
+}
+
+export function writeLocalJson(key: string, value: unknown): void {
+  writeJsonTo(() => localStorage, key, value);
 }
 
 export function removeSessionItem(key: string): void {

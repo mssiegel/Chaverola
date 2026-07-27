@@ -98,12 +98,16 @@ pieces those surfaces share.
   (`components/chat/useChatDemo.ts`,
   `components/Teacher/HostActivity/useHostActivityDemo.ts` — whose pure
   simulation rules live beside it in `hostWorld.ts`); generic
-  cross-cutting hooks live in `lib/`: `usePageTitle` (prepends the
-  "Chaverola | " brand prefix itself — callers pass just the page name),
-  `useHeroCtaPassed`, `useBackGuard`, `useLatestRef` (the
-  ref-mirrors-latest-value idiom for timer callbacks — don't hand-roll
-  it), `useSecondCountdown`, `useActivityLookup`,
-  and the hooks inside `locale.ts` / `studentSession.ts`. The live
+  cross-cutting hooks live in `lib/`: `usePageMeta` (sets `<title>` and
+  the meta description; appends the brand suffix itself, which is a
+  catalog key, so `/he` reads "… | חברולה"), `useHeroCtaPassed`,
+  `useBackGuard`, `useLatestRef` (the ref-mirrors-latest-value idiom for
+  timer callbacks — don't hand-roll it), `useSecondCountdown`,
+  `useActivityLookup`, and the hooks inside `locale.ts` /
+  `studentSession.ts`. `usePageMeta`'s pure half lives beside it in
+  `lib/pageMeta.ts` (`pageMeta()` plus the route-keyed `PAGE_META`
+  table), React-free so a future prerender pass can emit the same two
+  strings without drifting from the runtime. The live
   lobby/host sockets are `pages/student/useLobbyPresence.ts` (student —
   stays mounted through the chat and ended stages) and
   `Teacher/HostActivity/useHostActivityLive.ts` (teacher), both through
@@ -111,7 +115,15 @@ pieces those surfaces share.
 - **Mock data** lives only in
   [client/src/mockData/](../client/src/mockData/) (the one barrel file in
   the client). The demo join code `1234` always works, fully client
-  simulated.
+  simulated. The homepage prose reads the hero cast's names from
+  `heroCopyNames` rather than spelling them out, so a recast can't leave
+  the page describing a chat that isn't on it.
+- **Strings** live in [client/src/i18n/](../client/src/i18n/):
+  `locales/{en,he}/<ns>.ts` hold flat dotted keys, `ns/<ns>.ts` are the
+  side-effect registrars a lazy page imports, and `i18next.d.ts` teaches
+  `t()` the key space. `lib/locale.ts` owns the locale list and the URL
+  helpers; `lib/localePreference.ts` and `lib/localeBoot.ts` own
+  detection and the once-per-load redirect.
 - **Sticky-grid gotchas.** Two are load-bearing:
   - The setup-page form grid must **not** get `items-start`, or the sticky
     `LobbyPreview` rail loses its track (there's a code comment on it).

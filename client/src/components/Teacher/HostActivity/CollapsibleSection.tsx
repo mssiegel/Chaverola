@@ -56,7 +56,7 @@ export function CollapsibleSection({
           aria-expanded={open}
           aria-controls={contentId}
           onClick={() => setOpen((o) => !o)}
-          className="flex w-full items-center gap-3 rounded-2xl p-5 text-left sm:p-6"
+          className="flex w-full items-center gap-3 rounded-2xl p-5 text-start sm:p-6"
         >
           <AccentIconChip accent={accent} icon={Icon} />
           <span className="min-w-0 flex-1">
