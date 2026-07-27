@@ -55,7 +55,7 @@ i18next instance so a prerender can render both locales in one process; and
 | [02 — A pasted link shows the product](02-a-pasted-link-shows-the-product.md)                 | A Chaverola link unfurls as a branded card instead of a bare text row                           | Complete    |
 | [03 — Google knows which URL is the real one](03-google-knows-which-url-is-the-real-one.md)   | The Hebrew and English pages stop competing with each other, and `/demo` resolves for a bot     | Complete    |
 | [04 — Crawlers get a map and a fence](04-crawlers-get-a-map-and-a-fence.md)                   | A leaked classroom URL can't be indexed, and every real page is listed once                     | Complete    |
-| [05 — The search result says what this is](05-the-search-result-says-what-this-is.md)         | A search or answer engine can state that it's free and needs no student accounts                | Not started |
+| [05 — The search result says what this is](05-the-search-result-says-what-this-is.md)         | A search or answer engine can state that it's free and needs no student accounts                | Complete    |
 | [06 — Somebody is watching the search console](06-somebody-is-watching-the-search-console.md) | The founder can see whether any of it worked                                                    | Not started |
 
 **Order.** 04's first prompt is independent and can run any time — it is

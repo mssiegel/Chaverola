@@ -61,6 +61,22 @@ const OG_IMAGE_HEIGHT = "630";
 const OG_LOCALE: Record<Locale, string> = { en: "en_US", he: "he_IL" };
 
 /**
+ * The `Organization` logo, and it has to be the raster: Google's logo handling
+ * rejects an SVG, which is why `public/logo-512.png` was shot alongside the
+ * unfurl card rather than the favicon being reused. Square, unlike `OG_IMAGE`.
+ */
+const LOGO_IMAGE = `${SITE_ORIGIN}/logo-512.png`;
+
+/**
+ * The free plan is the whole product (docs/decisions/homepage.md), so the `Offer`
+ * states a real price of zero. One currency for both locales — the number is 0
+ * either way, and a per-locale currency would imply a price that varies by
+ * region. The paid "Complete Implementation" tier is deliberately NOT modelled:
+ * it has no public price, and an `Offer` without one is worse than no `Offer`.
+ */
+const PRICE_CURRENCY = "USD";
+
+/**
  * The page's own unfurl card. Nothing here is new copy: the title and
  * description are the same two strings `pageMeta` resolved for the `<title>`
  * and the description tag, so a link preview cannot say something the tab and
@@ -169,6 +185,106 @@ function pageLinks(url: string): string[] {
   ];
 }
 
+/**
+ * What Chaverola is, stated to a machine instead of inferred from prose: one
+ * `<script type="application/ld+json">` holding an `@graph` of three nodes, so
+ * there is one block to look at and the nodes can cross-reference by `@id`.
+ *
+ * HOMEPAGE ONLY — `/` and `/he`. The join gate, the create gate and the two demo
+ * URLs get nothing: structured data on a form or a live classroom earns no
+ * result and is four more claims to keep true. Resist the completeness instinct.
+ *
+ * NEVER add `aggregateRating` or `review`. There are no testimonials on this site
+ * on purpose (docs/decisions/homepage.md), so any rating here would be invented
+ * data about real people — the most-abused corner of this vocabulary and a
+ * straightforward way to earn a manual penalty. This is a standing ban, not a
+ * "not yet".
+ *
+ * No `SearchAction` on the `WebSite` either: the site has no search, and claiming
+ * one that doesn't exist is how a page gets its structured data ignored wholesale.
+ * No `HowTo`, and that is a decision rather than an oversight — the reasoning is
+ * in the decision entry, since the visible four-step list makes its absence look
+ * like a miss.
+ *
+ * Every string comes from the catalogs through the same `t` the head uses, so
+ * `/he` describes חברולה in Hebrew and nothing here can drift from the page.
+ *
+ * THE ESCAPING TRAP: this is a different context from every other tag in this
+ * file. `escapeHtml` must NOT touch it — HTML entities inside a `ld+json` body
+ * are invalid JSON and the whole block is silently discarded. `JSON.stringify`
+ * is the escaper; the one extra rule is `</` → `<\/` so a string can't close the
+ * script tag early.
+ */
+function structuredData(
+  common: TFunction,
+  locale: Locale,
+  url: string,
+  description: string
+): string {
+  const name = common("brand.name");
+  const page = `${SITE_ORIGIN}${url}`;
+  // One organization behind both language trees, so its `@id` is locale-free and
+  // the two `WebSite` nodes point at the same one.
+  const organizationId = `${SITE_ORIGIN}/#organization`;
+
+  const graph = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": organizationId,
+        name,
+        url: SITE_ORIGIN,
+        logo: LOGO_IMAGE,
+      },
+      {
+        "@type": "WebSite",
+        "@id": `${page}#website`,
+        name,
+        url: page,
+        // From the page's own locale, never a constant — this file is emitted
+        // twice and the two copies must disagree here.
+        inLanguage: locale,
+        publisher: { "@id": organizationId },
+      },
+      {
+        "@type": "SoftwareApplication",
+        "@id": `${page}#application`,
+        name,
+        // The homepage's own meta description, already written and humanized.
+        // It is the sentence the search result shows, so the two cannot differ.
+        description,
+        url: page,
+        inLanguage: locale,
+        applicationCategory: "EducationalApplication",
+        // It runs in a browser and installs nothing, which is one of the two
+        // facts a teacher checks before trying a classroom tool. The other is
+        // the price below.
+        operatingSystem: "Any",
+        offers: {
+          "@type": "Offer",
+          price: "0",
+          priceCurrency: PRICE_CURRENCY,
+        },
+        publisher: { "@id": organizationId },
+      },
+    ],
+  };
+
+  const json = JSON.stringify(graph, null, 2).replace(/<\//g, "<\\/");
+
+  return [
+    `<script type="application/ld+json">`,
+    // The writer indents the first line only; the rest carry their own so the
+    // emitted block reads as JSON when someone opens the file to debug it.
+    json
+      .split("\n")
+      .map((line) => `      ${line}`)
+      .join("\n"),
+    `    </script>`,
+  ].join("\n");
+}
+
 export interface PrerenderPage {
   /** Path under `dist/`, e.g. `he/activity/join/1234.html`. */
   file: string;
@@ -183,10 +299,13 @@ export interface PrerenderPage {
   title: string;
   description: string;
   /**
-   * Extra tags to insert before `</head>`, one per line, already whole. The
-   * Open Graph card and the canonical/hreflang set fill it today; the
-   * structured-data node (doc 05) appends to the same list, which is what keeps
-   * the writer script free of string logic of its own.
+   * Extra tags to insert before `</head>`, already whole: the Open Graph card,
+   * the canonical/hreflang set, and on the two homepages the `ld+json` block.
+   * All the string logic lives here so the writer script owns none.
+   *
+   * One entry per line, EXCEPT the `ld+json` block, which is several lines
+   * carrying their own indent — the writer prefixes the first line only, which
+   * is why `structuredData` indents the rest itself.
    */
   head: string[];
   /**
@@ -351,6 +470,12 @@ export async function prerenderPages(): Promise<PrerenderPage[]> {
         head: [
           ...socialCard(common, locale, url, meta.title, meta.description),
           ...pageLinks(url),
+          // Homepage only, same gate as the noscript block below and for a
+          // related reason: these two URLs are the ones a search engine has any
+          // reason to describe.
+          ...(route === "/"
+            ? [structuredData(common, locale, url, meta.description)]
+            : []),
         ],
         noscript: route === "/" ? homeNoscript(t, common, locale) : null,
       });

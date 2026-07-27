@@ -1,6 +1,6 @@
 # 05 — The search result says what this is
 
-State: **Not started**
+State: **Complete**
 
 **The problem.** Nothing on the site tells a machine what Chaverola _is_.
 A search engine or an answer engine reading the homepage has to infer
@@ -36,7 +36,7 @@ hits.
 [02](02-a-pasted-link-shows-the-product.md)'s first prompt, and the square
 logo PNG that same prompt produces.
 
-- [ ] Prompt — The homepage says what it is, in JSON
+- [x] Prompt — The homepage says what it is, in JSON
 
 ---
 

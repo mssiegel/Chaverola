@@ -5,6 +5,53 @@ area. Entries are newest-first; add new ones at the top, and add a matching line
 to the index in the same change. Replaced decisions move to Superseded at the
 bottom of this file.
 
+### The homepage tells a machine it's free, and it will never carry a rating
+
+_2026-07-28_
+
+**Decision:** `/` and `/he` each ship one `application/ld+json` block holding a
+three-node `@graph`: an `Organization` (brand name, the apex URL, the square
+`logo-512.png`), a `WebSite` (brand name, the page's own URL, `inLanguage` from
+the page's locale), and a `SoftwareApplication` (brand name, the homepage's own
+meta description, `applicationCategory: "EducationalApplication"`,
+`operatingSystem: "Any"`, and an `Offer` of `price: "0"`). Every string comes
+from the catalogs, so `/he` describes חברולה in Hebrew.
+
+Three standing bans, none of them "not yet":
+
+- **No `aggregateRating` and no `review`, ever.** There are no testimonials on
+  this site ([No testimonials on the homepage](#no-testimonials-on-the-homepage)),
+  so a rating here would be invented data about real people — the most-abused
+  corner of this vocabulary and a direct route to a manual penalty.
+- **No `SearchAction`.** The site has no search, and claiming one it doesn't
+  have is how a page gets its structured data distrusted site-wide.
+- **The paid tier is not modelled.** "Complete Implementation" has no public
+  price ([The homepage has a two-plan section, and the free plan stays the whole product](#the-homepage-has-a-two-plan-section-and-the-free-plan-stays-the-whole-product)),
+  and an `Offer` without a price is worse than no `Offer`. The free plan is what
+  the page leads with and what the schema says.
+
+**No `HowTo` either, and that one is a judgment call rather than an omission.**
+The four `how.step*` keys map onto it cleanly and need no new copy, but Google
+retired HowTo rich results in 2023, so it earns no visual treatment in search —
+only machine-readable structure for answer engines, which the `<noscript>` block
+already gives them in the same words. A future reader finding no `HowTo` on a
+page with a visible four-step list is looking at this decision, not a miss.
+
+The other eight URLs get no structured data at all. The join and create gates
+are forms and the two demo URLs are pitch-email links; structured data on either
+earns no result and is more claims to keep true.
+
+**Why:** Nothing on the site stated in machine-readable form what Chaverola is,
+so a search or answer engine had to infer "free, browser-based, no student
+accounts" from prose. Those are the three facts that remove a teacher's
+hesitation, and the zero-price `Offer` is the single most valuable of them. The
+bans are written down because each is a thing a future contributor would
+plausibly add for completeness, and each would cost more than it earns.
+
+_Implemented in
+[prerenderMeta.ts](../../client/src/lib/prerenderMeta.ts) (`structuredData`);
+plan in [docs/plans/seo/05](../plans/seo/05-the-search-result-says-what-this-is.md)._
+
 ### The homepage has a two-plan section, and the free plan stays the whole product
 
 _2026-07-26_

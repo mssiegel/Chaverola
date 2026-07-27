@@ -123,8 +123,12 @@ function stamp(shell, page) {
     "description meta tag"
   );
   html = replaceOnce(html, OG_FALLBACK, "", "fallback og block");
-  // The extension seam: docs 02-05 add their tags through `page.head`. The
-  // Open Graph card fills it today; canonical and hreflang land here too.
+  // The extension seam: docs 02-05 add their tags through `page.head` — the
+  // Open Graph card, canonical and hreflang, and the homepages' `ld+json` block.
+  // Inserted VERBATIM, and that is load-bearing for the last one: JSON-LD must
+  // not be HTML-escaped (entities inside the script body make it invalid JSON
+  // and the block is silently dropped), so `structuredData` escapes it with
+  // `JSON.stringify`, not with `meta.escapeHtml` like the two tags above.
   html = replaceOnce(
     html,
     HEAD_CLOSE,
