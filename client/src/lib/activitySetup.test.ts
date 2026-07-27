@@ -89,7 +89,8 @@ describe("toCreateActivityRequest", () => {
     const request = toCreateActivityRequest(
       draftWith({
         characters: [{ name: " Caesar's Ghost 👻 " }, { name: "Brutus!" }],
-      })
+      }),
+      "en"
     );
     // Exact object equality doubles as the no-ids check: the server mints
     // character ids, so the wire carries nothing but the name.
@@ -105,7 +106,8 @@ describe("toCreateActivityRequest", () => {
         characters: [{ name: "Ada" }, { name: "  " }, { name: "Ben" }],
         studentInstructions: "   ",
         teacherEmail: "",
-      })
+      }),
+      "en"
     );
     expect(request.characters.map((c) => c.name)).toEqual(["Ada", "Ben"]);
     // Omitted, not "" — the wire contract never sends blank optionals.
@@ -118,7 +120,8 @@ describe("toCreateActivityRequest", () => {
       draftWith({
         studentInstructions: "  Rome, 44 BC.  ",
         teacherEmail: "a@b.co",
-      })
+      }),
+      "en"
     );
     expect(request.studentInstructions).toBe("Rome, 44 BC.");
     expect(request.teacherEmail).toBe("a@b.co");

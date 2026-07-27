@@ -61,6 +61,7 @@ function record(chats: StoredChat[]): StoredActivity {
     characters: Object.values(CHARACTERS),
     studentInstructions: "Rome, 44 BC, the night before the Ides of March.",
     teacherEmail: "cohen@example.com",
+    locale: "en",
     settings: { ...DEFAULT_ACTIVITY_SETTINGS },
     createdAt: 0,
     lastSeenAt: 0,
@@ -68,7 +69,7 @@ function record(chats: StoredChat[]): StoredActivity {
     chats,
     lastPartners: {},
     leftoverStudentId: null,
-    rematchNotice: null,
+    railNotice: null,
     pausedAt: null,
     transcriptEmail: null,
   };

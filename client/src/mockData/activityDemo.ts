@@ -1,4 +1,4 @@
-import { DEMO_JOIN_CODE } from "@chaverola/shared";
+import { DEFAULT_LOCALE, DEMO_JOIN_CODE } from "@chaverola/shared";
 import type { Activity } from "@/types/activity";
 
 /*
@@ -21,6 +21,12 @@ export const DEMO_STUDENT_NAME = "Rachel";
 export const demoActivity: Activity = {
   joinCode: DEMO_JOIN_CODE,
   hostName: "Ms. Cohen",
+  // No teacher ever set this up, so there is no language it was created in —
+  // the demo is whatever language you happen to be reading it in. The field
+  // exists because Activity is the wire shape; the join page skips locale
+  // inheritance for `1234` entirely, and prompt 7 casts the whole demo per
+  // locale.
+  locale: DEFAULT_LOCALE,
   // 239 chars on purpose: the instructions counter appears at 200 and turns
   // red at the 250-char cap, so this sits between — the demo shows the
   // counter working instead of a seeded value that reads as an error. Keep

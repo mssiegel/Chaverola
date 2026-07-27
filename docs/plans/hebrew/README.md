@@ -1,6 +1,7 @@
 # Hebrew — the `/he` tree actually speaks Hebrew
 
-**State: In progress.** Prompts 1, 2 and 3 shipped, 2026-07-27. Four to go.
+**State: In progress.** Prompts 1–4 shipped, 2026-07-27. Three to go, and
+**prompt 6 is gated on prompt 4 being live on both sides.**
 
 `/he` has existed since the routing work as a mirror of the whole route tree,
 rendering identical English text left to right. This plan makes it a Hebrew
@@ -59,7 +60,7 @@ the same commit as the work.
 - [x] Prompt 1 — Plumbing, RTL, shell and homepage (`b9a9e59`)
 - [x] Prompt 2 — Teacher surfaces
 - [x] Prompt 3 — Student surfaces
-- [ ] Prompt 4 — `locale` on the record, `railNotice` beside `rematchNotice`
+- [x] Prompt 4 — `locale` on the record, `railNotice` beside `rematchNotice`
 - [ ] Prompt 5 — The Hebrew transcript email
 - [ ] Prompt 6 — Drop the deprecated prose
 - [ ] Prompt 7 — The Hebrew demo cast

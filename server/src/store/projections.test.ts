@@ -34,6 +34,7 @@ const fullRecord: StoredActivity = {
   ],
   studentInstructions: "Rome, 44 BC, the night before the Ides of March.",
   teacherEmail: "cohen@example.com",
+  locale: "en",
   settings: { ...DEFAULT_ACTIVITY_SETTINGS },
   createdAt: 1_000,
   lastSeenAt: 1_000,
@@ -41,7 +42,7 @@ const fullRecord: StoredActivity = {
   chats: [],
   lastPartners: {},
   leftoverStudentId: null,
-  rematchNotice: null,
+  railNotice: null,
   pausedAt: null,
   transcriptEmail: null,
 };
@@ -102,6 +103,7 @@ describe("toActivity (student projection)", () => {
       "characters",
       "hostName",
       "joinCode",
+      "locale",
       "studentInstructions",
     ]);
   });
@@ -123,6 +125,7 @@ describe("toHostedActivity (teacher projection)", () => {
       "characters",
       "hostName",
       "joinCode",
+      "locale",
       "settings",
       "studentInstructions",
       "teacherEmail",

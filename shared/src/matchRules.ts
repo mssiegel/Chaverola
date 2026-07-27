@@ -127,7 +127,18 @@ export function pickAutoMatchPair(
   return null;
 }
 
-/** "A and B" / "A, B, and C" — shared by the heads-up and the rail notice. */
+/*
+  The three prose helpers below are DEPRECATED and live on borrowed time. The
+  rail notice crosses the wire as a `RailNotice` now, and the client renders it
+  from its own catalog; these only still build the deprecated `rematchNotice`
+  string that `lobbyContext`'s `legacyNoticeText` ships for one deploy, so an
+  old client meeting a new server keeps rendering a string. They were always
+  the odd ones out in a file whose header claims pure matching primitives.
+  Deleted with that field (Hebrew plan, prompt 6). Nothing new may call them —
+  the client joins names with `lib/names.ts` (Intl.ListFormat, locale-pinned).
+*/
+
+/** "A and B" / "A, B, and C". @deprecated see the note above. */
 export function listNames(names: string[]): string {
   if (names.length <= 2) return names.join(" and ");
   return `${names.slice(0, -1).join(", ")}, and ${names[names.length - 1]}`;
@@ -135,7 +146,7 @@ export function listNames(names: string[]): string {
 
 /** Pair-everyone's rail notice for an exact pair/trio it left in line. Unlike
  *  the heads-up this isn't gated on the rematchWarning setting — it explains
- *  why the button visibly skipped them. */
+ *  why the button visibly skipped them. @deprecated see the note above. */
 export function stuckInLineNotice(names: string[]): string {
   return `${listNames(names)} just chatted ${
     names.length === 2 ? "with each other" : "together"
@@ -147,7 +158,7 @@ export function stuckInLineNotice(names: string[]): string {
  *  never hears another one's edit, so the notice states the count the server
  *  has and points at the refresh that shows it. Both counts are always 2 or
  *  more: a chat needs two students, and the roster's first two rows can't be
- *  removed. */
+ *  removed. @deprecated see the note above. */
 export function tooFewCharactersNotice(
   characterCount: number,
   studentCount: number

@@ -38,7 +38,7 @@ function world(overrides: Partial<HostWorld>): HostWorld {
     secondsUntilNextJoin: 99,
     secondsUntilAutoMatch: 99,
     leftoverStudentId: null,
-    rematchNotice: null,
+    railNotice: null,
     paused: false,
     ...overrides,
   };
@@ -50,6 +50,7 @@ function activity(
 ): HostedActivity {
   return {
     joinCode: "4321",
+    locale: "en",
     hostName: "Ms. Cohen",
     characters: [
       { id: "caesar", name: "Caesar's ghost" },
@@ -178,7 +179,7 @@ describe("pairEveryoneIn", () => {
     );
     expect(w.chats).toHaveLength(2);
     expect(w.queue).toHaveLength(0);
-    expect(w.rematchNotice).toBeNull();
+    expect(w.railNotice).toBeNull();
     expect(w.leftoverStudentId).toBeNull();
   });
 
@@ -208,7 +209,13 @@ describe("pairEveryoneIn", () => {
     const w = pairEveryoneIn(world({ queue, lastPartners }), activity());
     expect(w.chats).toHaveLength(0);
     expect(w.queue.map((s) => s.id)).toEqual(["a", "b"]);
-    expect(w.rematchNotice).toContain("Student A and Student B");
+    // Structural, not prose: the notice crosses as data and the panel words
+    // it, so this pins the kind AND the exact names in queue order — more
+    // than the sentence ever did.
+    expect(w.railNotice).toEqual({
+      kind: "stuckInLine",
+      names: ["Student A", "Student B"],
+    });
 
     // The notice explains why the button left them in line, so unlike the
     // heads-up it shows even with the rematch warning setting off.
@@ -217,7 +224,10 @@ describe("pairEveryoneIn", () => {
       activity(2, { rematchWarning: false })
     );
     expect(settingOff.chats).toHaveLength(0);
-    expect(settingOff.rematchNotice).toContain("Student A and Student B");
+    expect(settingOff.railNotice).toEqual({
+      kind: "stuckInLine",
+      names: ["Student A", "Student B"],
+    });
   });
 
   it("pairs a partial repeat silently — it is not an exact rerun", () => {
@@ -229,7 +239,7 @@ describe("pairEveryoneIn", () => {
       activity()
     );
     expect(w.chats).toHaveLength(1);
-    expect(w.rematchNotice).toBeNull();
+    expect(w.railNotice).toBeNull();
   });
 
   it("repairs a stranded exact pair by swapping with an earlier pairing", () => {
@@ -242,7 +252,7 @@ describe("pairEveryoneIn", () => {
     );
     expect(w.chats).toHaveLength(2);
     expect(w.queue).toHaveLength(0);
-    expect(w.rematchNotice).toBeNull();
+    expect(w.railNotice).toBeNull();
     for (const chat of w.chats) {
       expect(chat.participants.map((p) => p.id).sort()).not.toEqual(["c", "d"]);
     }
@@ -263,7 +273,7 @@ describe("pairEveryoneIn", () => {
     ]);
     expect(w.queue.map((s) => s.id)).toEqual(["b"]);
     expect(w.leftoverStudentId).toBe("b");
-    expect(w.rematchNotice).toBeNull();
+    expect(w.railNotice).toBeNull();
   });
 
   it("repairs an exact-rematch trio by trading a member with a pair", () => {
@@ -276,7 +286,7 @@ describe("pairEveryoneIn", () => {
     );
     expect(w.chats).toHaveLength(2);
     expect(w.queue).toHaveLength(0);
-    expect(w.rematchNotice).toBeNull();
+    expect(w.railNotice).toBeNull();
     const sizes = w.chats.map((c) => c.participants.length).sort();
     expect(sizes).toEqual([2, 3]);
     const trioChat = w.chats.find((c) => c.participants.length === 3)!;
@@ -297,7 +307,10 @@ describe("pairEveryoneIn", () => {
     );
     expect(w.chats).toHaveLength(0);
     expect(w.queue).toHaveLength(3);
-    expect(w.rematchNotice).toContain("Student C, Student D, and Student E");
+    expect(w.railNotice).toEqual({
+      kind: "stuckInLine",
+      names: ["Student C", "Student D", "Student E"],
+    });
   });
 });
 

@@ -1,5 +1,6 @@
 import { useId } from "react";
 import { useTranslation } from "react-i18next";
+import type { TFunction } from "i18next";
 import {
   Check,
   Info,
@@ -10,9 +11,11 @@ import {
   Zap,
 } from "lucide-react";
 
+import type { RailNotice } from "@chaverola/shared";
+
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { useLocale } from "@/lib/locale";
+import { useLocale, type Locale } from "@/lib/locale";
 import { listNames } from "@/lib/names";
 import { splitWaitShort, type WaitUnit } from "@/lib/time";
 import { cn } from "@/lib/utils";
@@ -26,6 +29,36 @@ const WAIT_KEYS = {
   seconds: "pairing.wait.seconds",
   minutes: "pairing.wait.minutes",
 } as const satisfies Record<WaitUnit, `pairing.wait.${string}`>;
+
+/**
+ * The rail notice, worded here rather than on the server: the wire carries a
+ * `RailNotice` (a kind plus its numbers or names), so a Hebrew teacher reads
+ * a Hebrew sentence and a student's typed name still passes through verbatim.
+ * A plain function taking `t` — pure, and callable from anywhere the catalog
+ * is loaded. Names are joined by `Intl.ListFormat` pinned to the reading
+ * locale, which isolates each one so a Latin name can't flip the list.
+ */
+function railNoticeText(
+  t: TFunction<["teacher", "common"]>,
+  notice: RailNotice,
+  locale: Locale
+): string {
+  if (notice.kind === "tooFewCharacters") {
+    return t("pairing.notice.tooFewCharacters", {
+      characterCount: notice.characterCount,
+      studentCount: notice.studentCount,
+    });
+  }
+  // Exactly two chatted "with each other"; three or more chatted "together" —
+  // the same split the rematch heads-up above makes, and not a plural form:
+  // English has no category that separates 2 from 3.
+  return t(
+    notice.names.length === 2
+      ? "pairing.notice.stuckInLine.pair"
+      : "pairing.notice.stuckInLine.group",
+    { names: listNames(notice.names, locale) }
+  );
+}
 
 export interface PairingPanelProps {
   waiting: WaitingStudent[];
@@ -44,9 +77,10 @@ export interface PairingPanelProps {
   /** Selection-time rematch heads-up (never blocks anything). */
   rematchWarning: string | null;
   /** Why the last press didn't do what the teacher expected, dismissible:
-   *  pair-everyone's forced-repeat note, or a start the cast couldn't seat. */
-  rematchNotice: string | null;
-  onDismissRematchNotice: () => void;
+   *  pair-everyone's forced-repeat note, or a start the cast couldn't seat.
+   *  Data, not prose — this panel words it (see railNoticeText). */
+  railNotice: RailNotice | null;
+  onDismissRailNotice: () => void;
   /** Pair-everyone's odd one out, highlighted as first in line. */
   leftoverStudentId: string | null;
   autoMatchOn: boolean;
@@ -87,8 +121,8 @@ export function PairingPanel({
   onPairEveryone,
   onRequestRemove,
   rematchWarning,
-  rematchNotice,
-  onDismissRematchNotice,
+  railNotice,
+  onDismissRailNotice,
   leftoverStudentId,
   autoMatchOn,
   autoMatchSeconds,
@@ -242,20 +276,18 @@ export function PairingPanel({
               a start the cast couldn't seat did nothing (feature 18). Hence
               the neutral icon — the box means "here's why that didn't do what
               you expected", and only the warning above is about a rematch. */}
-          {rematchNotice && (
+          {railNotice && (
             <div
               role="status"
               className="flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2.5 text-sm text-amber-800"
             >
               <Info aria-hidden className="mt-0.5 size-4 shrink-0" />
-              {/* TODO(prompt 4): this notice is prose authored elsewhere (the
-                  server for a real activity, hostWorld for the demo), so it
-                  stays English under /he. Prompt 4 turns it into a structured
-                  `railNotice` the client renders from the catalog. */}
-              <span className="min-w-0 flex-1">{rematchNotice}</span>
+              <span className="min-w-0 flex-1">
+                {railNoticeText(t, railNotice, locale)}
+              </span>
               <button
                 type="button"
-                onClick={onDismissRematchNotice}
+                onClick={onDismissRailNotice}
                 aria-label={t("common:dialog.dismiss")}
                 className="grid size-6 shrink-0 place-items-center rounded-full text-amber-700 transition-colors hover:bg-amber-100"
               >

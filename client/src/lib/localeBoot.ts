@@ -5,7 +5,11 @@ import {
   switchLocalePath,
   type Locale,
 } from "./locale";
-import { preferredLocale, saveLocale } from "./localePreference";
+import {
+  markLocaleExplicit,
+  preferredLocale,
+  saveLocale,
+} from "./localePreference";
 
 /**
  * Decides the page load's locale and, if the URL doesn't already say, rewrites
@@ -24,6 +28,11 @@ import { preferredLocale, saveLocale } from "./localePreference";
  * Only unprefixed URLs are ever rewritten. "/he" IS the choice — remembered
  * and left alone. That's what stops a visitor who deliberately picked English
  * from being bounced back by their own browser settings on the next load.
+ *
+ * A rewrite here is a GUESS, not a choice, so it doesn't call
+ * `markLocaleExplicit` — that's what lets a Hebrew activity's join link land a
+ * student on Hebrew even though their phone said otherwise, and equally an
+ * English activity's link land them on English.
  */
 export function applyBootLocale(): Locale {
   if (typeof window === "undefined") return DEFAULT_LOCALE; // prerender-safe
@@ -31,6 +40,9 @@ export function applyBootLocale(): Locale {
 
   const urlLocale = localeFromPathname(pathname);
   if (urlLocale !== DEFAULT_LOCALE) {
+    // A prefix that was already in the URL is the visitor's own choice, and
+    // outranks even the activity's language once a join code resolves.
+    markLocaleExplicit();
     saveLocale(urlLocale);
     return urlLocale;
   }

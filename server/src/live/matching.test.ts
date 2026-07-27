@@ -35,6 +35,7 @@ function makeActivity(characters: Character[]): StoredActivity {
     hostKey: "AAAAAAAAAAAAAAAAAAAAAAAA",
     hostName: "Ms. Cohen",
     characters,
+    locale: "en",
     settings: { ...DEFAULT_ACTIVITY_SETTINGS },
     createdAt: 0,
     lastSeenAt: 0,
@@ -42,7 +43,7 @@ function makeActivity(characters: Character[]): StoredActivity {
     chats: [],
     lastPartners: {},
     leftoverStudentId: null,
-    rematchNotice: null,
+    railNotice: null,
     pausedAt: null,
     transcriptEmail: null,
   };

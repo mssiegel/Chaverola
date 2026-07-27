@@ -1,5 +1,3 @@
-import { stuckInLineNotice, tooFewCharactersNotice } from "@chaverola/shared";
-
 import {
   activityDetailsUpdateSchema,
   activitySettingsSchema,
@@ -123,10 +121,14 @@ export function registerTeacherHandlers(
     // button.
     const asked = requestedSeats(current, ids).slice(0, 4);
     if (asked.length > current.characters.length) {
-      current.rematchNotice = tooFewCharactersNotice(
-        current.characters.length,
-        asked.length
-      );
+      // Counts, not a sentence: the teacher's own page words it, in the
+      // teacher's own language. Both are always 2 or more — a chat needs two
+      // students, and the roster's first two rows can't be removed.
+      current.railNotice = {
+        kind: "tooFewCharacters",
+        characterCount: current.characters.length,
+        studentCount: asked.length,
+      };
       log.info(
         {
           joinCode: data.joinCode,
@@ -140,9 +142,9 @@ export function registerTeacherHandlers(
     }
     const chat = createChat(current, ids, Date.now());
     if (!chat) return; // fewer than 2 eligible — a visible no-op
-    // A manual pairing clears any stale pair-everyone rematch notice: the
-    // teacher moved on (mirrors the demo's startChat).
-    current.rematchNotice = null;
+    // A manual pairing clears any stale rail notice: the teacher moved on
+    // (mirrors the demo's startChat).
+    current.railNotice = null;
     log.info(
       {
         joinCode: data.joinCode,
@@ -169,13 +171,14 @@ export function registerTeacherHandlers(
     // An exact pair/trio the plan couldn't repair stays in line — the rail
     // notice explains the visible skip (names resolved off the seats). Cleared
     // by a manual chat:start or the notice's X.
-    current.rematchNotice =
+    current.railNotice =
       plan.stuckStudentIds.length > 0
-        ? stuckInLineNotice(
-            plan.stuckStudentIds.map(
+        ? {
+            kind: "stuckInLine",
+            names: plan.stuckStudentIds.map(
               (id) => current.seats.byId.get(id)?.name ?? ""
-            )
-          )
+            ),
+          }
         : null;
     log.info(
       { joinCode: data.joinCode, groups: plan.groups.length },
@@ -184,14 +187,17 @@ export function registerTeacherHandlers(
     broadcastState(current);
   });
 
+  // The event name predates the notice's second writer and the rename; it
+  // stays as it is, because renaming a client→server event is its own
+  // breaking change for no gain.
   socket.on("match:dismiss-rematch-notice", () => {
     const current = getByHostKey(data.hostKey);
     if (!current) return;
-    if (current.rematchNotice === null) return; // idempotent — nothing to clear
+    if (current.railNotice === null) return; // idempotent — nothing to clear
     // Server-side so the next broadcastState can't resurrect it and a second
     // host device stays coherent.
-    current.rematchNotice = null;
-    log.info({ joinCode: data.joinCode }, "rematch notice dismissed");
+    current.railNotice = null;
+    log.info({ joinCode: data.joinCode }, "rail notice dismissed");
     broadcastState(current);
   });
 

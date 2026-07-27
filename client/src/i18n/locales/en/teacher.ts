@@ -202,6 +202,16 @@ export const teacher = {
     "Tap two students to pair them. Characters get dealt out randomly.",
   "pairing.tapHintGroup":
     "Tap two students to pair them, or up to {{max}} for a group. Characters get dealt out randomly.",
+  // The dismissible rail notice. The server sends the KIND and its names or
+  // counts; the wording is here. Both counts below are always 2 or more — a
+  // chat needs two students, and the first two roster rows can't be removed —
+  // so neither needs a plural form.
+  "pairing.notice.stuckInLine.pair":
+    "{{names}} just chatted with each other, so they're still in line.",
+  "pairing.notice.stuckInLine.group":
+    "{{names}} just chatted together, so they're still in line.",
+  "pairing.notice.tooFewCharacters":
+    "You picked {{studentCount}} students, but your cast only has {{characterCount}} characters, so no chat started. Refresh this page to see the current cast.",
   "pairing.firstInLine": "first in line",
   "pairing.remove": "Remove {{name, bidi}} from the activity",
   "pairing.wait.seconds": "{{value}}s",

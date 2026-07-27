@@ -3,9 +3,8 @@ import {
   dealCast,
   pairEveryonePlan,
   pickAutoMatchPair,
-  stuckInLineNotice,
 } from "@chaverola/shared";
-import type { LobbyConnectionState } from "@chaverola/shared";
+import type { LobbyConnectionState, RailNotice } from "@chaverola/shared";
 
 import { nextId, randInt } from "@/lib/random";
 import { HOST_SEED_CHATS, HOST_STUDENT_NAMES } from "@/mockData";
@@ -84,8 +83,12 @@ export interface HostWorld {
   secondsUntilAutoMatch: number;
   /** Pair-everyone's odd one out, highlighted as first in line. */
   leftoverStudentId: string | null;
-  /** Pair-everyone had to repeat a pairing; shown in the rail, dismissible. */
-  rematchNotice: string | null;
+  /** Pair-everyone had to repeat a pairing; shown in the rail, dismissible.
+   *  Structured like the server's, so the panel renders one shape either way
+   *  — the simulation only ever writes the "stuckInLine" kind, since the
+   *  dashboard caps a selection at the roster size and the demo's own
+   *  createChat can't be asked for more seats than it has. */
+  railNotice: RailNotice | null;
   /**
    * The teacher paused the whole activity. World-level on purpose — there is
    * no per-chat pause (see DECISIONS.md). While true, tickWorld holds every
@@ -226,7 +229,7 @@ export function findAutoMatchPair(
  * Pair the whole connected queue at once through the shared `pairEveryonePlan`
  * (fresh-first greedy, swap-repair around exact reruns, the odd-count trio /
  * leftover). An exact pair/trio the plan couldn't repair stays in line with a
- * dismissible `rematchNotice`; the odd one out becomes `leftoverStudentId`.
+ * dismissible `railNotice`; the odd one out becomes `leftoverStudentId`.
  */
 export function pairEveryoneIn(
   w: HostWorld,
@@ -253,9 +256,9 @@ export function pairEveryoneIn(
   return {
     ...next,
     leftoverStudentId: plan.leftoverId,
-    rematchNotice:
+    railNotice:
       plan.stuckIds.length > 0
-        ? stuckInLineNotice(plan.stuckIds.map(nameOf))
+        ? { kind: "stuckInLine", names: plan.stuckIds.map(nameOf) }
         : null,
   };
 }
@@ -417,7 +420,7 @@ export function seedWorld(activity: HostedActivity): HostWorld {
     secondsUntilNextJoin: randInt(JOIN_GAP_MIN_SECONDS, JOIN_GAP_MAX_SECONDS),
     secondsUntilAutoMatch: AUTO_MATCH_GAP_SECONDS,
     leftoverStudentId: null,
-    rematchNotice: null,
+    railNotice: null,
     paused: false,
   };
 }

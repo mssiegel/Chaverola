@@ -112,6 +112,16 @@ Detection runs exactly once per page load, in `main.tsx` before `createRoot`,
 and rewrites the URL with `replaceState`. Picking a language in the switcher
 saves it to `localStorage` before navigating.
 
+The activity rung fires later, because an activity resolves long after boot:
+`JoinActivityPage` swaps the URL's locale for the activity's the instant
+`lookup.state === "found"`, and never once a seat is in sessionStorage. What
+counts as an explicit choice is tracked in `localePreference.ts` — a prefix
+already in the URL at boot, or a switcher pick. A bare path that
+`applyBootLocale` rewrote from `navigator.language` is a guess, so an activity
+outranks it in both directions: a Hebrew activity's plain link lands an
+English-phoned student on `/he`, and an English one sends a Hebrew-phoned
+student back to the unprefixed path.
+
 **Why:** An Israeli teacher shouldn't have to know to type `/he`, and a visitor
 who deliberately picks English shouldn't be bounced back by their own phone
 settings on the next click. Running before React exists means frame 1 of a

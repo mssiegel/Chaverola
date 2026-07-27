@@ -1,10 +1,12 @@
 import { randomBytes, randomInt } from "node:crypto";
 
-import { DEMO_JOIN_CODE } from "@chaverola/shared";
+import { DEFAULT_LOCALE, DEMO_JOIN_CODE } from "@chaverola/shared";
 import type {
   ActivitySettings,
   Character,
   CharacterInput,
+  Locale,
+  RailNotice,
 } from "@chaverola/shared";
 
 import { capacity } from "../lib/httpErrors";
@@ -35,6 +37,10 @@ export interface StoredActivity {
   characters: Character[];
   studentInstructions?: string;
   teacherEmail?: string;
+  /** The language the teacher set up in, frozen at create — students inherit
+   *  it at join, and (from prompt 5) the transcript email is written in it.
+   *  Never edited: activity:update-details deliberately can't reach it. */
+  locale: Locale;
   settings: ActivitySettings;
   createdAt: number;
   lastSeenAt: number;
@@ -52,12 +58,14 @@ export interface StoredActivity {
   /** Pair-everyone's odd one out — lazily nulled at snapshot build once
    *  that seat stops waiting. */
   leftoverStudentId: string | null;
-  /** Pair-everyone left an exact pair/trio in line: the dismissible rail
-   *  notice, projected on chats:snapshot. Set by match:pair-everyone, cleared
-   *  by a manual chat:start or match:dismiss-rematch-notice. Server truth so a
-   *  second host device stays coherent. Mirrors the demo's
-   *  HostWorld.rematchNotice. */
-  rematchNotice: string | null;
+  /** Why the last thing the teacher pressed didn't do what they expected —
+   *  pair-everyone leaving an exact pair/trio in line, or a chat:start the
+   *  cast couldn't seat. The dismissible rail notice, projected on
+   *  chats:snapshot; cleared by a manual chat:start or
+   *  match:dismiss-rematch-notice. Structured, never prose: the client owns
+   *  the wording, in the teacher's language. Server truth so a second host
+   *  device stays coherent. Mirrors the demo's HostWorld.railNotice. */
+  railNotice: RailNotice | null;
   /** The teacher's world-level pause: set = paused, and the timestamp is
    *  the freeze anchor — snapshots clock against it, and resumeChats shifts
    *  the stored clocks forward by (now - pausedAt). */
@@ -78,6 +86,9 @@ export interface NewActivity {
   characters: CharacterInput[];
   studentInstructions?: string;
   teacherEmail?: string;
+  /** Absent from an older client during the deploy window — defaulted below,
+   *  never rejected (see the schema). */
+  locale?: Locale;
   settings: ActivitySettings;
 }
 
@@ -180,6 +191,7 @@ export function createActivity(
     hostKey: mintHostKey(),
     hostName: input.hostName,
     characters,
+    locale: input.locale ?? DEFAULT_LOCALE,
     settings: input.settings,
     createdAt: now,
     lastSeenAt: now,
@@ -187,7 +199,7 @@ export function createActivity(
     chats: [],
     lastPartners: {},
     leftoverStudentId: null,
-    rematchNotice: null,
+    railNotice: null,
     pausedAt: null,
     transcriptEmail: null,
   };

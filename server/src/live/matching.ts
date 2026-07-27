@@ -33,7 +33,7 @@ import type { Seat } from "./seats";
   What deliberately diverges (named, not drifted): the server tracks one-round
   last-partner memory (createChat maintains `activity.lastPartners`, and
   pair-everyone parks an unrepairable exact pair/trio in
-  `activity.rematchNotice`) — otherwise the pairing DECISIONS, auto-match and
+  `activity.railNotice`) — otherwise the pairing DECISIONS, auto-match and
   pair-everyone alike, are the shared rules, so no exact rerun is formed either
   way. Chats end two ways (the teacher's endChat, and markInactive's below-2
   rule); the whole class pauses as one switch (pauseChats/resumeChats); ids are

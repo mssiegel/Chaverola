@@ -12,6 +12,7 @@ import type {
   ChatTranscriptLine,
   ClientToServerEvents,
   QueueEntry,
+  RailNotice,
   ServerToClientEvents,
 } from "@chaverola/shared";
 
@@ -180,20 +181,20 @@ const chatsSnapshotWhere = (
     };
     socket.on("chats:snapshot", handler);
   });
-/** Like chatsSnapshotWhere, but surfaces the rematch notice the
- *  pair-everyone test below asserts on. */
-const rematchSnapshotWhere = (
+/** Like chatsSnapshotWhere, but surfaces the rail notice the pair-everyone
+ *  test below asserts on. */
+const railSnapshotWhere = (
   socket: ClientSocket,
   predicate: (payload: {
     chats: ChatSnapshot[];
-    rematchNotice: string | null;
+    railNotice: RailNotice | null;
   }) => boolean
 ) =>
-  new Promise<{ chats: ChatSnapshot[]; rematchNotice: string | null }>(
+  new Promise<{ chats: ChatSnapshot[]; railNotice: RailNotice | null }>(
     (resolve) => {
       const handler = (payload: {
         chats: ChatSnapshot[];
-        rematchNotice: string | null;
+        railNotice: RailNotice | null;
       }) => {
         if (!predicate(payload)) return;
         socket.off("chats:snapshot", handler);
@@ -276,26 +277,24 @@ describe("the live lobby", () => {
       [welcomeB.studentId]: [welcomeA.studentId],
     };
 
-    const parked = rematchSnapshotWhere(
-      teacher,
-      (p) => p.rematchNotice !== null
-    );
+    const parked = railSnapshotWhere(teacher, (p) => p.railNotice !== null);
     teacher.emit("match:pair-everyone");
     const parkedSnapshot = await parked;
     // Nobody was paired, and the notice names both — the exact pair stays.
+    // Structural, not prose: the wording is the client's now, and the kind
+    // plus the names in queue order is the whole contract.
     expect(parkedSnapshot.chats).toEqual([]);
-    expect(parkedSnapshot.rematchNotice).toContain("Ana");
-    expect(parkedSnapshot.rematchNotice).toContain("Boaz");
+    expect(parkedSnapshot.railNotice).toEqual({
+      kind: "stuckInLine",
+      names: ["Ana", "Boaz"],
+    });
 
     // Dismiss is server-side: the next snapshot has it cleared and it does
     // not resurrect.
-    const cleared = rematchSnapshotWhere(
-      teacher,
-      (p) => p.rematchNotice === null
-    );
+    const cleared = railSnapshotWhere(teacher, (p) => p.railNotice === null);
     teacher.emit("match:dismiss-rematch-notice");
     const clearedSnapshot = await cleared;
-    expect(clearedSnapshot.rematchNotice).toBeNull();
+    expect(clearedSnapshot.railNotice).toBeNull();
   });
 
   it("a 4-digit code structurally cannot open a teacher socket", async () => {

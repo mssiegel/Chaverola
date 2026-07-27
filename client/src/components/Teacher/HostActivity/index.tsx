@@ -213,8 +213,8 @@ export function HostActivityDashboard({
         setPendingAction({ kind: "remove-from-queue", student })
       }
       rematchWarning={rematchWarning}
-      rematchNotice={engine.rematchNotice}
-      onDismissRematchNotice={engine.dismissRematchNotice}
+      railNotice={engine.railNotice}
+      onDismissRailNotice={engine.dismissRailNotice}
       leftoverStudentId={engine.leftoverStudentId}
       autoMatchOn={activity.settings.autoMatch}
       autoMatchSeconds={activity.settings.autoMatchSeconds}

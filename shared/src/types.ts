@@ -4,6 +4,20 @@
   to them (schema drift is a compile error server-side).
 */
 
+/**
+ * The languages Chaverola speaks. English is the unprefixed locale in the
+ * client's URL scheme; every other one gets a prefix (`/he`).
+ *
+ * Here rather than in constants.ts, which already imports from this file —
+ * the other direction would be circular. The client re-exports all three from
+ * `lib/locale.ts`, which keeps the URL helpers beside them.
+ */
+export const LOCALES = ["en", "he"] as const;
+export type Locale = (typeof LOCALES)[number];
+
+/** The unprefixed locale, and the fallback whenever nothing else decides. */
+export const DEFAULT_LOCALE: Locale = "en";
+
 export interface Character {
   id: string;
   /**
@@ -28,6 +42,13 @@ export interface Activity {
   /** Optional instructions students read in the lobby — a scene, a debate
    *  topic, task steps. Not every teacher writes them. */
   studentInstructions?: string;
+  /**
+   * The language the teacher set the activity up in, frozen at create. A
+   * student who resolves the join code inherits it, so a whole class matches
+   * the projector instead of splitting by phone settings. Never editable:
+   * `activity:details-changed` deliberately doesn't carry it.
+   */
+  locale: Locale;
 }
 
 /**

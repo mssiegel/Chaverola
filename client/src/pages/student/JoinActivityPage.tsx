@@ -1,6 +1,11 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useOutletContext, useParams } from "react-router-dom";
+import {
+  useLocation,
+  useNavigate,
+  useOutletContext,
+  useParams,
+} from "react-router-dom";
 
 import type { LobbyConnectionState } from "@chaverola/shared";
 
@@ -14,7 +19,13 @@ import type { StudentWorldOutletContext } from "@/components/layout/StudentWorld
 import { ChatStage } from "@/components/Student/ChatStage";
 import { LiveChatStage } from "@/components/Student/LiveChatStage";
 import { WaitingLobby } from "@/components/Student/WaitingLobby";
-import { useLocaleNavigate } from "@/lib/locale";
+import {
+  isLocale,
+  switchLocalePath,
+  useLocale,
+  useLocaleNavigate,
+} from "@/lib/locale";
+import { localeIsExplicit } from "@/lib/localePreference";
 import { useStudentSession } from "@/lib/studentSession";
 import { useActivityLookup } from "@/lib/useActivityLookup";
 import { usePageMeta } from "@/lib/usePageMeta";
@@ -94,6 +105,48 @@ export function JoinActivityPage() {
 
   const isRealActivity =
     activity !== undefined && activity.joinCode !== DEMO_JOIN_CODE;
+
+  // The activity's own language, applied the instant its code resolves and
+  // never again: a student who typed the plain join link lands in the language
+  // the teacher set the class up in, so the whole room matches the projector.
+  //
+  // Only while no seat exists. `/` and `/he` are separate <Route> mounts, so
+  // this redirect gives the page a different identity — React unmounts and
+  // remounts it, wiping state and dropping any socket. Harmless here and only
+  // here: with nothing in sessionStorage the student isn't seated, so
+  // useActiveMatch (declared below, and gated on `seated`) has opened no
+  // socket to drop. Keep this effect above it.
+  //
+  // An explicit choice still outranks the activity — a `/he` the visitor
+  // arrived with, or a switcher pick. A bare path is no preference at all,
+  // even once applyBootLocale has rewritten it from navigator.language, and
+  // that is exactly the rung this implements (DECISIONS.md → "Locale is
+  // detected once at boot and remembered").
+  const locale = useLocale();
+  const { pathname, search, hash } = useLocation();
+  const navigateAcrossLocales = useNavigate();
+  // The demo is exempt: nobody set `1234` up, so it has no authored language
+  // — it's whatever you're reading it in.
+  const inheritedLocale = isRealActivity ? activity.locale : undefined;
+  useEffect(() => {
+    if (session !== null || localeIsExplicit()) return;
+    // Guarded, not trusted: an older server during a deploy answers without
+    // the field, and `/undefined/activity/join/1234` is a worse bug than not
+    // inheriting at all.
+    if (!isLocale(inheritedLocale) || inheritedLocale === locale) return;
+    navigateAcrossLocales(
+      `${switchLocalePath(pathname, inheritedLocale)}${search}${hash}`,
+      { replace: true }
+    );
+  }, [
+    session,
+    inheritedLocale,
+    locale,
+    pathname,
+    search,
+    hash,
+    navigateAcrossLocales,
+  ]);
 
   // Which real join code the socket said died under us. Latched into state
   // by the presence hook's onEnded callback (the presence value itself
@@ -217,6 +270,9 @@ export function JoinActivityPage() {
         joinCode: activity.joinCode,
         hostName: payload.hostName,
         characters: payload.characters ?? activity.characters,
+        // Carried, not re-read: the locale is frozen at create, and the
+        // details channel deliberately doesn't carry it.
+        locale: activity.locale,
       };
       if (payload.studentInstructions !== null) {
         next.studentInstructions = payload.studentInstructions;

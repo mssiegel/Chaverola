@@ -306,7 +306,7 @@ How the layer is put together (`server/src/live/`):
   `splitOddPool`), `planPairEveryone` and `findAutoMatchPair` run the
   eligible pool through the shared rematch-aware rules (`pairEveryonePlan`
   and `pickAutoMatchPair` — no exact rerun formed either way, a stuck
-  exact pair/trio parked in `rematchNotice`), `markInactive` owns the
+  exact pair/trio parked in `railNotice`), `markInactive` owns the
   below-2 ending, and
   `appendLine` owns the transcript (membership guard, id minting, the
   200-line cap). The split is the payoff: the lobby layer decides who may

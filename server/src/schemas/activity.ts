@@ -4,6 +4,7 @@ import {
   AUTO_MATCH_SECONDS,
   EMAIL_MAX_CHARS,
   EMAIL_PATTERN,
+  LOCALES,
   MAX_CHARACTERS,
   MIN_CHARACTERS,
   NAME_MAX_CHARS,
@@ -200,6 +201,12 @@ export const createActivityRequestSchema = z.object({
     .max(EMAIL_MAX_CHARS, "That email address is too long.")
     .regex(EMAIL_PATTERN, "That doesn't look like an email address.")
     .optional(),
+  // Optional on the wire and defaulted in the store — a required field would
+  // 400 every create from the still-old client for the length of a Vercel
+  // deploy. An unknown language is a rejection, not a silent fallback: the
+  // value is a closed set the client picks from, so anything else is a broken
+  // caller, the same reasoning as the settings bounds.
+  locale: z.enum(LOCALES).optional(),
   settings: activitySettingsSchema,
 }) satisfies z.ZodType<CreateActivityRequest>;
 // ^ The drift pin: if the schema's output ever drifts from the shared wire

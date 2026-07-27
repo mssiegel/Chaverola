@@ -5,6 +5,63 @@ area. Entries are newest-first; add new ones at the top, and add a matching line
 to the index in the same change. Replaced decisions move to Superseded at the
 bottom of this file.
 
+### An activity stores the language it was created in, and the student wire carries it
+
+_2026-07-27_
+
+**Decision:** `Activity.locale` is set from the teacher's setup form and frozen
+there. It rides both projections, so `GET /activities/:joinCode` hands it to a
+student before they have typed a name, and the join page switches the URL to
+that locale the instant the code resolves. `activity:update-details`
+deliberately can't reach it: the details channel's exact-key allowlist test is
+what proves the language can't move under a class mid-lesson.
+
+On the create request the field is **optional** and defaulted server-side to
+`DEFAULT_LOCALE`. The locale list itself moved to `shared/src/types.ts` (not
+`constants.ts`, which already imports from it), and the client's `lib/locale.ts`
+re-exports it beside the URL helpers.
+
+**Why:** An Israeli teacher reads out a plain join code, and thirty phones then
+decide the language by their own settings. One class ends up split across two
+languages while the projector shows a third. The activity is the only thing in
+the system that knows what language the lesson is in.
+
+Optional on the wire is not politeness: `shared/` is in both deploy triggers,
+so one push races two pipelines and the old client keeps posting for a few
+minutes. A required field would 400 every create in that window, on the one
+surface a teacher touches at the start of a class.
+
+---
+
+### The rail notice crosses the wire as data, and the prose field ships beside it for one deploy
+
+_2026-07-27_
+
+**Decision:** The teacher's dismissible rail notice is a discriminated union on
+`chats:snapshot` (`{ kind: "stuckInLine", names }` or
+`{ kind: "tooFewCharacters", characterCount, studentCount }`), and the client
+words it from its own catalog. `chats:snapshot` carries both the new
+`railNotice` and the old English `rematchNotice` for exactly one deploy; the
+prose is built from the structured value by `legacyNoticeText` in
+`lobbyContext.ts`, and prompt 6 of the Hebrew plan deletes it along with
+`shared`'s three prose helpers.
+
+A union, not a flat `{ kind, names?, … }` bag: the flat shape lets
+`{ kind: "stuckInLine" }` with no names typecheck, and the renderer then needs
+a `!` on every read.
+
+**Why:** Server-authored English was the last untranslatable prose on an
+otherwise Hebrew dashboard. Shipping both fields is the only safe way to change
+a field's type here: if `rematchNotice` had merely changed shape, an old client
+would render an object as a React child, throw, and unwind to
+`PageErrorBoundary`, which is mounted at the **root** and would replace the
+whole teacher dashboard with an error page, mid-lesson. The usual
+server-then-client push ordering cannot help, because `shared/` triggers both
+pipelines and no commit touching it is server-only. The reverse window, a new
+client against an old server, degrades to one missing notice.
+
+---
+
 ### react-i18next is the client's i18n layer; the server takes no i18n dependency
 
 _2026-07-27_

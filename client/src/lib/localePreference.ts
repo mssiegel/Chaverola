@@ -17,6 +17,25 @@ export function saveLocale(locale: Locale): void {
   writeLocalJson(KEY, locale);
 }
 
+/*
+  Did the visitor ASK for the language currently in the URL, or did we guess
+  it for them? Only the two explicit acts count: a locale prefix that was
+  already in the URL at boot, and picking one in the switcher. A bare path
+  rewritten from `navigator.language` is a guess, and a guess is what an
+  activity's own locale is allowed to overrule (see the precedence chain
+  below). Module state, so a hard load re-decides from the URL — which is
+  exactly right, because that URL is whatever the visitor just opened.
+*/
+let explicit = false;
+
+export function markLocaleExplicit(): void {
+  explicit = true;
+}
+
+export function localeIsExplicit(): boolean {
+  return explicit;
+}
+
 /** The first supported language in the browser's preference list, if any. */
 export function localeFromNavigator(): Locale | null {
   if (typeof navigator === "undefined") return null;
@@ -38,7 +57,9 @@ export function localeFromNavigator(): Locale | null {
  *
  * `activityLocale` is the language the teacher set the activity up in, so a
  * whole class matches the projector rather than splitting by phone settings.
- * It arrives with the server work in a later slice and is undefined until then.
+ * Nothing calls this with one: an activity resolves long after boot, so the
+ * student flow applies that rung itself, in `JoinActivityPage` — this
+ * signature is the chain written down in one place.
  */
 export function preferredLocale(activityLocale?: Locale): Locale {
   return (

@@ -1,11 +1,13 @@
 import type { Logger } from "pino";
 import type { Server, Socket } from "socket.io";
 
+import { stuckInLineNotice, tooFewCharactersNotice } from "@chaverola/shared";
 import type {
   ActivitySettings,
   ChatSnapshot,
   ClientToServerEvents,
   QueueEntry,
+  RailNotice,
   ServerToClientEvents,
 } from "@chaverola/shared";
 
@@ -20,6 +22,7 @@ import {
   toChatStarted,
   toChatUpdate,
   toPeerConnection,
+  toRailNotice,
   toRematchPartners,
 } from "../store/projections";
 import {
@@ -81,6 +84,23 @@ export function room(joinCode: string): string {
 }
 
 /**
+ * The rail notice as English prose, for the DEPRECATED `rematchNotice` field.
+ *
+ * Delete this, its field, and `shared`'s three prose helpers once the
+ * structured `railNotice` is live on both sides (Hebrew plan, prompt 6). It
+ * exists for exactly one deploy: `shared/` triggers both pipelines, so a new
+ * server always meets old clients for a few minutes, and an old client handed
+ * an object where it expects a string renders it as a React child, throws, and
+ * takes the whole teacher dashboard down with the root error boundary.
+ */
+function legacyNoticeText(notice: RailNotice | null): string | null {
+  if (notice === null) return null;
+  return notice.kind === "stuckInLine"
+    ? stuckInLineNotice(notice.names)
+    : tooFewCharactersNotice(notice.characterCount, notice.studentCount);
+}
+
+/**
  * How much of the class a `chats:snapshot` carries.
  *
  * **full** — every chat with its transcript. The healing snapshot: whatever a
@@ -114,6 +134,8 @@ export interface LobbyContext {
     leftoverStudentId: string | null;
     paused: boolean;
     lastPartners: Record<string, string[]>;
+    railNotice: RailNotice | null;
+    /** @deprecated one deploy only — see legacyNoticeText. */
     rematchNotice: string | null;
     settings: ActivitySettings;
   };
@@ -179,7 +201,8 @@ export function createLobbyContext(
       leftoverStudentId: record.leftoverStudentId,
       paused: record.pausedAt !== null,
       lastPartners: toRematchPartners(record),
-      rematchNotice: record.rematchNotice,
+      railNotice: toRailNotice(record),
+      rematchNotice: legacyNoticeText(record.railNotice),
       settings: toActivitySettings(record),
     };
   }

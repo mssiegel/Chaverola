@@ -116,7 +116,7 @@ export function useHostActivityDemo(
   const startChat = (studentIds: string[]) => {
     commit({
       ...createChat(worldRef.current, studentIds, activityRef.current),
-      rematchNotice: null,
+      railNotice: null,
     });
   };
 
@@ -286,9 +286,8 @@ export function useHostActivityDemo(
       0
     ),
     leftoverStudentId: world.leftoverStudentId,
-    rematchNotice: world.rematchNotice,
-    dismissRematchNotice: () =>
-      commit({ ...worldRef.current, rematchNotice: null }),
+    railNotice: world.railNotice,
+    dismissRailNotice: () => commit({ ...worldRef.current, railNotice: null }),
     isExactRematch: (ids) => isExactRematchIn(world.lastPartners, ids),
     startChat,
     pairEveryone,

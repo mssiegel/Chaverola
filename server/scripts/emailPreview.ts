@@ -62,6 +62,7 @@ const fixture: StoredActivity = {
   studentInstructions:
     "Basel, 1897. The First Zionist Congress is about to open, and everyone has an opinion.",
   teacherEmail: "preview@example.com",
+  locale: "en",
   settings: { ...DEFAULT_ACTIVITY_SETTINGS },
   createdAt: 0,
   lastSeenAt: 0,
@@ -101,7 +102,7 @@ const fixture: StoredActivity = {
   ],
   lastPartners: {},
   leftoverStudentId: null,
-  rematchNotice: null,
+  railNotice: null,
   pausedAt: null,
   transcriptEmail: null,
 };

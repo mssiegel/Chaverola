@@ -10,6 +10,7 @@ import {
 import type {
   CharacterInput,
   CreateActivityRequest,
+  Locale,
   StepperBounds,
 } from "@chaverola/shared";
 import type { ActivitySettings } from "@/types/activity";
@@ -251,9 +252,15 @@ export function validateActivityDraft(draft: ActivityDraft): SetupProblem[] {
  * dropped here — an abandoned character row never blocks a class from
  * starting. Blank optional fields are omitted (the wire contract never sends
  * `""` or null), and no ids go over: the server mints character ids.
+ *
+ * `locale` is the language the form itself is in, and it is always sent —
+ * optional on the wire only so a deploy can't 400 an old client's create.
+ * The activity keeps it for good: it is what puts a student who types the
+ * bare join link on the same language as the projector.
  */
 export function toCreateActivityRequest(
-  draft: ActivityDraft
+  draft: ActivityDraft,
+  locale: Locale
 ): CreateActivityRequest {
   const characters: CharacterInput[] = draft.characters
     .filter(isFilledCharacter)
@@ -264,6 +271,7 @@ export function toCreateActivityRequest(
   const request: CreateActivityRequest = {
     hostName: draft.hostName.trim(),
     characters,
+    locale,
     settings: { ...draft.settings },
   };
   if (instructions !== "") request.studentInstructions = instructions;

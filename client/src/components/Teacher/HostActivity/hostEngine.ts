@@ -2,6 +2,7 @@ import type {
   ActivitySettings,
   Character,
   LobbyConnectionState,
+  RailNotice,
 } from "@chaverola/shared";
 
 import type { HostedChat, WaitingStudent } from "./hostWorld";
@@ -33,8 +34,10 @@ export interface HostEngine {
   completedChats: HostedChat[];
   studentsChattingCount: number;
   leftoverStudentId: string | null;
-  rematchNotice: string | null;
-  dismissRematchNotice: () => void;
+  /** Why the last press didn't do what the teacher expected — structured, so
+   *  the panel words it from the catalog in the reading language. */
+  railNotice: RailNotice | null;
+  dismissRailNotice: () => void;
   /** True when this exact group was everyone's previous chat. */
   isExactRematch: (ids: string[]) => boolean;
   startChat: (studentIds: string[]) => void;

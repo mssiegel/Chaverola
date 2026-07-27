@@ -165,6 +165,9 @@ export function activityFromLiveDraft(
     joinCode: base.joinCode,
     hostName: draft.hostName.trim(),
     characters,
+    // Frozen at create and not on this form: the panel edits what students
+    // see, never the language the activity runs in.
+    locale: base.locale,
     settings: { ...draft.settings },
   };
   const instructions = draft.studentInstructions.trim();

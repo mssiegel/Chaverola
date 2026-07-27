@@ -59,6 +59,7 @@ export interface CreateActivityRequest {
   characters: CharacterInput[]; // 2–4; names unique (trimmed, case-insensitive)
   studentInstructions?: string; // ≤ STUDENT_INSTRUCTIONS_MAX_CHARS (250, code points); omit when blank
   teacherEmail?: string; // EMAIL_PATTERN, ≤ EMAIL_MAX_CHARS; omit when blank
+  locale?: Locale; // "en" | "he" — the language the form was in. OPTIONAL on the wire and defaulted to "en" server-side, so a deploy can't 400 an old client's create
   settings: ActivitySettings; // required in full; bounds REJECTED, not clamped
 }
 export interface CreateActivityResponse {
@@ -84,10 +85,15 @@ export interface ApiErrorResponse {
 ```
 
 `Activity` is the **student projection**: `joinCode`, `hostName`,
-`characters`, and optionally `studentInstructions`. `HostedActivity` extends it with
-`settings` and optionally `teacherEmail`. **Neither ever contains the
-hostKey** — it appears only as the top-level `hostKey` member of the
-create response.
+`characters`, `locale`, and optionally `studentInstructions`.
+`HostedActivity` extends it with `settings` and optionally `teacherEmail`.
+**Neither ever contains the hostKey** — it appears only as the top-level
+`hostKey` member of the create response.
+
+`locale` is frozen at create and reaches students on purpose: the join page
+switches the URL to it the moment a code resolves, so a class joining from a
+plain link matches the projector instead of splitting by phone settings.
+`activity:update-details` deliberately can't carry it.
 
 ## Endpoints
 
@@ -247,7 +253,8 @@ export interface ServerToClientEvents {
     leftoverStudentId: string | null; // pair-everyone's odd one out
     paused: boolean; // the world-level pause — keeps a second host device coherent
     lastPartners: Record<string, string[]>; // waiting seats' previous partners — feeds the rematch heads-up (teacher room only)
-    rematchNotice: string | null; // the dismissible rail notice: pair-everyone left an exact pair/trio in line, or a chat:start the cast couldn't seat — one slot, last write wins (teacher truth)
+    railNotice: RailNotice | null; // the dismissible rail notice as DATA — { kind: "stuckInLine", names } | { kind: "tooFewCharacters", characterCount, studentCount }. One slot, last write wins (teacher truth); the client words it from its own catalog
+    rematchNotice: string | null; // DEPRECATED, one deploy only: the same notice as English prose, so an old client isn't handed an object where it expects a string. Deleted by the Hebrew plan's prompt 6
     settings: ActivitySettings; // the stored settings — a woken host device re-syncs from its connect-time snapshot instead of committing its stale copy
   }) => void;
   /** Student only, targeted; re-sent on every resume while matched.
@@ -467,13 +474,13 @@ export interface ClientToServerEvents {
   "lobby:leave": () => void;
   /** Teacher only. Filtered to eligible students, then all or nothing: if the
    *  server's roster has fewer characters than that, the whole start is
-   *  refused and the reason comes back as rematchNotice rather than seating
+   *  refused and the reason comes back as railNotice rather than seating
    *  whoever fit (feature 18). No-ops below 2 eligible. */
   "chat:start": (payload: { studentIds: string[] }) => void;
   /** Teacher only. Fresh-first pairs in queue order, repairing around exact
    *  reruns; odd count seats a trailing trio when the roster has a 3rd
    *  character, else marks the leftover. An exact pair/trio it can't repair
-   *  stays in line, carried back as rematchNotice on the next chats:snapshot. */
+   *  stays in line, carried back as railNotice on the next chats:snapshot. */
   "match:pair-everyone": () => void;
   /** Teacher only; idempotent — dismisses the pair-everyone rematch notice
    *  server-side (so broadcastState can't resurrect it and a second host
@@ -578,7 +585,7 @@ below.
 - **Starting a chat is all or nothing.** `chat:start` filters to eligible
   students, takes at most four, and then refuses the whole start if the
   roster has fewer characters than that: nobody is seated, and the teacher
-  gets the refusal on `rematchNotice` naming the cast size the server
+  gets the refusal on `railNotice` naming the cast size the server
   actually holds. It used to clamp instead, which seated whoever fit and
   left the rest in the queue with nothing to explain it (feature 18,
   founder call 2026-07-26). Below 2 eligible it still does nothing

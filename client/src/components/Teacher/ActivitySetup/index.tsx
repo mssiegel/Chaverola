@@ -20,7 +20,7 @@ import {
   type SetupField,
   type SetupProblem,
 } from "@/lib/activitySetup";
-import { useLocaleNavigate } from "@/lib/locale";
+import { useLocale, useLocaleNavigate } from "@/lib/locale";
 import { primeHostedActivityLookup } from "@/lib/useHostedActivityLookup";
 
 import { AboutYouFields } from "./AboutYouFields";
@@ -80,6 +80,9 @@ function toDraft(form: SetupFormState): ActivityDraft {
 export function ActivitySetupForm() {
   const { t } = useTranslation("teacher");
   const navigate = useLocaleNavigate();
+  // The language this form is in becomes the activity's, for good — a teacher
+  // setting up in Hebrew gets a class that joins in Hebrew.
+  const locale = useLocale();
 
   const [form, setForm] = useState<SetupFormState>(() =>
     fromDraft(readActivityDraft())
@@ -151,7 +154,7 @@ export function ActivitySetupForm() {
     // No client-side timeout on purpose: create isn't idempotent, so a retry
     // fired while a slow response is still in flight could mint a second
     // activity. The button waits the request out however long it takes.
-    void createActivity(toCreateActivityRequest(toDraft(form))).then(
+    void createActivity(toCreateActivityRequest(toDraft(form), locale)).then(
       (result) => {
         setHosting(false);
         if (!result.ok) {

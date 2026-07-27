@@ -10,6 +10,7 @@ import type {
   Character,
   LobbyConnectionState,
   QueueEntry,
+  RailNotice,
 } from "@chaverola/shared";
 
 import { createLobbySocket, type LobbySocket } from "@/lib/socket";
@@ -107,7 +108,7 @@ export function useHostActivityLive({
   const [lastPartners, setLastPartners] = useState<Record<string, string[]>>(
     {}
   );
-  const [rematchNotice, setRematchNotice] = useState<string | null>(null);
+  const [railNotice, setRailNotice] = useState<RailNotice | null>(null);
   const [ended, setEnded] = useState<HostEnded | null>(null);
   const socketRef = useRef<LobbySocket | null>(null);
   // Set the instant the teacher ends the activity, read inside the mount
@@ -174,11 +175,13 @@ export function useHostActivityLive({
       setChats((prev) => mergeHostedChats(prev, payload.chats));
       setLeftoverStudentId(payload.leftoverStudentId);
       // `=== true` / `?? {}` / `?? null` tolerate the deploy window where an
-      // older server's snapshot has no paused / lastPartners / rematchNotice
-      // field yet.
+      // older server's snapshot has no paused / lastPartners / railNotice
+      // field yet. For railNotice that window costs one missing notice and
+      // nothing else — the deliberate half of the trade that keeps an old
+      // client from being handed an object where it expects prose.
       setPaused(payload.paused === true);
       setLastPartners(payload.lastPartners ?? {});
-      setRematchNotice(payload.rematchNotice ?? null);
+      setRailNotice(payload.railNotice ?? null);
       if (foldSettingsFromSnapshot) {
         foldSettingsFromSnapshot = false;
         // Presence check: an older server's snapshot has no settings field
@@ -249,7 +252,7 @@ export function useHostActivityLive({
       setConnection("connected");
       setPaused(false);
       setLastPartners({});
-      setRematchNotice(null);
+      setRailNotice(null);
       setEnded(null);
       endedRef.current = false;
       if (endResultTimerRef.current !== null) {
@@ -370,11 +373,13 @@ export function useHostActivityLive({
       0
     ),
     leftoverStudentId,
-    // rematchNotice and isExactRematch both read server truth from
+    // railNotice and isExactRematch both read server truth from
     // chats:snapshot; dismissing is a real server round-trip so a second host
     // device stays coherent (the server won't resurrect a dismissed notice).
-    rematchNotice,
-    dismissRematchNotice: () =>
+    // The event keeps its old name — renaming a client→server event is its
+    // own breaking change.
+    railNotice,
+    dismissRailNotice: () =>
       socketRef.current?.emit("match:dismiss-rematch-notice"),
     isExactRematch: (ids) => isExactRematchIn(lastPartners, ids),
     startChat,

@@ -237,6 +237,8 @@ git: `git log -- DECISIONS.md`.
   - [`/demo`, `/demo/teacher`, and `/demo/student` are thin redirects, never pages](docs/decisions/routes.md#demo-demoteacher-and-demostudent-are-thin-redirects-never-pages)
   - [The temporary `/demo/*` routes are gone — every surface lives in its real flow](docs/decisions/routes.md#the-temporary-demo-routes-are-gone--every-surface-lives-in-its-real-flow)
 - [Backend & API](docs/decisions/backend-api.md)
+  - [An activity stores the language it was created in, and the student wire carries it](docs/decisions/backend-api.md#an-activity-stores-the-language-it-was-created-in-and-the-student-wire-carries-it)
+  - [The rail notice crosses the wire as data, and the prose field ships beside it for one deploy](docs/decisions/backend-api.md#the-rail-notice-crosses-the-wire-as-data-and-the-prose-field-ships-beside-it-for-one-deploy)
   - [react-i18next is the client's i18n layer; the server takes no i18n dependency](docs/decisions/backend-api.md#react-i18next-is-the-clients-i18n-layer-the-server-takes-no-i18n-dependency)
   - [The API runs on a paid Render instance, because free web services block outbound SMTP](docs/decisions/backend-api.md#the-api-runs-on-a-paid-render-instance-because-free-web-services-block-outbound-smtp)
   - [The transcript mailer: Gmail SMTP behind one module, log-only without credentials](docs/decisions/backend-api.md#the-transcript-mailer-gmail-smtp-behind-one-module-log-only-without-credentials)

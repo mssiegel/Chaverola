@@ -52,6 +52,7 @@ describe("GET /activities/:joinCode", () => {
       "characters",
       "hostName",
       "joinCode",
+      "locale",
     ]);
   });
 

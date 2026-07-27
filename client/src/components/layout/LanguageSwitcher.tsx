@@ -18,7 +18,7 @@ import {
   useLocale,
   type Locale,
 } from "@/lib/locale";
-import { saveLocale } from "@/lib/localePreference";
+import { markLocaleExplicit, saveLocale } from "@/lib/localePreference";
 import { cn } from "@/lib/utils";
 
 /**
@@ -47,6 +47,10 @@ export function LanguageSwitcher({ className }: { className?: string }) {
     // deliberately picks English gets bounced back to /he by applyBootLocale
     // on their next load.
     saveLocale(next);
+    // …and this is the choice that outranks an activity's own language, so a
+    // student who switches at the join gate isn't bounced back by the code
+    // they're about to type.
+    markLocaleExplicit();
     navigate(`${switchLocalePath(pathname, next)}${search}${hash}`);
   };
 

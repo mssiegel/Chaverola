@@ -188,6 +188,14 @@ export const teacher: HebrewOf<TeacherCatalog> = {
     "תלחץ על שני תלמידים כדי לשבץ אותם. הדמויות מתחלקות אקראית.",
   "pairing.tapHintGroup":
     "תלחץ על שני תלמידים כדי לשבץ אותם, או עד {{max}} לקבוצה. הדמויות מתחלקות אקראית.",
+  // הודעת הפס. השרת שולח את סוג ההודעה ואת השמות או המספרים; הניסוח כאן.
+  // שני המספרים תמיד 2 ומעלה, ולכן אין להם צורות ריבוי נפרדות.
+  "pairing.notice.stuckInLine.pair":
+    "{{names}} דיברו ביניהם ממש עכשיו, אז הם עדיין בתור.",
+  "pairing.notice.stuckInLine.group":
+    "{{names}} דיברו יחד ממש עכשיו, אז הם עדיין בתור.",
+  "pairing.notice.tooFewCharacters":
+    "בחרת {{studentCount}} תלמידים, אבל יש לך רק {{characterCount}} דמויות, אז השיחה לא התחילה. תרענן את הדף כדי לראות את הדמויות המעודכנות.",
   "pairing.firstInLine": "ראשון בתור",
   "pairing.remove": "להוציא את {{name, bidi}} מהפעילות",
   "pairing.wait.seconds": "{{value}} שנ׳",

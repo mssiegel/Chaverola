@@ -8,6 +8,7 @@ import type {
   ChatTranscriptLine,
   HostedActivity,
   QueueEntry,
+  RailNotice,
 } from "@chaverola/shared";
 
 import { activeMembers, eligibleWaiting } from "../live/matching";
@@ -29,6 +30,9 @@ export function toActivity(stored: StoredActivity): Activity {
     joinCode: stored.joinCode,
     hostName: stored.hostName,
     characters: stored.characters,
+    // The one field a student's own screen needs before they've typed
+    // anything: it's what puts a Hebrew class on a Hebrew page.
+    locale: stored.locale,
   };
   if (stored.studentInstructions !== undefined)
     activity.studentInstructions = stored.studentInstructions;
@@ -41,7 +45,11 @@ export function toActivity(stored: StoredActivity): Activity {
  *  unable to ride along. The roster is the one thing here students already
  *  hold: toActivity hands them the same array at join. `null`, not an
  *  omitted key, for the instructions: a clear must be expressible on the
- *  wire (toActivity keeps its omit-when-undefined shape). */
+ *  wire (toActivity keeps its omit-when-undefined shape).
+ *
+ *  Deliberately NO `locale`: it is frozen at create, so a details edit can't
+ *  move it — and this allowlist is what proves it never leaks into the
+ *  details channel by accident. */
 export function toActivityDetails(stored: StoredActivity): {
   characters: Character[];
   hostName: string;
@@ -61,6 +69,7 @@ export function toHostedActivity(stored: StoredActivity): HostedActivity {
     joinCode: stored.joinCode,
     hostName: stored.hostName,
     characters: stored.characters,
+    locale: stored.locale,
     settings: stored.settings,
   };
   if (stored.studentInstructions !== undefined)
@@ -81,6 +90,25 @@ export function toActivitySettings(stored: StoredActivity): ActivitySettings {
     rematchWarning: stored.settings.rematchWarning,
     autoMatch: stored.settings.autoMatch,
     autoMatchSeconds: stored.settings.autoMatchSeconds,
+  };
+}
+
+/** The rail notice as chats:snapshot carries it (teacher-room only). A
+ *  field-by-field literal per variant, never a spread of the stored object —
+ *  the same rule as every other projector here, and it matters more than
+ *  usual now that the notice carries real student names. The names array is
+ *  copied so a later mutation of the stored notice can't reach a payload
+ *  already emitted. */
+export function toRailNotice(stored: StoredActivity): RailNotice | null {
+  const notice = stored.railNotice;
+  if (notice === null) return null;
+  if (notice.kind === "stuckInLine") {
+    return { kind: "stuckInLine", names: [...notice.names] };
+  }
+  return {
+    kind: "tooFewCharacters",
+    characterCount: notice.characterCount,
+    studentCount: notice.studentCount,
   };
 }
 

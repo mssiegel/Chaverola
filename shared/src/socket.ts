@@ -52,6 +52,22 @@ export interface ChatSnapshot {
   endReason: "teacher" | "peer" | "peer-timeout" | null;
 }
 
+/**
+ * The dismissible rail notice: why the last thing the teacher pressed didn't
+ * do what they expected. Structured rather than prose so the client renders it
+ * from its own catalog in the teacher's language — the server ships no copy.
+ *
+ * A discriminated union, not a flat `{ kind, names?, characterCount? }` bag:
+ * the flat shape lets `{ kind: "stuckInLine" }` with no names typecheck, and
+ * the renderer then needs a `!` on every read.
+ *
+ * `names` are real student names — a teacher-only surface, exactly like
+ * QueueEntry.name, and it rides the teacher room only.
+ */
+export type RailNotice =
+  | { kind: "stuckInLine"; names: string[] }
+  | { kind: "tooFewCharacters"; characterCount: number; studentCount: number };
+
 /** Student-facing: characterIds only — never names, never peer studentIds. */
 export interface ChatPeer {
   characterId: string;
@@ -119,12 +135,20 @@ export interface ServerToClientEvents {
     // teacher-room only; feeds the rematch heads-up. `?? {}` on the client
     // tolerates an older server during a deploy.
     lastPartners: Record<string, string[]>;
-    // The dismissible rail notice: why the last thing the teacher pressed
-    // didn't do what they expected. Two writers — pair-everyone leaving an
-    // exact pair/trio in line, and a chat:start the cast couldn't seat
-    // (feature 18) — one slot, last write wins. Teacher truth, so a second
-    // host device stays coherent. `?? null` on the client tolerates an older
-    // server during a deploy.
+    // The dismissible rail notice (see RailNotice). Two writers —
+    // pair-everyone leaving an exact pair/trio in line, and a chat:start the
+    // cast couldn't seat (feature 18) — one slot, last write wins. Teacher
+    // truth, so a second host device stays coherent. `?? null` on the client
+    // tolerates an older server during a deploy.
+    railNotice: RailNotice | null;
+    // DEPRECATED, one deploy only: the same notice as server-authored English
+    // prose, which is what made it untranslatable. Both fields ship together
+    // because an old client handed an object where it expects a string would
+    // render it as a React child, throw, and unwind to the root
+    // PageErrorBoundary — replacing the whole teacher dashboard with an error
+    // page, mid-lesson. `shared/` is in both deploy triggers, so no commit can
+    // be server-only and the usual server-then-client dance cannot help.
+    // Deleted once railNotice is live on both sides (Hebrew plan, prompt 6).
     rematchNotice: string | null;
     // The stored settings, teacher-room only — so a host device that slept
     // through a settings:changed re-syncs from its connect-time snapshot
@@ -298,17 +322,19 @@ export interface ClientToServerEvents {
   "lobby:leave": () => void;
   /** Teacher only. Filtered to eligible students, then all or nothing: if the
    *  server's roster has fewer characters than that, the whole start is
-   *  refused and the reason comes back as rematchNotice rather than seating
+   *  refused and the reason comes back as railNotice rather than seating
    *  whoever fit (feature 18). No-ops below 2 eligible. */
   "chat:start": (payload: { studentIds: string[] }) => void;
   /** Teacher only. Fresh-first pairs in queue order, repairing around exact
    *  reruns; odd count seats a trailing trio when the roster has a 3rd
    *  character, else marks the leftover. An exact pair/trio it can't repair
-   *  stays in line, carried back as rematchNotice on the next chats:snapshot. */
+   *  stays in line, carried back as railNotice on the next chats:snapshot. */
   "match:pair-everyone": () => void;
-  /** Teacher only; idempotent — dismisses the pair-everyone rematch notice
-   *  server-side so broadcastState can't resurrect it and a second host device
-   *  stays coherent. A no-op when there is no notice. */
+  /** Teacher only; idempotent — dismisses the rail notice server-side so
+   *  broadcastState can't resurrect it and a second host device stays
+   *  coherent. A no-op when there is no notice. The event name keeps its
+   *  original spelling on purpose: renaming a client→server event is its own
+   *  breaking change, for no gain. */
   "match:dismiss-rematch-notice": () => void;
   /** Teacher only. Quiet exit; ends the chat when <2 active would remain. */
   "chat:remove": (payload: { chatId: string; studentId: string }) => void;
