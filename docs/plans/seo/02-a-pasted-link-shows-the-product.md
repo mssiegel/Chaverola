@@ -57,8 +57,8 @@ that needs to know its own address. Docs
 [05](05-the-search-result-says-what-this-is.md) import that constant rather
 than each declaring their own, so run this doc before them.
 
-- [ ] Prompt 1 — One card, one origin, one fallback (code shipped; tick once
-      the production link has been pasted into Slack and Gmail)
+- [x] Prompt 1 — One card, one origin, one fallback (card seen rendering in
+      WhatsApp, 2026-07-27)
 - [ ] Prompt 2 — Every URL gets its own card
 
 ---
