@@ -69,7 +69,10 @@ explicit mark after all, which the entry in
 explains was rejected on purpose. Step 5 failing means the per-line RLM didn't
 survive the transfer encoding.
 
-**Coverage in the meantime:** the Gmail send landed and renders. `pnpm test`
+**Coverage in the meantime:** the Gmail send landed and the founder confirmed
+it renders correctly — right to left, brand-first subject, the Latin-named
+student's line intact. That covers the Blink/WebKit family; Outlook's Word
+renderer is a different engine and is what this entry is for. `pnpm test`
 asserts the mechanisms are present — a brand-first subject, `dir="rtl"` in the
 HTML, `<bdi>` around a Latin name, and U+200F on every non-empty plain-text
 line — which is not the same as a client honoring them. `pnpm preview:email`

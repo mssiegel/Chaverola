@@ -575,6 +575,49 @@ smoke, and one network-sensitive leg.
 
 ---
 
+## Pass record — 2026-07-27 (prompt 5, and the deploy that nearly hid prompts 1–4)
+
+**Prompt 5 verified.** `pnpm typecheck` and `pnpm test` green (77/77 on the
+server workspace, run four times over the change — the ten pre-existing
+transcript assertions untouched). `pnpm preview:email` opened and eyeballed for
+both locales. The plan's real-send leg **ran**: a Hebrew transcript went through
+the live Gmail SMTP path and the founder confirmed it renders — right to left,
+brand-first subject, the Latin-named student's line intact. Outlook was the only
+leg blocked (no account to hand) and is logged in
+[`docs/pending-manual-tests.md`](../../pending-manual-tests.md); its Word
+renderer is the one engine that might honor `<bdi>` while dropping the
+container's `dir`, which is the single case where the email would show a teacher
+_wrong data_ rather than ugly data.
+
+**The deploy hazard fired, and it was not prompt 5's.** Pushing prompts 4 and 5
+together put a server-and-docs commit (`1f7b2c2`) on the tip, so Vercel's Ignored
+Build Step canceled the client build — 1s duration, and the newest **Ready**
+production build was **16 hours old**, predating prompt 1. Both dashboards read
+green. The served bundle contained one scrap of Hebrew, `{en:"EN",he:"עב"}`, the
+language switcher from the old routing work: **prompts 1–4's client halves had
+never reached production at all.** Nothing broke meanwhile, because prompt 4's
+deliberate two-field window covered it — the new server still sent the
+deprecated `rematchNotice` beside `railNotice`, and the old client read the one
+it knew. That is the design working exactly as its own section predicted.
+
+Fixed with the documented recovery, `vercel --prod --yes` **from the repo root**
+([`docs/operations.md`](../../operations.md) → Recovering a skipped client
+build). Verified by grepping the served bundle rather than trusting Ready:
+`railNotice` 13 hits and `rematchNotice` **0** in the host page chunk, both
+notice kinds present, and the Hebrew catalogs shipping in their own chunk
+(`Combination-*.js`, 789 Hebrew characters — the entry bundle is clean, so a
+grep of `index-*.js` alone reads as a false negative and this is worth knowing
+before someone repeats it). `/`, `/he` and `/he/activity/create` all 200;
+`/healthz` on `1f7b2c2`.
+
+**Prompt 6's gate is therefore open** — prompt 4 is confirmed live on both
+sides. One thing to carry into it: prompt 6 touches `shared/` and `server/` and
+**not** `client/`, so its own push will be canceled by Vercel the same way. That
+is harmless there (the client changes nothing), but it is not a build worth
+debugging.
+
+---
+
 ## Notes for whoever runs these
 
 - **`pnpm lint` was already failing on `main` before this work started** — four
