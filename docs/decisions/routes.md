@@ -5,6 +5,69 @@ area. Entries are newest-first; add new ones at the top, and add a matching line
 to the index in the same change. Replaced decisions move to Superseded at the
 bottom of this file.
 
+### `robots.txt` fences the two capability path shapes, and carves the demo back out
+
+_2026-07-27_
+
+**Decision:** `client/public/robots.txt` disallows `/activity/host/` and
+`/activity/join/` in both locales, and re-allows `/activity/host/1234` and
+`/activity/join/1234` in both. `/app.html` is disallowed too. AI crawlers —
+GPTBot, ClaudeBot, PerplexityBot — are **allowed**, by inheriting the one
+`User-agent: *` group rather than getting one of their own.
+
+**Why:** A live classroom is a URL capability. Whoever holds
+`/activity/host/<hostKey>` runs the class, and `/activity/join/<joinCode>` is a
+live 4-digit code. Neither is linked from anywhere, so neither is discoverable
+today — but every unmatched path answers HTTP 200 with the shell, so one that
+escaped into a forum, a shared screen or a tweeted screenshot would be crawled
+like any other page.
+
+`Disallow` rather than `noindex`, and that is the right tool here rather than
+the weaker one: `noindex` is a tag, so it only works once the crawler has
+fetched the page, which is the thing being prevented. The trade is that a
+disallowed URL someone links to can still surface as a bare URL in results —
+acceptable, because the page's contents never leave the site.
+
+**The demo is the carve-out, and it is the whole subtlety of the file.**
+`/activity/host/1234` is the link that goes into a pitch email; nothing else
+links it. The `Allow` lines win because a matcher resolves a conflict by longest
+matching path, which is why the code is spelled out rather than derived — the
+same reason `client/src/lib/pageMeta.ts` spells it out instead of importing
+`DEMO_JOIN_CODE`. Those two must stay in step. The rules were checked against a
+real matcher, not read: `Allow`/`Disallow` precedence is the classic place to be
+confidently wrong, and `Disallow: /activity/join/` deliberately does **not**
+block `/activity/join`, the join gate, which is a real indexed page.
+
+The AI-crawler call is written down because it is a real product choice some
+sites answer the other way, and because the absence of a rule looks identical to
+never having decided. They are the readers the homepage's `<noscript>` block was
+written for ([The homepage ships its words in a `<noscript>`
+block](branding.md#the-homepage-ships-its-words-in-a-noscript-block-and-the-demo-urls-get-none)),
+so blocking them would invalidate that work. **Allowing them must stay an
+inheritance, never a group of their own:** a matcher obeys the most specific
+matching group only, so an explicit `User-agent: GPTBot` block would make GPTBot
+ignore every `Disallow` above it and crawl live classrooms.
+
+Two things this deliberately does not fix. **Every unknown path still returns
+HTTP 200**, so Google will see soft 404s; narrowing what gets crawled is not the
+same as answering correctly, and a real fix needs a Vercel 404 route or an edge
+function ([docs/plans/seo/README.md](../plans/seo/README.md) → "What's
+deliberately not here"). And the prerender pass writes every page twice, so
+`.html` twins like `/activity/join.html` are reachable duplicates — left
+unfenced on purpose, since nothing links them and each carries a self-canonical
+pointing at its clean URL, which is the mechanism that already consolidates them.
+
+Naming the capability path shapes in a public file leaks nothing: `README.md`
+publishes the same route table, and a hostKey is 24 base64url characters of
+`randomBytes` — 144 bits.
+
+_`robots.txt` is a **static file, not a route** — Vercel serves real files from
+the output directory before applying the catch-all rewrite in `vercel.json`, so
+"routes are canonical" is not in tension with it and nothing in `App.tsx`
+changes._
+
+---
+
 ### The demo URLs redirect at the edge, and the React route is now its dev twin
 
 _2026-07-27_

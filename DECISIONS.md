@@ -235,6 +235,7 @@ git: `git log -- DECISIONS.md`.
   - _Superseded_
     - [Demo surfaces say so: a pretend-students chip on both views](docs/decisions/demo-flows.md#demo-surfaces-say-so-a-pretend-students-chip-on-both-views)
 - [Routes & app structure](docs/decisions/routes.md)
+  - [`robots.txt` fences the two capability path shapes, and carves the demo back out](docs/decisions/routes.md#robotstxt-fences-the-two-capability-path-shapes-and-carves-the-demo-back-out)
   - [The demo URLs redirect at the edge, and the React route is now its dev twin](docs/decisions/routes.md#the-demo-urls-redirect-at-the-edge-and-the-react-route-is-now-its-dev-twin)
   - [A namespace can register on more than one page, and `chat` registers on four](docs/decisions/routes.md#a-namespace-can-register-on-more-than-one-page-and-chat-registers-on-four)
   - [A component that renders on two pages keeps its strings in `common`](docs/decisions/routes.md#a-component-that-renders-on-two-pages-keeps-its-strings-in-common)

@@ -1,0 +1,51 @@
+# Chaverola's crawl fence.
+#
+# A static file, not a route: Vercel serves real files from the output
+# directory BEFORE it applies the catch-all rewrite in vercel.json, so this is
+# reachable at /robots.txt and is not swallowed by the SPA shell. Nothing in
+# App.tsx changes — "routes are canonical" is not in tension with this file.
+
+User-agent: *
+
+# A live classroom is a URL capability. Whoever holds /activity/host/<hostKey>
+# runs the class, and /activity/join/<joinCode> is a live 4-digit code. Neither
+# is linked from anywhere, but every unmatched path answers HTTP 200 with the
+# shell, so one that escapes into a forum, a shared screen or a tweeted
+# screenshot would otherwise be crawlable and indexable.
+#
+# THE TRAILING SLASH IS LOAD-BEARING. `Disallow: /activity/join/` does NOT
+# block /activity/join — that is the join gate, a real page, and it stays
+# indexed. Same for /activity/host/ and the /he twins.
+#
+# `1234` is the demo, and it is the link that goes into a pitch email, so it
+# has to stay crawlable. The Allow lines win because a robots.txt matcher
+# resolves a conflict by LONGEST MATCHING PATH — spelling the code out is what
+# carves the demo back out of the fence. KEEP IN STEP with PAGE_META in
+# client/src/lib/pageMeta.ts, which spells the same `1234` out for the same
+# reason instead of importing DEMO_JOIN_CODE.
+Disallow: /activity/host/
+Allow: /activity/host/1234
+Disallow: /activity/join/
+Allow: /activity/join/1234
+Disallow: /he/activity/host/
+Allow: /he/activity/host/1234
+Disallow: /he/activity/join/
+Allow: /he/activity/join/1234
+
+# A build artifact that happens to be publicly reachable, not a page: app.html
+# is the pristine shell that vercel.json's catch-all rewrite serves. Doc 03's
+# second prompt emits a /he-app.html twin — disallow it here in that same
+# change.
+Disallow: /app.html
+
+# AI crawlers — GPTBot, ClaudeBot, PerplexityBot and the rest — are ALLOWED,
+# and that is a deliberate call (founder, 2026-07-27) rather than an absence.
+# They are the readers the homepage's <noscript> body was written for.
+#
+# They are allowed by INHERITING the group above, and it has to stay that way.
+# An explicit `User-agent: GPTBot` group would be worse than useless: a matcher
+# obeys the most specific matching group ONLY, so GPTBot would then ignore
+# every Disallow above and crawl live classrooms.
+
+# No Sitemap: line yet — doc 04's second prompt writes the sitemap and adds it.
+# Pointing at a 404 is worse than saying nothing.

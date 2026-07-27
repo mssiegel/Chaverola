@@ -43,7 +43,7 @@ directory** and can run first, before doc
 prompt, and deliberately runs after prompt 1 so `robots.txt` never
 advertises a sitemap that doesn't exist yet.
 
-- [ ] Prompt 1 — The fence
+- [x] Prompt 1 — The fence
 - [ ] Prompt 2 — The map
 
 ---
