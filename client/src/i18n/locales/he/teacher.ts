@@ -18,9 +18,12 @@ export const teacher: HebrewOf<TeacherCatalog> = {
   // ---------------------------------------------------------------------
   // /activity/create — the setup page and its form
 
-  "setup.meta.title": "הקמת פעילות",
+  // Impersonal plural, like the setup form's other copy — the English "you"
+  // isn't carried over, because matching the neighbouring Hebrew beats
+  // matching the source.
+  "setup.meta.title": "הקמת פעילות כיתתית בצ׳אט",
   "setup.meta.description":
-    "בוחרים דמויות, מסדרים כמה הגדרות ומקבלים קוד הצטרפות לכיתה. לוקח בערך דקה.",
+    "נותנים שם ל־2 עד 4 דמויות שהתלמידים יגלמו וכותבים על מה הם ידברו. ההקמה לוקחת בערך דקה, ואז מקבלים קוד בן 4 ספרות לכיתה.",
 
   "setup.badge": "למורים",
   "setup.title": "מקימים את הפעילות",
@@ -105,6 +108,15 @@ export const teacher: HebrewOf<TeacherCatalog> = {
   // /activity/host/:hostKey — the live dashboard
 
   "host.meta.title": "הפעילות שלך",
+  // A localization, not a translation: the English pair names a Roman
+  // history class, but /he runs a different production entirely (תל אביב,
+  // ה׳ באייר תש״ח — see DECISIONS.md → "The Hebrew demo is re-cast, never
+  // translated"), so this quotes that demo's own studentInstructions.
+  // "אין שום הרשמה" over a calque of "nothing to sign up for"; the shipped
+  // `home.plans` line already says it that way.
+  "host.demo.meta.title": "דמו למורה: לצפות בכיתה חיה",
+  "host.demo.meta.description":
+    "כאן כיתת היסטוריה כבר באמצע פעילות על השעות שלפני ההכרזה, ואין שום הרשמה. לכל צ׳אט יש כרטיס חי עם שם אמיתי ליד כל דמות.",
 
   "host.badge": "למורים",
   "host.loading": "מחפשים את הפעילות שלך…",

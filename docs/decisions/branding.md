@@ -5,6 +5,62 @@ area. Entries are newest-first; add new ones at the top, and add a matching line
 to the index in the same change. Replaced decisions move to Superseded at the
 bottom of this file.
 
+### The meta title is written for a search result, not for the page, and the demo carries its own
+
+_2026-07-27_
+
+**Decision:** A page's `<title>` and `<meta name="description">` are written for
+someone reading a search result or a link preview, and they may say something
+different from what the page itself says. The homepage no longer titles itself
+"A Classroom Activity That Students Love"; it leads with the words a teacher
+types, and every description closes on the facts that remove hesitation (free,
+no student accounts, nothing to install).
+
+The join gate is the case that forced this. Its `title.join` is also the gate
+card's own `<h1>`, so it now has a **separate** `join.meta.title` key: the
+heading a student reads still says "Join an Activity", while the tab and the
+search result say "Join the Activity with Your 4-Digit Code". Never merge those
+two keys back together — nothing in the type system catches it, `JoinGateCard`
+would just quietly start rendering a search-engine sentence as its heading.
+
+`/activity/host/1234` and `/activity/join/1234` get their own share-ready pairs
+(`host.demo.meta.*`, `join.demo.meta.*`), picked at the page's existing
+`usePageMeta` call by a `hostKey === DEMO_JOIN_CODE` test rather than by a
+second hook call in the demo view. A real host session keeps the plain private
+title and still passes it as its own description.
+
+The Hebrew is a localization. Its demo description names the Hebrew demo's
+scene, not the English one's — there is no Roman class on `/he` (see
+[The Hebrew demo is re-cast, never
+translated](demo-flows.md#the-hebrew-demo-is-re-cast-never-translated)) — and
+grammatical person follows each page's shipped neighbours rather than the
+English source, so setup and the join gate keep their impersonal plural while
+the homepage and both demo pages address the teacher as `אתה`.
+
+**Why:** Product-owner call, extending [Page titles read "&lt;Page&gt; |
+Chaverola", page name
+first](#page-titles-read-ltpagegt--chaverola-page-name-first). That entry set
+the format; nobody had since asked whether the words inside it were words
+anyone searches for, and they weren't. The demo half is a straight defect fix:
+`/demo` is the URL that gets said out loud in a meeting and pasted into an
+email to a principal, and it was rendering "Your Live Activity" as both its
+title and its description.
+
+Deliberately **not** in this change, so the omissions don't read as oversights:
+no Open Graph or Twitter cards, no canonical URLs, no `hreflang` between `/` and
+`/he`, no `robots.txt` or `sitemap.xml`, and no prerendering. Those stay
+deferred to the later Vite SEO effort. The consequence to know: these strings
+are set client-side, so a link-preview bot never sees them — it reads
+`client/index.html`, which is why that file's description was rewritten in the
+same change to be the best all-purpose sentence about the product. Its `<title>`
+stays the bare brand on purpose: nothing stamps a title before React mounts, so
+a sentence there would flash English at a Hebrew visitor mid-fetch.
+
+_Implemented in [pageMeta](../../client/src/lib/pageMeta.ts),
+[HostActivityPage](../../client/src/pages/teacher/HostActivityPage.tsx),
+[JoinActivityPage](../../client/src/pages/student/JoinActivityPage.tsx), and the
+`meta.*` keys across `client/src/i18n/locales/`._
+
 ### Hebrew talks about the teacher without guessing their gender
 
 _2026-07-27_
@@ -120,7 +176,7 @@ _2026-07-15_
 
 **Decision:** `document.title` for every routed page is the page's own name
 followed by the brand — e.g. "Join an Activity | Chaverola" — via the shared
-`usePageTitle` hook. Routes without a title fall back to bare "Chaverola".
+`usePageMeta` hook. Routes without a title fall back to bare "Chaverola".
 
 **Why:** Product-owner call for SEO: the page-specific words get prominence in
 search results while the brand still matches a "Chaverola" search. Brand-first
@@ -129,4 +185,11 @@ Activity") were both rejected — the first buries the page's keywords, the
 second adds clutter without search value. Full SSR/meta-tag SEO is deferred to
 a later Vite SEO effort; until then titles are set client-side only.
 
-_Implemented in [usePageTitle](../../client/src/lib/usePageTitle.ts)._
+**Update (2026-07-27):** the format is unchanged, but what goes inside it is
+now settled separately — see [The meta title is written for a search result,
+not for the page, and the demo carries its
+own](#the-meta-title-is-written-for-a-search-result-not-for-the-page-and-the-demo-carries-its-own).
+The hook was also renamed `usePageTitle` → `usePageMeta` when it took on the
+description; the name is corrected above.
+
+_Implemented in [usePageMeta](../../client/src/lib/usePageMeta.ts)._

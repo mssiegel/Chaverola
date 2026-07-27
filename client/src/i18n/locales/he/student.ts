@@ -21,8 +21,21 @@ export const student: HebrewOf<StudentCatalog> = {
   "title.ended": "הצ׳אט נגמר",
   "title.activityGone": "הפעילות נגמרה",
 
+  // The gate's SEO pair, separate from `title.join` above because that one
+  // is also the card's h1 (JoinGateCard). "שיבוץ" is the word the Hebrew
+  // lobby itself uses, and an Israeli student reads it as an ordinary school
+  // word where a literal "בן זוג לצ׳אט" reads as translated.
+  "join.meta.title": "הצטרפות לפעילות עם קוד בן 4 ספרות",
   "join.meta.description":
-    "קיבלת קוד מהמורה? מקלידים אותו כאן ומצטרפים לפעילות.",
+    "קיבלת קוד מהמורה? מקלידים אותו כאן ואז מוסיפים שם. מחכים רגע לשיבוץ עם מישהו מהכיתה, ולא צריך חשבון ולא צריך להתקין כלום.",
+
+  // /activity/join/1234 — where /demo/student lands. Addressed to the
+  // teacher trying the student's seat, so masculine second person here,
+  // unlike the gate above. Names no classmate: the demo's peers are
+  // simulated, the same hedge `demo.studentBody` makes.
+  "join.demo.meta.title": "דמו לתלמיד: לקבל דמות סודית",
+  "join.demo.meta.description":
+    "כאן אתה יושב בדיוק במקום של התלמידים שלך, בכיתת הדמו. מקבל דמות סודית ונכנס איתה לצ׳אט חי, בלי להקליד קוד ובלי להירשם.",
 
   // "מנחה:" is a label rather than a verb — the same call the teacher's host
   // page and the transcript email make, and it sidesteps agreement entirely.

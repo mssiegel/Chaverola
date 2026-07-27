@@ -17,9 +17,11 @@ export const teacher = {
   // ---------------------------------------------------------------------
   // /activity/create — the setup page and its form
 
-  "setup.meta.title": "Set Up Your Activity",
+  // The meta pair is written for a search result and doesn't have to match
+  // `setup.title` below, which is the page's own h1.
+  "setup.meta.title": "Create a Classroom Roleplay Activity",
   "setup.meta.description":
-    "Name your characters, pick your settings, and get a join code for your class. Takes about a minute.",
+    "Name the 2 to 4 characters your students will play and write what they should talk about. Setup takes about a minute, then you get the 4-digit join code.",
 
   "setup.badge": "For teachers",
   "setup.title": "Set up your activity",
@@ -113,6 +115,13 @@ export const teacher = {
   // /activity/host/:hostKey — the live dashboard
 
   "host.meta.title": "Your Live Activity",
+  // `1234` is the one host URL anyone is meant to share: it's what /demo and
+  // /demo/teacher redirect into, and what gets pasted into an email to a
+  // principal. So it gets a pair written for that reader, where a real
+  // session — unguessable and never indexed — gets the private title above.
+  "host.demo.meta.title": "Teacher Dashboard Demo: Watch a Live Class",
+  "host.demo.meta.description":
+    "A Roman history class is already running here, and there's nothing to sign up for. Every chat is a live card with a real name beside every character.",
 
   "host.badge": "For teachers",
   "host.loading": "Finding your activity…",

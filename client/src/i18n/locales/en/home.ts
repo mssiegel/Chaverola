@@ -9,9 +9,12 @@ import type { Catalog } from "../../types";
  * them out, or a recast leaves the page describing a chat that isn't on it.
  */
 export const home = {
-  "meta.title": "A Classroom Activity That Students Love",
+  // Written for a search result, not for the page — the words a teacher
+  // actually types ("classroom roleplay chat activity", "free") come first,
+  // and the two facts that remove hesitation close the description.
+  "meta.title": "Free Classroom Roleplay Chat Activity",
   "meta.description":
-    "Chaverola turns your class into a live chat where every student plays a character. Set one up in a minute. Students join with a code and never need an account.",
+    "Every student gets a secret character and a classmate to chat with. You watch every chat live with real names on it. It's free, and nobody needs an account.",
 
   "hero.eyebrow": "A classroom activity for teachers",
   // <1> is the highlighter mark. Word order differs by language, which is why

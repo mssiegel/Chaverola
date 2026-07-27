@@ -16,10 +16,23 @@ export const student = {
   "title.ended": "Chat Ended",
   "title.activityGone": "Activity Ended",
 
+  // The gate's SEO pair. It's a separate key from `title.join` precisely
+  // because that one is also the card's h1 (JoinGateCard) — a title written
+  // for a search result would rewrite the heading a student reads.
+  "join.meta.title": "Join the Activity with Your 4-Digit Code",
   "join.meta.description":
-    "Got a code from your teacher? Type it in here and join the activity.",
+    "Got a code from your teacher? Type it in, then add your name. You'll wait a moment for a classmate to pair up with, and you never need an account.",
 
-  // The one form serving both gate stages. `title.join` doubles as the h1.
+  // /activity/join/1234 — where /demo/student lands. A teacher sizing the
+  // activity up from a link, not a student holding a code, so it says what
+  // they're about to see. It never promises a real classmate: the demo's
+  // peers are simulated (the same reason `demo.studentBody` hedges).
+  "join.demo.meta.title": "Student Demo: Get a Secret Character",
+  "join.demo.meta.description":
+    "Sit where your students sit in the demo class. You're dealt a secret character and dropped into a live in-character chat, with no code to type in.",
+
+  // The one form serving both gate stages. `title.join` doubles as the h1,
+  // which is why the SEO title above is its own key — don't merge them.
   "gate.hostedBy": "Hosted by ",
   "gate.code": "code",
   "gate.codePrompt": "Enter your activity's code.",

@@ -12,9 +12,13 @@ import type { HomeCatalog } from "../en/home";
  * which would collide badly with a Latin character name.
  */
 export const home: HebrewOf<HomeCatalog> = {
-  "meta.title": "פעילות כיתתית שהתלמידים אוהבים",
+  // "צ׳אט בתוך דמות" rather than the literal משחק תפקידים — it's the page's
+  // own shipped phrase (hero.title) and the lighter of the two to search.
+  // Hebrew adjectives follow the noun, so "חינם" sits after פעילות כיתתית
+  // and the whole query reads contiguously.
+  "meta.title": "פעילות כיתתית חינם: צ׳אט בתוך דמות",
   "meta.description":
-    "חברולה הופכת את השיעור לצ׳אט חי שבו כל תלמיד מגלם דמות. מקימים פעילות בערך בדקה. התלמידים נכנסים עם קוד ולא צריכים חשבון.",
+    "כל תלמיד מקבל דמות סודית ובן שיח מהכיתה. אתה רואה כל צ׳אט בשידור חי, עם השם האמיתי של כל תלמיד. חינם, ובלי חשבונות לתלמידים.",
 
   "hero.eyebrow": "פעילות כיתתית למורים",
   "hero.title": "כל הכיתה מדברת. <1>בתוך דמות.</1>",

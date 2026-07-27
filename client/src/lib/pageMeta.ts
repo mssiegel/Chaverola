@@ -38,7 +38,23 @@ export const PAGE_META = {
   },
   "/activity/join": {
     ns: "student",
-    title: "title.join",
+    // The gate's SEO title, never `title.join` — that key is the card's own
+    // h1 (JoinGateCard), and this is the sentence a search result shows.
+    title: "join.meta.title",
     description: "join.meta.description",
+  },
+  // The demo, which is the one link out of a pitch email. /demo,
+  // /demo/teacher and /demo/student are redirects, so these are what a bot
+  // following one actually fetches. Spelled out rather than built from
+  // DEMO_JOIN_CODE, to keep this module import-free past the i18next type.
+  "/activity/host/1234": {
+    ns: "teacher",
+    title: "host.demo.meta.title",
+    description: "host.demo.meta.description",
+  },
+  "/activity/join/1234": {
+    ns: "student",
+    title: "join.demo.meta.title",
+    description: "join.demo.meta.description",
   },
 } as const;

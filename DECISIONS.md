@@ -212,6 +212,7 @@ git: `git log -- DECISIONS.md`.
   - [The navbar has one CTA: Join an Activity](docs/decisions/navbar.md#the-navbar-has-one-cta-join-an-activity)
   - [Navbar: CTA label shortens on phones; language switcher swaps in place](docs/decisions/navbar.md#navbar-cta-label-shortens-on-phones-language-switcher-swaps-in-place)
 - [Branding & page titles](docs/decisions/branding.md)
+  - [The meta title is written for a search result, not for the page, and the demo carries its own](docs/decisions/branding.md#the-meta-title-is-written-for-a-search-result-not-for-the-page-and-the-demo-carries-its-own)
   - [Hebrew talks about the teacher without guessing their gender](docs/decisions/branding.md#hebrew-talks-about-the-teacher-without-guessing-their-gender)
   - [The brand is חברולה in Hebrew, and the logo mark never mirrors](docs/decisions/branding.md#the-brand-is-חברולה-in-hebrew-and-the-logo-mark-never-mirrors)
   - [Hebrew uses Rubik, and it's a quality call rather than a missing-glyph fix](docs/decisions/branding.md#hebrew-uses-rubik-and-its-a-quality-call-rather-than-a-missing-glyph-fix)

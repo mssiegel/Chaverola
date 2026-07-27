@@ -347,7 +347,29 @@ export function JoinActivityPage() {
     return () => setChatStudentName(null);
   }, [chatStudentName, setChatStudentName]);
 
-  usePageMeta(t(STAGE_TITLE_KEYS[stage]), t("join.meta.description"));
+  // Which meta this screen carries. Two stages sit behind a URL someone can
+  // open cold: bare /activity/join, where a student holding a code arrives,
+  // and the demo's /activity/join/1234, which is what /demo/student resolves
+  // to and what a pitch link opens. Those two get copy written for a search
+  // result and a link preview; every later stage keeps its per-stage tab
+  // label, because nobody links a waiting lobby.
+  //
+  // Not STAGE_TITLE_KEYS.code: `title.join` is also the gate's own h1
+  // (JoinGateCard), so rewriting it for search would rewrite the heading on
+  // screen. Keyed off the URL param rather than the resolved activity, since
+  // the meta is a fact about the URL and this way it's right on first render.
+  const demoEntry =
+    joinCodeParam === DEMO_JOIN_CODE &&
+    (stage === "loading" || stage === "name");
+  const metaTitleKey = demoEntry
+    ? "join.demo.meta.title"
+    : stage === "code"
+      ? "join.meta.title"
+      : STAGE_TITLE_KEYS[stage];
+  usePageMeta(
+    t(metaTitleKey),
+    t(demoEntry ? "join.demo.meta.description" : "join.meta.description")
+  );
 
   // Match changes swap the screen on this same route (lobby → chat, rematch,
   // back to lobby) without navigating, so ScrollToTop can't see them — open

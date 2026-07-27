@@ -43,15 +43,29 @@ export function HostActivityPage() {
   // "teacher" first so unprefixed keys resolve there; "common" for the two
   // shell-grade buttons this page reuses.
   const { t } = useTranslation(["teacher", "common"]);
-  // The host page is behind an unguessable key and never indexed, so its
-  // description is just the title again rather than its own catalog key.
-  usePageMeta(t("host.meta.title"), t("host.meta.title"));
+
+  // `1234` is the one host URL anyone is meant to share — it's what /demo and
+  // /demo/teacher redirect into, and what gets pasted into a pitch email — so
+  // it carries a pair written for that reader. A real session is behind an
+  // unguessable key and never indexed, so it keeps a plain private title and
+  // reuses it as the description rather than carrying a second string nothing
+  // reads.
+  //
+  // Chosen here rather than by a second usePageMeta inside
+  // DemoHostActivityView: child effects flush before the parent's, so this
+  // call would write the private title back over the demo's on every commit,
+  // and the three inline branches below would lose their meta entirely.
+  const isDemo = hostKey === DEMO_JOIN_CODE;
+  usePageMeta(
+    isDemo ? t("host.demo.meta.title") : t("host.meta.title"),
+    isDemo ? t("host.demo.meta.description") : t("host.meta.title")
+  );
 
   // The demo never consults this: the hook settles `1234` (or any other
   // non-key-shaped param) as not-found without a network trip.
   const { lookup, retry } = useHostedActivityLookup(hostKey);
 
-  if (hostKey === DEMO_JOIN_CODE) {
+  if (isDemo) {
     return <DemoHostActivityView key={DEMO_JOIN_CODE} />;
   }
 
