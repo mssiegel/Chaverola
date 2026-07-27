@@ -18,6 +18,20 @@ export const common = {
   "share.cardAlt":
     "The Chaverola logo, a white speech bubble with a smiling face, on a purple card.",
 
+  // The fallback shell's description — the sentence served to every URL that
+  // isn't one of the ten prerendered ones. Third person on purpose: it has to
+  // read correctly on a student URL as well as a teacher's.
+  //
+  // ONLY THE HEBREW SIDE IS READ. `prerenderMeta.fallbackShells()` stamps
+  // he-app.html from `he`; app.html is the pristine shell, so ITS copy of this
+  // sentence is the literal in client/index.html and that is the English one's
+  // home. This key exists because `HebrewOf<>` cannot hold a Hebrew string
+  // without its English twin, and the value is kept identical so the two can be
+  // diffed by eye. A pinned mirror, the same admission `share.cardAlt` above
+  // makes about the same file, and SITE_ORIGIN makes about the same host.
+  "shell.description":
+    "A free classroom activity where students play secret characters and chat with each other about the lesson. The teacher sees every chat live, by name.",
+
   "nav.joinLong": "Join an Activity",
   "nav.joinShort": "Join Activity",
 

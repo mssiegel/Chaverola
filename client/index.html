@@ -27,7 +27,15 @@
          shapes each), so every one of the ten unfurls as itself;
          vercel.json's catch-all
          points at app.html, which keeps THIS pair. What still reads it: a real
-         host session, a real 4-digit join code, the 404, every /he/… session.
+         host session, a real 4-digit join code, the 404.
+         THERE ARE NOW TWO FALLBACKS, and the /he prefix picks between them.
+         vercel.json rewrites /he/… to dist/he-app.html — the same shell,
+         stamped Hebrew from the `shell.description` key in the common catalog,
+         so a Hebrew session URL is Hebrew in the tab and in an unfurl. Every
+         unprefixed URL still lands here, including one a Hebrew-preferring
+         visitor opened: the path carries no preference for the server to read,
+         and boot corrects the page a moment later. That is the honest limit of
+         a static fallback, and it is written down rather than chased.
          Third person on purpose — it has to read correctly on a student URL
          too. The title stays the bare brand for the same reason it always did:
          nothing stamps a title before React mounts, so this is what sits in the
@@ -61,9 +69,11 @@
          two literals are its only mirror — a static shell can't import. Same
          for og:image:alt, which is `share.cardAlt` in the common catalog and
          has a Hebrew twin there; only the stamped pages can read it.
-         No og:locale pair here on purpose: this block serves both languages,
-         and a page that claims en_US to a Hebrew reader is worse than a page
-         that claims nothing.
+         No og:locale pair here on purpose: this block STILL serves both
+         languages — every unprefixed URL, whoever opened it — and a page that
+         claims en_US to a Hebrew reader is worse than a page that claims
+         nothing. he-app.html does carry the pair, because it serves one
+         language and so cannot be wrong about it.
          twitter:card is the ONLY twitter:* tag here, and the omission is
          deliberate. X and every other consumer of those tags falls back to the
          og:* equivalents for title, description and image, so a parallel

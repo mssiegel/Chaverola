@@ -32,11 +32,12 @@ Allow: /he/activity/host/1234
 Disallow: /he/activity/join/
 Allow: /he/activity/join/1234
 
-# A build artifact that happens to be publicly reachable, not a page: app.html
-# is the pristine shell that vercel.json's catch-all rewrite serves. Doc 03's
-# second prompt emits a /he-app.html twin — disallow it here in that same
-# change.
+# Build artifacts that happen to be publicly reachable, not pages: app.html is
+# the pristine shell that vercel.json's catch-all rewrite serves, and
+# he-app.html is its Hebrew twin, which the /he/ rewrite serves. A third
+# language would add a third file here, same as it would add a third rewrite.
 Disallow: /app.html
+Disallow: /he-app.html
 
 # AI crawlers — GPTBot, ClaudeBot, PerplexityBot and the rest — are ALLOWED,
 # and that is a deliberate call (founder, 2026-07-27) rather than an absence.

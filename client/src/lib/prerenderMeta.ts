@@ -144,7 +144,11 @@ function pageLinks(url: string): string[] {
 export interface PrerenderPage {
   /** Path under `dist/`, e.g. `he/activity/join/1234.html`. */
   file: string;
-  /** The URL that file answers, e.g. `/he/activity/join/1234`. */
+  /**
+   * The URL that file answers, e.g. `/he/activity/join/1234`. A fallback shell
+   * answers many, so it names the locale's home instead — see
+   * `fallbackShells`.
+   */
   url: string;
   lang: Locale;
   dir: "ltr" | "rtl";
@@ -326,4 +330,58 @@ export async function prerenderPages(): Promise<PrerenderPage[]> {
   }
 
   return pages;
+}
+
+/**
+ * One fallback shell per prefixed locale — `dist/he-app.html` today — for the
+ * URLs that have no `PAGE_META` entry and so get no file of their own: a live
+ * host session, a real 4-digit join code, a mistyped path. `vercel.json` routes
+ * `/he/…` here and everything else to `app.html`, which stays the pristine
+ * English shell that `client/index.html` spells by hand.
+ *
+ * English is absent by design, not by omission: `app.html` is also the TEMPLATE
+ * the writer script re-stamps every page from, so it has to stay untouched.
+ * That is why `shell.description`'s English value is a pinned mirror rather than
+ * the sentence's only home — the note is on the key in the `common` catalog.
+ *
+ * Not a page, and it must never look like one:
+ *
+ * - **No canonical and no `hreflang`.** Ten URLs share this file, so a canonical
+ *   would name nine of them wrongly, and pointing every mistyped path at `/he`
+ *   would consolidate garbage into the Hebrew homepage. Keeping these URLs out
+ *   of the index is `robots.txt`'s job, not a link tag's, and the two mechanisms
+ *   should not be confused.
+ * - **`og:url` is the locale's home** (`/he`), matching what `index.html`'s
+ *   hand-written twin already claims for English. It is the one field a shared
+ *   session link can't answer honestly; `robots.txt` disallows this file, and an
+ *   unfurl card naming the product beats one naming nothing.
+ * - **It DOES carry `og:locale`.** `index.html` omits the pair because that
+ *   block serves both languages and claiming `en_US` to a Hebrew reader is worse
+ *   than claiming nothing. This file serves one language, so the pair cannot be
+ *   wrong.
+ *
+ * The `<title>` is the bare brand rather than `pageMeta`'s "… | חברולה": nothing
+ * stamps a title before React mounts, so this is what sits in the tab during the
+ * lazy page fetch, and it is the same call `index.html`'s `<title>` makes.
+ */
+export function fallbackShells(): PrerenderPage[] {
+  return LOCALES.filter((locale) => locale !== DEFAULT_LOCALE).map((locale) => {
+    const common = i18n.getFixedT(locale);
+    // Both key-checked through the i18next augmentation, so neither needs the
+    // `must()` guard that PAGE_META's plain-string keys do.
+    const title = common("brand.name");
+    const description = common("shell.description");
+    const url = switchLocalePath("/", locale);
+
+    return {
+      file: `${locale}-app.html`,
+      url,
+      lang: locale,
+      dir: LOCALE_DIR[locale],
+      title,
+      description,
+      head: socialCard(common, locale, url, title, description),
+      noscript: null,
+    };
+  });
 }

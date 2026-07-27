@@ -1,6 +1,6 @@
 # 03 — Google knows which URL is the real one
 
-State: **Not started**
+State: **Complete**
 
 **The problem.** Every page on this site is reachable at more than one
 address, and nothing tells a search engine which address is the real one.
@@ -47,7 +47,8 @@ doc [02](02-a-pasted-link-shows-the-product.md)'s first prompt.
 
 - [x] Prompt 1 — Every page names itself and its twin (the 308s land with the
       next deploy — `vite preview` doesn't read `vercel.json`)
-- [ ] Prompt 2 — A Hebrew visitor's dead end is in Hebrew
+- [x] Prompt 2 — A Hebrew visitor's dead end is in Hebrew (the `/he/` rewrite
+      lands with the next deploy, for the same reason)
 
 ---
 

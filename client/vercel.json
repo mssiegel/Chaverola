@@ -31,5 +31,8 @@
       "permanent": true
     }
   ],
-  "rewrites": [{ "source": "/(.*)", "destination": "/app.html" }]
+  "rewrites": [
+    { "source": "/he/(.*)", "destination": "/he-app.html" },
+    { "source": "/(.*)", "destination": "/app.html" }
+  ]
 }

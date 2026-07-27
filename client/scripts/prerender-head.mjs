@@ -186,6 +186,23 @@ function targetsFor(page) {
 const shell = await readTemplate();
 await writeFile(APP, shell, "utf8");
 
+/*
+  The prefixed locales' own fallbacks — dist/he-app.html — stamped from the same
+  pristine shell and written straight rather than through `targetsFor`, which
+  would emit a nonsense `he-app/index.html`. vercel.json sends `/he/…` here, so
+  a Hebrew visitor's live session or dead end is Hebrew in the tab and in an
+  unfurl instead of the English shell. app.html gets no such pass: it is the
+  template this script re-reads, so stamping it would destroy idempotence.
+*/
+const fallbacks = meta.fallbackShells();
+for (const fallback of fallbacks) {
+  await writeFile(
+    path.join(DIST, fallback.file),
+    stamp(shell, fallback),
+    "utf8"
+  );
+}
+
 const pages = await meta.prerenderPages();
 let written = 0;
 for (const page of pages) {
@@ -201,5 +218,7 @@ for (const page of pages) {
 }
 
 console.log(
-  `prerender-head: ${pages.length} pages in ${written} files + app.html — ${pages.map((page) => page.url).join(", ")}`
+  `prerender-head: ${pages.length} pages in ${written} files + app.html + ${fallbacks
+    .map((fallback) => fallback.file)
+    .join(", ")} — ${pages.map((page) => page.url).join(", ")}`
 );

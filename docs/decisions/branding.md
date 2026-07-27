@@ -5,6 +5,64 @@ area. Entries are newest-first; add new ones at the top, and add a matching line
 to the index in the same change. Replaced decisions move to Superseded at the
 bottom of this file.
 
+### There is a Hebrew fallback shell too, and an unprefixed URL is still English
+
+_2026-07-27_
+
+**Decision:** `pnpm build` emits a second fallback, `dist/he-app.html` — the
+same shell stamped `lang="he" dir="rtl"`, titled חברולה, and carrying a new
+Hebrew sentence, `shell.description` in the `common` catalog.
+[`vercel.json`](../../client/vercel.json) routes `/he/…` to it and everything
+else to `app.html`, with the `/he/` rule ahead of the catch-all. Both still sit
+behind the filesystem check, so the ten prerendered files keep winning: `/he`
+itself never reaches the rule.
+
+This extends [The prerendered shell splits in
+two…](#the-prerendered-shell-splits-in-two-and-apphtml-is-the-one-that-keeps-the-generic-pair)
+rather than replacing it. That entry's split stands exactly as written; there
+is now one more file on the far side of it.
+
+**Why:** That entry named the case and left it open: "every `/he/… session`"
+was listed among the URLs `app.html` serves, which meant a Hebrew teacher
+mid-class had an English tab title, and a Hebrew session link pasted into a
+staffroom WhatsApp unfurled in English. Hebrew is a first-class product here,
+not a translation layer ([The Hebrew demo is re-cast, never
+translated](demo-flows.md#the-hebrew-demo-is-re-cast-never-translated)), so the
+prefix that already decides the page's language now decides its shell's too.
+
+**The limit, stated rather than chased:** a Hebrew-preferring visitor who opens
+a bare English session URL still gets `app.html`. The path carries no
+preference for a static host to read, and boot corrects the page to Hebrew a
+moment later exactly as it does today. Serving Hebrew off `Accept-Language`
+would need an edge function and would make a cached response depend on a header,
+which is a worse trade than one English frame.
+
+The new file is not a page and does not pretend to be one. It carries **no
+canonical and no `hreflang`**: ten URLs share it, so a canonical would name nine
+of them wrongly, and pointing every mistyped `/he` path at the Hebrew homepage
+would consolidate garbage into it. Keeping those URLs out of the index is
+[`robots.txt`](../../client/public/robots.txt)'s job, which disallows
+`/he-app.html` beside `/app.html`. Its `og:url` says `/he`, the one field a
+shared session link cannot answer honestly, matching what `index.html`'s
+hand-written twin already claims for English. It **does** carry `og:locale`,
+which `index.html` deliberately omits — that block serves both languages and
+claiming `en_US` to a Hebrew reader is worse than claiming nothing, while this
+one serves a single language and so cannot be wrong about it.
+
+The English sentence keeps its home in `client/index.html`, because `app.html`
+is also the template the writer script re-stamps every page from and has to stay
+untouched. `shell.description`'s English value is therefore a pinned mirror that
+nothing reads, kept identical so the two can be diffed by eye — the same
+admission `share.cardAlt` and `SITE_ORIGIN` already make about the same file. A
+third language would add a catalog pair, a rewrite rule and a `Disallow` line;
+the emitter itself walks `LOCALES` and needs no edit.
+
+_Implemented in [prerenderMeta.ts](../../client/src/lib/prerenderMeta.ts)
+(`fallbackShells`), [prerender-head.mjs](../../client/scripts/prerender-head.mjs),
+[vercel.json](../../client/vercel.json),
+[robots.txt](../../client/public/robots.txt), the `common` catalogs, and the head
+comment in [index.html](../../client/index.html)._
+
 ### A pasted link shows a card, and it's one image and one tag set for the whole site
 
 _2026-07-27_
