@@ -2075,7 +2075,7 @@ _2026-07-15_
 **Decision:** The joining instructions include styled link-text ("Copy the
 student join link") that copies `<current origin>/activity/join/:joinCode`
 to the clipboard with a brief "Copied!" confirmation. The raw URL is never
-rendered in the UI. The spoken instructions keep saying www.chaverola.com.
+rendered in the UI. The spoken instructions keep saying chaverola.com.
 (Product-owner call, 2026-07-15, over copying the literal branded URL.)
 
 **Why:** Nothing on these pages may be a dead end — a copied link must

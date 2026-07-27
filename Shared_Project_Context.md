@@ -87,7 +87,7 @@ verbatim.
   Fredoka does ship Hebrew glyphs, but it's a Latin display face with a bolt-on Hebrew,
   and Rubik is drawn for Hebrew UI text.
 - **Brand name:** **Chaverola** in English, **חברולה** in Hebrew. The domain
-  (`www.chaverola.com`) stays Latin in both.
+  (`chaverola.com`) stays Latin in both.
 - **Logo & favicon:** generate an SVG — one large rounded speech bubble with a friendly
   face (two dot eyes and a small smile) filling most of the tile, tail at the bottom left.
   Flat and minimal, **no sparkles.** Set on a rounded-square app-icon tile. **Use the same

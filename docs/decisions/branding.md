@@ -5,6 +5,34 @@ area. Entries are newest-first; add new ones at the top, and add a matching line
 to the index in the same change. Replaced decisions move to Superseded at the
 bottom of this file.
 
+### The canonical host is the apex, and it's what a teacher says out loud
+
+_2026-07-27_
+
+**Decision:** `chaverola.com` — the apex, no `www` — is the site's one
+address. The joining instructions a teacher reads to the class say
+`chaverola.com`, so the spoken address and the canonical URL are the same
+string.
+
+**Why:** Founder call. Two hostnames answering the same content is duplicate
+content: it splits every ranking signal and hands a search engine a choice
+nobody meant to offer. The apex also shortens the sentence a teacher performs
+in front of a room of teenagers, which is the only place this string is ever
+said out loud rather than clicked.
+
+The spoken and canonical forms were allowed to differ before — speech said
+`www.chaverola.com` while the site answered on both — and collapsing them is
+what stops the next person having to work out which one is authoritative.
+
+Only the spoken half has shipped. The `www` → apex redirect (Vercel dashboard
+config, ungreppable from the repo) and the `<link rel="canonical">` tags that
+make this true for machines are
+[docs/plans/seo/](../plans/seo/README.md) work and have not landed yet.
+
+_Implemented in
+[JoiningInstructions](../../client/src/components/Teacher/HostActivity/JoiningInstructions.tsx)
+(`SPOKEN_DOMAIN`)._
+
 ### The meta title is written for a search result, not for the page, and the demo carries its own
 
 _2026-07-27_
@@ -95,7 +123,7 @@ _2026-07-27_
 
 **Decision:** Under `/he` the brand reads **חברולה** everywhere the app writes
 it: the navbar wordmark, the student world's pill, the `<title>` suffix, and
-body copy. What stays Latin is the domain (`www.chaverola.com`, which a teacher
+body copy. What stays Latin is the domain (`chaverola.com`, which a teacher
 reads out loud to the class) and the email From-name.
 
 The logo mark itself is never flipped. Its speech-bubble tail points

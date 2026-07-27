@@ -10,7 +10,7 @@ import type { CommonCatalog } from "../en/common";
     written in masculine second person".
   - Conversational, not institutional. Teacher surfaces talk to a colleague;
     student surfaces read at upper-middle/high-school level.
-  - The brand is חברולה. The domain (www.chaverola.com) stays Latin.
+  - The brand is חברולה. The domain (chaverola.com) stays Latin.
   - Teacher-typed content — character names, the host's name, instructions,
     student names, every message — is NEVER translated, in any locale.
 */

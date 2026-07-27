@@ -6,10 +6,11 @@ import { useLocalePath } from "@/lib/locale";
 
 import { CollapsibleSection } from "./CollapsibleSection";
 
-/** The address students hear, spoken and written. Latin in every locale, so
- *  every rendering of it carries `dir="ltr"` — an RTL line otherwise lays it
- *  out as `com.chaverola.www`. */
-const SPOKEN_DOMAIN = "www.chaverola.com";
+/** The address students hear, spoken and written. The apex, not `www` — it's
+ *  the canonical host, and one less thing for a teacher to say out loud to a
+ *  room. Latin in every locale, so every rendering of it carries `dir="ltr"`
+ *  — an RTL line otherwise lays it out as `com.chaverola`. */
+const SPOKEN_DOMAIN = "chaverola.com";
 
 /**
  * How students get in: the pin, said out loud or written on the board —
@@ -30,7 +31,7 @@ export function JoiningInstructions({ joinCode }: { joinCode: string }) {
   );
 
   const handleCopy = async () => {
-    // The spoken instructions say www.chaverola.com (the address students
+    // The spoken instructions say chaverola.com (the address students
     // hear); the clipboard gets THIS origin, so the copied link opens the
     // real join page wherever the app is running. Never printed on screen.
     const url = `${window.location.origin}${localePath(`/activity/join/${joinCode}`)}`;
