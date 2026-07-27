@@ -680,6 +680,19 @@ Two things the plan didn't anticipate, both found by driving it:
   eighteen chatter lines and four seed transcripts are built on. The file
   header says so, because it is the constraint a translator breaks first.
 
+**The production pass ran, and this time the deploy behaved.** The tip commit
+touches `client/`, so Vercel built it (Ready, 33s) instead of canceling —
+which is the whole reason this prompt was the one carrying the rule. Render
+took the same commit and went live on it, so prompt 6's server-side deletion
+reached production here too: `/healthz` had still been answering `1f7b2c2`
+until this push. All three legs green against chaverola.com: `coldwake --prod`
+4/4, `verify:smoke --prod` 7/7, and `he-demo.mjs --prod` **88/88** — the same
+eighty-eight assertions as localhost, including the zero-socket one, now
+through Vercel's CDN and against a build with `?fast` compiled out. No new
+handset ask: the demo cast touches no offline or disconnect path, and the
+Hebrew asks already in
+[pending-manual-tests.md](../../pending-manual-tests.md) still stand.
+
 ---
 
 ## Notes for whoever runs these
