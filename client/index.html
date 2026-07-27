@@ -23,8 +23,9 @@
     />
     <meta name="theme-color" content="#6C4BE0" />
     <!-- The FALLBACK pair. `scripts/prerender-head.mjs` copies the built shell
-         to dist/app.html and stamps a per-URL head into ten more files, one
-         per public URL, so each unfurls as itself; vercel.json's catch-all
+         to dist/app.html and stamps a head into a file per public URL (two
+         shapes each), so every one of the ten unfurls as itself;
+         vercel.json's catch-all
          points at app.html, which keeps THIS pair. What still reads it: a real
          host session, a real 4-digit join code, the 404, every /he/… session.
          Third person on purpose — it has to read correctly on a student URL

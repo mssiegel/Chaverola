@@ -9,10 +9,11 @@ bottom of this file.
 
 _2026-07-27_
 
-**Decision:** `pnpm build` now ends by writing eleven HTML files. Ten carry a
-public URL's own `<title>`, description and `<html lang/dir>`; the eleventh,
-`dist/app.html`, is an untouched copy of the shell, and `client/vercel.json`'s
-catch-all rewrite points at **that** file rather than at `index.html`.
+**Decision:** `pnpm build` now ends by stamping each of the ten public URLs'
+own `<title>`, description and `<html lang/dir>` into its own file under
+`dist/`, plus one more file — `dist/app.html`, an untouched copy of the shell —
+that `client/vercel.json`'s catch-all rewrite points at rather than at
+`index.html`.
 
 The split is the whole point. `dist/index.html` has to carry the homepage's
 meta, because it is the only file Vercel can serve for `/` — so if it were also
@@ -51,11 +52,23 @@ about a silent localhost fallback. The three markers it matches in
 the description tag) are a contract, and the script throws unless each matches
 exactly once.
 
-Files land as `dist/he.html`, not `dist/he/index.html`, so `vite preview` can
-serve them — its sirv runs with `extensions: []` and only tries `…/index.html`
-for URLs ending in `/`. `vite preview` hardcodes its own SPA fallback to
-`/index.html`, so it structurally cannot test the `app.html` rewrite; that one
-assertion belongs on a Vercel deploy.
+Every page is written **twice** — `dist/he.html` and `dist/he/index.html` — and
+both shapes are load-bearing. Vercel's filesystem phase does not strip `.html`
+(`cleanUrls` defaults off), measured on production 2026-07-27: `/he.html`
+served the stamped file while `/he` fell through to `app.html`. So Vercel needs
+the directory-index shape. `vite preview` needs the flat one — its sirv runs
+with `extensions: []` and only tries `…/index.html` for URLs ending in `/` — and
+without it there is no way to check the work locally before a deploy. `/` needs
+no twin; `dist/index.html` already is both.
+
+`cleanUrls: true` would have collapsed this to one shape, and was not taken: it
+also rewrites `/app.html` to `/app`, which is the destination of the catch-all
+that every real session URL and every 404 goes through. Trading a duplicated
+static file for a redirect hop on the join path is the wrong way round.
+
+`vite preview` hardcodes its own SPA fallback to `/index.html`, so it
+structurally cannot test the `app.html` rewrite; that one assertion belongs on
+a Vercel deploy.
 
 _Implemented in [prerenderMeta.ts](../../client/src/lib/prerenderMeta.ts),
 [prerender-head.mjs](../../client/scripts/prerender-head.mjs),

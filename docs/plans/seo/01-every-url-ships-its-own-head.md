@@ -287,9 +287,17 @@ which extend the same two files:**
   build. The script sets `process.env.NODE_ENV ??= "production"` before the
   import.
 
-Still open, as this doc says it would be: the Vercel-deploy `curl` proving
-the `app.html` rewrite, and whether the filesystem phase resolves `/he` →
-`dist/he.html`. Shipped in the flat shape; if it doesn't resolve, emit both.
+- **Vercel's filesystem phase does NOT resolve `/he` → `dist/he.html`**, so
+  this doc's contingency applied and every page is emitted in **both**
+  shapes. Measured on production 2026-07-27 with the flat shape live:
+  `/he.html` returned the stamped Hebrew title, `/he` fell through the
+  catch-all to `app.html`. `cleanUrls: true` would fix it in one line and
+  was rejected — it also rewrites `/app.html` to `/app`, which is the
+  destination every real session URL and every 404 passes through, so it
+  buys one fewer static file for a redirect hop on the join path.
+
+The `app.html` rewrite itself is confirmed live: `/activity/host/notarealkey`
+returns `<title>Chaverola</title>`, not the homepage's.
 
 ---
 

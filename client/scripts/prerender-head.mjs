@@ -142,18 +142,41 @@ async function readTemplate() {
   }
 }
 
+/*
+  EVERY PAGE IS WRITTEN TWICE, and both shapes are load-bearing.
+
+  Vercel's filesystem phase does NOT strip `.html` (`cleanUrls` defaults off),
+  measured on production 2026-07-27: `/he.html` served the stamped file while
+  `/he` fell straight through the catch-all to app.html. So Vercel needs
+  `he/index.html`. `vite preview` needs the opposite — its sirv runs with
+  `extensions: []` and its htmlFallbackMiddleware only tries `…/index.html`
+  when the URL ends in `/`, so without `he.html` there'd be no way to check
+  your own work locally before a deploy.
+
+  `/` is the one page that needs no twin: `dist/index.html` already is both.
+*/
+function targetsFor(page) {
+  if (page.file === "index.html") return [page.file];
+  return [page.file, page.file.replace(/\.html$/, "/index.html")];
+}
+
 const shell = await readTemplate();
 await writeFile(APP, shell, "utf8");
 
 const pages = await meta.prerenderPages();
+let written = 0;
 for (const page of pages) {
-  const out = path.join(DIST, page.file);
-  await mkdir(path.dirname(out), { recursive: true });
-  // UTF-8, no BOM. Hebrew ׳ (U+05F3) and ״ (U+05F4) are ordinary letters, not
-  // ASCII quotes — nothing here converts them, and nothing should.
-  await writeFile(out, stamp(shell, page), "utf8");
+  const html = stamp(shell, page);
+  for (const target of targetsFor(page)) {
+    const out = path.join(DIST, target);
+    await mkdir(path.dirname(out), { recursive: true });
+    // UTF-8, no BOM. Hebrew ׳ (U+05F3) and ״ (U+05F4) are ordinary letters, not
+    // ASCII quotes — nothing here converts them, and nothing should.
+    await writeFile(out, html, "utf8");
+    written += 1;
+  }
 }
 
 console.log(
-  `prerender-head: ${pages.length} pages stamped + app.html — ${pages.map((page) => page.url).join(", ")}`
+  `prerender-head: ${pages.length} pages in ${written} files + app.html — ${pages.map((page) => page.url).join(", ")}`
 );
