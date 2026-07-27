@@ -143,7 +143,7 @@ pieces those surfaces share.
       │                      static SPA; client-touching pushes deploy
       │  fetch/XHR
       ▼
-   api.chaverola.com ─────► Render (server)     Virginia / US East, Free tier
+   api.chaverola.com ─────► Render (server)     Virginia / US East, Starter
       CNAME → onrender.com   single Node instance, tsx runs src directly
 ```
 
@@ -169,7 +169,8 @@ pieces those surfaces share.
   vars, `GMAIL_USER` / `GMAIL_APP_PASSWORD` — unset in dev, where the mailer
   logs instead of sending ([operations.md](operations.md) → Gmail app
   password).
-- **Instance type:** the API runs on a **paid** Render instance, which is a
+- **Instance type:** the API runs on a **paid** Render instance —
+  **`starter`, 512 MB RAM / 0.5 CPU**, one instance, no autoscaling. Paid is a
   hard requirement, not a nicety — Render blocks outbound SMTP on Free web
   services, so the transcript email cannot send from one (DECISIONS.md →
   "The API runs on a paid Render instance"). It also means the instance

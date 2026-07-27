@@ -62,6 +62,14 @@ export function attachLobby(
     // detection (~45s unscaled) compresses with everything else.
     pingInterval: timing.pingIntervalMs,
     pingTimeout: timing.pingTimeoutMs,
+    // Inbound only — it feeds ws's maxPayload, the polling content-length
+    // check, and the packet decoder, so nothing we emit can be truncated by
+    // it. Unset, engine.io defaults to 1MB per socket, which on a 512MB
+    // instance is an OOM a few hundred hostile sockets wide; the largest
+    // honest payload we accept is the ~2KB chat:start. Deliberately roomier
+    // than app.ts's 16kb JSON limit so a future event carrying more doesn't
+    // quietly hit the ceiling.
+    maxHttpBufferSize: 32 * 1024,
   });
 
   const ctx = createLobbyContext(io, log, mailer);
