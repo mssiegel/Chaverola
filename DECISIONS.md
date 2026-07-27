@@ -261,6 +261,9 @@ git: `git log -- DECISIONS.md`.
   - [Considered and rejected for the backend: TanStack Query, dotenv, a hostKey stash, an npm conversion](docs/decisions/backend-api.md#considered-and-rejected-for-the-backend-tanstack-query-dotenv-a-hostkey-stash-an-npm-conversion)
   - _Superseded_
     - [Teachers set up at class start, and a warm-up ping hides the cold start](docs/decisions/backend-api.md#teachers-set-up-at-class-start-and-a-warm-up-ping-hides-the-cold-start)
+- [Analytics](docs/decisions/analytics.md)
+  - [Analytics never reports a hostKey or a live join code](docs/decisions/analytics.md#analytics-never-reports-a-hostkey-or-a-live-join-code)
+  - [Analytics is Vercel Web Analytics, not Google](docs/decisions/analytics.md#analytics-is-vercel-web-analytics-not-google)
 - [Process & tooling](docs/decisions/process.md)
   - [The status table is what a teacher gained; fixes get no row](docs/decisions/process.md#the-status-table-is-what-a-teacher-gained-fixes-get-no-row)
   - [Doc drift is fixed at the source: one home, and pointers follow the code](docs/decisions/process.md#doc-drift-is-fixed-at-the-source-one-home-and-pointers-follow-the-code)

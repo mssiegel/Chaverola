@@ -1,4 +1,5 @@
 import { DirectionProvider } from "@radix-ui/react-direction";
+import { Analytics } from "@vercel/analytics/react";
 import { Navigate, Route, Routes } from "react-router-dom";
 
 import { AppLayout } from "@/components/layout/AppLayout";
@@ -10,6 +11,7 @@ import { StudentWorldLayout } from "@/components/layout/StudentWorldLayout";
 // chats and chatter lines included) into the chunk a student loads first.
 import { DEMO_JOIN_CODE } from "@chaverola/shared";
 
+import { redactBeforeSend } from "@/lib/analytics";
 import { lazyPage } from "@/lib/lazyPage";
 import { LOCALE_DIR, useLocale, useLocalePath } from "@/lib/locale";
 
@@ -115,6 +117,12 @@ export default function App() {
     <DirectionProvider dir={dir}>
       <ScrollToTop />
       <LocaleEffects />
+      {/* Renders nothing; counts pageviews. Inside the router because it reads
+          the URL on every route change — and `beforeSend` rewrites `:hostKey`
+          and `:joinCode` to their patterns before anything is reported (see
+          lib/analytics.ts). The script is same-origin (/_vercel/insights) and
+          sets no cookies, so no consent banner is involved. */}
+      <Analytics beforeSend={redactBeforeSend} />
       <Routes>
         <Route path="/">{LocalizedRoutes()}</Route>
         <Route path="/he">{LocalizedRoutes()}</Route>
