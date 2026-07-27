@@ -5,6 +5,63 @@ area. Entries are newest-first; add new ones at the top, and add a matching line
 to the index in the same change. Replaced decisions move to Superseded at the
 bottom of this file.
 
+### The prerendered shell splits in two, and `app.html` is the one that keeps the generic pair
+
+_2026-07-27_
+
+**Decision:** `pnpm build` now ends by writing eleven HTML files. Ten carry a
+public URL's own `<title>`, description and `<html lang/dir>`; the eleventh,
+`dist/app.html`, is an untouched copy of the shell, and `client/vercel.json`'s
+catch-all rewrite points at **that** file rather than at `index.html`.
+
+The split is the whole point. `dist/index.html` has to carry the homepage's
+meta, because it is the only file Vercel can serve for `/` — so if it were also
+the rewrite target, every unmatched URL (a real host session, a real 4-digit
+join code, the 404, every `/he/…` session) would unfurl as the English
+homepage. Vercel's filesystem check runs before rewrites, so `/` and the ten
+prerendered paths win on disk and everything else falls through to `app.html`,
+which still says the bare brand and the third-person all-purpose sentence — the
+exact case [The meta title is written for a search
+result…](#the-meta-title-is-written-for-a-search-result-not-for-the-page-and-the-demo-carries-its-own)
+wrote them for. That entry's "these strings are set client-side, so a
+link-preview bot never sees them" no longer holds for the ten; it still holds
+for everything served through `app.html`.
+
+The emitter loads its typed half through Vite's `runnerImport`, not a plugin in
+`vite.config.ts`. A plugin was tried and is a dead end worth not retrying: the
+config file is bundled by rolldown with an externalize-deps pass that leaves
+`@/lib/locale` unresolvable and hands back `@chaverola/shared` as raw
+extensionless TS, which breaks config loading on _every_ Vite command including
+`vite dev`. `runnerImport` is marked experimental, but it is what Vite itself
+uses to load a config with `configLoader: 'runner'`, the version is pinned by
+the lockfile, and it fails loudly rather than silently.
+
+**Why:** Product-owner call. No string changed — only who gets to read them.
+Slack, WhatsApp, Gmail and LinkedIn parse raw HTML; GPTBot, ClaudeBot and
+PerplexityBot download JS and never execute it; Bing takes its `<title>` from
+the first response. All of them were reading one generic sentence for ten URLs,
+which made `/demo` — the link that goes into a pitch email to a principal —
+unfurl as generic product copy.
+
+The step fails hard on purpose, with no warn-and-keep-the-shell branch: a green
+deploy serving generic meta everywhere is a regression nobody notices for a
+week, the same argument [`api.ts`](../../client/src/lib/api.ts) already makes
+about a silent localhost fallback. The three markers it matches in
+`client/index.html` (`<html lang="en" dir="ltr">`, `<title>Chaverola</title>`,
+the description tag) are a contract, and the script throws unless each matches
+exactly once.
+
+Files land as `dist/he.html`, not `dist/he/index.html`, so `vite preview` can
+serve them — its sirv runs with `extensions: []` and only tries `…/index.html`
+for URLs ending in `/`. `vite preview` hardcodes its own SPA fallback to
+`/index.html`, so it structurally cannot test the `app.html` rewrite; that one
+assertion belongs on a Vercel deploy.
+
+_Implemented in [prerenderMeta.ts](../../client/src/lib/prerenderMeta.ts),
+[prerender-head.mjs](../../client/scripts/prerender-head.mjs),
+[vercel.json](../../client/vercel.json), and the head comment in
+[index.html](../../client/index.html)._
+
 ### The canonical host is the apex, and it's what a teacher says out loud
 
 _2026-07-27_

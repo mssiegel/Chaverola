@@ -65,7 +65,7 @@ Chaverola is a fun, game-like classroom chat activity. Students join with a code
 Run from the repo root:
 
 - **Dev:** `pnpm dev` — client (Vite) and server (tsx watch, port 3001) in parallel; `pnpm dev:client` / `pnpm dev:server` run one side alone.
-- **Build:** `pnpm build` — type-check + production build (client only; the server has no build — tsx runs its source, and `typecheck` is its gate).
+- **Build:** `pnpm build` — type-check + production build, then `client/scripts/prerender-head.mjs` stamps each public URL's own `<head>` into its own file under `dist/` and writes the unstamped `dist/app.html` the catch-all rewrite serves (client only; the server has no build — tsx runs its source, and `typecheck` is its gate). That last step **fails the build** rather than warning, so `pnpm build` is the gate for anything touching `client/index.html`'s head.
 - **Typecheck:** `pnpm typecheck` — `pnpm -r typecheck` across all three packages.
 - **Lint:** `pnpm lint` — ESLint 9 flat configs in `client/` and `server/`, including the React Hooks + React Compiler lints (client).
 - **Test:** `pnpm test` — `pnpm -r test`: the client suite (pure logic, no DOM) plus the server suite (the safety invariants — projection privacy incl. the characterIds-only pin, the hostKey boundary in REST and socket editions, the `1234` reservation, the seat-resume race guard, the matched-seat grace timer, and the pure matching rules). Both suites are deliberately small — see DECISIONS.md → "Server tests cover only the safety invariants" / "Testing stays small" before adding tests.

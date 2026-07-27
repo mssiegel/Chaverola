@@ -106,8 +106,14 @@ pieces those surfaces share.
   `useActivityLookup`, and the hooks inside `locale.ts` /
   `studentSession.ts`. `usePageMeta`'s pure half lives beside it in
   `lib/pageMeta.ts` (`pageMeta()` plus the route-keyed `PAGE_META`
-  table), React-free so a future prerender pass can emit the same two
-  strings without drifting from the runtime. The live
+  table), React-free so the prerender pass emits the same two
+  strings without drifting from the runtime. That pass is
+  `lib/prerenderMeta.ts` — typed, in `src/` so `tsc -b` covers it, imported
+  by nothing in the app — which `client/scripts/prerender-head.mjs` loads
+  through Vite's `runnerImport` as the last step of `pnpm build`: it copies
+  the built shell to `dist/app.html` (the catch-all rewrite target) and
+  stamps ten per-URL heads beside it, so a link unfurler or an AI crawler
+  reads each page's own words without running any JS. The live
   lobby/host sockets are `pages/student/useLobbyPresence.ts` (student —
   stays mounted through the chat and ended stages) and
   `Teacher/HostActivity/useHostActivityLive.ts` (teacher), both through

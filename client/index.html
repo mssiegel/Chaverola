@@ -1,8 +1,9 @@
 <!doctype html>
-<!-- lang/dir are the ENGLISH shell's values. main.tsx rewrites both before
-     React mounts, so a /he load paints RTL on frame 1; they're spelled out
-     here so the attributes always exist and the first layout can't reflow
-     from a missing dir. -->
+<!-- lang/dir: the shell's are English, and scripts/prerender-head.mjs stamps
+     each file it emits with that URL's own pair. main.tsx rewrites both
+     before React mounts as well, so a /he load paints RTL on frame 1 either
+     way; they're spelled out here so the attributes always exist and the
+     first layout can't reflow from a missing dir. -->
 <html lang="en" dir="ltr">
   <head>
     <meta charset="UTF-8" />
@@ -21,16 +22,20 @@
       content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content, viewport-fit=cover"
     />
     <meta name="theme-color" content="#6C4BE0" />
-    <!-- The shell's own pair, and the ONLY one a link-preview bot ever sees:
-         Slack, WhatsApp and Gmail read this raw HTML and never run the JS that
-         swaps in the route's meta, so this description is what every pasted
-         Chaverola link unfurls as, /demo included. Third person on purpose —
-         it has to read correctly on a student URL too.
-         The title stays the bare brand. Nothing stamps a title before React
-         mounts, so this is what sits in the tab during the lazy page fetch,
-         and a full English sentence there would flash English at a Hebrew
-         student on school wifi. Length belongs in the description, which no
-         human reads. -->
+    <!-- The FALLBACK pair. `scripts/prerender-head.mjs` copies the built shell
+         to dist/app.html and stamps a per-URL head into ten more files, one
+         per public URL, so each unfurls as itself; vercel.json's catch-all
+         points at app.html, which keeps THIS pair. What still reads it: a real
+         host session, a real 4-digit join code, the 404, every /he/… session.
+         Third person on purpose — it has to read correctly on a student URL
+         too. The title stays the bare brand for the same reason it always did:
+         nothing stamps a title before React mounts, so this is what sits in the
+         tab during the lazy page fetch, and a full English sentence there would
+         flash English at a Hebrew student on school wifi.
+         The three markers below — the <html> tag above, this description tag,
+         and the <title> — are matched LITERALLY by the prerender script, which
+         throws unless each matches exactly once. Editing them is editing a
+         contract; the build goes red, it does not go quiet. -->
     <meta
       name="description"
       content="A free classroom activity where students play secret characters and chat with each other about the lesson. The teacher sees every chat live, by name."

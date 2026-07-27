@@ -54,7 +54,7 @@ purely additive on top of it. **Prompt 3 is gated on a founder call** — read
 its risk record before starting it, and do not run it just because it is
 next.
 
-- [ ] Prompt 1 — Ten URLs, ten heads
+- [x] Prompt 1 — Ten URLs, ten heads
 - [ ] Prompt 2 — The words are in the HTML, without a rendered body
 - [ ] Prompt 3 — A rendered body (gated — read the risk record first)
 
@@ -269,6 +269,27 @@ prerendered:
 
 Decision entry in this commit. `pnpm format`, one commit to `main`, push,
 tick this box.
+
+**As landed, two corrections to the above — both matter to prompts 2-5,
+which extend the same two files:**
+
+- **The namespace imports must run at module scope, behind top-level
+  `await`, not inside `prerenderPages()`.** `runnerImport` closes its module
+  runner the moment the imported module finishes evaluating, so a dynamic
+  `import()` awaited any later dies with "Vite module runner has been
+  closed." `initI18n` still runs first, on the line above them — the
+  init-before-imports trap is real, the placement is just higher up.
+- **`mode: "production"` does not make `import.meta.env.DEV` false.**
+  `runnerImport` resolves its config with `command: "serve"`, and Vite 8
+  derives `isProduction` from `process.env.NODE_ENV` alone; `mode` only
+  reaches `import.meta.env.MODE`. Left alone, i18next's
+  `debug: import.meta.env.DEV` dumps its whole resolved config into every
+  build. The script sets `process.env.NODE_ENV ??= "production"` before the
+  import.
+
+Still open, as this doc says it would be: the Vercel-deploy `curl` proving
+the `app.html` rewrite, and whether the filesystem phase resolves `/he` →
+`dist/he.html`. Shipped in the flat shape; if it doesn't resolve, emit both.
 
 ---
 
