@@ -30,8 +30,22 @@ in what anyone sees.
 
 One card for both locales, and the mark inside it is not mirrored — the same
 call [the logo mark
-makes](#the-brand-is-חברולה-in-hebrew-and-the-logo-mark-never-mirrors). `/he`
-gets its Hebrew `og:site_name` in prompt 2, from the catalog.
+makes](#the-brand-is-חברולה-in-hebrew-and-the-logo-mark-never-mirrors).
+
+**Update (2026-07-27):** the ten prerendered URLs now carry their own tag set
+rather than the shell's, so the demo link in a pitch email unfurls saying what
+the demo is. Same picture, same reasoning above; what varies is the title, the
+description, `og:url`, and the Hebrew pages' `og:site_name`, `og:image:alt` and
+`og:locale`. The tags are built in `prerenderMeta.ts` from the two strings
+`pageMeta` already resolved, so a preview cannot say something the tab and the
+search result don't.
+
+The shell's set survives only in `app.html`, which is deliberate: it answers the
+real host session, the real join code and the 404, and none of those should
+advertise a live classroom. `prerender-head.mjs` cuts that block out of every
+page it stamps, so no head carries two `og:title`s — a duplicate is resolved
+differently by each unfurler, and the shell's copy would probably win by being
+first.
 
 The PNG is a browser screenshot of the same inline SVG `LogoMark` draws, taken
 through the verify harness rather than by adding a rasterizer, which makes it a
@@ -50,7 +64,10 @@ is unreadable, so the card's job is recognition and the words are the `og:title`
 and `og:description` beside it.
 
 _Implemented in [index.html](../../client/index.html),
-[og-card.png](../../client/public/og-card.png), and the pinned-mirror note in
+[og-card.png](../../client/public/og-card.png),
+[prerenderMeta.ts](../../client/src/lib/prerenderMeta.ts),
+[prerender-head.mjs](../../client/scripts/prerender-head.mjs), and the
+pinned-mirror note in
 [Logo.tsx](../../client/src/components/brand/Logo.tsx)._
 
 ### No server-rendered body — the locale flash costs a Hebrew visitor more than a crawler gains

@@ -38,6 +38,67 @@ import { PAGE_META, pageMeta } from "@/lib/pageMeta";
  */
 export const SITE_ORIGIN = "https://chaverola.com";
 
+/**
+ * One picture for every URL and both locales, so there is one file to keep in
+ * sync with the brand and one thing for an unfurler to cache. 1200×630 is the
+ * size Slack, WhatsApp and X all crop their preview from; the width and height
+ * are tags rather than a lookup because an unfurler that reads them can lay the
+ * card out before the image arrives. See docs/decisions/branding.md.
+ */
+const OG_IMAGE = `${SITE_ORIGIN}/og-card.png`;
+const OG_IMAGE_WIDTH = "1200";
+const OG_IMAGE_HEIGHT = "630";
+
+/**
+ * `og:locale` takes a language_TERRITORY tag, not the bare `he` that the URL
+ * prefix and `<html lang>` use, so it needs its own map rather than the locale
+ * itself. A third language adds one line here; `LOCALES` already drives which
+ * ones become `og:locale:alternate`.
+ */
+const OG_LOCALE: Record<Locale, string> = { en: "en_US", he: "he_IL" };
+
+/**
+ * The page's own unfurl card. Nothing here is new copy: the title and
+ * description are the same two strings `pageMeta` resolved for the `<title>`
+ * and the description tag, so a link preview cannot say something the tab and
+ * the search result don't.
+ *
+ * `client/index.html` carries a hand-written twin of this set for the URLs that
+ * have no `PAGE_META` entry. `scripts/prerender-head.mjs` deletes that twin from
+ * every file it stamps — one `og:title` per head, never two.
+ */
+function socialCard(
+  common: TFunction,
+  locale: Locale,
+  url: string,
+  title: string,
+  description: string
+): string[] {
+  const tag = (property: string, content: string) =>
+    `<meta property="${property}" content="${escapeHtml(content)}" />`;
+
+  return [
+    tag("og:type", "website"),
+    tag("og:site_name", common("brand.name")),
+    tag("og:title", title),
+    tag("og:description", description),
+    // Absolute, both of them. A relative URL in either is ignored by most
+    // unfurlers, which is the whole reason SITE_ORIGIN exists.
+    tag("og:url", `${SITE_ORIGIN}${url}`),
+    tag("og:image", OG_IMAGE),
+    tag("og:image:width", OG_IMAGE_WIDTH),
+    tag("og:image:height", OG_IMAGE_HEIGHT),
+    tag("og:image:alt", common("share.cardAlt")),
+    tag("og:locale", OG_LOCALE[locale]),
+    ...LOCALES.filter((other) => other !== locale).map((other) =>
+      tag("og:locale:alternate", OG_LOCALE[other])
+    ),
+    // `name`, not `property`, and the only twitter:* tag on the page. The
+    // reasoning for the omission is in index.html beside the twin.
+    `<meta name="twitter:card" content="summary_large_image" />`,
+  ];
+}
+
 export interface PrerenderPage {
   /** Path under `dist/`, e.g. `he/activity/join/1234.html`. */
   file: string;
@@ -48,9 +109,10 @@ export interface PrerenderPage {
   title: string;
   description: string;
   /**
-   * Extra tags to insert before `</head>`. Empty today — this is the seam the
-   * later SEO docs (Open Graph, canonical, hreflang) plug into, so the writer
-   * script never needs to grow string logic of its own.
+   * Extra tags to insert before `</head>`, one per line, already whole. The
+   * Open Graph card is what fills it today; canonical, hreflang and the
+   * structured-data node (docs 03 and 05) append to the same list, which is what
+   * keeps the writer script free of string logic of its own.
    */
   head: string[];
   /**
@@ -212,7 +274,7 @@ export async function prerenderPages(): Promise<PrerenderPage[]> {
         dir: LOCALE_DIR[locale],
         title: meta.title,
         description: meta.description,
-        head: [],
+        head: socialCard(common, locale, url, meta.title, meta.description),
         noscript: route === "/" ? homeNoscript(t, common, locale) : null,
       });
     }

@@ -90,6 +90,13 @@ const HTML_TAG = /<html lang="en" dir="ltr">/g;
 const TITLE_TAG = /<title>Chaverola<\/title>/g;
 const DESCRIPTION_TAG = /<meta\s+name="description"[\s\S]*?\/>/g;
 const HEAD_CLOSE = /^ {2}<\/head>/gm;
+/* The shell's hand-written Open Graph card, cut from every page that brings its
+   own through `page.head`. Deleting rather than leaving both is the point: one
+   og:title per head, since a duplicate is resolved differently by each unfurler
+   and the shell's copy would likely win by being first. app.html never goes
+   through `stamp`, so it keeps the block, which is what it's for. */
+const OG_FALLBACK =
+  /^ {4}<!-- og:fallback:start[\s\S]*?^ {4}<!-- og:fallback:end -->\n/gm;
 /* The body seam. Only pages that carry a `noscript` string touch it, so a
    page without one is emitted byte-identically to before. */
 const ROOT_DIV = /^ {4}<div id="root"><\/div>/gm;
@@ -114,9 +121,9 @@ function stamp(shell, page) {
     `<meta\n      name="description"\n      content="${meta.escapeHtml(page.description)}"\n    />`,
     "description meta tag"
   );
-  // The extension seam: docs 02-05 add their tags through `page.head`, which is
-  // empty today, so this is currently an identity replacement that still proves
-  // the anchor is there.
+  html = replaceOnce(html, OG_FALLBACK, "", "fallback og block");
+  // The extension seam: docs 02-05 add their tags through `page.head`. The
+  // Open Graph card fills it today; canonical and hreflang land here too.
   html = replaceOnce(
     html,
     HEAD_CLOSE,

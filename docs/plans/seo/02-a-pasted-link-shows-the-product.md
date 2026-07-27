@@ -59,7 +59,8 @@ than each declaring their own, so run this doc before them.
 
 - [x] Prompt 1 — One card, one origin, one fallback (card seen rendering in
       WhatsApp, 2026-07-27)
-- [ ] Prompt 2 — Every URL gets its own card
+- [ ] Prompt 2 — Every URL gets its own card (code shipped and curled locally;
+      tick once the production `/demo` link has been pasted somewhere real)
 
 ---
 

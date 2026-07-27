@@ -10,6 +10,14 @@ export const common = {
   "brand.name": "Chaverola",
   "brand.home": "Chaverola home",
 
+  // The link-preview card (public/og-card.png), described for a reader whose
+  // screen reader announces it. No call site in the app: `prerenderMeta` reads
+  // it at build time, and client/index.html spells the same sentence by hand for
+  // the URLs that get the fallback card. It stops at the picture because the
+  // words on the card are the og:title and og:description sitting beside it.
+  "share.cardAlt":
+    "The Chaverola logo, a white speech bubble with a smiling face, on a purple card.",
+
   "nav.joinLong": "Join an Activity",
   "nav.joinShort": "Join Activity",
 

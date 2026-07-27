@@ -42,10 +42,15 @@
       content="A free classroom activity where students play secret characters and chat with each other about the lesson. The teacher sees every chat live, by name."
     />
     <title>Chaverola</title>
-    <!-- The fallback unfurl card, read by Slack, WhatsApp, iMessage, LinkedIn
-         and a Gmail compose window. It reaches the same URLs the pair above
-         does — everything served through app.html — until docs/plans/seo/02
-         prompt 2 gives each prerendered page its own set.
+    <!-- og:fallback:start — a FOURTH marker, and the only one that gets
+         deleted. scripts/prerender-head.mjs removes everything through the end
+         marker below from each file it stamps and writes that page's own card
+         in its place (prerenderMeta's `socialCard`), because two og:titles in
+         one head is one too many and which of them an unfurler reads is not
+         worth guessing at. So this block is app.html's card: the real host
+         session, the real join code, the 404, every /he/… session.
+         The fallback unfurl card, read by Slack, WhatsApp, iMessage, LinkedIn
+         and a Gmail compose window.
          og:title and og:description are the two strings above, not a third set
          written for social: there is no evidence a different sentence performs
          better, and a third set is a third thing to keep in sync. The title
@@ -53,7 +58,12 @@
          unmatched URLs, student sessions included.
          og:url and og:image MUST be absolute; most unfurlers ignore a relative
          image. The origin is SITE_ORIGIN in src/lib/prerenderMeta.ts, and these
-         two literals are its only mirror — a static shell can't import.
+         two literals are its only mirror — a static shell can't import. Same
+         for og:image:alt, which is `share.cardAlt` in the common catalog and
+         has a Hebrew twin there; only the stamped pages can read it.
+         No og:locale pair here on purpose: this block serves both languages,
+         and a page that claims en_US to a Hebrew reader is worse than a page
+         that claims nothing.
          twitter:card is the ONLY twitter:* tag here, and the omission is
          deliberate. X and every other consumer of those tags falls back to the
          og:* equivalents for title, description and image, so a parallel
@@ -75,9 +85,10 @@
     <meta property="og:image:height" content="630" />
     <meta
       property="og:image:alt"
-      content="The Chaverola logo, a white speech bubble with a smiling face, on a purple card that reads Chaverola."
+      content="The Chaverola logo, a white speech bubble with a smiling face, on a purple card."
     />
     <meta name="twitter:card" content="summary_large_image" />
+    <!-- og:fallback:end -->
   </head>
   <body>
     <div id="root"></div>

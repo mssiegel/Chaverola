@@ -18,6 +18,9 @@ export const common: HebrewOf<CommonCatalog> = {
   "brand.name": "חברולה",
   "brand.home": "חברולה, לדף הבית",
 
+  "share.cardAlt":
+    "הלוגו של חברולה, בועת דיבור לבנה עם פרצוף מחייך, על רקע סגול.",
+
   "nav.joinLong": "להצטרף לפעילות",
   "nav.joinShort": "להצטרף",
 
