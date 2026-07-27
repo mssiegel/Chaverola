@@ -66,13 +66,6 @@ export interface LiveMatch {
 
 export type ActiveMatch = DemoMatch | LiveMatch;
 
-/**
- * A characterId the fetched roster can't resolve (shouldn't happen — the
- * server deals from the same roster the student fetched — but the wire is
- * the wire). The room still works; only the label is a mystery.
- */
-export const FALLBACK_CHARACTER_NAME = "Mystery guest";
-
 /** How long "X is back! 🎉" shows before the banner clears (or hands back
  *  to another offline peer's countdown). Real time, never scaled — live
  *  wire timing is never compressed. */
@@ -115,10 +108,6 @@ export const DEMO_LOBBY_AUTO_MATCH_MS = 20_000;
  *  demo simulation, so it runs through scaledMs (live socket state never
  *  does). */
 export const DEMO_WIFI_BLIP_MS = 4_000;
-
-/** The copy for a server we couldn't reach at all — distinct from not-found. */
-export const UNREACHABLE_COPY =
-  "We can't reach Chaverola right now. Check your internet, then try again.";
 
 /** The floating white card the student world's stages render on. */
 export const STUDENT_CARD_CLASS =

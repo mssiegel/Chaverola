@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import {
   CHAT_SEND_WINDOW_LIMIT,
@@ -31,6 +32,7 @@ import {
   clearTypingPeer,
   dropPendingLine,
   failPendingLine,
+  type MatchCopy,
 } from "./liveMatchState";
 
 /**
@@ -80,6 +82,15 @@ export function useActiveMatch({
     studentInstructions: string | null;
   }) => void;
 }) {
+  // The reducers in liveMatchState.ts are pure and node-tested, so the three
+  // strings they'd otherwise author are built here and threaded in.
+  const { t } = useTranslation("chat");
+  const copy: MatchCopy = {
+    fallbackCharacterName: t("notice.mysteryGuest"),
+    left: (name) => t("notice.left", { name }),
+    timedOut: (name) => t("notice.timedOut", { name }),
+  };
+
   // Set by the lobby's demo match triggers (demo) or by the server's
   // chat:started (real activities, via the presence hook below).
   const [match, setMatch] = useState<ActiveMatch | null>(null);
@@ -246,7 +257,8 @@ export function useActiveMatch({
           // the lobby copy is only the deploy-window fallback for a
           // server that doesn't send `cast` yet.
           payload.cast ?? activity?.characters ?? [],
-          session.name
+          session.name,
+          copy
         )
       );
     },
@@ -254,7 +266,7 @@ export function useActiveMatch({
       setMatch((prev) => applyChatLine(prev, payload));
     },
     onChatUpdate: (payload) => {
-      setMatch((prev) => applyChatUpdate(prev, payload));
+      setMatch((prev) => applyChatUpdate(prev, payload, copy));
     },
     onPeerTyping: (payload) => {
       if (match?.kind !== "live" || match.chatId !== payload.chatId) return;

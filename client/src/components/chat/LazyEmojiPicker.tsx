@@ -1,4 +1,5 @@
 import { lazy, Suspense } from "react";
+import { useTranslation } from "react-i18next";
 import type { EmojiClickData } from "emoji-picker-react";
 
 // Code-split the (heavy) emoji picker — only loaded when opened. Kept in its
@@ -30,11 +31,12 @@ export function LazyEmojiPicker({
   onPick,
   autoFocusSearch,
 }: LazyEmojiPickerProps) {
+  const { t } = useTranslation("chat");
   return (
     <Suspense
       fallback={
         <div className="grid size-full place-items-center text-sm text-muted-foreground">
-          Loading emojis…
+          {t("emoji.loading")}
         </div>
       }
     >

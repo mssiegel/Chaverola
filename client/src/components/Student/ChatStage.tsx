@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { GraduationCap, PartyPopper, Pause, Play } from "lucide-react";
 
 import { useChatDemo } from "@/components/chat/useChatDemo";
@@ -51,6 +52,7 @@ export function ChatStage({
   activityEnded,
   onActivityEnds,
 }: ChatStageProps) {
+  const { t } = useTranslation("student");
   // Built once per mount: the scenario is this match's identity, with the
   // signed-in student's real name behind their character.
   const [scenario] = useState(() => {
@@ -143,7 +145,7 @@ export function ChatStage({
                 disabled={chat.isEnded}
                 icon={<GraduationCap className="size-4" />}
               >
-                Teacher ends chat
+                {t("demo.teacherEndsChat")}
               </EventButton>
               {/* The bell: every chat ends AND the activity closes. The
                   wrap-up screen (reveal included) holds, and its CTA lands on
@@ -162,7 +164,7 @@ export function ChatStage({
                 disabled={chat.isEnded}
                 icon={<PartyPopper className="size-4" />}
               >
-                Teacher ends the activity
+                {t("demo.teacherEndsActivity")}
               </EventButton>
               {/* Deliberately not gated on isEnded: pause is world-level, so
                   flipping it from the ended screen sends the student back to a
@@ -173,15 +175,17 @@ export function ChatStage({
                 disabled={classPaused}
                 icon={<Pause className="size-4" />}
               >
-                Teacher pauses the class
+                {t("demo.pause")}
               </EventButton>
               <EventButton
                 onWorld
                 onClick={() => onClassPausedChange(false)}
                 disabled={!classPaused}
+                // No flip-rtl on Play: a transport control points the same
+                // way on every remote in the world.
                 icon={<Play className="size-4" />}
               >
-                Teacher resumes the class
+                {t("demo.resume")}
               </EventButton>
             </>
           }

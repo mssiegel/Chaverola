@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Handshake, Pause, Play, Users, UserX, WifiOff } from "lucide-react";
 
 import { DemoControlsPanel, EventButton } from "@/components/demo/DemoControls";
@@ -26,11 +27,9 @@ export function LobbyDemoControls({
   wifiBlipActive: boolean;
   onWifiBlip: () => void;
 }) {
+  const { t } = useTranslation("student");
   return (
-    <DemoControlsPanel
-      onWorld
-      caption="In a real activity, your teacher does this part."
-    >
+    <DemoControlsPanel onWorld caption={t("demo.lobbyCaption")}>
       <div className="grid grid-cols-2 gap-2">
         {/* Pairing stays enabled while paused on purpose: a teacher can
             still hand-pick matches mid-announcement, and the chat that
@@ -40,14 +39,14 @@ export function LobbyDemoControls({
           onClick={() => onMatch("duo")}
           icon={<Handshake className="size-4" />}
         >
-          Pair me 1-on-1
+          {t("demo.pairDuo")}
         </EventButton>
         <EventButton
           onWorld
           onClick={() => onMatch("group")}
           icon={<Users className="size-4" />}
         >
-          Put me in a group of 3
+          {t("demo.pairGroup")}
         </EventButton>
         <EventButton
           onWorld
@@ -55,15 +54,17 @@ export function LobbyDemoControls({
           disabled={classPaused}
           icon={<Pause className="size-4" />}
         >
-          Teacher pauses the class
+          {t("demo.pause")}
         </EventButton>
         <EventButton
           onWorld
           onClick={() => onClassPausedChange(false)}
           disabled={!classPaused}
+          // No flip-rtl: Play is a transport control, and those point the
+          // same way on every remote in the world.
           icon={<Play className="size-4" />}
         >
-          Teacher resumes the class
+          {t("demo.resume")}
         </EventButton>
         <EventButton
           onWorld
@@ -71,14 +72,14 @@ export function LobbyDemoControls({
           disabled={wifiBlipActive}
           icon={<WifiOff className="size-4" />}
         >
-          Your wifi blips
+          {t("demo.wifiBlip")}
         </EventButton>
         <EventButton
           onWorld
           onClick={onTeacherRemove}
           icon={<UserX className="size-4" />}
         >
-          Teacher removes you
+          {t("demo.removeMe")}
         </EventButton>
       </div>
     </DemoControlsPanel>

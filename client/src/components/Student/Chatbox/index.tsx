@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { DoorOpen, LogOut } from "lucide-react";
 
 import { ChatFrame } from "@/components/chat/ChatFrame";
@@ -74,6 +75,10 @@ export function Chatbox({
   activityEnded,
   releaseKeyboardOnSend,
 }: ChatboxProps) {
+  // `common` alongside `student`: the 1:1 exit asks the same question the
+  // teacher's card does, so it reuses `common`'s endChat.* rather than
+  // keeping a second copy of the sentence.
+  const { t } = useTranslation(["student", "common"]);
   const {
     self,
     peers,
@@ -108,26 +113,26 @@ export function Chatbox({
   // button and an already-open dialog swap together as a group dwindles.
   const isGroupExit = peers.length > 1;
 
+  // flip-rtl on both: a door glyph and a log-out arrow each read as "out
+  // this way", so they follow the reading direction.
   const exitConfirm = isGroupExit
     ? {
-        title: "Leave this chat?",
-        description:
-          "The chat keeps going without you, and there's no coming back in. You can head back to the lobby whenever you're ready.",
+        title: t("exit.leaveTitle"),
+        description: t("exit.leaveBody"),
         confirmLabel: (
           <>
-            <DoorOpen className="size-4" />
-            Leave chat
+            <DoorOpen className="flip-rtl size-4" />
+            {t("exit.leave")}
           </>
         ),
       }
     : {
-        title: "End this chat?",
-        description:
-          "This ends the chat for everyone in it, and there's no reopening it. You can head back to the lobby whenever you're ready.",
+        title: t("common:endChat.title"),
+        description: t("exit.endBody"),
         confirmLabel: (
           <>
-            <LogOut className="size-4" />
-            End chat
+            <LogOut className="flip-rtl size-4" />
+            {t("common:endChat.confirm")}
           </>
         ),
       };
@@ -155,20 +160,21 @@ export function Chatbox({
               <button
                 type="button"
                 onClick={() => setConfirmOpen(true)}
-                aria-label={isGroupExit ? "Leave chat" : "End chat"}
+                aria-label={isGroupExit ? t("exit.leave") : t("exit.end")}
                 className="flex shrink-0 items-center gap-1.5 rounded-full bg-white/15 px-3 py-1.5 text-sm font-semibold text-white backdrop-blur-sm transition-colors hover:bg-white/25 active:scale-[0.98]"
               >
+                {/* flip-rtl: both glyphs mean "out this way". */}
                 {isGroupExit ? (
                   <>
-                    <DoorOpen className="size-4" />
-                    <span>Leave</span>
+                    <DoorOpen className="flip-rtl size-4" />
+                    <span>{t("exit.leave")}</span>
                   </>
                 ) : (
                   <>
-                    <LogOut className="size-4" />
-                    <span className="max-sm:hidden">End chat</span>
+                    <LogOut className="flip-rtl size-4" />
+                    <span className="max-sm:hidden">{t("exit.end")}</span>
                     <span aria-hidden className="sm:hidden">
-                      End
+                      {t("exit.endShort")}
                     </span>
                   </>
                 )}
@@ -227,7 +233,7 @@ export function Chatbox({
         title={exitConfirm.title}
         description={exitConfirm.description}
         confirmLabel={exitConfirm.confirmLabel}
-        cancelLabel="Keep chatting"
+        cancelLabel={t("exit.keepChatting")}
       />
     </ChatFrame>
   );

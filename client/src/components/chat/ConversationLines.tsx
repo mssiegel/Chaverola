@@ -1,3 +1,5 @@
+import { useTranslation } from "react-i18next";
+
 import { participantsById } from "@/lib/participants";
 import { cn } from "@/lib/utils";
 import type { ChatMessage, Participant } from "@/types/chat";
@@ -22,6 +24,14 @@ interface ConversationLinesProps {
  * (the teacher view prepends `(realName) `), 0px between consecutive lines from
  * the same speaker and +4px when the speaker changes — a smooth, game-like
  * flow. Text size/leading is inherited so each view can set its own density.
+ *
+ * Up to three scripts can meet on one line — a Hebrew character, a Latin real
+ * name, a message in either — separated by neutrals that belong to nobody. The
+ * container keeps the UI's direction, so the "(you)" tag and the retry button
+ * always sit at the same inline end; each authored field then isolates itself
+ * in its own `<bdi>`, PARENTHESES INCLUDED, since those are exactly the
+ * neutrals that would otherwise swap ends. One fix covers the student chatbox
+ * and the teacher's chat card.
  */
 export function ConversationLines({
   participants,
@@ -31,6 +41,7 @@ export function ConversationLines({
   showRealNames = false,
   onRetryMessage,
 }: ConversationLinesProps) {
+  const { t } = useTranslation("chat");
   const byId = participantsById(participants);
 
   return (
@@ -72,23 +83,25 @@ export function ConversationLines({
             )}
           >
             {showRealNames && (
-              <span className="text-muted-foreground">
-                ({sender.realName}){" "}
-              </span>
+              <>
+                <bdi className="text-muted-foreground">
+                  ({sender.realName})
+                </bdi>{" "}
+              </>
             )}
             <span
               className="font-semibold"
               style={{ color: characterColors.get(sender.character.id) }}
             >
-              {sender.character.name}
+              <bdi>{sender.character.name}</bdi>
               {isSelf && (
                 <span className="ms-1 align-middle text-[11px] font-medium text-muted-foreground">
-                  (you)
+                  {t("header.you")}
                 </span>
               )}
               <span className="text-foreground">: </span>
             </span>
-            <span className="text-foreground/90">{message.text}</span>
+            <bdi className="text-foreground/90">{message.text}</bdi>
             {/* Its own line under the message, not an inline tail: a thumb
                 needs a real target, and 11px of underlined text between
                 words is not one. */}
@@ -107,11 +120,11 @@ export function ConversationLines({
                   onClick={() => onRetryMessage(message.id)}
                   className="mt-0.5 flex items-center gap-1 rounded-md px-1 py-1.5 text-xs font-medium text-destructive underline underline-offset-2"
                 >
-                  Didn't send. Try again
+                  {t("line.retry")}
                 </button>
               ) : (
                 <span className="mt-0.5 flex items-center gap-1 px-1 py-1.5 text-xs font-medium text-destructive">
-                  This didn't send
+                  {t("line.failed")}
                 </span>
               ))}
           </div>

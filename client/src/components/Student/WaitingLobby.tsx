@@ -1,5 +1,6 @@
 import { Loader2, Pause } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import type { LobbyConnectionState } from "@chaverola/shared";
 
@@ -47,6 +48,7 @@ export function WaitingLobby({
   teacherAway = false,
   onLeaveActivity,
 }: WaitingLobbyProps) {
+  const { t } = useTranslation("student");
   // How long this lobby has been on screen, in two steps. The lobby unmounts
   // whenever the stage leaves it, so a chat and a trip back to the lobby
   // afterwards both start the clock over — which is what a student expects.
@@ -66,10 +68,10 @@ export function WaitingLobby({
   // time. Pause outranks all of it — it's the truer reason nothing's moving.
   const waitingLine =
     waited === 2
-      ? "Longer wait than usual, but you're still in line. Your chat opens as soon as someone's free."
+      ? t("lobby.waitingLong")
       : waited === 1
-        ? "Still finding you a partner. Hang tight, your chat opens right here."
-        : `${activity.hostName} is picking who chats with who. When it's your turn, the chat opens right here.`;
+        ? t("lobby.waitingStill")
+        : t("lobby.waiting", { hostName: activity.hostName });
 
   // One precedence, read by both the pill and the line above it. Connection
   // trouble outranks the rest: while this socket is down, "paused" and "your
@@ -86,20 +88,20 @@ export function WaitingLobby({
 
   const bodyLine =
     hold === "paused"
-      ? "Your teacher hit pause for a moment. When things start back up, your chat opens right here."
+      ? t("lobby.paused")
       : hold === "teacher-away"
         ? // "Can't reach" rather than "your teacher stepped away": all the
           // server knows is that no teacher device is connected, which could
           // be a shut laptop, a closed tab, or their wifi. It puts the
           // uncertainty on us instead of pinning a story on the teacher.
-          "We can't reach your teacher's screen right now, so nobody's getting matched. When they're back, your chat opens right here."
+          t("lobby.teacherAway")
         : waitingLine;
 
   return (
     <section className="flex w-full animate-in flex-col items-center gap-6 text-center duration-500 fade-in slide-in-from-bottom-4 motion-reduce:animate-none">
       <div className="space-y-2 pt-2">
         <h1 className="text-3xl font-semibold text-foreground">
-          You're in, {studentName}! 🎉
+          {t("lobby.title", { name: studentName })}
         </h1>
         <p className="text-muted-foreground" aria-live="polite">
           {bodyLine}
@@ -115,7 +117,7 @@ export function WaitingLobby({
             aria-hidden
             className="size-4 animate-spin motion-reduce:animate-none"
           />
-          Reconnecting you…
+          {t("reconnecting.pill")}
         </div>
       ) : hold === "paused" ? (
         <div
@@ -123,7 +125,7 @@ export function WaitingLobby({
           aria-live="polite"
         >
           <Pause aria-hidden className="size-4" />
-          Class is paused
+          {t("lobby.pillPaused")}
         </div>
       ) : hold === "teacher-away" ? (
         // The waiting pill's own colors, minus the dots. Amber would read as
@@ -133,35 +135,38 @@ export function WaitingLobby({
           className="flex items-center gap-2.5 rounded-full border border-brand-grape/25 bg-brand-grape-soft px-4 py-2 text-sm font-semibold text-brand-grape-strong"
           aria-live="polite"
         >
-          Waiting for your teacher
+          {t("lobby.pillTeacherAway")}
         </div>
       ) : (
         <div
           className="flex items-center gap-2.5 rounded-full border border-brand-grape/25 bg-brand-grape-soft px-4 py-2 text-sm font-semibold text-brand-grape-strong"
           aria-live="polite"
         >
-          Waiting for your match
+          {t("lobby.pillWaiting")}
           <TypingDots dotClassName="bg-brand-mint" aria-hidden />
         </div>
       )}
 
       <div className="w-full space-y-4 rounded-2xl border border-border bg-card p-5 text-start shadow-sm">
+        {/* Every value in this card is teacher-typed, so each one isolates
+            itself: a Latin name or an English instruction inside a Hebrew
+            card must not drag the punctuation around it. */}
         <div>
-          <SectionLabel>Hosted by</SectionLabel>
-          <p className="mt-0.5 font-medium text-foreground">
+          <SectionLabel>{t("lobby.hostedBy")}</SectionLabel>
+          <bdi className="mt-0.5 block font-medium text-foreground">
             {activity.hostName}
-          </p>
+          </bdi>
         </div>
 
         <div>
-          <SectionLabel>Characters in this activity</SectionLabel>
+          <SectionLabel>{t("lobby.characters")}</SectionLabel>
           <ul className="mt-2 flex flex-wrap gap-2">
             {activity.characters.map((character) => (
               <li
                 key={character.id}
                 className="inline-flex items-center gap-1.5 rounded-full bg-secondary px-3 py-1 text-sm font-medium text-secondary-foreground"
               >
-                {character.name}
+                <bdi>{character.name}</bdi>
               </li>
             ))}
           </ul>
@@ -169,10 +174,10 @@ export function WaitingLobby({
 
         {activity.studentInstructions && (
           <div>
-            <SectionLabel>Instructions</SectionLabel>
-            <p className="mt-0.5 text-sm leading-relaxed text-foreground">
+            <SectionLabel>{t("lobby.instructions")}</SectionLabel>
+            <bdi className="mt-0.5 block text-sm leading-relaxed text-foreground">
               {activity.studentInstructions}
-            </p>
+            </bdi>
           </div>
         )}
       </div>
@@ -186,7 +191,7 @@ export function WaitingLobby({
         onClick={() => setLeaveOpen(true)}
         className="text-sm font-medium text-muted-foreground underline underline-offset-4 transition-colors hover:text-foreground"
       >
-        Leave the activity
+        {t("lobby.leave")}
       </button>
 
       {/* No match-arrived guard needed: a chat:started swaps the stage, which
@@ -199,10 +204,10 @@ export function WaitingLobby({
           setLeaveOpen(false);
           onLeaveActivity();
         }}
-        title="Leave the activity?"
-        description="Your teacher will see you've left. You can rejoin with the same code, but you'd start waiting again."
-        confirmLabel="Leave activity"
-        cancelLabel="Keep waiting"
+        title={t("lobby.leaveTitle")}
+        description={t("lobby.leaveBody")}
+        confirmLabel={t("lobby.leaveConfirm")}
+        cancelLabel={t("lobby.leaveCancel")}
       />
     </section>
   );

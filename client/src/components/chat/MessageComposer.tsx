@@ -1,4 +1,5 @@
 import { useLayoutEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import type { EmojiClickData } from "emoji-picker-react";
 import { SendHorizontal, Smile } from "lucide-react";
 
@@ -45,7 +46,8 @@ interface MessageComposerProps {
   locked?: boolean;
   /**
    * What the locked field says when it's empty. Defaults to the pause copy,
-   * the only locked state a room has today.
+   * the only locked state a room has today — see the `t` fallback below
+   * rather than a default parameter, since the copy comes from the catalog.
    */
   lockedPlaceholder?: string;
   /**
@@ -82,10 +84,11 @@ export function MessageComposer({
   onTyping,
   selfCharacterLabel,
   locked = false,
-  lockedPlaceholder = "Paused. Hang tight…",
+  lockedPlaceholder,
   releaseKeyboardOnSend = false,
   holdSeconds = null,
 }: MessageComposerProps) {
+  const { t } = useTranslation("chat");
   const [value, setValue] = useState("");
   const [pickerOpen, setPickerOpen] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -171,12 +174,15 @@ export function MessageComposer({
       <div className="px-2 py-2 sm:px-4 sm:py-2.5">
         {holdSeconds !== null && (
           <div className="mb-1.5 px-1 text-xs font-medium text-muted-foreground">
-            You&apos;re on a roll. Sending these in {holdSeconds}s
+            {t("composer.hold", { seconds: holdSeconds })}
           </div>
         )}
         <div className="relative">
           {showCounter && (
             <div
+              // dir="ltr": "62/75" is two digit runs around a neutral slash,
+              // which an RTL line would otherwise render as "75/62".
+              dir="ltr"
               className={cn(
                 "absolute end-1 -top-5 text-xs font-semibold tabular-nums transition-colors",
                 atLimit ? "text-destructive" : "text-muted-foreground"
@@ -204,7 +210,7 @@ export function MessageComposer({
               <PopoverTrigger asChild>
                 <button
                   type="button"
-                  aria-label="Add emoji"
+                  aria-label={t("composer.addEmoji")}
                   // Safe as a real `disabled` where the textarea isn't: the
                   // caret lives in the field, not here (the mousedown below
                   // sees to that), so locking this button blurs nothing.
@@ -261,10 +267,10 @@ export function MessageComposer({
               // through the pause for free.
               placeholder={
                 locked
-                  ? lockedPlaceholder
+                  ? (lockedPlaceholder ?? t("composer.pausedPlaceholder"))
                   : selfCharacterLabel
-                    ? `Talk as ${selfCharacterLabel}…`
-                    : "Type a message…"
+                    ? t("composer.talkAs", { name: selfCharacterLabel })
+                    : t("composer.placeholder")
               }
               className="max-h-16 flex-1 resize-none border-0 bg-transparent py-1.5 text-[15px] leading-6 text-foreground outline-none placeholder:text-muted-foreground"
             />
@@ -286,10 +292,11 @@ export function MessageComposer({
               // is what actually refuses.
               disabled={!value.trim()}
               aria-disabled={locked}
-              aria-label="Send message"
+              aria-label={t("composer.send")}
               className="grid size-10 shrink-0 place-items-center self-end rounded-full bg-primary text-primary-foreground shadow-sm transition-all hover:bg-brand-grape-strong active:scale-95 disabled:opacity-40 disabled:hover:bg-primary aria-disabled:opacity-40 aria-disabled:hover:bg-primary"
             >
-              <SendHorizontal className="size-5" />
+              {/* flip-rtl: a paper plane flies the way the sentence runs. */}
+              <SendHorizontal className="flip-rtl size-5" />
             </button>
           </div>
         </div>

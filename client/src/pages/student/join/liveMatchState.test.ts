@@ -5,6 +5,7 @@ import { LOBBY_GRACE_SECONDS, type Character } from "@chaverola/shared";
 import { NOTICE_SENDER_ID, type Participant } from "@/types/chat";
 
 import type { LiveMatch } from "./stageTypes";
+import type { MatchCopy } from "./liveMatchState";
 import {
   applyChatLine,
   applyChatStarted,
@@ -35,6 +36,15 @@ afterEach(() => {
   vi.useRealTimers();
 });
 
+// The prose the reducers take as a parameter — English, spelled out here
+// rather than pulled from the catalog, so these assertions pin the reducers'
+// behavior and not the copy in i18n/locales/en/chat.ts.
+const COPY: MatchCopy = {
+  fallbackCharacterName: "Mystery guest",
+  left: (name) => `${name} left the chat`,
+  timedOut: (name) => `${name} couldn't get back in and left the chat`,
+};
+
 const roster: Character[] = [
   { id: "brutus", name: "Brutus 🔪" },
   { id: "cleo", name: "Cleopatra 👑" },
@@ -43,7 +53,7 @@ const roster: Character[] = [
 ];
 
 function participant(id: string): Participant {
-  return toParticipant(roster, { characterId: id });
+  return toParticipant(roster, { characterId: id }, COPY);
 }
 
 function liveMatch(overrides: Partial<LiveMatch> = {}): LiveMatch {
@@ -52,7 +62,7 @@ function liveMatch(overrides: Partial<LiveMatch> = {}): LiveMatch {
     chatId: "chat-1",
     self: {
       id: "antony",
-      character: resolveCharacter(roster, "antony"),
+      character: resolveCharacter(roster, "antony", COPY),
       realName: "Rachel",
     },
     peers: [participant("brutus"), participant("cleo")],
@@ -84,21 +94,21 @@ describe("toLiveMessage", () => {
 
 describe("resolveCharacter", () => {
   it("finds a character in the roster", () => {
-    expect(resolveCharacter(roster, "cleo")).toEqual({
+    expect(resolveCharacter(roster, "cleo", COPY)).toEqual({
       id: "cleo",
       name: "Cleopatra 👑",
     });
   });
 
   it("falls back to a mystery guest for an id the roster can't resolve", () => {
-    expect(resolveCharacter(roster, "ghost")).toEqual({
+    expect(resolveCharacter(roster, "ghost", COPY)).toEqual({
       id: "ghost",
       name: "Mystery guest",
     });
   });
 
   it("resolves against an empty roster as a mystery guest", () => {
-    expect(resolveCharacter([], "brutus")).toEqual({
+    expect(resolveCharacter([], "brutus", COPY)).toEqual({
       id: "brutus",
       name: "Mystery guest",
     });
@@ -107,7 +117,7 @@ describe("resolveCharacter", () => {
 
 describe("toParticipant", () => {
   it("uses the characterId as the participant id and carries no real name", () => {
-    expect(toParticipant(roster, { characterId: "brutus" })).toEqual({
+    expect(toParticipant(roster, { characterId: "brutus" }, COPY)).toEqual({
       id: "brutus",
       character: { id: "brutus", name: "Brutus 🔪" },
       realName: "",
@@ -146,7 +156,8 @@ describe("applyChatStarted — first delivery", () => {
         reconnectingPeers: [{ characterId: "brutus", secondsLeft: 60 }],
       },
       roster,
-      "Rachel"
+      "Rachel",
+      COPY
     );
     expect(next).toEqual({
       kind: "live",
@@ -185,7 +196,8 @@ describe("applyChatStarted — resume re-delivery", () => {
         lines: [line("l1", "brutus", "hi"), line("l3", "cleo", "back?")],
       },
       roster,
-      "Rachel"
+      "Rachel",
+      COPY
     ) as LiveMatch;
     expect(next.messages).toEqual([
       { id: "l1", senderId: "brutus", text: "hi" },
@@ -212,7 +224,8 @@ describe("applyChatStarted — resume re-delivery", () => {
         reconnectingPeers: [],
       },
       roster,
-      "Rachel"
+      "Rachel",
+      COPY
     ) as LiveMatch;
     // Missed line first, THEN the departure notice — the true order.
     expect(next.messages.map((m) => m.text)).toEqual([
@@ -243,7 +256,8 @@ describe("applyChatStarted — resume re-delivery", () => {
         reconnectingPeers: [{ characterId: "cleo", secondsLeft: 45 }],
       },
       roster,
-      "Rachel"
+      "Rachel",
+      COPY
     ) as LiveMatch;
     expect(next.offlinePeers).toEqual({ cleo: NOW + 45_000 });
   });
@@ -261,7 +275,8 @@ describe("applyChatStarted — resume re-delivery", () => {
         reconnectingPeers: [{ characterId: "cleo", secondsLeft: 30 }],
       },
       roster,
-      "Rachel"
+      "Rachel",
+      COPY
     ) as LiveMatch;
     expect(next.typingPeerId).toBeNull();
   });
@@ -279,7 +294,8 @@ describe("applyChatStarted — resume re-delivery", () => {
         reconnectingPeers: [],
       },
       roster,
-      "Rachel"
+      "Rachel",
+      COPY
     ) as LiveMatch;
     expect(next.typingPeerId).toBe("brutus");
   });
@@ -331,19 +347,24 @@ describe("applyChatUpdate / shrinkToPeers", () => {
   it("returns prev unchanged when nobody left", () => {
     const prev = liveMatch();
     expect(
-      applyChatUpdate(prev, {
-        chatId: "chat-1",
-        peers: [{ characterId: "brutus" }, { characterId: "cleo" }],
-      })
+      applyChatUpdate(
+        prev,
+        {
+          chatId: "chat-1",
+          peers: [{ characterId: "brutus" }, { characterId: "cleo" }],
+        },
+        COPY
+      )
     ).toBe(prev);
   });
 
   it("drops a leaver from peers, keeps them in everPeers, and posts a plain 'left' notice", () => {
     const prev = liveMatch();
-    const next = applyChatUpdate(prev, {
-      chatId: "chat-1",
-      peers: [{ characterId: "brutus" }],
-    }) as LiveMatch;
+    const next = applyChatUpdate(
+      prev,
+      { chatId: "chat-1", peers: [{ characterId: "brutus" }] },
+      COPY
+    ) as LiveMatch;
     expect(next.peers).toEqual([participant("brutus")]);
     expect(next.everPeers).toEqual([
       participant("brutus"),
@@ -358,7 +379,7 @@ describe("applyChatUpdate / shrinkToPeers", () => {
 
   it("uses the timeout copy for a leaver who was offline in the PREV map", () => {
     const prev = liveMatch({ offlinePeers: { cleo: NOW + 5_000 } });
-    const next = shrinkToPeers(prev, [{ characterId: "brutus" }]);
+    const next = shrinkToPeers(prev, [{ characterId: "brutus" }], COPY);
     expect(next.messages.at(-1)).toMatchObject({
       text: "Cleopatra 👑 couldn't get back in and left the chat",
     });
@@ -368,7 +389,7 @@ describe("applyChatUpdate / shrinkToPeers", () => {
 
   it("clears a leaver's typing slot and pending return flash", () => {
     const prev = liveMatch({ typingPeerId: "cleo", returnedFlashId: "cleo" });
-    const next = shrinkToPeers(prev, [{ characterId: "brutus" }]);
+    const next = shrinkToPeers(prev, [{ characterId: "brutus" }], COPY);
     expect(next.typingPeerId).toBeNull();
     expect(next.returnedFlashId).toBeNull();
   });
@@ -530,7 +551,8 @@ describe("pending sends", () => {
         lines: [line("l1", "brutus", "hi"), line("l9", "antony", "et tu?")],
       },
       roster,
-      "Rachel"
+      "Rachel",
+      COPY
     );
     expect(next.messages.map((m) => m.id)).toEqual(["l1", "l9"]);
     expect(next.messages.at(-1)?.delivery).toBeUndefined();
@@ -548,7 +570,8 @@ describe("pending sends", () => {
         lines: [line("l1", "brutus", "hi")],
       },
       roster,
-      "Rachel"
+      "Rachel",
+      COPY
     );
     expect(next.messages.map((m) => m.id)).toEqual(["l1", "p1"]);
   });

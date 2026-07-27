@@ -1,3 +1,5 @@
+import { useTranslation } from "react-i18next";
+import type { TFunction } from "i18next";
 import { ArrowRight, EyeOff, RotateCcw } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -35,8 +37,13 @@ interface ChatEndedSectionProps {
  * The tile + title + body for each way a chat can end. A peer who ended it is
  * named by their character, never their real name — the mystery holds until
  * the reveal below. The default case is a safety net for a missing reason.
+ *
+ * `t` is a parameter and this stays pure, per the extraction rule. The TILES
+ * stay in code beside the keys on purpose: they're art, not copy, and the
+ * visual language of the eight endings is not a translator's to change.
  */
 function endedCopy(
+  t: TFunction<"student">,
   endReason: ChatEndReason | null,
   endedByLabel: string | null,
   endedInGroup: boolean
@@ -45,54 +52,56 @@ function endedCopy(
     case "student":
       return {
         tile: "🎬",
-        title: "And… scene!",
+        title: t("ended.student.title"),
         body: endedInGroup
-          ? "You ended this chat for the whole group. Nicely played! 👏"
-          : "You ended this chat. Nicely played! 👏",
+          ? t("ended.student.bodyGroup")
+          : t("ended.student.body"),
       };
     case "peer":
       return {
         tile: "🎭",
-        title: `${endedByLabel ?? "Your partner"} ended the chat`,
-        body: "That's a wrap for this one. Nicely played! 👏",
+        title: t("ended.peer.title", {
+          name: endedByLabel ?? t("ended.partner"),
+        }),
+        body: t("ended.peer.body"),
       };
     case "teacher":
       return {
         tile: "🎓",
-        title: "Your teacher ended the chat",
-        body: "Time for what's next in class. Nicely played! 👏",
+        title: t("ended.teacher.title"),
+        body: t("ended.teacher.body"),
       };
     case "peer-timeout":
       return {
         tile: "🔌",
-        title: "Your partner lost connection",
-        body: "They couldn't get back in, so this chat ended. Not your fault!",
+        title: t("ended.peerTimeout.title"),
+        body: t("ended.peerTimeout.body"),
       };
     case "self-timeout":
       return {
         tile: "📶",
-        title: "You lost connection",
-        body: "You couldn't get back in time, so this chat ended for you. It happens!",
+        title: t("ended.selfTimeout.title"),
+        body: t("ended.selfTimeout.body"),
       };
     case "self-left":
       return {
         tile: "👋",
-        title: "You left the chat",
-        body: "The others are still chatting away. Nicely played! 👏",
+        title: t("ended.selfLeft.title"),
+        body: t("ended.selfLeft.body"),
       };
     case "removed":
       // No applause on this one: it's the only ending the student neither
       // chose nor lost to the wifi. Say what happened and where they land.
       return {
         tile: "🚪",
-        title: "Your teacher took you out of the activity",
-        body: "That ends this chat too. You can join again with your name.",
+        title: t("ended.removed.title"),
+        body: t("ended.removed.body"),
       };
     default:
       return {
         tile: "🎭",
-        title: "Great roleplay!",
-        body: "That chat has ended. Nicely played. 👏",
+        title: t("ended.fallback.title"),
+        body: t("ended.fallback.body"),
       };
   }
 }
@@ -115,10 +124,12 @@ export function ChatEndedSection({
   activityEnded = false,
   onBackToLobby,
 }: ChatEndedSectionProps) {
+  const { t } = useTranslation("student");
   const endedBy = endedByPeerId
     ? peers.find((p) => p.id === endedByPeerId)
     : undefined;
   const copy = endedCopy(
+    t,
     endReason,
     endedBy?.character.name ?? null,
     endedInGroup
@@ -149,14 +160,12 @@ export function ChatEndedSection({
         {chatGoesOnWithoutYou ? (
           <div className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-border bg-card/60 p-3 text-sm text-muted-foreground">
             <EyeOff className="size-4" />
-            <span>
-              Names stay secret. This chat is still going without you.
-            </span>
+            <span>{t("ended.secretLeft")}</span>
           </div>
         ) : revealNames && !removed ? (
           <div className="w-full rounded-xl border border-border bg-card p-3 text-start shadow-sm">
             <SectionLabel className="mb-2 text-center">
-              You were really chatting with
+              {t("ended.revealTitle")}
             </SectionLabel>
             <ul className="space-y-1.5">
               {peers.map((peer) => (
@@ -164,15 +173,18 @@ export function ChatEndedSection({
                   key={peer.id}
                   className="flex items-center justify-between gap-3 text-sm"
                 >
-                  <span
+                  {/* Two teacher/student-authored runs on one row, so each
+                      isolates itself — a Hebrew character beside a Latin
+                      real name would otherwise swap ends. */}
+                  <bdi
                     className="font-semibold"
                     style={{ color: characterColors.get(peer.character.id) }}
                   >
                     {peer.character.name}
-                  </span>
-                  <span className="font-medium text-foreground">
+                  </bdi>
+                  <bdi className="font-medium text-foreground">
                     {peer.realName}
-                  </span>
+                  </bdi>
                 </li>
               ))}
             </ul>
@@ -180,10 +192,7 @@ export function ChatEndedSection({
         ) : (
           <div className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-border bg-card/60 p-3 text-sm text-muted-foreground">
             <EyeOff className="size-4" />
-            <span>
-              {secretLine ??
-                "Names stay secret. Your teacher hasn't revealed them."}
-            </span>
+            <span>{secretLine ?? t("ended.secretDefault")}</span>
           </div>
         )}
 
@@ -192,25 +201,28 @@ export function ChatEndedSection({
             // The seat went with the removal, so there is no lobby and no
             // rematch to offer. The tap runs the sign-out this screen
             // deferred and lands them on the name step.
+            // flip-rtl on both arrows: "onwards" follows the reading
+            // direction.
             <Button size="lg" className="w-full" onClick={onBackToLobby}>
-              Join again
-              <ArrowRight className="size-4" />
+              {t("ended.joinAgain")}
+              <ArrowRight className="flip-rtl size-4" />
             </Button>
           ) : activityEnded ? (
             // No rematch to promise and no lobby to return to — the tap just
             // closes the wrap-up out onto the activity-over screen.
             <Button size="lg" className="w-full" onClick={onBackToLobby}>
-              Done
-              <ArrowRight className="size-4" />
+              {t("ended.done")}
+              <ArrowRight className="flip-rtl size-4" />
             </Button>
           ) : (
             <>
               <p className="text-sm font-medium text-foreground">
-                Ready for another round? 🚀
+                {t("ended.again")}
               </p>
               <Button size="lg" className="w-full" onClick={onBackToLobby}>
+                {/* No flip-rtl: a cycle glyph turns the same way everywhere. */}
                 <RotateCcw className="size-4" />
-                Back to the lobby
+                {t("ended.backToLobby")}
               </Button>
             </>
           )}

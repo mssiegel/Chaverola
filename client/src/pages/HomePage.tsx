@@ -6,6 +6,9 @@ import { GraduationCap, MessageCircle } from "lucide-react";
 // this page's chunk. Every module that reads home:* strings must be reachable
 // from here.
 import "@/i18n/ns/home";
+// …and `chat`, because the hero renders the real chatbox: header, feed,
+// composer, emoji picker. Those pieces read chat:* wherever they are mounted.
+import "@/i18n/ns/chat";
 
 import { DemoSection } from "@/components/home/DemoSection";
 import { FounderNote } from "@/components/home/FounderNote";

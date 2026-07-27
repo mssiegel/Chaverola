@@ -2,6 +2,8 @@ import { useTranslation } from "react-i18next";
 
 // Side-effect import: registers the `teacher` namespace into this page chunk.
 import "@/i18n/ns/teacher";
+// …and `chat`, for the emoji picker each character row opens.
+import "@/i18n/ns/chat";
 
 import { ActivitySetupForm } from "@/components/Teacher/ActivitySetup";
 import { Badge } from "@/components/ui/badge";

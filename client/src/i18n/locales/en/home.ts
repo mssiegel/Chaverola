@@ -23,6 +23,9 @@ export const home = {
     "This is the student side, live. Go ahead, type as {{self, bidi}}.",
   "hero.chatNote":
     "🤫 In a real round, {{self, bidi}} and {{peerShort, bidi}} are both your students. Only you know who's playing who, until the reveal at the end.",
+  /** The hero chatbox's own header suffix — the rest of that header is
+   *  `chat`, but this half-sentence exists only on this page. */
+  "hero.chatPeerSuffix": " · played by a classmate",
   "hero.stepsLabel": "Setup takes about a minute:",
   "hero.step1": "Create an activity and pick your characters.",
   "hero.step2": "Put the join code on the board.",

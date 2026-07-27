@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 import {
   DoorOpen,
   FastForward,
@@ -33,6 +34,10 @@ interface ChatDemoControlsProps {
  * teacher's name reveal) as visitor-friendly buttons. Used by the join flow's
  * chatting stage, which adds its own extras. Demo seats only — a real chat is
  * driven by the server and has no panel.
+ *
+ * `student`, not `common`, despite living under `demo/`: only the join flow
+ * mounts this one. Its sibling `DemoControls` panel IS shared, which is why
+ * that one's strings are in `common`.
  */
 export function ChatDemoControls({
   chat,
@@ -43,13 +48,11 @@ export function ChatDemoControls({
   onSelfBlip,
   extraEvents,
 }: ChatDemoControlsProps) {
+  const { t } = useTranslation("student");
   const peerConnected = chat.peerState === "connected";
 
   return (
-    <DemoControlsPanel
-      onWorld={onWorld}
-      caption="In a real chat these happen on their own."
-    >
+    <DemoControlsPanel onWorld={onWorld} caption={t("demo.chatCaption")}>
       <div className="space-y-4">
         <label className="flex cursor-pointer items-center justify-between gap-3">
           {/* text-balance: on a phone this label wraps, and without it the
@@ -60,7 +63,7 @@ export function ChatDemoControls({
               onWorld ? "text-white/90" : "text-foreground"
             )}
           >
-            Your teacher reveals names when the chat ends
+            {t("demo.reveal")}
           </span>
           <DemoToggle checked={revealNames} onChange={onRevealNamesChange} />
         </label>
@@ -72,7 +75,7 @@ export function ChatDemoControls({
               onWorld ? "text-white/80" : "text-muted-foreground"
             )}
           >
-            Make something happen
+            {t("demo.makeSomethingHappen")}
           </p>
           <div className="grid grid-cols-2 gap-2">
             <EventButton
@@ -81,7 +84,7 @@ export function ChatDemoControls({
               disabled={!peerConnected || chat.isEnded}
               icon={<WifiOff className="size-4" />}
             >
-              Partner drops off
+              {t("demo.peerDrops")}
             </EventButton>
             <EventButton
               onWorld={onWorld}
@@ -89,15 +92,16 @@ export function ChatDemoControls({
               disabled={peerConnected || chat.isEnded}
               icon={<Wifi className="size-4" />}
             >
-              Partner comes back
+              {t("demo.peerReturns")}
             </EventButton>
             <EventButton
               onWorld={onWorld}
               onClick={chat.skipReconnectWait}
               disabled={chat.reconnectSecondsLeft === null || chat.isEnded}
+              // No flip-rtl: FastForward is a transport control.
               icon={<FastForward className="size-4" />}
             >
-              Skip the wait
+              {t("demo.skipWait")}
             </EventButton>
             <EventButton
               onWorld={onWorld}
@@ -105,15 +109,16 @@ export function ChatDemoControls({
               disabled={!peerConnected || chat.isEnded}
               icon={<MessageCirclePlus className="size-4" />}
             >
-              Make them talk
+              {t("demo.makeThemTalk")}
             </EventButton>
             <EventButton
               onWorld={onWorld}
               onClick={chat.peerEndsChat}
               disabled={!peerConnected || chat.isEnded}
-              icon={<LogOut className="size-4" />}
+              // flip-rtl: a log-out arrow reads as "out this way".
+              icon={<LogOut className="flip-rtl size-4" />}
             >
-              Partner ends chat
+              {t("demo.peerEndsChat")}
             </EventButton>
             {/* Leaving is a group move — in a 1:1 a partner exiting ends the
                 chat instead, so this stays disabled there. */}
@@ -121,9 +126,9 @@ export function ChatDemoControls({
               onWorld={onWorld}
               onClick={chat.peerLeavesChat}
               disabled={chat.peers.length < 2 || chat.isEnded}
-              icon={<DoorOpen className="size-4" />}
+              icon={<DoorOpen className="flip-rtl size-4" />}
             >
-              Partner leaves chat
+              {t("demo.peerLeavesChat")}
             </EventButton>
             {/* The blip you come back from, next to the drop you don't. */}
             <EventButton
@@ -132,7 +137,7 @@ export function ChatDemoControls({
               disabled={selfBlipActive || chat.isEnded}
               icon={<WifiOff className="size-4" />}
             >
-              Your wifi blips
+              {t("demo.wifiBlip")}
             </EventButton>
             <EventButton
               onWorld={onWorld}
@@ -140,7 +145,7 @@ export function ChatDemoControls({
               disabled={chat.isEnded}
               icon={<Unplug className="size-4" />}
             >
-              You drop off (2 min pass)
+              {t("demo.youDropOff")}
             </EventButton>
             {extraEvents}
           </div>

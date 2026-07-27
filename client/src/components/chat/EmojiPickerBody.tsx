@@ -1,9 +1,15 @@
 import type { CSSProperties } from "react";
+import { useTranslation } from "react-i18next";
+import type { TFunction } from "i18next";
 import EmojiPicker, {
+  Categories,
   EmojiStyle,
   Theme,
+  type CategoryConfig,
   type EmojiClickData,
 } from "emoji-picker-react";
+
+import { useLocale, type Locale } from "@/lib/locale";
 
 interface EmojiPickerBodyProps {
   onPick: (data: EmojiClickData) => void;
@@ -50,6 +56,40 @@ const BOX_STYLE = {
   "--epr-category-padding": "0",
 } as CSSProperties;
 
+/** The picker's own category list, in the order it shows them. `custom` is
+ *  left out because nothing here passes `customEmojis`. */
+const CATEGORY_KEYS = [
+  [Categories.SUGGESTED, "emoji.suggested"],
+  [Categories.SMILEYS_PEOPLE, "emoji.smileysPeople"],
+  [Categories.ANIMALS_NATURE, "emoji.animalsNature"],
+  [Categories.FOOD_DRINK, "emoji.foodDrink"],
+  [Categories.TRAVEL_PLACES, "emoji.travelPlaces"],
+  [Categories.ACTIVITIES, "emoji.activities"],
+  [Categories.OBJECTS, "emoji.objects"],
+  [Categories.SYMBOLS, "emoji.symbols"],
+  [Categories.FLAGS, "emoji.flags"],
+] as const satisfies readonly (readonly [Categories, `emoji.${string}`])[];
+
+/**
+ * One `categories` array per locale, kept alive for the app's lifetime — the
+ * same reason `BOX_STYLE` above is a module constant. The picker compares its
+ * config BY REFERENCE, so a fresh array per render re-renders every visible
+ * emoji on every keystroke of the composer. There are two locales, so this
+ * map holds two entries forever and that is the whole point.
+ */
+const CATEGORIES_BY_LOCALE = new Map<Locale, CategoryConfig[]>();
+
+function categoriesFor(t: TFunction<"chat">, locale: Locale): CategoryConfig[] {
+  const cached = CATEGORIES_BY_LOCALE.get(locale);
+  if (cached) return cached;
+  const built = CATEGORY_KEYS.map(([category, key]) => ({
+    category,
+    name: t(key),
+  }));
+  CATEGORIES_BY_LOCALE.set(locale, built);
+  return built;
+}
+
 /**
  * Emoji-only picker (no stickers, no GIFs — teachers must be able to read
  * chats at a glance). Shared by the student composer's popover and the
@@ -62,22 +102,36 @@ const BOX_STYLE = {
  * re-merges the config, which mints a fresh `customEmojis: []` identity,
  * invalidates the data memo, and deep-clones 197 KB of emoji JSON on the main
  * thread.
+ *
+ * `dir="ltr"` on the wrapper because the library has ZERO right-to-left
+ * support (`grep -o rtl` over its bundle hits only the substring inside
+ * "turtle"). That is the correct rendering anyway: this is a grid of pictures
+ * with a search box, not prose. Its search placeholder, clear button and
+ * category names are translated below; its "No results found" and its a11y
+ * live region are module constants inside the package and stay English.
  */
 export default function EmojiPickerBody({
   onPick,
   autoFocusSearch = false,
 }: EmojiPickerBodyProps) {
+  const { t } = useTranslation("chat");
+  const locale = useLocale();
   return (
-    <EmojiPicker
-      onEmojiClick={onPick}
-      emojiStyle={EmojiStyle.NATIVE}
-      theme={Theme.LIGHT}
-      skinTonesDisabled
-      previewConfig={NO_PREVIEW}
-      autoFocusSearch={autoFocusSearch}
-      style={BOX_STYLE}
-      height="100%"
-      width="100%"
-    />
+    <div dir="ltr" className="size-full">
+      <EmojiPicker
+        onEmojiClick={onPick}
+        emojiStyle={EmojiStyle.NATIVE}
+        theme={Theme.LIGHT}
+        skinTonesDisabled
+        previewConfig={NO_PREVIEW}
+        autoFocusSearch={autoFocusSearch}
+        searchPlaceHolder={t("emoji.search")}
+        searchClearButtonLabel={t("emoji.clear")}
+        categories={categoriesFor(t, locale)}
+        style={BOX_STYLE}
+        height="100%"
+        width="100%"
+      />
+    </div>
   );
 }

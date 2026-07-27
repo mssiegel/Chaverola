@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { ArrowRight, Loader2 } from "lucide-react";
 
 import { STUDENT_NAME_MAX_CHARS } from "@chaverola/shared";
@@ -16,7 +17,6 @@ import { DEMO_JOIN_CODE } from "@/mockData";
 
 import {
   STUDENT_CARD_CLASS,
-  UNREACHABLE_COPY,
   type CodeProblem,
   type StudentStage,
 } from "./stageTypes";
@@ -61,6 +61,7 @@ export function JoinGateCard({
   onJoinActivity: () => void;
   onDeliverLookup: (activity: Activity) => void;
 }) {
+  const { t } = useTranslation("student");
   const navigate = useLocaleNavigate();
 
   // The message under the code input has two sources: a submit that came
@@ -146,18 +147,23 @@ export function JoinGateCard({
       >
         <div className="space-y-2">
           <h1 className="text-3xl font-semibold text-foreground">
-            Join an Activity
+            {t("title.join")}
           </h1>
           {stage === "name" && activity ? (
             <p className="animate-in text-muted-foreground duration-300 fade-in motion-reduce:animate-none">
-              Hosted by{" "}
-              <span className="font-semibold text-foreground">
+              {t("gate.hostedBy")}
+              {/* The teacher typed this name — isolate it so a Latin one
+                  can't drag the "·" to the wrong side of a Hebrew line. */}
+              <bdi className="font-semibold text-foreground">
                 {activity.hostName}
-              </span>{" "}
-              · code {activity.joinCode}
+              </bdi>{" "}
+              · {t("gate.code")}{" "}
+              {/* Four digits beside a neutral: dir="ltr" or an RTL line
+                  reorders them. */}
+              <span dir="ltr">{activity.joinCode}</span>
             </p>
           ) : (
-            <p className="text-muted-foreground">Enter your activity's code.</p>
+            <p className="text-muted-foreground">{t("gate.codePrompt")}</p>
           )}
         </div>
 
@@ -169,9 +175,8 @@ export function JoinGateCard({
             {/* Arriving from a chat, the wrap-up screen already said what
                 happened — repeating it here would just be the same sentence
                 twice, so this variant is only the instruction. */}
-            {removedNotice === "lobby" &&
-              "Your teacher removed you from the activity. "}
-            Enter your name to join again.
+            {removedNotice === "lobby" && t("gate.removed")}
+            {t("gate.reenterName")}
           </div>
         )}
 
@@ -184,8 +189,8 @@ export function JoinGateCard({
                 isDesktopViewport || (name === "" && removedNotice === null)
               }
               maxLength={STUDENT_NAME_MAX_CHARS}
-              aria-label="Your name"
-              placeholder="Your name"
+              aria-label={t("gate.yourName")}
+              placeholder={t("gate.yourName")}
               className="w-full animate-in rounded-2xl border-0 bg-brand-grape-soft px-4 py-4 text-center text-xl font-semibold duration-300 outline-none fade-in slide-in-from-bottom-2 focus:ring-2 focus:ring-brand-grape/40 motion-reduce:animate-none"
             />
           ) : (
@@ -205,8 +210,14 @@ export function JoinGateCard({
                 readOnly={lookingUpCode}
                 inputMode="numeric"
                 autoFocus={isDesktopViewport}
-                aria-label="Join code"
+                aria-label={t("gate.joinCode")}
                 placeholder="1234"
+                // dir="ltr" on a four-digit field inside an RTL page:
+                // `tracking-[0.4em]` puts a letter-space after the last digit,
+                // and centred text lands that gap — and the caret — on the
+                // wrong edge without it. The "1234" placeholder pads backwards
+                // too.
+                dir="ltr"
                 className="w-full rounded-2xl border-0 bg-brand-grape-soft py-4 text-center text-3xl font-semibold tracking-[0.4em] outline-none focus:ring-2 focus:ring-brand-grape/40"
               />
               {codeProblem && (
@@ -215,8 +226,8 @@ export function JoinGateCard({
                   className="text-sm font-medium text-destructive"
                 >
                   {codeProblem === "not-found"
-                    ? "Activity was not found. Recheck the Join Code you entered."
-                    : UNREACHABLE_COPY}
+                    ? t("gate.notFound")
+                    : t("gate.unreachable")}
                 </p>
               )}
             </>
@@ -229,20 +240,22 @@ export function JoinGateCard({
             disabled={!canSubmit}
             className="w-full bg-linear-to-r from-brand-gradient-from to-brand-gradient-to hover:from-[#7d5cf5] hover:to-[#5f3fd6]"
           >
+            {/* flip-rtl on both arrows: they mean "onwards", so they point
+                the way the page reads. */}
             {stage === "name" ? (
               <>
-                Join Activity
-                <ArrowRight className="size-4" />
+                {t("gate.join")}
+                <ArrowRight className="flip-rtl size-4" />
               </>
             ) : lookingUpCode ? (
               <>
-                Finding your activity…
+                {t("gate.finding")}
                 <Loader2 className="size-4 animate-spin motion-reduce:animate-none" />
               </>
             ) : (
               <>
-                Continue
-                <ArrowRight className="size-4" />
+                {t("gate.continue")}
+                <ArrowRight className="flip-rtl size-4" />
               </>
             )}
           </Button>

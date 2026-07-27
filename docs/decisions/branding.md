@@ -5,6 +5,34 @@ area. Entries are newest-first; add new ones at the top, and add a matching line
 to the index in the same change. Replaced decisions move to Superseded at the
 bottom of this file.
 
+### Hebrew talks about the teacher without guessing their gender
+
+_2026-07-27_
+
+**Decision:** The student's screens name no actor where a phrasing without one
+is at least as natural. "Your teacher removed you from the activity" is
+`הוצאת מהפעילות`, "Your teacher ended the chat" is `הצ׳אט נסגר`, "Your teacher
+paused the chat" is `הצ׳אט מושהה`. Masculine third person stays where the
+sentence is genuinely _about_ what a teacher does — the demo steering buttons
+(`המורה עוצר את השיעור`) and the lobby's "{host} is picking who chats with
+who", which interpolates the teacher's own name.
+
+**Why:** [Hebrew is written in masculine second
+person](#hebrew-is-written-in-masculine-second-person) already accepts
+addressing half a class in the wrong gender, and says to sidestep where a
+phrasing can. The student flow is where that bites hardest: it mentions the
+teacher on a dozen screens, most Israeli teachers are women, and unlike
+`אתה` — which a teenager reads as the generic — `המורה סגר` is a specific
+claim about a specific person the student is looking at across the room. The
+passive costs nothing here: every one of these sentences already says what
+happened, and _who_ was never the interesting half.
+
+The exception is deliberate rather than lazy. The demo panel's buttons exist
+to say "this is the thing a teacher does", so an actor-free label
+(`עצירת השיעור`) would read as a system setting instead of a person's move.
+
+---
+
 ### The brand is חברולה in Hebrew, and the logo mark never mirrors
 
 _2026-07-27_

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import {
   CHAT_SEND_WINDOW_MS,
@@ -135,6 +136,7 @@ export function LiveChatStage({
   onEndChat,
   onBackToLobby,
 }: LiveChatStageProps) {
+  const { t } = useTranslation("student");
   const [confirmOpen, setConfirmOpen] = useState(false);
 
   // Same guard as the demo stage: a stray back-swipe must never silently
@@ -252,7 +254,7 @@ export function LiveChatStage({
         onBackToLobby={onBackToLobby}
         endConfirmOpen={confirmOpen}
         onEndConfirmOpenChange={setConfirmOpen}
-        endedSecretLine="Names stay secret. That's the whole game."
+        endedSecretLine={t("ended.secretLive")}
         activityEnded={activityEnded}
       />
     </div>

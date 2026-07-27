@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { Trans, useTranslation } from "react-i18next";
 import { Wifi, WifiOff } from "lucide-react";
 
 import { LOBBY_GRACE_SECONDS } from "@chaverola/shared";
@@ -28,9 +29,10 @@ export function PeerReconnectBanner({
   peerName,
   reconnectSecondsLeft = null,
 }: PeerReconnectBannerProps) {
+  const { t } = useTranslation("chat");
   if (peerState === "connected") return null;
 
-  const name = peerName ?? "Your partner";
+  const name = peerName ?? t("peer.fallback");
 
   const config: Record<
     Exclude<PeerConnectionState, "connected">,
@@ -40,20 +42,25 @@ export function PeerReconnectBanner({
       icon: <WifiOff className="size-4" />,
       text:
         reconnectSecondsLeft === null ? (
-          `${name} lost connection…`
+          t("peer.lost", { name })
         ) : (
           <>
-            {name} lost connection…{" "}
+            {t("peer.lost", { name })}{" "}
             {/* The ticking clock stays out of the live region so screen
-                readers hear the announcement once, not sixty times a minute. */}
+                readers hear the announcement once, not sixty times a minute.
+                <Trans> rather than a prefix plus a suffix because Hebrew puts
+                words on BOTH sides of the clock; the <bdi> keeps "1:43" from
+                laying out as "43:1" on an RTL line. */}
             <span aria-hidden>
-              <span className="tabular-nums">
-                {formatSecondsAsClock(reconnectSecondsLeft)}
-              </span>
-              {" to come back"}
+              <Trans
+                t={t}
+                i18nKey="peer.clock"
+                values={{ clock: formatSecondsAsClock(reconnectSecondsLeft) }}
+                components={{ 1: <bdi className="tabular-nums" /> }}
+              />
             </span>
             <span className="sr-only">
-              they have {LOBBY_GRACE_SECONDS / 60} minutes to come back
+              {t("peer.srWindow", { minutes: LOBBY_GRACE_SECONDS / 60 })}
             </span>
           </>
         ),
@@ -61,7 +68,7 @@ export function PeerReconnectBanner({
     },
     reconnected: {
       icon: <Wifi className="size-4" />,
-      text: `${name} is back! 🎉`,
+      text: t("peer.back", { name }),
       className: "bg-emerald-50 text-emerald-700 border-emerald-200",
     },
   };

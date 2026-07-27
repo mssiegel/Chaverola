@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 
 import {
   Popover,
@@ -40,6 +41,7 @@ export function ChatHeader({
   actions,
   characterColors,
 }: ChatHeaderProps) {
+  const { t } = useTranslation("chat");
   const [firstPeer] = peers;
   const hiddenPeerCount = peers.length - 1;
   const roster = [self, ...peers];
@@ -55,19 +57,24 @@ export function ChatHeader({
       {/* Both lines wrap rather than truncate: names are teacher-authored, so
           a single long one can outgrow any width. */}
       <div className="min-w-0 leading-tight">
+        {/* One key per sentence, with the styling on the wrapper — never a
+            contraction split across two spans. Every character name is
+            teacher-typed, so it goes in its own <bdi>. */}
         <div className="text-[15px] font-semibold">
-          <span className="font-normal text-white/70">You're </span>
-          {self.character.name}
+          <span className="font-normal text-white/70">
+            {t("header.youAre")}
+          </span>
+          <bdi>{self.character.name}</bdi>
         </div>
 
         {firstPeer && (
           <Popover>
             <PopoverTrigger className="block rounded-md text-start text-sm leading-snug text-white/85 transition-colors hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/70">
-              <span className="text-white/60">with </span>
-              {firstPeer.character.name}
+              <span className="text-white/60">{t("header.with")}</span>
+              <bdi>{firstPeer.character.name}</bdi>
               {hiddenPeerCount > 0 && (
                 <span className="ms-1.5 inline-block rounded-full bg-white/15 px-2 py-0.5 text-xs font-semibold whitespace-nowrap text-white">
-                  and {hiddenPeerCount} other{hiddenPeerCount > 1 ? "s" : ""}
+                  {t("header.others", { count: hiddenPeerCount })}
                 </span>
               )}
               {peerSuffix}
@@ -75,7 +82,7 @@ export function ChatHeader({
 
             <PopoverContent align="start" sideOffset={8} className="w-56">
               <p className="text-xs font-semibold text-muted-foreground">
-                Who's in this chat
+                {t("header.roster")}
               </p>
               <ul className="mt-2 space-y-1.5">
                 {roster.map((participant) => {
@@ -93,11 +100,11 @@ export function ChatHeader({
                         />
                       )}
                       <span className="min-w-0">
-                        {participant.character.name}
+                        <bdi>{participant.character.name}</bdi>
                         {participant.id === self.id && (
                           <span className="font-normal text-muted-foreground">
                             {" "}
-                            (you)
+                            {t("header.you")}
                           </span>
                         )}
                       </span>

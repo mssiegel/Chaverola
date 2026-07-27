@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Loader2, RotateCw } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -19,6 +20,7 @@ export function ReconnectingCard({
   studentName: string;
   onTryNow: () => void;
 }) {
+  const { t } = useTranslation("student");
   return (
     <div className="flex w-full max-w-sm flex-1 flex-col items-center justify-start gap-4 pt-2 sm:justify-center sm:pt-0">
       <div
@@ -29,12 +31,9 @@ export function ReconnectingCard({
       >
         <div className="space-y-2">
           <h1 className="text-3xl font-semibold text-foreground">
-            Hang tight, {studentName}
+            {t("reconnecting.title", { name: studentName })}
           </h1>
-          <p className="text-muted-foreground">
-            We can't reach Chaverola right now. Your spot is saved, and this
-            screen opens back into your lobby as soon as we get through.
-          </p>
+          <p className="text-muted-foreground">{t("reconnecting.body")}</p>
         </div>
 
         <div
@@ -45,7 +44,7 @@ export function ReconnectingCard({
             aria-hidden
             className="size-4 animate-spin motion-reduce:animate-none"
           />
-          Reconnecting you…
+          {t("reconnecting.pill")}
         </div>
 
         <Button
@@ -54,8 +53,9 @@ export function ReconnectingCard({
           onClick={onTryNow}
           className="w-full"
         >
+          {/* No flip-rtl: a cycle glyph turns the same way in every language. */}
           <RotateCw aria-hidden className="size-4" />
-          Try now
+          {t("reconnecting.tryNow")}
         </Button>
       </div>
     </div>

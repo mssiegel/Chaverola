@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Loader2 } from "lucide-react";
 
 import { MAX_STUDENTS_PER_ACTIVITY } from "@chaverola/shared";
@@ -22,6 +23,7 @@ export function ActivityFullCard({
   onRetry: () => void;
   onUseAnotherCode: () => void;
 }) {
+  const { t } = useTranslation("student");
   return (
     <div className="flex w-full max-w-sm flex-1 flex-col items-center justify-start gap-4 pt-2 sm:justify-center sm:pt-0">
       <div
@@ -32,12 +34,10 @@ export function ActivityFullCard({
       >
         <div className="space-y-2">
           <h1 className="text-3xl font-semibold text-foreground">
-            This activity is full
+            {t("full.title")}
           </h1>
           <p className="text-muted-foreground">
-            An activity holds up to {MAX_STUDENTS_PER_ACTIVITY} students, and
-            every spot is taken right now. If someone leaves, their spot opens
-            up.
+            {t("full.body", { max: MAX_STUDENTS_PER_ACTIVITY })}
           </p>
         </div>
         <div className="flex w-full flex-col items-center gap-3">
@@ -49,11 +49,11 @@ export function ActivityFullCard({
           >
             {retrying ? (
               <>
-                Checking for a spot…
+                {t("full.checking")}
                 <Loader2 className="size-4 animate-spin motion-reduce:animate-none" />
               </>
             ) : (
-              "Try again"
+              t("full.retry")
             )}
           </Button>
           <button
@@ -61,7 +61,7 @@ export function ActivityFullCard({
             onClick={onUseAnotherCode}
             className="text-sm font-medium text-muted-foreground underline underline-offset-4 transition-colors hover:text-foreground"
           >
-            Use a different code
+            {t("full.otherCode")}
           </button>
         </div>
       </div>

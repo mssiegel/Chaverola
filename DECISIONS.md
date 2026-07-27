@@ -211,6 +211,7 @@ git: `git log -- DECISIONS.md`.
   - [The navbar has one CTA: Join an Activity](docs/decisions/navbar.md#the-navbar-has-one-cta-join-an-activity)
   - [Navbar: CTA label shortens on phones; language switcher swaps in place](docs/decisions/navbar.md#navbar-cta-label-shortens-on-phones-language-switcher-swaps-in-place)
 - [Branding & page titles](docs/decisions/branding.md)
+  - [Hebrew talks about the teacher without guessing their gender](docs/decisions/branding.md#hebrew-talks-about-the-teacher-without-guessing-their-gender)
   - [The brand is חברולה in Hebrew, and the logo mark never mirrors](docs/decisions/branding.md#the-brand-is-חברולה-in-hebrew-and-the-logo-mark-never-mirrors)
   - [Hebrew uses Rubik, and it's a quality call rather than a missing-glyph fix](docs/decisions/branding.md#hebrew-uses-rubik-and-its-a-quality-call-rather-than-a-missing-glyph-fix)
   - [Hebrew is written in masculine second person](docs/decisions/branding.md#hebrew-is-written-in-masculine-second-person)
@@ -226,6 +227,7 @@ git: `git log -- DECISIONS.md`.
   - _Superseded_
     - [Demo surfaces say so: a pretend-students chip on both views](docs/decisions/demo-flows.md#demo-surfaces-say-so-a-pretend-students-chip-on-both-views)
 - [Routes & app structure](docs/decisions/routes.md)
+  - [A namespace can register on more than one page, and `chat` registers on four](docs/decisions/routes.md#a-namespace-can-register-on-more-than-one-page-and-chat-registers-on-four)
   - [A component that renders on two pages keeps its strings in `common`](docs/decisions/routes.md#a-component-that-renders-on-two-pages-keeps-its-strings-in-common)
   - [Name lists are joined by `Intl.ListFormat`, pinned to the app's locale](docs/decisions/routes.md#name-lists-are-joined-by-intllistformat-pinned-to-the-apps-locale)
   - [`/he` is Hebrew and right-to-left; English stays unprefixed](docs/decisions/routes.md#he-is-hebrew-and-right-to-left-english-stays-unprefixed)

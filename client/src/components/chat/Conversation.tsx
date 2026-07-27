@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { ArrowDown } from "lucide-react";
 
 import type { LobbyConnectionState } from "@chaverola/shared";
@@ -61,6 +62,7 @@ export function Conversation({
   characterColors,
   onRetryMessage,
 }: ConversationProps) {
+  const { t } = useTranslation("chat");
   const byId = participantsById(participants);
 
   const isGroup = participants.length > 2;
@@ -211,7 +213,8 @@ export function Conversation({
             onClick={() => scrollToNewest("smooth")}
             className="flex w-fit max-w-full animate-in items-center gap-1.5 rounded-full border border-brand-grape/25 bg-card px-3 py-1.5 text-sm font-medium text-brand-grape shadow-md transition-colors fade-in slide-in-from-bottom-2 hover:bg-brand-grape-soft active:scale-[0.98] motion-reduce:animate-none"
           >
-            <span className="min-w-0 truncate">New messages</span>
+            <span className="min-w-0 truncate">{t("line.newMessages")}</span>
+            {/* No flip-rtl: down is down in every language. */}
             <ArrowDown aria-hidden className="size-4 shrink-0" />
           </button>
         </div>

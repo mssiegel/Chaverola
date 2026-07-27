@@ -1,3 +1,5 @@
+import { useTranslation } from "react-i18next";
+
 import { ChatFrame } from "@/components/chat/ChatFrame";
 import { ChatHeader } from "@/components/chat/ChatHeader";
 import { Conversation } from "@/components/chat/Conversation";
@@ -22,6 +24,7 @@ interface HeroChatboxProps {
  * DECISIONS.md → "Hero chatbox is a live demo".
  */
 export function HeroChatbox({ chat }: HeroChatboxProps) {
+  const { t } = useTranslation("home");
   const characterColors = selfFirstCharacterColors(
     chat.self,
     chat.participants
@@ -34,7 +37,7 @@ export function HeroChatbox({ chat }: HeroChatboxProps) {
         peers={chat.peers}
         characterColors={characterColors}
         peerSuffix={
-          <span className="text-white/60"> · played by a classmate</span>
+          <span className="text-white/60">{t("hero.chatPeerSuffix")}</span>
         }
       />
 

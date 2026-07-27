@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Loader2 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -10,6 +11,7 @@ import { STUDENT_CARD_CLASS } from "./stageTypes";
  * fire the page's sign-out effect mid-lookup.
  */
 export function LoadingCard() {
+  const { t } = useTranslation("student");
   return (
     <div className="flex w-full max-w-sm flex-1 flex-col items-center justify-start gap-4 pt-2 sm:justify-center sm:pt-0">
       <div
@@ -24,7 +26,7 @@ export function LoadingCard() {
           className="size-8 animate-spin text-brand-grape motion-reduce:animate-none"
         />
         <p className="text-lg font-semibold text-foreground">
-          Finding your activity…
+          {t("gate.finding")}
         </p>
       </div>
     </div>

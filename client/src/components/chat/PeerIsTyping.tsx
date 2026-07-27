@@ -1,3 +1,5 @@
+import { Trans, useTranslation } from "react-i18next";
+
 import { TypingDots } from "@/components/chat/TypingDots";
 
 interface PeerIsTypingProps {
@@ -12,9 +14,10 @@ interface PeerIsTypingProps {
  * group chat it becomes "someone is typing…" so a single peer isn't singled out.
  */
 export function PeerIsTyping({ characterName, isGroup }: PeerIsTypingProps) {
+  const { t } = useTranslation("chat");
   if (!characterName) return null;
 
-  const label = isGroup ? "someone" : characterName;
+  const label = isGroup ? t("typing.someone") : characterName;
 
   return (
     <div
@@ -23,7 +26,15 @@ export function PeerIsTyping({ characterName, isGroup }: PeerIsTypingProps) {
     >
       <TypingDots dotClassName="bg-brand-grape/70" />
       <span className="italic">
-        <span className="font-medium not-italic">{label}</span> is typing…
+        {/* <Trans> because the styled fragment sits INSIDE the sentence and
+            the name is teacher-typed: <bdi> keeps a Latin character name from
+            dragging the "…" to the wrong end of a Hebrew line. */}
+        <Trans
+          t={t}
+          i18nKey="typing.line"
+          values={{ name: label }}
+          components={{ 1: <bdi className="font-medium not-italic" /> }}
+        />
       </span>
     </div>
   );

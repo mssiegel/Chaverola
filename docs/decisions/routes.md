@@ -5,6 +5,38 @@ area. Entries are newest-first; add new ones at the top, and add a matching line
 to the index in the same change. Replaced decisions move to Superseded at the
 bottom of this file.
 
+### A namespace can register on more than one page, and `chat` registers on four
+
+_2026-07-27_
+
+**Decision:** The shared chat chrome — header, transcript, feed banners,
+composer, emoji picker — keeps its ~40 strings in the `chat` namespace, and
+`import "@/i18n/ns/chat"` sits at the top of **four** lazy page modules: the
+homepage, both teacher pages, and the student join flow.
+
+**Why:** It looks like a case for [A component that renders on two pages keeps
+its strings in
+`common`](#a-component-that-renders-on-two-pages-keeps-its-strings-in-common),
+and the exception is what that rule's own cost line points at: `common` loads
+at init, so those forty keys × two locales would be paid for by every page,
+including the join gate on thirty phones sharing one school AP. The chat
+pieces are mounted on four surfaces the rule didn't anticipate — the marketing
+hero IS a real chatbox, and the teacher's setup form and live settings panel
+open the same emoji picker the student composer does — so `common` would have
+absorbed most of a page namespace.
+
+The `common` rule still holds for the small stuff: `Teacher/ChatCard`'s labels,
+`DemoBanner`, `DemoControls`, and the end-a-chat dialog are a dozen keys
+between them, and a dozen keys is cheaper than a fifth registration site.
+
+The failure mode this trades for is a fifth page that renders a chat piece and
+forgets the import. That is loud rather than silent: the DEV `missingKeyHandler`
+in [`i18n/index.ts`](../../client/src/i18n/index.ts) logs
+`[i18n] missing chat:<key>` on the first render, and every Hebrew driver in
+`tools/verify/scratch/` watches the console for exactly that line.
+
+---
+
 ### A component that renders on two pages keeps its strings in `common`
 
 _2026-07-27_

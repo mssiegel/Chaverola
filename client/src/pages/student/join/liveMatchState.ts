@@ -9,11 +9,7 @@ import { nextId } from "@/lib/random";
 import { NOTICE_SENDER_ID } from "@/types/chat";
 import type { ChatMessage, Participant } from "@/types/chat";
 
-import {
-  FALLBACK_CHARACTER_NAME,
-  type ActiveMatch,
-  type LiveMatch,
-} from "./stageTypes";
+import { type ActiveMatch, type LiveMatch } from "./stageTypes";
 
 /*
   The live-match state machine as pure reducers — no React, no refs, no
@@ -29,6 +25,21 @@ import {
   fetched lobby roster remains only as the deploy-window fallback for a
   server that doesn't send `cast` yet.
 */
+
+/**
+ * The three strings these reducers would otherwise have to author. This module
+ * is pure and node-tested — no React, no `t` — so the caller builds this from
+ * the `chat` catalog and threads it in, exactly the way `selfName` already is.
+ */
+export interface MatchCopy {
+  /** A characterId the chat's cast can't resolve. Shouldn't happen (the
+   *  server deals from the cast it froze), but the wire is the wire. */
+  fallbackCharacterName: string;
+  /** A peer who left of their own accord. */
+  left: (characterName: string) => string;
+  /** A peer who was marked offline and never came back. */
+  timedOut: (characterName: string) => string;
+}
 
 /** chat:started's payload, as the presence hook hands it over. */
 export type ChatStartedPayload = {
@@ -82,12 +93,13 @@ export function toOfflinePeers(
  *  the wire is the wire — an unresolvable id still renders, as a mystery. */
 export function resolveCharacter(
   roster: Character[],
-  characterId: string
+  characterId: string,
+  copy: MatchCopy
 ): Character {
   return (
     roster.find((c) => c.id === characterId) ?? {
       id: characterId,
-      name: FALLBACK_CHARACTER_NAME,
+      name: copy.fallbackCharacterName,
     }
   );
 }
@@ -96,14 +108,15 @@ export function resolveCharacter(
  *  construction — the student wire never has them. */
 export function toParticipant(
   roster: Character[],
-  peer: ChatPeer
+  peer: ChatPeer,
+  copy: MatchCopy
 ): Participant {
   return {
     // characterId doubles as the participant id — unique within a chat
     // (each character is dealt once), and the only identity the student
     // wire carries.
     id: peer.characterId,
-    character: resolveCharacter(roster, peer.characterId),
+    character: resolveCharacter(roster, peer.characterId, copy),
     realName: "",
   };
 }
@@ -116,7 +129,11 @@ export function toParticipant(
  * who vanished while marked offline never came back, so they get the
  * timeout copy; everyone else "left the chat".
  */
-export function shrinkToPeers(prev: LiveMatch, current: ChatPeer[]): LiveMatch {
+export function shrinkToPeers(
+  prev: LiveMatch,
+  current: ChatPeer[],
+  copy: MatchCopy
+): LiveMatch {
   const currentIds = new Set(current.map((p) => p.characterId));
   const gone = prev.peers.filter((p) => !currentIds.has(p.id));
   if (gone.length === 0) return prev;
@@ -149,8 +166,8 @@ export function shrinkToPeers(prev: LiveMatch, current: ChatPeer[]): LiveMatch {
         // from inside the room, the peer was gone and never came back.
         text:
           prev.offlinePeers[peer.id] !== undefined
-            ? `${peer.character.name} couldn't get back in and left the chat`
-            : `${peer.character.name} left the chat`,
+            ? copy.timedOut(peer.character.name)
+            : copy.left(peer.character.name),
       })),
     ],
   };
@@ -167,7 +184,8 @@ export function applyChatStarted(
   prev: ActiveMatch | null,
   payload: ChatStartedPayload,
   roster: Character[],
-  selfName: string
+  selfName: string,
+  copy: MatchCopy
 ): LiveMatch {
   if (prev?.kind === "live" && prev.chatId === payload.chatId) {
     // A resume re-delivery of the chat already on screen — and the
@@ -200,7 +218,7 @@ export function applyChatStarted(
     // later — typing is not in the backlog, by design.
     const caughtUp: LiveMatch = {
       ...prev,
-      everPeers: payload.everPeers.map((p) => toParticipant(roster, p)),
+      everPeers: payload.everPeers.map((p) => toParticipant(roster, p, copy)),
       messages: merged,
     };
     // Membership reconciles against the OLD offline map on purpose:
@@ -210,7 +228,7 @@ export function applyChatStarted(
     // own blip may have swallowed a peer's drop OR return, so the
     // carried-over entries can't be trusted, and the backlog is
     // authoritative on every delivery, same philosophy as `lines`.
-    const shrunk = shrinkToPeers(caughtUp, payload.peers);
+    const shrunk = shrinkToPeers(caughtUp, payload.peers, copy);
     const offlinePeers = toOfflinePeers(payload.reconnectingPeers);
     return {
       ...shrunk,
@@ -229,11 +247,11 @@ export function applyChatStarted(
     chatId: payload.chatId,
     self: {
       id: payload.selfCharacterId,
-      character: resolveCharacter(roster, payload.selfCharacterId),
+      character: resolveCharacter(roster, payload.selfCharacterId, copy),
       realName: selfName,
     },
-    peers: payload.peers.map((p) => toParticipant(roster, p)),
-    everPeers: payload.everPeers.map((p) => toParticipant(roster, p)),
+    peers: payload.peers.map((p) => toParticipant(roster, p, copy)),
+    everPeers: payload.everPeers.map((p) => toParticipant(roster, p, copy)),
     // The server's order is already correct and already capped.
     messages: payload.lines.map(toLiveMessage),
     typingPeerId: null,
@@ -360,10 +378,11 @@ export function applyChatLine(
 /** chat:update — a membership change; whoever left gets a local notice. */
 export function applyChatUpdate(
   prev: ActiveMatch | null,
-  payload: ChatUpdatePayload
+  payload: ChatUpdatePayload,
+  copy: MatchCopy
 ): ActiveMatch | null {
   return prev?.kind === "live" && prev.chatId === payload.chatId
-    ? shrinkToPeers(prev, payload.peers)
+    ? shrinkToPeers(prev, payload.peers, copy)
     : prev;
 }
 

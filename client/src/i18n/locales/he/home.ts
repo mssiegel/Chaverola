@@ -24,6 +24,7 @@ export const home: HebrewOf<HomeCatalog> = {
     "זה הצד של התלמיד, בשידור חי. קדימה, תכתוב בתור {{self, bidi}}.",
   "hero.chatNote":
     "🤫 בסבב אמיתי, גם {{self, bidi}} וגם {{peerShort, bidi}} הם תלמידים שלך. רק אתה יודע מי מגלם את מי, עד החשיפה בסוף.",
+  "hero.chatPeerSuffix": " · מגולם בידי תלמיד מהכיתה",
   "hero.stepsLabel": "ההקמה לוקחת בערך דקה:",
   "hero.step1": "יוצרים פעילות ובוחרים דמויות.",
   "hero.step2": "כותבים את קוד ההצטרפות על הלוח.",

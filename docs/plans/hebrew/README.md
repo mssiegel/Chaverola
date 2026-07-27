@@ -1,6 +1,6 @@
 # Hebrew — the `/he` tree actually speaks Hebrew
 
-**State: In progress.** Prompts 1 and 2 shipped, 2026-07-27. Five to go.
+**State: In progress.** Prompts 1, 2 and 3 shipped, 2026-07-27. Four to go.
 
 `/he` has existed since the routing work as a mirror of the whole route tree,
 rendering identical English text left to right. This plan makes it a Hebrew
@@ -58,7 +58,7 @@ the same commit as the work.
 
 - [x] Prompt 1 — Plumbing, RTL, shell and homepage (`b9a9e59`)
 - [x] Prompt 2 — Teacher surfaces
-- [ ] Prompt 3 — Student surfaces
+- [x] Prompt 3 — Student surfaces
 - [ ] Prompt 4 — `locale` on the record, `railNotice` beside `rematchNotice`
 - [ ] Prompt 5 — The Hebrew transcript email
 - [ ] Prompt 6 — Drop the deprecated prose
@@ -405,7 +405,11 @@ prompt here.
    rather than a verb, which sidesteps gender agreement with the teacher's name
    entirely. `participant` is `{name} בתפקיד {character}`, the playbill
    connective; `בתור` was rejected because תור also means "queue" and collides
-   with the pairing UI's own vocabulary. Plurals are hand-written per noun
+   with the pairing UI's own vocabulary. **Keep `בתפקיד` here even though prompt
+   3 shipped `לדבר בתור {name}…` in the composer** — that placeholder sits a few
+   pixels under the homepage hero's own `תכתוב בתור {self}` from prompt 1, and
+   two words for one idea on one screen reads worse than a collision with a
+   word that only appears on the teacher's rail. `he/chat.ts` says so in place. Plurals are hand-written per noun
    (שיחה is feminine, תלמיד masculine; 1 and 2 take the spelled-out numeral).
 4. **HTML part:** `dir` as an **attribute**, not CSS — Gmail strips `<html>` and
    `<body>` and much CSS but keeps `dir` on block elements — plus `text-align`
@@ -488,6 +492,13 @@ is genuinely new knowledge for this repo and is the durable output of prompts
 
 **Goal:** a Hebrew visitor's demo is an Israeli classroom, not a translated
 Roman one.
+
+**After prompt 3, the scripted lines in `mockData/` are the ONLY English left on
+a Hebrew student screen** — the chrome around them all reads Hebrew, so a
+half-done cast is very visible. Two things prompt 3 changed under this prompt's
+feet: `useChatDemo` is now a `t`-calling hook (its two membership notices come
+from `chat:notice.*`), and `hostActivityDemo`'s removal notice does too — so
+neither needs re-translating with the cast, only re-casting.
 
 Client-only. The demo `1234` is purely client-simulated — the server refuses to
 mint it, 404s it, and rejects it at socket auth — so **no Hebrew twin is needed

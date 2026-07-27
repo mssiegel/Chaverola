@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { ArrowRight } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -19,6 +20,7 @@ export function ActivityGoneCard({
 }: {
   onEnterNewCode: () => void;
 }) {
+  const { t } = useTranslation("student");
   return (
     <div className="flex w-full max-w-sm flex-1 flex-col items-center justify-start gap-4 pt-2 sm:justify-center sm:pt-0">
       <div
@@ -29,20 +31,18 @@ export function ActivityGoneCard({
       >
         <div className="space-y-2">
           <h1 className="text-3xl font-semibold text-foreground">
-            This activity is over
+            {t("gone.title")}
           </h1>
-          <p className="text-muted-foreground">
-            Your class wrapped up. Thanks for playing! If class is still going,
-            something cut the activity short. Ask your teacher for a fresh code.
-          </p>
+          <p className="text-muted-foreground">{t("gone.body")}</p>
         </div>
         <Button
           size="lg"
           onClick={onEnterNewCode}
           className="w-full bg-linear-to-r from-brand-gradient-from to-brand-gradient-to hover:from-[#7d5cf5] hover:to-[#5f3fd6]"
         >
-          Enter a new code
-          <ArrowRight className="size-4" />
+          {t("gone.cta")}
+          {/* flip-rtl: "onwards", so it follows the reading direction. */}
+          <ArrowRight className="flip-rtl size-4" />
         </Button>
       </div>
     </div>

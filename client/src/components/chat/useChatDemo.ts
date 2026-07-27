@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { LOBBY_GRACE_SECONDS } from "@chaverola/shared";
 
@@ -62,6 +63,7 @@ export function useChatDemo(
   scenario: ChatScenario,
   options?: ChatDemoOptions
 ): ChatDemo {
+  const { t } = useTranslation("chat");
   const isPaused = options?.isPaused ?? false;
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [typingPeerId, setTypingPeerId] = useState<string | null>(null);
@@ -121,7 +123,7 @@ export function useChatDemo(
           id: nextId("m"),
           senderId: NOTICE_SENDER_ID,
           kind: "notice",
-          text: `${offline.character.name} couldn't get back in and left the chat`,
+          text: t("notice.timedOut", { name: offline.character.name }),
         },
       ]);
     }
@@ -365,7 +367,7 @@ export function useChatDemo(
         id: nextId("m"),
         senderId: NOTICE_SENDER_ID,
         kind: "notice",
-        text: `${leaver.character.name} left the chat`,
+        text: t("notice.left", { name: leaver.character.name }),
       },
     ]);
   };

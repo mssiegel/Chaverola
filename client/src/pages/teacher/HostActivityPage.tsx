@@ -5,6 +5,9 @@ import { useParams } from "react-router-dom";
 
 // Side-effect import: registers the `teacher` namespace into this page chunk.
 import "@/i18n/ns/teacher";
+// …and `chat`, for the chat cards' transcript lines and the emoji pickers in
+// the live settings panel's character rows.
+import "@/i18n/ns/chat";
 
 import { DemoBanner } from "@/components/demo/DemoBanner";
 import { LocaleLink } from "@/components/layout/LocaleLink";

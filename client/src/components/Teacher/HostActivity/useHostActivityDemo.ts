@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { isExactRematchIn } from "@chaverola/shared";
 
@@ -50,6 +51,9 @@ export interface HostActivityDemo extends HostEngine, HostDemoTriggers {}
 export function useHostActivityDemo(
   activity: HostedActivity
 ): HostActivityDemo {
+  // `chat`, not `teacher`: this is a transcript notice, and the student side
+  // posts the identical sentence from the same key.
+  const { t } = useTranslation("chat");
   const [world, setWorld] = useState<HostWorld>(() => seedWorld(activity));
   const [ended, setEnded] = useState<HostEnded | null>(null);
 
@@ -202,7 +206,7 @@ export function useHostActivityDemo(
     // The deal-time character IS the label — a chat's cast is frozen when
     // it starts (feature 18), so no re-resolve against the live roster.
     const removed = chat.participants.find((p) => p.id === studentId);
-    const label = removed ? removed.character.name : "Someone";
+    const label = removed ? removed.character.name : t("notice.someone");
     commit({
       ...w,
       chats: w.chats.map((c) =>
@@ -216,7 +220,7 @@ export function useHostActivityDemo(
                   id: nextId("m"),
                   senderId: NOTICE_SENDER_ID,
                   kind: "notice" as const,
-                  text: `${label} left the chat`,
+                  text: t("notice.left", { name: label }),
                 },
               ],
             }
