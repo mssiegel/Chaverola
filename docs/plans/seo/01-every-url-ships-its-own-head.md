@@ -55,7 +55,7 @@ its risk record before starting it, and do not run it just because it is
 next.
 
 - [x] Prompt 1 — Ten URLs, ten heads
-- [ ] Prompt 2 — The words are in the HTML, without a rendered body
+- [x] Prompt 2 — The words are in the HTML, without a rendered body
 - [ ] Prompt 3 — A rendered body (gated — read the risk record first)
 
 ---
@@ -367,6 +367,25 @@ page.
 demo URL contains a `<noscript>` block; the rendered pages at both URLs are
 visually unchanged in a browser at desktop and phone width. `pnpm format`,
 one commit to `main`, push, tick this box.
+
+**As landed, one trap this doc did not name:** `hero.title` is a `<Trans>`
+string — "Get your whole class talking. `<1>`In character.`</1>`", where `<1>`
+is the highlighter mark `HomePage` passes down. Running it through `escapeHtml`
+alone puts a literal `&lt;1&gt;` inside the one `<h1>` a crawler reads, so
+`prerenderMeta` strips `/<\/?\d+>/g` first and escapes second. Any later doc
+that pulls a catalog string into element text has to go through the same
+`plainText` helper, not `escapeHtml` directly.
+
+Two label keys beyond the list above are in the block — `hero.stepsLabel` and
+`how.eyebrow` — because a bare `<ol>` and four stacked step titles do not say
+what they are a list of. Both are existing copy, so the no-new-strings rule
+holds.
+
+Verified with `curl.exe` against `vite preview` (per-URL `<h1>`, no
+`| brand.name`, no leaked `<1>`, no block on either demo URL or the gates) and
+a Playwright pass at desktop and phone width in both locales confirming exactly
+one real `<h1>` per page — the rendered one, matching the block's text — and
+that nothing in the block paints.
 
 ---
 

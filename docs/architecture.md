@@ -115,7 +115,10 @@ pieces those surfaces share.
   stamps each of the ten public URLs' own head beside it — in both
   `he.html` and `he/index.html` shape, because Vercel resolves only the
   second and `vite preview` only the first — so a link unfurler or an AI
-  crawler reads each page's own words without running any JS. The live
+  crawler reads each page's own words without running any JS. `/` and `/he`
+  additionally get a small `<noscript>` block after `#root` carrying the
+  homepage's own headline, pitch and steps from the same catalog keys, so
+  those readers get the product and not only its name. The live
   lobby/host sockets are `pages/student/useLobbyPresence.ts` (student —
   stays mounted through the chat and ended stages) and
   `Teacher/HostActivity/useHostActivityLive.ts` (teacher), both through

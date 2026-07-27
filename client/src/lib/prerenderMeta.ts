@@ -12,6 +12,8 @@
   key augmentation for free. Nothing in the app imports it, so it never enters
   a bundle.
 */
+import type { TFunction } from "i18next";
+
 import { initI18n } from "@/i18n";
 import {
   DEFAULT_LOCALE,
@@ -37,6 +39,12 @@ export interface PrerenderPage {
    * script never needs to grow string logic of its own.
    */
   head: string[];
+  /**
+   * A `<noscript>` block to insert after `<div id="root"></div>`, already
+   * indented for the body. `null` on every page that gets none — see
+   * `homeNoscript` for which pages those are and why.
+   */
+  noscript: string | null;
 }
 
 /**
@@ -49,6 +57,17 @@ export function escapeHtml(value: string): string {
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;");
+}
+
+/**
+ * Element text from a catalog string that may carry `<Trans>` placeholders —
+ * `hero.title` is "… <1>In character.</1>", where `<1>` is the highlighter mark
+ * `HomePage` passes down. Strip those BEFORE escaping, or the `<h1>` a crawler
+ * reads says "&lt;1&gt;In character.&lt;/1&gt;". Escaping second is what keeps
+ * a real `<` in future copy safe.
+ */
+function plainText(value: string): string {
+  return escapeHtml(value.replace(/<\/?\d+>/g, ""));
 }
 
 /**
@@ -93,6 +112,63 @@ await Promise.all([
   import("@/i18n/ns/student"),
 ]);
 
+/**
+ * The homepage's own words in the body, for a reader that never runs
+ * JavaScript: GPTBot, ClaudeBot, PerplexityBot, every link unfurler. Read from
+ * the same `home` catalog through the same `t` the head uses, so it cannot
+ * drift from what the page renders — and no new copy, so nothing here needs a
+ * humanizer pass.
+ *
+ * A `<noscript>` block rather than a rendered React tree, and the reasons are
+ * structural rather than stylistic (see docs/plans/seo/01, prompt 2): a browser
+ * with JS never paints it, so the locale flash that disqualifies a real
+ * rendered body is impossible rather than mitigated; it sits outside `#root`,
+ * so `createRoot`'s container wipe can't reach it and there is no hydration
+ * surface; and it executes no React at build time, so it can't break the build
+ * or impose an SSR-safety rule on future component authors. Not cloaking: it is
+ * a faithful subset of the rendered page from the same keys, and Googlebot's
+ * second-wave render sees the real page regardless.
+ *
+ * ONLY `/` and `/he` get one. The two demo URLs deliberately get none — they
+ * are pitch-email links whose whole value is the unfurl card, which is pure
+ * `<head>`; body text there would be maintenance for no reader. The create and
+ * join gates likewise: nobody reads a form.
+ *
+ * Keep it small. It ships inside the HTML of the two most-fetched URLs, and it
+ * is text, not a page. Hebrew needs no `dir` of its own — the emitted
+ * `<html dir="rtl">` governs it.
+ */
+function homeNoscript(t: LooseT, common: TFunction, locale: Locale): string {
+  const text = (key: string) => plainText(must(t(key), key, locale));
+  const href = (route: string) => escapeHtml(switchLocalePath(route, locale));
+
+  return [
+    `    <noscript>`,
+    `      <h1>${text("hero.title")}</h1>`,
+    `      <p>${text("hero.pitch")}</p>`,
+    `      <p>${text("hero.stepsLabel")}</p>`,
+    `      <ol>`,
+    `        <li>${text("hero.step1")}</li>`,
+    `        <li>${text("hero.step2")}</li>`,
+    `        <li>${text("hero.step3")}</li>`,
+    `      </ol>`,
+    `      <h2>${text("how.eyebrow")}</h2>`,
+    `      <ol>`,
+    `        <li>${text("how.step1.title")}</li>`,
+    `        <li>${text("how.step2.title")}</li>`,
+    `        <li>${text("how.step3.title")}</li>`,
+    `        <li>${text("how.step4.title")}</li>`,
+    `      </ol>`,
+    // The page's own two CTAs, and the only crawlable path from here into the
+    // rest of the app — every other link on the homepage is a router click.
+    // `nav.joinLong` lives in `common`, which is why this takes two `t`s; being
+    // key-checked, it needs no `must` guard, same as `pageMeta`'s `brand.name`.
+    `      <p><a href="${href("/activity/join")}">${plainText(common("nav.joinLong"))}</a></p>`,
+    `      <p><a href="${href("/activity/create")}">${text("cta.host")}</a></p>`,
+    `    </noscript>`,
+  ].join("\n");
+}
+
 export async function prerenderPages(): Promise<PrerenderPage[]> {
   const pages: PrerenderPage[] = [];
 
@@ -123,6 +199,7 @@ export async function prerenderPages(): Promise<PrerenderPage[]> {
         title: meta.title,
         description: meta.description,
         head: [],
+        noscript: route === "/" ? homeNoscript(t, common, locale) : null,
       });
     }
   }

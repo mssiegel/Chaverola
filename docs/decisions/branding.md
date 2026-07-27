@@ -5,6 +5,43 @@ area. Entries are newest-first; add new ones at the top, and add a matching line
 to the index in the same change. Replaced decisions move to Superseded at the
 bottom of this file.
 
+### The homepage ships its words in a `<noscript>` block, and the demo URLs get none
+
+_2026-07-27_
+
+**Decision:** `/` and `/he` — and only those two — carry a small `<noscript>`
+block after `<div id="root"></div>`: the hero headline as an `<h1>`, the pitch
+paragraph, the three setup steps, the four how-it-works step titles, and links
+to that locale's join and create pages. No string is new. Every one is read
+from the same `home` catalog through the same `t` the rendered page uses, so
+the block cannot drift from what a browser paints.
+
+**Why:** GPTBot, ClaudeBot, PerplexityBot and every link unfurler download the
+JavaScript and never run it. [The prerendered shell splits in
+two…](#the-prerendered-shell-splits-in-two-and-apphtml-is-the-one-that-keeps-the-generic-pair)
+gave them each page's name; this gives them the product. `<noscript>` rather
+than a server-rendered body, and the reasons are structural rather than
+stylistic: a browser with JS never paints it, so the locale flash — a Hebrew
+visitor reading a fully painted English homepage while the app catches up — is
+impossible rather than mitigated; the block sits outside `#root`, where
+`createRoot`'s container wipe cannot reach it, so there is no hydration
+surface; and `pnpm build` still executes no React, so no future component
+author inherits an SSR-safety rule. A real rendered body is
+[doc 01's prompt 3](../plans/seo/01-every-url-ships-its-own-head.md), which is
+gated on a founder call and argues against itself.
+
+It is not cloaking. The text is a faithful subset of what the page renders,
+from the same keys, and Googlebot's second-wave render sees the real page
+regardless.
+
+The two demo URLs deliberately get **none**. They are the link out of a pitch
+email, and their whole value is the unfurl card, which is pure `<head>`; body
+text there would be maintenance for no reader. The create and join gates
+likewise — nobody searches for a form.
+
+_Implemented in [prerenderMeta.ts](../../client/src/lib/prerenderMeta.ts) and
+[prerender-head.mjs](../../client/scripts/prerender-head.mjs)._
+
 ### The prerendered shell splits in two, and `app.html` is the one that keeps the generic pair
 
 _2026-07-27_

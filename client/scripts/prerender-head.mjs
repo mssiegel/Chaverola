@@ -1,7 +1,9 @@
 /*
   Stamps each public URL's own <head> into its own file under dist/, so a link
   unfurler or an AI crawler — none of which run JavaScript — reads that page's
-  title and description instead of the shell's all-purpose pair.
+  title and description instead of the shell's all-purpose pair. The homepage
+  also gets a <noscript> body block, so the same readers can find out what
+  Chaverola is and not only what it's called.
 
   Runs after `vite build`, as the last step of `pnpm build`. It is a dumb file
   writer: every string comes from `src/lib/prerenderMeta.ts`, which is typed and
@@ -88,6 +90,9 @@ const HTML_TAG = /<html lang="en" dir="ltr">/g;
 const TITLE_TAG = /<title>Chaverola<\/title>/g;
 const DESCRIPTION_TAG = /<meta\s+name="description"[\s\S]*?\/>/g;
 const HEAD_CLOSE = /^ {2}<\/head>/gm;
+/* The body seam. Only pages that carry a `noscript` string touch it, so a
+   page without one is emitted byte-identically to before. */
+const ROOT_DIV = /^ {4}<div id="root"><\/div>/gm;
 
 function stamp(shell, page) {
   let html = shell;
@@ -112,12 +117,23 @@ function stamp(shell, page) {
   // The extension seam: docs 02-05 add their tags through `page.head`, which is
   // empty today, so this is currently an identity replacement that still proves
   // the anchor is there.
-  return replaceOnce(
+  html = replaceOnce(
     html,
     HEAD_CLOSE,
     [...page.head.map((tag) => `    ${tag}`), "  </head>"].join("\n"),
     "</head> close tag"
   );
+  // The homepage's words for a reader that never runs JS. Already indented by
+  // prerenderMeta — this script owns no string logic, only anchors.
+  if (page.noscript !== null) {
+    html = replaceOnce(
+      html,
+      ROOT_DIV,
+      `    <div id="root"></div>\n${page.noscript}`,
+      "#root div"
+    );
+  }
+  return html;
 }
 
 /*
