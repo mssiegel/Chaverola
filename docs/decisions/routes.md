@@ -5,6 +5,50 @@ area. Entries are newest-first; add new ones at the top, and add a matching line
 to the index in the same change. Replaced decisions move to Superseded at the
 bottom of this file.
 
+### A component that renders on two pages keeps its strings in `common`
+
+_2026-07-27_
+
+**Decision:** Namespaces follow where a component is MOUNTED, not which folder
+it lives in. `Teacher/ChatCard/`, `demo/DemoBanner` and `demo/DemoControls`
+all sit under a feature folder but render on more than one page, so their
+strings live in `common` — `card.*`, `endChat.*`, `lostConnection` and
+`demo.*` — rather than in `teacher` or `student`.
+
+**Why:** A namespace registers from a side-effect module that the lazy page
+imports, so its strings ride that page's chunk. The chat card is the worked
+example: the marketing homepage renders the real card in its teacher preview,
+so putting the card's copy in `teacher` would either make the homepage import
+the whole teacher catalog (both locales, a hundred-odd keys, on the page that
+most needs to be fast) or duplicate the strings in two catalogs that then
+drift. The demo banner and the steering panel have the same shape across the
+teacher host page and the student world.
+
+The rule has a cost: `common` loads at init, so every key added to it is paid
+for by every page. That is why the bar is "genuinely mounted on two pages",
+not "might be reused one day".
+
+---
+
+### Name lists are joined by `Intl.ListFormat`, pinned to the app's locale
+
+_2026-07-27_
+
+**Decision:** `lib/names.ts` builds "A and B" / "A, B, and C" through
+`Intl.ListFormat`, and the locale it passes is always the app's `Locale`
+(`en` or `he`), never `navigator.language`. Each name is wrapped in FSI…PDI
+before joining.
+
+**Why:** The joiner is a word, so an English `and` was the last piece of
+untranslated prose on a Hebrew pairing rail. `navigator.language` is the
+tempting default and is wrong: `en-GB` drops the Oxford comma, which would
+make the sentence a teacher reads depend on which machine the browser is
+running on. The per-name isolates matter because a class list mixes scripts —
+without them, one Latin name at the front decides the direction of the whole
+list, conjunction included, and the Hebrew names lay out backwards.
+
+---
+
 ### `/he` is Hebrew and right-to-left; English stays unprefixed
 
 _2026-07-27_

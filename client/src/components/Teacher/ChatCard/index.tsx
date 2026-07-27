@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { ChevronsDownUp, ChevronsUpDown, LogOut } from "lucide-react";
 
 import { CHAT_FRAME_CLASS } from "@/components/chat/ChatFrame";
@@ -67,6 +68,9 @@ export function ChatCard({
   onRemoveParticipant,
   roster,
 }: ChatCardProps) {
+  // `common`, not `teacher`: the homepage renders this card too, and its
+  // chunk registers only `home`. See DECISIONS.md.
+  const { t } = useTranslation("common");
   const [expanded, setExpanded] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -171,8 +175,10 @@ export function ChatCard({
           aria-expanded={expanded}
           onClick={() => setExpanded((open) => !open)}
         >
+          {/* No flip-rtl: these chevrons are vertical, and up/down is the
+              same in every language. */}
           {expanded ? <ChevronsDownUp /> : <ChevronsUpDown />}
-          {expanded ? "Minimize" : "Full chat"}
+          {expanded ? t("card.minimize") : t("card.fullChat")}
         </Button>
 
         {!isEnded && onEndChat && (
@@ -182,8 +188,9 @@ export function ChatCard({
             className="flex-1 border-destructive/40 text-destructive hover:bg-destructive/10 hover:text-destructive"
             onClick={() => setConfirmOpen(true)}
           >
-            <LogOut />
-            End chat
+            {/* flip-rtl: a door-and-arrow glyph reads as "out this way". */}
+            <LogOut className="flip-rtl" />
+            {t("endChat.confirm")}
           </Button>
         )}
       </div>
@@ -195,8 +202,8 @@ export function ChatCard({
         open={confirmOpen}
         onOpenChange={setConfirmOpen}
         onConfirm={handleConfirmEnd}
-        description="The students will see the chat is over and can head back to the lobby. There's no reopening it."
-        cancelLabel="Let them keep chatting"
+        description={t("endChat.hostBody")}
+        cancelLabel={t("endChat.hostCancel")}
       />
     </section>
   );

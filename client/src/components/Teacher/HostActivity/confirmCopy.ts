@@ -1,3 +1,5 @@
+import type { TFunction } from "i18next";
+
 import type { Participant } from "@/types/chat";
 
 import type { HostedChat, WaitingStudent } from "./hostWorld";
@@ -15,8 +17,13 @@ export type PendingAction =
  * `autoMatchOn` is read live at render, never frozen into the action: a
  * pending settings edit can flip it while the dialog is open, and the copy
  * must not promise a hold that won't happen.
+ *
+ * `t` comes in as a parameter and this stays a pure function, per the house
+ * extraction rule: a hook here would be uncallable from `getFixedT`.
+ * `confirmVariant` stays in code — it's behavior, not copy.
  */
 export function confirmCopy(
+  t: TFunction<"teacher">,
   action: PendingAction | null,
   autoMatchOn: boolean,
   teacherEmail: string | null,
@@ -32,11 +39,12 @@ export function confirmCopy(
 } {
   if (action?.kind === "remove-from-queue") {
     return {
-      title: `Remove ${action.student.realName}?`,
-      description:
-        "They'll be signed out and sent back to the join screen, with a note that you removed them. They can sign in again, with a better name if that was the problem.",
-      confirmLabel: "Remove them",
-      cancelLabel: "Never mind",
+      title: t("confirm.removeStudent.title", {
+        name: action.student.realName,
+      }),
+      description: t("confirm.removeStudent.body"),
+      confirmLabel: t("confirm.remove"),
+      cancelLabel: t("confirm.cancel"),
       confirmVariant: "destructive",
     };
   }
@@ -45,54 +53,54 @@ export function confirmCopy(
       action.chat.participants.length - action.chat.inactiveStudentIds.length >
       2;
     return {
-      title: `Remove ${action.participant.realName} from their chat?`,
+      title: t("confirm.removeFromChat.title", {
+        name: action.participant.realName,
+      }),
       description: groupChat
-        ? "They'll be signed out and sent back to the join screen. The rest of the group keeps chatting, and classmates only see that the character left, not that you removed anyone."
-        : "They'll be signed out and sent back to the join screen, and their partner's chat ends. Nobody is told it was a removal.",
-      confirmLabel: "Remove them",
-      cancelLabel: "Never mind",
+        ? t("confirm.removeFromChat.group")
+        : t("confirm.removeFromChat.pair"),
+      confirmLabel: t("confirm.remove"),
+      cancelLabel: t("confirm.cancel"),
       confirmVariant: "destructive",
     };
   }
   if (action?.kind === "pause-all") {
     return {
-      title: "Pause all chats?",
-      description:
-        "Students keep their chat on screen but can't send anything until you resume. Chat clocks stop too, so nobody loses time.",
-      confirmLabel: "Pause chats",
-      cancelLabel: "Never mind",
+      title: t("confirm.pause.title"),
+      description: t("confirm.pause.body"),
+      confirmLabel: t("confirm.pause.confirm"),
+      cancelLabel: t("confirm.cancel"),
       confirmVariant: "default",
     };
   }
   if (action?.kind === "end-activity") {
     // The terminal wrap-up. Names the three consequences, then where the
     // transcript goes (with a live chat count) or that nothing will be sent.
-    const consequences =
-      "Every chat ends right now and your students see the activity is over. The join code stops working, so nobody else can join.";
     const emailLine = demo
-      ? "This is the demo, so nothing gets emailed."
+      ? t("confirm.endActivity.demo")
       : !teacherEmail
-        ? "No email is set, so nothing will be emailed. The chats will only be here on this page."
+        ? t("confirm.endActivity.noEmail")
         : chatCount === 0
-          ? `No chats have happened yet, so there's nothing to email to ${teacherEmail}.`
-          : chatCount === 1
-            ? `We'll email the chat to ${teacherEmail}.`
-            : `We'll email all ${chatCount} chats to ${teacherEmail}.`;
+          ? t("confirm.endActivity.noChats", { email: teacherEmail })
+          : t("confirm.endActivity.send", {
+              count: chatCount,
+              email: teacherEmail,
+            });
     return {
-      title: "End the activity for everyone?",
-      description: `${consequences} ${emailLine}`,
-      confirmLabel: "End activity",
-      cancelLabel: "Keep it running",
+      title: t("confirm.endActivity.title"),
+      description: `${t("confirm.endActivity.consequences")} ${emailLine}`,
+      confirmLabel: t("confirm.endActivity.confirm"),
+      cancelLabel: t("confirm.endActivity.cancel"),
       confirmVariant: "destructive",
     };
   }
   return {
-    title: "End all chats?",
+    title: t("confirm.endAll.title"),
     description: autoMatchOn
-      ? "Every active chat will end right now for everyone in it. Auto-match goes on hold too, so students wait in the lobby until you pair them or turn it back on."
-      : "Every active chat will end right now for everyone in it. Students will see the chat is over and can head back to the lobby for another round.",
-    confirmLabel: "End all chats",
-    cancelLabel: "Let them keep chatting",
+      ? t("confirm.endAll.hold")
+      : t("confirm.endAll.body"),
+    confirmLabel: t("confirm.endAll.confirm"),
+    cancelLabel: t("confirm.endAll.cancel"),
     confirmVariant: "destructive",
   };
 }

@@ -1,12 +1,13 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Loader2, LogOut, UserPlus, UsersRound, WifiOff } from "lucide-react";
-
-import { listNames } from "@chaverola/shared";
 
 import { DemoControlsPanel, EventButton } from "@/components/demo/DemoControls";
 import { AccentIconChip } from "@/components/Teacher/ActivitySetup/FormSection";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { useLocale } from "@/lib/locale";
+import { listNames } from "@/lib/names";
 import { cn } from "@/lib/utils";
 import type { HostedActivity } from "@/types/activity";
 
@@ -49,6 +50,8 @@ export function HostActivityDashboard({
   engine,
   demoTriggers,
 }: HostActivityDashboardProps) {
+  const { t } = useTranslation("teacher");
+  const locale = useLocale();
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [pendingAction, setPendingAction] = useState<PendingAction | null>(
     null
@@ -141,9 +144,12 @@ export function HostActivityDashboard({
     const names = actionableSelectedIds.map(
       (id) => engine.waiting.find((s) => s.id === id)!.realName
     );
-    rematchWarning = `${listNames(names)} just chatted ${
-      names.length === 2 ? "with each other" : "together"
-    }. You can still pair them, this is only a heads-up.`;
+    rematchWarning = t(
+      names.length === 2
+        ? "host.rematchWarning.pair"
+        : "host.rematchWarning.group",
+      { names: listNames(names, locale) }
+    );
   }
 
   const startSelectedChat = () => {
@@ -221,16 +227,14 @@ export function HostActivityDashboard({
 
   const waitingHint =
     connectedWaiting.length > 0
-      ? `${connectedWaiting.length} student${
-          connectedWaiting.length === 1 ? "" : "s"
-        } waiting`
+      ? t("host.hint.waiting", { count: connectedWaiting.length })
       : engine.waiting.length > 0
         ? // Seats held, nobody pairable — say that rather than claim the room
           //  is empty or everyone's mid-chat.
-          "No one can pair yet. Waiting on students to reconnect"
+          t("host.hint.stalled")
         : noStudentsYet
-          ? "No students yet. Share the pin to let them in"
-          : "Everyone's chatting. The queue refills as chats end";
+          ? t("host.hint.noStudents")
+          : t("host.hint.allChatting");
 
   const reconnecting = engine.connection === "reconnecting";
   // The demo runs the whole class in the browser and never emails anyone, so
@@ -281,9 +285,8 @@ export function HostActivityDashboard({
             className="mt-0.5 size-4 shrink-0 animate-spin motion-reduce:animate-none"
           />
           <span className="min-w-0 flex-1">
-            <span className="font-semibold">Reconnecting to your class…</span>{" "}
-            Everything below is from right before you lost connection. It
-            catches up as soon as you're back.
+            <span className="font-semibold">{t("host.offline.title")}</span>{" "}
+            {t("host.offline.body")}
           </span>
         </div>
       )}
@@ -340,7 +343,7 @@ export function HostActivityDashboard({
               <div className="mb-4 flex items-center gap-3 pt-5">
                 <AccentIconChip accent="grape" icon={UsersRound} />
                 <h2 className="flex items-center gap-2 text-lg font-semibold text-foreground">
-                  Pair your students
+                  {t("pairing.title")}
                   <CountPill count={engine.waiting.length} />
                 </h2>
               </div>
@@ -350,7 +353,7 @@ export function HostActivityDashboard({
 
           <div className="lg:hidden">
             <CollapsibleSection
-              title="Pair your students"
+              title={t("pairing.title")}
               icon={UsersRound}
               accent="grape"
               count={engine.waiting.length}
@@ -392,21 +395,21 @@ export function HostActivityDashboard({
                 where the grid ends — that's what lets the rail stay stuck for
                 the whole scroll. Same visual spot on phones. */}
             {demoTriggers && (
-              <DemoControlsPanel caption="A real class does all this by itself.">
+              <DemoControlsPanel caption={t("host.demo.caption")}>
                 <div className="grid grid-cols-2 gap-2 sm:max-w-md">
                   <EventButton
                     onClick={demoTriggers.triggerJoin}
                     disabled={!demoTriggers.canTriggerJoin}
                     icon={<UserPlus className="size-4" />}
                   >
-                    A student joins
+                    {t("host.demo.join")}
                   </EventButton>
                   <EventButton
                     onClick={demoTriggers.triggerWifiBlip}
                     disabled={!demoTriggers.canTriggerWifiBlip}
                     icon={<WifiOff className="size-4" />}
                   >
-                    A student's wifi blips
+                    {t("host.demo.wifi")}
                   </EventButton>
                 </div>
               </DemoControlsPanel>
@@ -421,14 +424,16 @@ export function HostActivityDashboard({
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div className="min-w-0">
                   <h2 className="text-sm font-semibold text-foreground">
-                    Wrap up the activity
+                    {t("host.wrapUp.title")}
                   </h2>
                   <p className="mt-0.5 text-sm text-muted-foreground">
                     {demo
-                      ? "Ends every chat. The demo doesn't email anyone."
+                      ? t("host.wrapUp.demo")
                       : activity.teacherEmail
-                        ? `Ends every chat and emails the transcript to ${activity.teacherEmail}.`
-                        : "Ends every chat. No email is set, so nothing will be sent."}
+                        ? t("host.wrapUp.email", {
+                            email: activity.teacherEmail,
+                          })
+                        : t("host.wrapUp.noEmail")}
                   </p>
                 </div>
                 <Button
@@ -437,8 +442,9 @@ export function HostActivityDashboard({
                   onClick={() => setPendingAction({ kind: "end-activity" })}
                   className="shrink-0 border-destructive/40 text-destructive hover:bg-destructive/10 hover:text-destructive"
                 >
-                  <LogOut aria-hidden className="size-4" />
-                  End activity
+                  {/* flip-rtl: a door-and-arrow glyph reads as "out this way". */}
+                  <LogOut aria-hidden className="flip-rtl size-4" />
+                  {t("host.wrapUp.cta")}
                 </Button>
               </div>
             </div>
@@ -453,6 +459,7 @@ export function HostActivityDashboard({
         }}
         onConfirm={confirmPendingAction}
         {...confirmCopy(
+          t,
           pendingAction,
           activity.settings.autoMatch,
           activity.teacherEmail ?? null,

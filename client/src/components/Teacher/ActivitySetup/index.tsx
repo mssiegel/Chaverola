@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   ArrowRight,
   ClipboardList,
@@ -41,14 +42,12 @@ const nextRowId = () => `character-row-${++rowSeq}`;
 /** What went wrong with the last Host attempt. */
 type CreateFailure = "unreachable" | "server";
 
-const FAILURE_COPY: Record<CreateFailure, string> = {
-  unreachable:
-    "We can't reach Chaverola right now. Check your internet, then try " +
-    "again. Everything you typed is still here.",
-  server:
-    "Something went wrong on our end and the activity wasn't created. " +
-    "Give it a second, then try again.",
-};
+/** Catalog keys, so the map stays a plain module constant. `as const
+ *  satisfies` keeps the literals, which is what lets `t()` check them. */
+const FAILURE_KEYS = {
+  unreachable: "setup.failure.unreachable",
+  server: "setup.failure.server",
+} as const satisfies Record<CreateFailure, `setup.failure.${string}`>;
 
 interface SetupFormState extends ActivityDraftFields {
   characters: CharacterRowState[];
@@ -79,6 +78,7 @@ function toDraft(form: SetupFormState): ActivityDraft {
  * `POST /activities` and landing on `/activity/host/<hostKey>`.
  */
 export function ActivitySetupForm() {
+  const { t } = useTranslation("teacher");
   const navigate = useLocaleNavigate();
 
   const [form, setForm] = useState<SetupFormState>(() =>
@@ -98,10 +98,11 @@ export function ActivitySetupForm() {
   }, [form]);
 
   const problems = useMemo(() => validateActivityDraft(toDraft(form)), [form]);
-  const problemFor = (field: SetupField): string | undefined =>
-    showProblems
-      ? problems.find((problem) => problem.field === field)?.message
-      : undefined;
+  const problemFor = (field: SetupField): string | undefined => {
+    if (!showProblems) return undefined;
+    const problem = problems.find((p) => p.field === field);
+    return problem ? t(problem.messageKey) : undefined;
+  };
 
   // Every field that can be a problem registers its input here, so a failed
   // Host tap can scroll straight to the first one.
@@ -178,10 +179,10 @@ export function ActivitySetupForm() {
       <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_20rem] lg:gap-10">
         <div className="flex flex-col gap-5 sm:gap-6">
           <FormSection
-            title="Characters"
+            title={t("setup.characters.title")}
             icon={Drama}
             accent="grape"
-            hint="Students play these parts when you pair them up. Two is all you need: every 1:1 chat uses the first two. A 3rd character only gets used when you pair a group of 3, and a 4th when you pair a group of 4."
+            hint={t("setup.characters.hint")}
           >
             <CharacterRowsField
               rows={form.characters}
@@ -193,7 +194,11 @@ export function ActivitySetupForm() {
             />
           </FormSection>
 
-          <FormSection title="About you" icon={UserRound} accent="coral">
+          <FormSection
+            title={t("setup.aboutYou.title")}
+            icon={UserRound}
+            accent="coral"
+          >
             <AboutYouFields
               hostName={form.hostName}
               teacherEmail={form.teacherEmail}
@@ -201,11 +206,12 @@ export function ActivitySetupForm() {
               hostNameError={hostNameError}
               emailError={emailError}
               idPrefix="setup-host"
-              namePlaceholder="Ms. Cohen"
+              namePlaceholder={t("aboutYou.name.placeholder")}
               nameHint={
                 <p className="mt-1.5 text-sm text-muted-foreground">
-                  Students see “Hosted by {form.hostName.trim() || "…"}” in the
-                  lobby.
+                  {t("aboutYou.name.hint", {
+                    name: form.hostName.trim() || "…",
+                  })}
                 </p>
               }
               registerField={registerField}
@@ -213,11 +219,11 @@ export function ActivitySetupForm() {
           </FormSection>
 
           <FormSection
-            title="Student instructions"
+            title={t("setup.instructions.title")}
             icon={ClipboardList}
             accent="sky"
             optional
-            hint="Tell students what to do, whether that's a scene to play or a question to debate. They read it in the lobby while they wait."
+            hint={t("setup.instructions.hint")}
           >
             <StudentInstructionsField
               value={form.studentInstructions}
@@ -258,7 +264,7 @@ export function ActivitySetupForm() {
                 role="alert"
                 className="rounded-xl border border-destructive/30 bg-red-50 px-4 py-3 text-sm font-medium text-destructive lg:shadow-lg"
               >
-                {FAILURE_COPY[failure]}
+                {t(FAILURE_KEYS[failure])}
               </div>
             )}
             <Button
@@ -269,13 +275,15 @@ export function ActivitySetupForm() {
             >
               {hosting ? (
                 <>
-                  Setting up your activity…
+                  {t("setup.hosting")}
                   <Loader2 className="size-4 animate-spin motion-reduce:animate-none" />
                 </>
               ) : (
                 <>
-                  Host the Activity
-                  <ArrowRight className="size-4" />
+                  {t("setup.host")}
+                  {/* flip-rtl: this arrow means "onwards", so it has to point
+                      the way the page reads. */}
+                  <ArrowRight className="flip-rtl size-4" />
                 </>
               )}
             </Button>

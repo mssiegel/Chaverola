@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Archive } from "lucide-react";
 
 import { ChatCard } from "@/components/Teacher/ChatCard";
@@ -21,22 +22,23 @@ export function CompletedChatsSection({
   chats,
   activity,
 }: CompletedChatsSectionProps) {
+  const { t } = useTranslation("teacher");
   return (
     <CollapsibleSection
-      title="Completed chats"
+      title={t("completed.title")}
       icon={Archive}
       accent="sky"
       count={chats.length}
       collapsedHint={
         chats.length === 0
-          ? "Ended chats land here"
-          : `${chats.length} wrapped up`
+          ? t("completed.hint.none")
+          : t("completed.hint.count", { count: chats.length })
       }
     >
       {chats.length === 0 ? (
         <EmptyState className="py-6">
           <p className="text-sm text-muted-foreground">
-            Nothing here yet. When a chat ends, its card moves down here.
+            {t("completed.empty")}
           </p>
         </EmptyState>
       ) : (
@@ -51,7 +53,7 @@ export function CompletedChatsSection({
               isEnded
               // A real empty state: a chat can end before its first message
               // (the below-2 rule), and the blank box needs to say so.
-              emptyHint="This chat ended before anyone said anything."
+              emptyHint={t("completed.emptyHint")}
               inactiveParticipantIds={new Set(chat.inactiveStudentIds)}
               roster={activity.characters}
             />

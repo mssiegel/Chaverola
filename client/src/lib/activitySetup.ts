@@ -177,9 +177,22 @@ export function saveActivityDraft(draft: ActivityDraft): void {
 /** Which form field a problem highlights (`character-<row index>`). */
 export type SetupField = "hostName" | "teacherEmail" | `character-${number}`;
 
+/**
+ * A `teacher` catalog key, spelled out rather than `problem.${string}`: the
+ * literal union is what makes `t(problem.messageKey)` check at the call site.
+ * `lib/hostActivity.ts` adds the live-only one.
+ */
+export type SetupProblemKey =
+  | "problem.needTwoCharacters"
+  | "problem.duplicateCharacter"
+  | "problem.hostName"
+  | "problem.email"
+  | "problem.characterInUse";
+
 export interface SetupProblem {
   field: SetupField;
-  message: string;
+  /** A key, not a string — this module is pure, so the form calls `t`. */
+  messageKey: SetupProblemKey;
 }
 
 /**
@@ -197,7 +210,7 @@ export function validateActivityDraft(draft: ActivityDraft): SetupProblem[] {
     );
     problems.push({
       field: `character-${Math.max(firstEmpty, 0)}`,
-      message: "Name at least two characters so students have parts to play.",
+      messageKey: "problem.needTwoCharacters",
     });
   }
 
@@ -211,7 +224,7 @@ export function validateActivityDraft(draft: ActivityDraft): SetupProblem[] {
     if (seenNames.has(key)) {
       problems.push({
         field: `character-${index}`,
-        message: "Two characters can't share a name. Change one of them.",
+        messageKey: "problem.duplicateCharacter",
       });
     } else {
       seenNames.add(key);
@@ -219,20 +232,12 @@ export function validateActivityDraft(draft: ActivityDraft): SetupProblem[] {
   });
 
   if (draft.hostName.trim() === "") {
-    problems.push({
-      field: "hostName",
-      message: "Add your name so students know who's hosting.",
-    });
+    problems.push({ field: "hostName", messageKey: "problem.hostName" });
   }
 
   const email = draft.teacherEmail.trim();
   if (email !== "" && !EMAIL_PATTERN.test(email)) {
-    problems.push({
-      field: "teacherEmail",
-      message:
-        "That email doesn't look right. Fix it, or clear the field if you " +
-        "don't want the chats emailed.",
-    });
+    problems.push({ field: "teacherEmail", messageKey: "problem.email" });
   }
 
   return problems;

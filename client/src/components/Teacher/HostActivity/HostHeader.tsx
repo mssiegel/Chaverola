@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { DEMO_JOIN_CODE } from "@/mockData";
 import type { HostedActivity } from "@/types/activity";
@@ -29,6 +30,7 @@ export function HostHeader({
   /** Nobody has joined at all — a fresh real activity, not a busy round. */
   noStudentsYet?: boolean;
 }) {
+  const { t } = useTranslation("teacher");
   const heroStatRef = useRef<HTMLDivElement>(null);
   const [statOffScreen, setStatOffScreen] = useState(false);
   // Only the condensed bar cares: on the demo the sticky DemoBanner owns
@@ -50,10 +52,10 @@ export function HostHeader({
   return (
     <header>
       <h1 className="text-2xl font-semibold text-foreground sm:text-3xl">
-        Your activity is live
+        {t("host.title")}
       </h1>
       <p className="mt-1 text-muted-foreground">
-        Hosted by {activity.hostName}
+        {t("host.hostedBy", { name: activity.hostName })}
       </p>
 
       {/* The hero stat. */}
@@ -74,7 +76,7 @@ export function HostHeader({
         </span>
         <div className="min-w-0">
           <p className="flex items-center gap-2 text-lg font-semibold text-foreground">
-            waiting to chat
+            {t("host.waitingToChat")}
             <LiveDot />
           </p>
           {/* With seats held by dropped students, the reconnecting line below
@@ -83,15 +85,15 @@ export function HostHeader({
           {(waitingCount > 0 || noStudentsYet || reconnectingCount === 0) && (
             <p className="mt-0.5 text-sm text-muted-foreground">
               {waitingCount > 0
-                ? "Pair them up below, or let auto-match handle it."
+                ? t("host.pairThemUp")
                 : noStudentsYet
-                  ? "Share the pin below and they'll pop up here."
-                  : "The queue refills as chats wrap up."}
+                  ? t("host.sharePin")
+                  : t("host.queueRefills")}
             </p>
           )}
           {reconnectingCount > 0 && (
             <p className="mt-0.5 text-sm text-muted-foreground">
-              +{reconnectingCount} reconnecting, so they can't pair up yet.
+              {t("host.reconnecting", { count: reconnectingCount })}
             </p>
           )}
         </div>
@@ -116,11 +118,11 @@ export function HostHeader({
               >
                 {waitingCount}
               </span>{" "}
-              waiting to chat
+              {t("host.waitingToChat")}
             </span>
             <span className="text-muted-foreground">·</span>
             <span className="text-muted-foreground">
-              pin{" "}
+              {t("host.pin")}{" "}
               <span className="font-semibold text-foreground tabular-nums">
                 {activity.joinCode}
               </span>

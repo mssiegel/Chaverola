@@ -1,3 +1,5 @@
+import { useTranslation } from "react-i18next";
+import type { TFunction } from "i18next";
 import { Loader2 } from "lucide-react";
 
 import { LocaleLink } from "@/components/layout/LocaleLink";
@@ -11,8 +13,12 @@ import type { HostEnded } from "./hostEngine";
  * failed, or nothing to send — with the completed chats still readable beneath
  * it (rendered by the dashboard) so a failed send is never a dead end. Same
  * centered tile + title + body shape as the student's ChatEndedSection.
+ *
+ * The tiles stay in code: they're art, not copy, and no locale should be able
+ * to change which emoji reports a failed send.
  */
 function wrappedCopy(
+  t: TFunction<"teacher">,
   ended: HostEnded,
   demo: boolean
 ): { tile: string; title: string; body: string } {
@@ -24,50 +30,48 @@ function wrappedCopy(
   if (demo) {
     return {
       tile: "🎬",
-      title: "That's a wrap",
-      body: "This is the demo, so nothing gets emailed. In a real activity, every chat is sent to your inbox the moment you end it.",
+      title: t("wrapped.demo.title"),
+      body: t("wrapped.demo.body"),
     };
   }
 
   if (state === "sending") {
     return {
       tile: "",
-      title: "Sending your transcripts…",
-      body: `We're emailing every chat to ${to}. This only takes a moment.`,
+      title: t("wrapped.sending.title"),
+      body: t("wrapped.sending.body", { to }),
     };
   }
 
   if (state === "unconfirmed") {
     return {
       tile: "📮",
-      title: "We didn't hear back about the email",
-      body: `The message to ${to} may still have gone out, but we never heard back either way. Check your inbox in a few minutes. Your chats are below, so copy anything you want to keep before you close this tab.`,
+      title: t("wrapped.unconfirmed.title"),
+      body: t("wrapped.unconfirmed.body", { to }),
     };
   }
 
   if (state === "sent") {
     return {
       tile: "📬",
-      title: `Sent to ${to}`,
-      body: "Every chat from this class is on its way to your inbox. Give it a minute to land.",
+      title: t("wrapped.sent.title", { to }),
+      body: t("wrapped.sent.body"),
     };
   }
 
   if (state === "failed") {
     return {
       tile: "⚠️",
-      title: "We couldn't send the email",
-      body: `The message to ${to} didn't go through. Your chats are still below, so copy anything you want to keep before you close this tab.`,
+      title: t("wrapped.failed.title"),
+      body: t("wrapped.failed.body", { to }),
     };
   }
 
   // "empty": nothing was sent — no address, or no chat had a message.
   return {
     tile: "📭",
-    title: "That's a wrap",
-    body: to
-      ? "These chats had no messages, so there was nothing to email. They're below if you want to look back."
-      : "You didn't set an email for this activity, so nothing was sent. Your chats are below if you want to reread them.",
+    title: t("wrapped.empty.title"),
+    body: to ? t("wrapped.empty.noMessages") : t("wrapped.empty.noEmail"),
   };
 }
 
@@ -78,7 +82,8 @@ export function WrappedUpCard({
   ended: HostEnded;
   demo?: boolean;
 }) {
-  const copy = wrappedCopy(ended, demo);
+  const { t } = useTranslation("teacher");
+  const copy = wrappedCopy(t, ended, demo);
   const sending = ended.state === "sending";
 
   return (
@@ -104,7 +109,9 @@ export function WrappedUpCard({
 
         {!sending && (
           <Button asChild size="lg" className="mt-1">
-            <LocaleLink to="/activity/create">Set up a new activity</LocaleLink>
+            <LocaleLink to="/activity/create">
+              {t("host.newActivity")}
+            </LocaleLink>
           </Button>
         )}
       </div>

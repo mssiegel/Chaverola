@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { SlidersHorizontal } from "lucide-react";
 
 import { AboutYouFields } from "@/components/Teacher/ActivitySetup/AboutYouFields";
@@ -52,6 +53,7 @@ export function LiveSettingsPanel({
   paused,
   onActivityChange,
 }: LiveSettingsPanelProps) {
+  const { t } = useTranslation("teacher");
   const [draft, setDraft] = useState<LiveActivityDraft>(() =>
     liveDraftFromActivity(activity)
   );
@@ -80,8 +82,10 @@ export function LiveSettingsPanel({
     () => validateLiveDraft(draft, committedIds),
     [draft, committedIds]
   );
-  const problemFor = (field: SetupField): string | undefined =>
-    problems.find((problem) => problem.field === field)?.message;
+  const problemFor = (field: SetupField): string | undefined => {
+    const problem = problems.find((p) => p.field === field);
+    return problem ? t(problem.messageKey) : undefined;
+  };
 
   // Debounced propagation: the inputs update on every keystroke, the
   // activity only after the teacher pauses — so half-typed names never
@@ -154,7 +158,7 @@ export function LiveSettingsPanel({
 
   return (
     <CollapsibleSection
-      title="Edit activity settings"
+      title={t("liveSettings.title")}
       icon={SlidersHorizontal}
       accent="mint"
       defaultOpen={false}
@@ -164,8 +168,8 @@ export function LiveSettingsPanel({
       // the first one set it.
       collapsedHint={
         activity.teacherEmail
-          ? "Everything from setup, still editable while the activity runs"
-          : "Add your email and we'll send you every chat when the activity wraps up"
+          ? t("liveSettings.hint.set")
+          : t("liveSettings.hint.noEmail")
       }
     >
       {/* Only what actually travels gets promised. Everything in this panel
@@ -177,16 +181,12 @@ export function LiveSettingsPanel({
           DECISIONS.md → "The live settings panel only claims the edits that
           actually travel" and "A chat freezes its cast when it starts". */}
       <p className="text-sm leading-relaxed text-muted-foreground">
-        Your name, the instructions, the characters, settings, and your email
-        all save as soon as you pause typing, and students waiting in the lobby
-        see the changes right away. A chat that's already running keeps the
-        characters it started with, so nobody gets renamed mid-conversation. New
-        chats use your latest cast.
+        {t("liveSettings.body")}
       </p>
 
       <div className="mt-6 flex flex-col gap-7">
         <div>
-          <SectionLabel>Characters</SectionLabel>
+          <SectionLabel>{t("setup.characters.title")}</SectionLabel>
           <div className="mt-3">
             <CharacterRowsField
               rows={draft.characters}
@@ -200,7 +200,7 @@ export function LiveSettingsPanel({
         </div>
 
         <div>
-          <SectionLabel>About you</SectionLabel>
+          <SectionLabel>{t("setup.aboutYou.title")}</SectionLabel>
           <AboutYouFields
             className="mt-3"
             hostName={draft.hostName}
@@ -213,7 +213,7 @@ export function LiveSettingsPanel({
         </div>
 
         <div>
-          <SectionLabel>Student instructions</SectionLabel>
+          <SectionLabel>{t("setup.instructions.title")}</SectionLabel>
           <div className="mt-3">
             <StudentInstructionsField
               value={draft.studentInstructions}
@@ -223,7 +223,7 @@ export function LiveSettingsPanel({
         </div>
 
         <div>
-          <SectionLabel>Settings</SectionLabel>
+          <SectionLabel>{t("settings.title")}</SectionLabel>
           <div className="mt-1">
             <SettingsSection
               bare

@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 import { Joystick } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -24,6 +25,9 @@ export function DemoControlsPanel({
   caption?: ReactNode;
   children: ReactNode;
 }) {
+  // `common`: this panel is mounted by the teacher's host page and by the
+  // student world's demo controls alike.
+  const { t } = useTranslation("common");
   return (
     <section
       className={cn(
@@ -39,7 +43,7 @@ export function DemoControlsPanel({
         )}
       >
         <Joystick className="size-4" />
-        You're driving this demo
+        {t("demo.driving")}
       </div>
       {caption && (
         <p

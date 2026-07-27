@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 
 import { EMAIL_MAX_CHARS } from "@chaverola/shared";
 import { Input } from "@/components/ui/input";
@@ -45,10 +46,14 @@ export function AboutYouFields({
   registerField,
   className,
 }: AboutYouFieldsProps) {
+  const { t } = useTranslation("teacher");
   return (
     <div className={cn("flex flex-col gap-5", className)}>
       <div>
-        <FieldLabelRow htmlFor={`${idPrefix}-name`} label="Your name">
+        <FieldLabelRow
+          htmlFor={`${idPrefix}-name`}
+          label={t("aboutYou.name.label")}
+        >
           <LimitCounter
             count={charCount(hostName)}
             max={NAME_MAX_CHARS}
@@ -77,7 +82,7 @@ export function AboutYouFields({
       <div>
         <FieldLabelRow
           htmlFor={`${idPrefix}-email`}
-          label="Your email"
+          label={t("aboutYou.email.label")}
           optional
         />
         <Input
@@ -86,17 +91,20 @@ export function AboutYouFields({
           inputMode="email"
           autoComplete="email"
           maxLength={EMAIL_MAX_CHARS}
+          // An address is Latin by construction, and the placeholder pads
+          // backwards in an RTL field without this.
+          dir="ltr"
           ref={registerField?.("teacherEmail")}
           value={teacherEmail}
           onChange={(event) => onPatch({ teacherEmail: event.target.value })}
-          placeholder="you@school.org"
+          placeholder={t("aboutYou.email.placeholder")}
           aria-invalid={emailError ? true : undefined}
         />
         {emailError ? (
           <FieldError message={emailError} className="mt-1.5" />
         ) : (
           <p className="mt-1.5 text-sm text-muted-foreground">
-            We'll email you every chat from the activity once it wraps up.
+            {t("aboutYou.email.hint")}
           </p>
         )}
       </div>

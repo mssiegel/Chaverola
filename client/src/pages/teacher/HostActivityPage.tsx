@@ -36,7 +36,9 @@ import type { ActivitySettings, HostedActivity } from "@/types/activity";
  */
 export function HostActivityPage() {
   const { hostKey } = useParams();
-  const { t } = useTranslation("teacher");
+  // "teacher" first so unprefixed keys resolve there; "common" for the two
+  // shell-grade buttons this page reuses.
+  const { t } = useTranslation(["teacher", "common"]);
   // The host page is behind an unguessable key and never indexed, so its
   // description is just the title again rather than its own catalog key.
   usePageMeta(t("host.meta.title"), t("host.meta.title"));
@@ -62,7 +64,7 @@ export function HostActivityPage() {
           className="size-8 animate-spin text-brand-grape motion-reduce:animate-none"
         />
         <p className="text-lg font-semibold text-foreground">
-          Finding your activity…
+          {t("host.loading")}
         </p>
       </div>
     );
@@ -71,13 +73,14 @@ export function HostActivityPage() {
   if (lookup.state === "unreachable") {
     return (
       <PlaceholderPage
-        eyebrow="For teachers"
-        title="We can't reach Chaverola"
-        description="Your activity may well still be running. Check your internet, then try again."
+        eyebrow={t("host.badge")}
+        title={t("host.unreachable.title")}
+        description={t("host.unreachable.body")}
       >
         <Button size="lg" onClick={retry}>
+          {/* No flip-rtl: RotateCw is a cycle glyph, not a direction. */}
           <RotateCw aria-hidden className="size-4" />
-          Try again
+          {t("common:error.retry")}
         </Button>
       </PlaceholderPage>
     );
@@ -104,18 +107,19 @@ export function HostActivityPage() {
  * restart mid-lesson ends every class; the socket surfaces it).
  */
 function HostActivityNotFound() {
+  const { t } = useTranslation(["teacher", "common"]);
   return (
     <PlaceholderPage
-      eyebrow="For teachers"
-      title="That activity isn't running"
-      description="Activities only stay up while class is happening, and this link doesn't match any that are live right now. If you typed or pasted it, double-check it. Setting up a new activity takes about a minute."
+      eyebrow={t("host.badge")}
+      title={t("host.notFound.title")}
+      description={t("host.notFound.body")}
     >
       <div className="flex flex-col items-center gap-3 sm:flex-row">
         <Button asChild size="lg">
-          <LocaleLink to="/activity/create">Set up a new activity</LocaleLink>
+          <LocaleLink to="/activity/create">{t("host.newActivity")}</LocaleLink>
         </Button>
         <Button asChild size="lg" variant="outline">
-          <LocaleLink to="/">Back home</LocaleLink>
+          <LocaleLink to="/">{t("common:notFound.backHome")}</LocaleLink>
         </Button>
       </div>
     </PlaceholderPage>
@@ -133,6 +137,7 @@ function HostActivityChrome({
   demo?: boolean;
   children: ReactNode;
 }) {
+  const { t } = useTranslation("teacher");
   return (
     <div className="relative isolate">
       {/* The demo's pretend-students banner pins below the navbar for the
@@ -153,7 +158,7 @@ function HostActivityChrome({
 
       <div className="mx-auto w-full max-w-6xl px-4 pt-8 pb-16 sm:pt-10">
         <div className="mb-5">
-          <Badge>For teachers</Badge>
+          <Badge>{t("host.badge")}</Badge>
         </div>
         {children}
       </div>

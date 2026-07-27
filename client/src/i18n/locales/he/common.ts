@@ -28,6 +28,30 @@ export const common: HebrewOf<CommonCatalog> = {
   "dialog.close": "סגירה",
   "dialog.dismiss": "סגירה",
 
+  // "בתפקיד" is the playbill connective, the same one the transcript email
+  // uses. "בתור" was rejected: תור also means queue, and the pairing rail
+  // already owns that word.
+  "card.as": " בתפקיד ",
+  "card.live": "חי",
+  "card.paused": "מושהה",
+  "card.ended": "הסתיים",
+  "card.fullChat": "כל השיחה",
+  "card.minimize": "לכווץ",
+  "card.remove": "להוציא את {{name, bidi}} מהשיחה",
+
+  lostConnection: "החיבור נפל",
+
+  "demo.banner": "זה שיעור הדמו. התלמידים מדומים.",
+  "demo.bannerStudent": "זה הדמו. שאר התלמידים מדומים.",
+  "demo.startYourOwn": "להקים אחד משלך",
+  "demo.driving": "אתה מנהל את הדמו",
+
+  "endChat.title": "לסיים את השיחה?",
+  "endChat.confirm": "לסיים",
+  "endChat.hostBody":
+    "התלמידים יראו שהשיחה נגמרה ויוכלו לחזור ללובי. אין דרך לפתוח אותה מחדש.",
+  "endChat.hostCancel": "שימשיכו לדבר",
+
   "notFound.pageTitle": "הדף לא נמצא",
   "notFound.eyebrow": "404",
   "notFound.title": "אין כאן כלום 🫥",

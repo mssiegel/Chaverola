@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Eye,
   Repeat2,
@@ -44,22 +45,26 @@ export function SettingsSection({
   bare,
   paused,
 }: SettingsSectionProps) {
+  const { t } = useTranslation("teacher");
+
   const rows = (
     <div className="divide-y divide-border/70">
       <SettingRow
         id="setting-reveal-names"
         icon={Eye}
-        title="Reveal names when a chat ends"
-        description="Chats are anonymous while they run. When one ends, the students in it find out who they were really talking to."
+        title={t("settings.reveal.title")}
+        description={t("settings.reveal.body")}
         checked={settings.revealNames}
         onCheckedChange={(revealNames) => onChange({ revealNames })}
       />
 
       <SettingRow
         id="setting-rematch-warning"
+        // No flip-rtl: Repeat2 is a cycle glyph, and a cycle has no reading
+        // direction to mirror.
         icon={Repeat2}
-        title="Warn before a rematch"
-        description="You get a heads-up when a pairing would put the same students together again."
+        title={t("settings.rematch.title")}
+        description={t("settings.rematch.body")}
         checked={settings.rematchWarning}
         onCheckedChange={(rematchWarning) => onChange({ rematchWarning })}
       />
@@ -67,7 +72,7 @@ export function SettingsSection({
       <SettingRow
         id="setting-auto-match"
         icon={Zap}
-        title="Match students 1:1 automatically"
+        title={t("settings.autoMatch.title")}
         // Paused only outranks the normal description while the setting is
         // ON — the same off > paused > on order the pairing rail uses, and
         // it opens with the rail's own sentence so the two controls can't
@@ -75,20 +80,23 @@ export function SettingsSection({
         // describing what turning it on will do.
         description={
           paused && settings.autoMatch
-            ? "Auto-match is on hold while chats are paused. When you resume, two students who have each waited long enough get paired up on their own."
-            : "Once two students have each waited long enough, they get paired up on their own. Nobody lands right back with their last partner."
+            ? t("settings.autoMatch.bodyPaused")
+            : t("settings.autoMatch.body")
         }
         checked={settings.autoMatch}
         onCheckedChange={(autoMatch) => onChange({ autoMatch })}
       >
-        <SubControl label="Students wait" muted={!settings.autoMatch}>
+        <SubControl
+          label={t("settings.autoMatch.wait")}
+          muted={!settings.autoMatch}
+        >
           <NumberStepper
             value={settings.autoMatchSeconds}
             bounds={AUTO_MATCH_SECONDS}
             disabled={!settings.autoMatch}
-            format={(v) => `${v} seconds`}
-            decreaseLabel="Five seconds less"
-            increaseLabel="Five seconds more"
+            format={(v) => t("settings.autoMatch.seconds", { seconds: v })}
+            decreaseLabel={t("settings.autoMatch.less")}
+            increaseLabel={t("settings.autoMatch.more")}
             onChange={(autoMatchSeconds) => onChange({ autoMatchSeconds })}
           />
         </SubControl>
@@ -101,10 +109,10 @@ export function SettingsSection({
   return (
     <FormSection
       quiet
-      title="Settings"
+      title={t("settings.title")}
       icon={SlidersHorizontal}
       accent="mint"
-      hint="These start out the way we recommend. You can change any of them while the activity runs."
+      hint={t("settings.hint")}
     >
       {rows}
     </FormSection>

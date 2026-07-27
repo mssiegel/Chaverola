@@ -1,6 +1,6 @@
 # Hebrew — the `/he` tree actually speaks Hebrew
 
-**State: In progress.** Prompt 1 shipped (`b9a9e59`, 2026-07-27). Six to go.
+**State: In progress.** Prompts 1 and 2 shipped, 2026-07-27. Five to go.
 
 `/he` has existed since the routing work as a mirror of the whole route tree,
 rendering identical English text left to right. This plan makes it a Hebrew
@@ -57,7 +57,7 @@ user-facing copy** — Hebrew counts. **Tick the checkbox** in the list below in
 the same commit as the work.
 
 - [x] Prompt 1 — Plumbing, RTL, shell and homepage (`b9a9e59`)
-- [ ] Prompt 2 — Teacher surfaces
+- [x] Prompt 2 — Teacher surfaces
 - [ ] Prompt 3 — Student surfaces
 - [ ] Prompt 4 — `locale` on the record, `railNotice` beside `rematchNotice`
 - [ ] Prompt 5 — The Hebrew transcript email
@@ -217,6 +217,18 @@ Check for horizontal overflow on both. `pnpm format`, one commit, box ticked.
 
 **Goal:** a student joins, waits, chats, and reaches every ending in Hebrew.
 
+**Prompt 2 already did the shared parts of items 6 and 11, and it is worth
+reading before redoing them.** `EndChatConfirmationModal`'s own title and
+confirm label, and `DemoBanner` / `DemoControls`, render on the teacher's demo
+page too, so they are already translated and their strings sit in **`common`**,
+not in `chat` or `student` (see DECISIONS.md → "A component that renders on two
+pages keeps its strings in `common`"). That also settles the cross-namespace
+problem those two would otherwise have posed: `components/chat/` is registered
+by the student pages, and the teacher's chat card mounts both of them. Prompt 3
+still owns `ChatDemoControls.tsx` and `LobbyDemoControls.tsx`, which are
+student-only. `DemoBanner` needed two keys rather than a `<Trans>` — the "Start
+your own" link is a trailing CTA, not a fragment inside the sentence.
+
 1. **Fill `locales/{en,he}/student.ts` and `chat.ts`.** The six `title.*` keys
    and `join.meta.description` are already in `student`.
 2. **`pages/student/join/`** — `JoinGateCard.tsx`, `ActivityGoneCard.tsx`,
@@ -258,7 +270,11 @@ Check for horizontal overflow on both. `pnpm format`, one commit, box ticked.
    `{count}/{MAX}` counter. `<bdi>` around `formatSecondsAsClock` in
    `PeerReconnectBanner`.
 10. **`emoji-picker-react` has zero RTL support** (`grep -o "rtl"` over its
-    bundle hits only the substring inside "turtle"). Wrap `<EmojiPicker>` in
+    bundle hits only the substring inside "turtle"). **This one is not
+    student-only:** the setup form's character rows open the same picker, so
+    its English "Search" and category names are the last English a Hebrew
+    teacher can reach. Prompt 2 checked the popover's RTL anchoring and left
+    the picker's own chrome here. Wrap `<EmojiPicker>` in
     `<div dir="ltr">` — correct anyway, it's a grid of pictures rather than
     prose. Its `searchPlaceHolder`, `searchClearButtonLabel`, and
     `categories[].name` **are** translatable; "No results found" and the a11y
@@ -337,6 +353,10 @@ English prose.
    `Intl.ListFormat`, **pinned to the `Locale` value, never `navigator.language`**
    — `en-GB` drops the Oxford comma, which would make the rendered output depend
    on the machine the browser runs on. It reproduces the current English exactly.
+   **`lib/names.ts` already exists**: prompt 2 needed it for the rail's two
+   client-authored sentences, so only the `shared` half is left (and prompt 6
+   deletes it outright). It isolates each name before joining — a Latin name at
+   the front otherwise flips the whole list.
 8. **Locale inheritance fires only before a seat exists** — at the instant
    `lookup.state === "found"`, never once a session is in sessionStorage.
    `/` and `/he` are separate `<Route>` mounts, so the redirect gives the page a

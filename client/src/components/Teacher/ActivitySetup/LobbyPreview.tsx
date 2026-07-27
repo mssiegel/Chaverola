@@ -1,3 +1,5 @@
+import { useTranslation } from "react-i18next";
+
 import { TypingDots } from "@/components/chat/TypingDots";
 import { MaskDoodle, SparkleDoodle } from "@/components/decor/doodles";
 import { SectionLabel } from "@/components/ui/section-label";
@@ -23,13 +25,14 @@ export function LobbyPreview({
   studentInstructions,
   characters,
 }: LobbyPreviewProps) {
+  const { t } = useTranslation("teacher");
   const cast = characters.filter(isFilledCharacter);
   const host = hostName.trim();
   const instructions = studentInstructions.trim();
 
   return (
     <div>
-      <SectionLabel>What students see</SectionLabel>
+      <SectionLabel>{t("preview.label")}</SectionLabel>
 
       <div className="student-world-bg relative mt-3 overflow-hidden rounded-3xl p-4 shadow-md">
         {/* Static scatter of the student world's doodles — decoration only. */}
@@ -45,20 +48,20 @@ export function LobbyPreview({
             lobby, with the info card below it. */}
         <div className="relative flex flex-col items-center gap-3 pt-1.5">
           <div className="inline-flex items-center gap-2 rounded-full border border-brand-grape/25 bg-brand-grape-soft px-3 py-1.5 text-xs font-semibold text-brand-grape-strong">
-            Waiting for your match
+            {t("preview.waiting")}
             <TypingDots dotClassName="bg-brand-mint" aria-hidden />
           </div>
 
           <div className="w-full space-y-4 rounded-2xl bg-card/95 p-4 shadow-sm">
             <div>
-              <SectionLabel>Hosted by</SectionLabel>
+              <SectionLabel>{t("preview.hostedBy")}</SectionLabel>
               <p className="mt-0.5 text-sm font-medium text-foreground">
-                {host || "…"}
+                <bdi>{host || "…"}</bdi>
               </p>
             </div>
 
             <div>
-              <SectionLabel>Characters in this activity</SectionLabel>
+              <SectionLabel>{t("preview.characters")}</SectionLabel>
               {cast.length > 0 ? (
                 <ul className="mt-2 flex flex-wrap gap-1.5">
                   {cast.map((character) => (
@@ -66,22 +69,22 @@ export function LobbyPreview({
                       key={character.id}
                       className="inline-flex items-center gap-1.5 rounded-full bg-secondary px-2.5 py-1 text-xs font-medium text-secondary-foreground"
                     >
-                      {character.name.trim()}
+                      <bdi>{character.name.trim()}</bdi>
                     </li>
                   ))}
                 </ul>
               ) : (
                 <p className="mt-1 text-sm text-muted-foreground italic">
-                  Your characters show up here once you name them.
+                  {t("preview.charactersEmpty")}
                 </p>
               )}
             </div>
 
             {instructions && (
               <div>
-                <SectionLabel>Instructions</SectionLabel>
+                <SectionLabel>{t("preview.instructions")}</SectionLabel>
                 <p className="mt-0.5 text-sm leading-relaxed text-foreground">
-                  {instructions}
+                  <bdi>{instructions}</bdi>
                 </p>
               </div>
             )}
@@ -90,7 +93,7 @@ export function LobbyPreview({
       </div>
 
       <p className="mt-2.5 text-xs leading-relaxed text-muted-foreground">
-        This is the lobby your class waits in. It fills in as you type.
+        {t("preview.caption")}
       </p>
     </div>
   );

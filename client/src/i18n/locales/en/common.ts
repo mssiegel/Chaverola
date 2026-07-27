@@ -20,6 +20,39 @@ export const common = {
   "dialog.close": "Close",
   "dialog.dismiss": "Dismiss",
 
+  // The teacher's monitoring chat card. Here rather than in `teacher` because
+  // the homepage renders the real card too (TeacherViewSection's live
+  // preview), and a page-scoped namespace would make one of the two pay for
+  // the other's chunk. See DECISIONS.md → "The chat card's strings live in
+  // the common namespace".
+  "card.as": " as ",
+  "card.live": "Live",
+  "card.paused": "Paused",
+  "card.ended": "Ended",
+  "card.fullChat": "Full chat",
+  "card.minimize": "Minimize",
+  "card.remove": "Remove {{name, bidi}} from this chat",
+
+  // The lost-connection tag, shared by the card's roster and the queue rows.
+  lostConnection: "lost connection",
+
+  // The demo furniture. Here for the same reason as the card: the banner and
+  // the steering panel are mounted by the teacher's host page and the student
+  // world alike, and neither namespace covers both.
+  "demo.banner": "This is the demo class. The students are pretend.",
+  "demo.bannerStudent": "This is the demo. The other students are pretend.",
+  "demo.startYourOwn": "Start your own",
+  "demo.driving": "You're driving this demo",
+
+  // The end-a-chat confirmation. Shared by the teacher's card and the student
+  // chatbox; the seat-specific half of it rides here too, because the card
+  // keeps the dialog mounted even on the homepage, where `teacher` isn't.
+  "endChat.title": "End this chat?",
+  "endChat.confirm": "End chat",
+  "endChat.hostBody":
+    "The students will see the chat is over and can head back to the lobby. There's no reopening it.",
+  "endChat.hostCancel": "Let them keep chatting",
+
   "notFound.pageTitle": "Page Not Found",
   "notFound.eyebrow": "404",
   "notFound.title": "Nothing here 🫥",

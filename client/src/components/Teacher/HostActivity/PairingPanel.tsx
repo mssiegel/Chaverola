@@ -1,4 +1,5 @@
 import { useId } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Check,
   Info,
@@ -9,15 +10,22 @@ import {
   Zap,
 } from "lucide-react";
 
-import { listNames } from "@chaverola/shared";
-
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { formatWaitShort } from "@/lib/time";
+import { useLocale } from "@/lib/locale";
+import { listNames } from "@/lib/names";
+import { splitWaitShort, type WaitUnit } from "@/lib/time";
 import { cn } from "@/lib/utils";
 
 import { EmptyState } from "./EmptyState";
 import type { WaitingStudent } from "./hostWorld";
+
+/** The wait chip's unit → its catalog key. `as const satisfies` keeps the
+ *  literals, which is what lets the `t()` below check. */
+const WAIT_KEYS = {
+  seconds: "pairing.wait.seconds",
+  minutes: "pairing.wait.minutes",
+} as const satisfies Record<WaitUnit, `pairing.wait.${string}`>;
 
 export interface PairingPanelProps {
   waiting: WaitingStudent[];
@@ -89,6 +97,8 @@ export function PairingPanel({
   showHoldNotice,
   onDismissHoldNotice,
 }: PairingPanelProps) {
+  const { t } = useTranslation(["teacher", "common"]);
+  const locale = useLocale();
   const selectionFull = selectedIds.length >= maxGroupSize;
   // Rows list everyone; counts and CTAs follow who the server would actually
   // pair. Derived here rather than passed in, so the button and the number
@@ -122,15 +132,14 @@ export function PairingPanel({
             <Zap aria-hidden className="mt-0.5 size-4 shrink-0" />
             <span className="min-w-0 flex-1">
               {connectedCount === 0
-                ? "Auto-match is off. Students land back here as their chats wrap up."
-                : connectedCount === 1
-                  ? "1 student is waiting, and auto-match is off."
-                  : `${connectedCount} students are waiting, and auto-match is off.`}
+                ? // Zero is its own sentence, not a plural form.
+                  t("pairing.hold.none")
+                : t("pairing.hold.waiting", { count: connectedCount })}
             </span>
             <button
               type="button"
               onClick={onDismissHoldNotice}
-              aria-label="Dismiss"
+              aria-label={t("common:dialog.dismiss")}
               className="grid size-6 shrink-0 place-items-center rounded-full text-amber-700 transition-colors hover:bg-amber-100"
             >
               <X className="size-3.5" />
@@ -143,7 +152,7 @@ export function PairingPanel({
             className="mt-2 w-full border-amber-300 bg-white text-amber-900 hover:bg-amber-100 hover:text-amber-900"
           >
             <Zap aria-hidden />
-            Turn auto-match back on
+            {t("pairing.hold.turnOn")}
           </Button>
         </div>
       )}
@@ -155,10 +164,10 @@ export function PairingPanel({
               📣
             </p>
             <p className="mt-1 font-semibold text-foreground">
-              No students yet
+              {t("pairing.empty.noStudents.title")}
             </p>
             <p className="mt-1 text-sm text-muted-foreground">
-              Read out the pin and they'll show up here as they join.
+              {t("pairing.empty.noStudents.body")}
             </p>
           </EmptyState>
         ) : (
@@ -167,10 +176,10 @@ export function PairingPanel({
               🎉
             </p>
             <p className="mt-1 font-semibold text-foreground">
-              Everyone's chatting
+              {t("pairing.empty.chatting.title")}
             </p>
             <p className="mt-1 text-sm text-muted-foreground">
-              Students come back here once their chats end.
+              {t("pairing.empty.chatting.body")}
             </p>
           </EmptyState>
         )
@@ -190,7 +199,7 @@ export function PairingPanel({
               className="w-full"
             >
               <UsersRound aria-hidden />
-              Pair everyone 1:1
+              {t("pairing.pairEveryone")}
             </Button>
             <Button
               onClick={onStartChat}
@@ -198,21 +207,24 @@ export function PairingPanel({
               className="w-full"
             >
               <Sparkles aria-hidden />
-              Start their chat
               {actionableSelectedIds.length >= 2
-                ? ` (${actionableSelectedIds.length})`
-                : ""}
+                ? t("pairing.startWithCount", {
+                    selected: actionableSelectedIds.length,
+                  })
+                : t("pairing.start")}
             </Button>
             {parkedNames.length > 0 && (
               <p role="status" className="text-xs text-amber-700">
-                Waiting on {listNames(parkedNames)} to reconnect.
+                {t("pairing.parked", {
+                  names: listNames(parkedNames, locale),
+                })}
               </p>
             )}
           </div>
           <p className="-mt-2 text-xs text-muted-foreground lg:-mt-4">
-            Tap two students to pair them
-            {maxGroupSize > 2 ? `, or up to ${maxGroupSize} for a group` : ""}.
-            Characters get dealt out randomly.
+            {maxGroupSize > 2
+              ? t("pairing.tapHintGroup", { max: maxGroupSize })
+              : t("pairing.tapHint")}
           </p>
 
           {rematchWarning && (
@@ -220,6 +232,7 @@ export function PairingPanel({
               role="status"
               className="flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2.5 text-sm text-amber-800"
             >
+              {/* No flip-rtl: Repeat2 is a cycle, not a direction. */}
               <Repeat2 aria-hidden className="mt-0.5 size-4 shrink-0" />
               <span>{rematchWarning}</span>
             </div>
@@ -235,11 +248,15 @@ export function PairingPanel({
               className="flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2.5 text-sm text-amber-800"
             >
               <Info aria-hidden className="mt-0.5 size-4 shrink-0" />
+              {/* TODO(prompt 4): this notice is prose authored elsewhere (the
+                  server for a real activity, hostWorld for the demo), so it
+                  stays English under /he. Prompt 4 turns it into a structured
+                  `railNotice` the client renders from the catalog. */}
               <span className="min-w-0 flex-1">{rematchNotice}</span>
               <button
                 type="button"
                 onClick={onDismissRematchNotice}
-                aria-label="Dismiss"
+                aria-label={t("common:dialog.dismiss")}
                 className="grid size-6 shrink-0 place-items-center rounded-full text-amber-700 transition-colors hover:bg-amber-100"
               >
                 <X className="size-3.5" />
@@ -252,6 +269,7 @@ export function PairingPanel({
               const selected = selectedIds.includes(student.id);
               const isLeftover = student.id === leftoverStudentId;
               const dropped = student.connection === "reconnecting";
+              const wait = splitWaitShort(student.waitSeconds);
               // Both tags never show at once — a dropped student can't be
               // paired, so "first in line" would be an empty promise.
               const rowContent = (
@@ -268,20 +286,20 @@ export function PairingPanel({
                     {selected && <Check className="size-3" />}
                   </span>
                   <span className="min-w-0 flex-1 truncate text-sm font-medium text-foreground">
-                    {student.realName}
+                    <bdi>{student.realName}</bdi>
                   </span>
                   {isLeftover && !dropped && (
                     <span className="shrink-0 rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-semibold text-amber-800">
-                      first in line
+                      {t("pairing.firstInLine")}
                     </span>
                   )}
                   {dropped && (
                     <span className="shrink-0 rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-semibold text-amber-800">
-                      lost connection
+                      {t("common:lostConnection")}
                     </span>
                   )}
                   <span className="shrink-0 text-xs text-muted-foreground tabular-nums">
-                    {formatWaitShort(student.waitSeconds)}
+                    {t(WAIT_KEYS[wait.unit], { value: wait.value })}
                   </span>
                 </>
               );
@@ -322,7 +340,9 @@ export function PairingPanel({
                   <button
                     type="button"
                     onClick={() => onRequestRemove(student)}
-                    aria-label={`Remove ${student.realName} from the activity`}
+                    aria-label={t("pairing.remove", {
+                      name: student.realName,
+                    })}
                     className="grid size-8 shrink-0 place-items-center rounded-lg text-muted-foreground/70 transition-colors hover:bg-destructive/10 hover:text-destructive"
                   >
                     <X className="size-4" />
@@ -350,10 +370,10 @@ export function PairingPanel({
           className="min-w-0 flex-1 cursor-pointer text-xs leading-relaxed text-muted-foreground"
         >
           {!autoMatchOn
-            ? "Auto-match is off: students wait here until you pair them."
+            ? t("pairing.autoMatch.off")
             : paused
-              ? "Auto-match is on hold while chats are paused."
-              : `Auto-match is on: students pair up on their own after waiting ${autoMatchSeconds} seconds.`}
+              ? t("pairing.autoMatch.paused")
+              : t("pairing.autoMatch.on", { seconds: autoMatchSeconds })}
         </label>
         <Switch
           id={autoMatchSwitchId}

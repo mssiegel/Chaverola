@@ -91,9 +91,7 @@ export function validateLiveDraft(
     if (row.name.trim() === "" && committedCharacterIds.has(row.id)) {
       problems.push({
         field: `character-${index}`,
-        message:
-          "Your class already has this character, so it needs a name. " +
-          "To drop a character, use the remove button on rows 3 and 4.",
+        messageKey: "problem.characterInUse",
       });
     }
   });

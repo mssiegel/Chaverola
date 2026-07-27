@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { ArrowRight } from "lucide-react";
 
 import { LocaleLink } from "@/components/layout/LocaleLink";
@@ -28,10 +29,14 @@ import { LocaleLink } from "@/components/layout/LocaleLink";
  * spares the pinning from having to follow the collapsed pad.)
  */
 export function DemoBanner({ onWorld = false }: { onWorld?: boolean }) {
+  // `common`: this banner pins over the teacher's host page and the student
+  // world, so neither page namespace covers both of its mounts.
+  const { t } = useTranslation("common");
+
   if (onWorld) {
     return (
       <p className="sticky top-[max(5rem,calc(4rem+env(safe-area-inset-top)))] z-10 w-full rounded-2xl bg-brand-sun px-4 py-2.5 text-center text-sm font-semibold text-brand-grape-strong shadow-lg max-sm:group-has-[textarea:focus]:hidden sm:text-base">
-        This is the demo. The other students are pretend.
+        {t("demo.bannerStudent")}
       </p>
     );
   }
@@ -41,13 +46,15 @@ export function DemoBanner({ onWorld = false }: { onWorld?: boolean }) {
   return (
     <div className="sticky top-[calc(4rem+env(safe-area-inset-top))] z-20 px-4 sm:top-[calc(4.5rem+env(safe-area-inset-top))]">
       <p className="mx-auto flex w-fit max-w-full flex-wrap items-center justify-center gap-x-2 rounded-2xl bg-brand-sun px-5 py-2.5 text-center text-sm font-semibold text-foreground shadow-lg lg:py-1.5">
-        This is the demo class. The students are pretend.
+        {t("demo.banner")}
         <LocaleLink
           to="/activity/create"
           className="inline-flex items-center gap-1 font-bold text-brand-grape-strong underline underline-offset-2 hover:text-brand-grape"
         >
-          Start your own
-          <ArrowRight className="size-3.5" />
+          {t("demo.startYourOwn")}
+          {/* flip-rtl: this arrow means "onwards", so it has to point the
+              way the page reads. */}
+          <ArrowRight className="flip-rtl size-3.5" />
         </LocaleLink>
       </p>
     </div>

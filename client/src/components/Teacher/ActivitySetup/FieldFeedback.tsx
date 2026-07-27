@@ -1,3 +1,5 @@
+import { useTranslation } from "react-i18next";
+
 import { cn } from "@/lib/utils";
 
 /**
@@ -15,6 +17,7 @@ export function FieldLabelRow({
   optional?: boolean;
   children?: React.ReactNode;
 }) {
+  const { t } = useTranslation("teacher");
   return (
     <div className="mb-1.5 flex items-baseline justify-between gap-2">
       <label
@@ -24,7 +27,7 @@ export function FieldLabelRow({
         {label}
         {optional && (
           <span className="ms-1.5 font-normal text-muted-foreground">
-            (optional)
+            {t("setup.optionalTag")}
           </span>
         )}
       </label>
@@ -76,7 +79,10 @@ export function LimitCounter({
 }) {
   if (count < showFrom) return null;
   return (
+    // dir="ltr": "26/30" is two digit runs around a neutral slash, which an
+    // RTL line would otherwise lay out as "30/26".
     <span
+      dir="ltr"
       className={cn(
         "shrink-0 text-xs font-semibold tabular-nums",
         count >= max ? "text-destructive" : "text-muted-foreground",

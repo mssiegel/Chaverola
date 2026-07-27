@@ -226,6 +226,8 @@ git: `git log -- DECISIONS.md`.
   - _Superseded_
     - [Demo surfaces say so: a pretend-students chip on both views](docs/decisions/demo-flows.md#demo-surfaces-say-so-a-pretend-students-chip-on-both-views)
 - [Routes & app structure](docs/decisions/routes.md)
+  - [A component that renders on two pages keeps its strings in `common`](docs/decisions/routes.md#a-component-that-renders-on-two-pages-keeps-its-strings-in-common)
+  - [Name lists are joined by `Intl.ListFormat`, pinned to the app's locale](docs/decisions/routes.md#name-lists-are-joined-by-intllistformat-pinned-to-the-apps-locale)
   - [`/he` is Hebrew and right-to-left; English stays unprefixed](docs/decisions/routes.md#he-is-hebrew-and-right-to-left-english-stays-unprefixed)
   - [Locale is detected once at boot and remembered, and the URL always wins](docs/decisions/routes.md#locale-is-detected-once-at-boot-and-remembered-and-the-url-always-wins)
   - [The language switcher disappears once a student is seated](docs/decisions/routes.md#the-language-switcher-disappears-once-a-student-is-seated)

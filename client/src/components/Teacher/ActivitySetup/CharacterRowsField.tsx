@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Plus, X } from "lucide-react";
 
 import {
@@ -18,13 +19,17 @@ export interface CharacterRowState extends CharacterDraft {
   id: string;
 }
 
-/** Placeholder ideas, one per row — same cast as the Rome demo activity. */
-const ROW_PLACEHOLDERS = [
-  "Caesar's ghost",
-  "Brutus",
-  "Cleopatra",
-  "Marc Antony",
-];
+/**
+ * Placeholder ideas, one per row — catalog KEYS, because the cast is example
+ * content rather than copy: each locale gets the roster its own classroom
+ * would recognise (the Rome demo's in English, 1948 Tel Aviv's in Hebrew).
+ */
+const ROW_PLACEHOLDER_KEYS = [
+  "characters.placeholder1",
+  "characters.placeholder2",
+  "characters.placeholder3",
+  "characters.placeholder4",
+] as const satisfies readonly `characters.placeholder${number}`[];
 
 interface CharacterRowsFieldProps {
   rows: CharacterRowState[];
@@ -55,10 +60,12 @@ export function CharacterRowsField({
   problemFor,
   registerField,
 }: CharacterRowsFieldProps) {
+  const { t } = useTranslation("teacher");
   return (
     <div className="flex flex-col gap-3">
       {rows.map((row, index) => {
         const error = problemFor(`character-${index}`);
+        const placeholderKey = ROW_PLACEHOLDER_KEYS[index];
         const count = charCount(row.name);
         const removable = index >= MIN_CHARACTERS;
         return (
@@ -67,9 +74,11 @@ export function CharacterRowsField({
               <CharacterNameField
                 value={row.name}
                 onChange={(name) => onUpdate(row.id, { name })}
-                placeholder={ROW_PLACEHOLDERS[index] ?? "Another character"}
-                label={`Character ${index + 1} name`}
-                emojiButtonLabel={`Add an emoji to character ${index + 1}`}
+                placeholder={t(placeholderKey ?? "characters.placeholderExtra")}
+                label={t("characters.nameLabel", { number: index + 1 })}
+                emojiButtonLabel={t("characters.emojiLabel", {
+                  number: index + 1,
+                })}
                 invalid={Boolean(error)}
                 registerRef={registerField(`character-${index}`)}
               />
@@ -93,7 +102,9 @@ export function CharacterRowsField({
               <button
                 type="button"
                 onClick={() => onRemove(row.id)}
-                aria-label={`Remove character ${index + 1}`}
+                aria-label={t("characters.removeLabel", {
+                  number: index + 1,
+                })}
                 className="mt-2 grid size-8 shrink-0 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
               >
                 <X className="size-4" />
@@ -114,7 +125,7 @@ export function CharacterRowsField({
           className="flex h-12 w-full items-center justify-center gap-2 rounded-xl border border-dashed border-input text-sm font-semibold text-muted-foreground transition-colors hover:border-brand-grape/60 hover:bg-brand-grape-soft/40 hover:text-brand-grape"
         >
           <Plus className="size-4" aria-hidden />
-          Add a character
+          {t("characters.add")}
         </button>
       )}
     </div>

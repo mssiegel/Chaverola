@@ -36,13 +36,12 @@ export function CreateActivityPage() {
 
       <div className="mx-auto w-full max-w-2xl px-4 pt-8 pb-36 sm:pt-10 lg:max-w-5xl">
         <header className="mb-6 sm:mb-8">
-          <Badge>For teachers</Badge>
+          <Badge>{t("setup.badge")}</Badge>
           <h1 className="mt-3 text-3xl font-semibold text-foreground sm:text-4xl">
-            Set up your activity
+            {t("setup.title")}
           </h1>
           <p className="mt-2 max-w-xl text-muted-foreground">
-            Setup takes about a minute. Host it and you'll get the 4-digit code
-            your class joins with.
+            {t("setup.body")}
           </p>
         </header>
         <ActivitySetupForm />

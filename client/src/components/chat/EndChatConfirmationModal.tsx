@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { LogOut } from "lucide-react";
 
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
@@ -23,18 +24,22 @@ export function EndChatConfirmationModal({
   description,
   cancelLabel,
 }: EndChatConfirmationModalProps) {
+  // `common`: this dialog is mounted by the teacher's chat card, which the
+  // homepage renders too.
+  const { t } = useTranslation("common");
   return (
     <ConfirmDialog
       open={open}
       onOpenChange={onOpenChange}
       onConfirm={onConfirm}
-      title="End this chat?"
+      title={t("endChat.title")}
       description={description}
       cancelLabel={cancelLabel}
       confirmLabel={
         <>
-          <LogOut className="size-4" />
-          End chat
+          {/* flip-rtl: a door-and-arrow glyph reads as "out this way". */}
+          <LogOut className="flip-rtl size-4" />
+          {t("endChat.confirm")}
         </>
       }
     />

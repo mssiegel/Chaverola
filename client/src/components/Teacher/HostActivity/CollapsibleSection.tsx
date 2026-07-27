@@ -23,8 +23,10 @@ interface CollapsibleSectionProps {
   accent: SectionAccent;
   /** Shown as a pill after the title (e.g. the number of chats). */
   count?: number;
-  /** One line under the title that earns the collapsed state its keep. */
-  collapsedHint?: string;
+  /** One line under the title that earns the collapsed state its keep.
+   *  A node, not a string: the joining instructions' hint carries a `dir`
+   *  wrapper around the domain it names. */
+  collapsedHint?: ReactNode;
   defaultOpen?: boolean;
   children: ReactNode;
 }
@@ -70,6 +72,8 @@ export function CollapsibleSection({
               </span>
             )}
           </span>
+          {/* No flip-rtl: a vertical chevron points at the content below it,
+              and that direction is the same in every language. */}
           <ChevronDown
             aria-hidden
             className={cn(

@@ -1,9 +1,15 @@
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Link2, Megaphone } from "lucide-react";
 
 import { useLocalePath } from "@/lib/locale";
 
 import { CollapsibleSection } from "./CollapsibleSection";
+
+/** The address students hear, spoken and written. Latin in every locale, so
+ *  every rendering of it carries `dir="ltr"` — an RTL line otherwise lays it
+ *  out as `com.chaverola.www`. */
+const SPOKEN_DOMAIN = "www.chaverola.com";
 
 /**
  * How students get in: the pin, said out loud or written on the board —
@@ -12,6 +18,7 @@ import { CollapsibleSection } from "./CollapsibleSection";
  * no-projection principle; see DECISIONS.md).
  */
 export function JoiningInstructions({ joinCode }: { joinCode: string }) {
+  const { t } = useTranslation(["teacher", "common"]);
   const localePath = useLocalePath();
   const [copied, setCopied] = useState(false);
   const copiedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -39,15 +46,26 @@ export function JoiningInstructions({ joinCode }: { joinCode: string }) {
 
   return (
     <CollapsibleSection
-      title="Student joining instructions"
+      title={t("joining.title")}
       icon={Megaphone}
       accent="sky"
-      collapsedHint={`Pin ${joinCode} · students join at www.chaverola.com`}
+      collapsedHint={
+        <>
+          {t("joining.hint.pin", { code: joinCode })} · {t("joining.hint.site")}{" "}
+          <span dir="ltr">{SPOKEN_DOMAIN}</span>
+        </>
+      }
     >
       <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
-        <div className="shrink-0 rounded-2xl border-2 border-dashed border-brand-grape/40 bg-brand-grape-soft/50 px-8 py-4 text-center">
+        {/* dir="ltr" on the tile: `tracking-[0.2em]` puts a letter-space
+            after the last digit, and an RTL box lands that gap on the
+            wrong edge, shunting the pin off-centre. */}
+        <div
+          dir="ltr"
+          className="shrink-0 rounded-2xl border-2 border-dashed border-brand-grape/40 bg-brand-grape-soft/50 px-8 py-4 text-center"
+        >
           <span className="block text-xs font-bold tracking-wide text-brand-grape-strong/80 uppercase">
-            Activity pin
+            {t("joining.pinLabel")}
           </span>
           <span className="block text-4xl font-bold tracking-[0.2em] text-brand-grape-strong tabular-nums sm:text-5xl">
             {joinCode}
@@ -55,26 +73,31 @@ export function JoiningInstructions({ joinCode }: { joinCode: string }) {
         </div>
 
         <div className="min-w-0 flex-1">
-          <p className="font-semibold text-foreground">Tell your class:</p>
+          <p className="font-semibold text-foreground">
+            {t("joining.tellClass")}
+          </p>
+          {/* The markers are hand-written, so each one carries its own
+              dir="ltr" — "1." is a digit next to a neutral full stop, which
+              an RTL line renders as ".1". */}
           <ol className="mt-1.5 space-y-1 text-sm text-muted-foreground">
             <li>
-              1. Go to{" "}
-              <span className="font-semibold text-foreground">
-                www.chaverola.com
+              <span dir="ltr">1.</span> {t("joining.step1")}{" "}
+              <span dir="ltr" className="font-semibold text-foreground">
+                {SPOKEN_DOMAIN}
               </span>
             </li>
             <li>
-              2. Tap{" "}
+              <span dir="ltr">2.</span> {t("joining.step2")}{" "}
               <span className="font-semibold text-foreground">
-                Join an Activity
+                {t("common:nav.joinLong")}
               </span>
             </li>
-            <li>3. Type in the pin</li>
+            <li>
+              <span dir="ltr">3.</span> {t("joining.step3")}
+            </li>
           </ol>
           <p className="mt-2.5 text-sm text-muted-foreground">
-            Say the pin out loud or write it on the board. Keep your screen to
-            yourself, because any student who sees your screen will know who
-            they're about to chat with.
+            {t("joining.body")}
           </p>
           <button
             type="button"
@@ -82,7 +105,7 @@ export function JoiningInstructions({ joinCode }: { joinCode: string }) {
             className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-brand-grape underline-offset-4 transition-colors hover:text-brand-grape-strong hover:underline"
           >
             <Link2 aria-hidden className="size-4" />
-            {copied ? "Copied!" : "Copy the student join link"}
+            {copied ? t("joining.copied") : t("joining.copy")}
           </button>
         </div>
       </div>

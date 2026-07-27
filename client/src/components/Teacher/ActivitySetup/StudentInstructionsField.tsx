@@ -1,3 +1,5 @@
+import { useTranslation } from "react-i18next";
+
 import { STUDENT_INSTRUCTIONS_MAX_CHARS } from "@chaverola/shared";
 import { Textarea } from "@/components/ui/textarea";
 import { STUDENT_INSTRUCTIONS_COUNTER_FROM } from "@/lib/activitySetup";
@@ -18,6 +20,7 @@ export function StudentInstructionsField({
   value: string;
   onChange: (studentInstructions: string) => void;
 }) {
+  const { t } = useTranslation("teacher");
   const count = charCount(value);
   return (
     <>
@@ -29,8 +32,8 @@ export function StudentInstructionsField({
             clampChars(event.target.value, STUDENT_INSTRUCTIONS_MAX_CHARS)
           )
         }
-        aria-label="Student instructions"
-        placeholder="Rome, 44 BC, the night before the Ides of March…"
+        aria-label={t("setup.instructions.title")}
+        placeholder={t("instructions.placeholder")}
       />
       {count >= STUDENT_INSTRUCTIONS_COUNTER_FROM && (
         <div className="mt-1.5 flex justify-end">

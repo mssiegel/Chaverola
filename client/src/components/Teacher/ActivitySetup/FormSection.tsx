@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 import type { LucideIcon } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -70,6 +71,7 @@ export function FormSection({
   quiet,
   children,
 }: FormSectionProps) {
+  const { t } = useTranslation("teacher");
   return (
     <section
       className={cn(
@@ -86,7 +88,7 @@ export function FormSection({
             {title}
             {optional && (
               <span className="ms-2 text-sm font-normal text-muted-foreground">
-                optional
+                {t("setup.optional")}
               </span>
             )}
           </h2>

@@ -1,3 +1,4 @@
+import { Trans, useTranslation } from "react-i18next";
 import { LogOut, MessagesSquare, Pause, Play, UsersRound } from "lucide-react";
 
 import { ChatCard } from "@/components/Teacher/ChatCard";
@@ -46,18 +47,19 @@ export function ChatsInProgressSection({
   onRequestRemoveParticipant,
   onPairEveryone,
 }: ChatsInProgressSectionProps) {
+  const { t } = useTranslation("teacher");
   return (
     <CollapsibleSection
-      title="Chats in progress"
+      title={t("chats.title")}
       icon={MessagesSquare}
       accent="coral"
       count={chats.length}
       collapsedHint={
         chats.length === 0
-          ? "No chats going right now"
+          ? t("chats.hint.none")
           : paused
-            ? `Paused: ${studentsChattingCount} students mid-chat`
-            : `${studentsChattingCount} students chatting right now`
+            ? t("chats.hint.paused", { count: studentsChattingCount })
+            : t("chats.hint.active", { count: studentsChattingCount })
       }
     >
       {chats.length === 0 ? (
@@ -65,22 +67,26 @@ export function ChatsInProgressSection({
         // clear the pause), so Resume must stay reachable here too.
         paused ? (
           <EmptyState className="py-8">
-            <p className="font-semibold text-foreground">Still paused</p>
+            <p className="font-semibold text-foreground">
+              {t("chats.empty.paused.title")}
+            </p>
             <p className="mx-auto mt-1 max-w-sm text-sm text-muted-foreground">
-              The chats are over, but the class is still paused. Nobody gets
-              matched again until you resume.
+              {t("chats.empty.paused.body")}
             </p>
             <Button className="mt-4" onClick={onResumeAll}>
+              {/* No flip-rtl on Play: it's a transport control, and those
+                  keep their shape in every language. */}
               <Play aria-hidden />
-              Resume
+              {t("chats.resume")}
             </Button>
           </EmptyState>
         ) : (
           <EmptyState className="py-8">
-            <p className="font-semibold text-foreground">No chats yet</p>
+            <p className="font-semibold text-foreground">
+              {t("chats.empty.none.title")}
+            </p>
             <p className="mx-auto mt-1 max-w-sm text-sm text-muted-foreground">
-              Pair two students in the queue, or start the whole round in one
-              tap.
+              {t("chats.empty.none.body")}
             </p>
             <Button
               variant="outline"
@@ -89,24 +95,31 @@ export function ChatsInProgressSection({
               disabled={waitingCount < 2}
             >
               <UsersRound aria-hidden />
-              Pair everyone 1:1
+              {t("pairing.pairEveryone")}
             </Button>
           </EmptyState>
         )
       ) : (
         <>
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+            {/* <Trans> because the bold count sits mid-sentence and where
+                in the sentence it lands is a word-order decision — Hebrew
+                spells out one and two instead of printing a digit. */}
             <p className="text-sm text-muted-foreground">
-              <span className="font-semibold text-foreground">
-                {studentsChattingCount}
-              </span>{" "}
-              students chatting
+              <Trans
+                t={t}
+                i18nKey="chats.chatting"
+                count={studentsChattingCount}
+                components={{
+                  1: <span className="font-semibold text-foreground" />,
+                }}
+              />
             </p>
             <div className="flex flex-wrap items-center gap-2">
               {paused ? (
                 <Button size="sm" onClick={onResumeAll}>
                   <Play aria-hidden />
-                  Resume
+                  {t("chats.resume")}
                 </Button>
               ) : (
                 <Button
@@ -116,7 +129,7 @@ export function ChatsInProgressSection({
                   className="border-amber-400/60 text-amber-700 hover:bg-amber-50 hover:text-amber-800"
                 >
                   <Pause aria-hidden />
-                  Pause all chats
+                  {t("chats.pauseAll")}
                 </Button>
               )}
               <Button
@@ -125,8 +138,9 @@ export function ChatsInProgressSection({
                 onClick={onRequestEndAll}
                 className="border-destructive/40 text-destructive hover:bg-destructive/10 hover:text-destructive"
               >
-                <LogOut aria-hidden />
-                End all chats
+                {/* flip-rtl: a door-and-arrow glyph reads as "out this way". */}
+                <LogOut aria-hidden className="flip-rtl" />
+                {t("chats.endAll")}
               </Button>
             </div>
           </div>
@@ -136,10 +150,7 @@ export function ChatsInProgressSection({
               className="mb-4 flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2.5 text-sm text-amber-800"
             >
               <Pause aria-hidden className="mt-0.5 size-4 shrink-0" />
-              <span>
-                Chats are paused. Students can read their chat but can't type
-                until you resume.
-              </span>
+              <span>{t("chats.pausedNotice")}</span>
             </div>
           )}
           <div className="grid items-start gap-4 md:grid-cols-2">
@@ -159,7 +170,7 @@ export function ChatsInProgressSection({
                 // Unconditional — on a freshly paired demo chat it shows for
                 // a beat until the first scripted line, and it's just as
                 // true there.
-                emptyHint="No messages yet. They'll show up here as students type."
+                emptyHint={t("chats.emptyHint")}
                 inactiveParticipantIds={new Set(chat.inactiveStudentIds)}
                 reconnectingParticipantIds={
                   new Set(chat.reconnectingStudentIds ?? [])
