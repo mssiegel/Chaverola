@@ -7,7 +7,7 @@ import {
 import type { LobbyConnectionState, RailNotice } from "@chaverola/shared";
 
 import { nextId, randInt } from "@/lib/random";
-import { HOST_SEED_CHATS, HOST_STUDENT_NAMES } from "@/mockData";
+import type { HostDemoCast } from "@/mockData";
 import type { HostedActivity } from "@/types/activity";
 import type {
   ChatEndReason,
@@ -352,9 +352,18 @@ export function tickWorld(w: HostWorld, activity: HostedActivity): HostWorld {
   return next;
 }
 
-/** Boot the demo classroom: 2 chats going, 2 finished, 6 waiting, more coming. */
-export function seedWorld(activity: HostedActivity): HostWorld {
-  const roster: RosterStudent[] = HOST_STUDENT_NAMES.map((realName) => ({
+/**
+ * Boot the demo classroom: 2 chats going, 2 finished, 6 waiting, more coming.
+ *
+ * The class arrives as a parameter rather than a module import because it is
+ * locale-dependent now, and this module is pure with no React — it cannot
+ * call `useDemoContent()`. `useHostActivityDemo` can, and threads it in.
+ */
+export function seedWorld(
+  activity: HostedActivity,
+  cast: HostDemoCast
+): HostWorld {
+  const roster: RosterStudent[] = cast.studentNames.map((realName) => ({
     id: nextId("student"),
     realName,
   }));
@@ -364,7 +373,7 @@ export function seedWorld(activity: HostedActivity): HostWorld {
   const lastPartners: Record<string, string[]> = {};
   const queue: WaitingStudent[] = [];
 
-  for (const seed of HOST_SEED_CHATS) {
+  for (const seed of cast.seedChats) {
     // A teacher-made activity may have fewer characters than a seed wants
     // (a quad needs 4); clamp the chat to the roster and keep the spare
     // students for the queue instead of crashing the demo.

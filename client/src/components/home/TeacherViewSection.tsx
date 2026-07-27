@@ -5,7 +5,7 @@ import {
   SectionHeading,
 } from "@/components/home/SectionHeading";
 import { ChatCard } from "@/components/Teacher/ChatCard";
-import { heroCopyNames } from "@/mockData";
+import { useDemoContent } from "@/lib/demoContent";
 import type { ChatMessage, Participant } from "@/types/chat";
 
 interface TeacherViewSectionProps {
@@ -31,6 +31,7 @@ export function TeacherViewSection({
   messages,
 }: TeacherViewSectionProps) {
   const { t } = useTranslation("home");
+  const { heroNames } = useDemoContent();
 
   return (
     <section className="border-y border-border/70 bg-brand-grape-soft/30">
@@ -46,12 +47,12 @@ export function TeacherViewSection({
           {/* No "this card" here: on phones the card renders well below this
               text, so spatial pointing breaks. The caption right above the
               card does the pointing instead — see DECISIONS.md. The cast's
-              names come from `heroCopyNames`, so this copy can't drift from
+              names come from the demo content, so this copy can't drift from
               the chat it describes. */}
           <p className="max-w-lg text-lg text-pretty text-muted-foreground">
             {t("teacherView.body", {
-              self: heroCopyNames.self,
-              peer: heroCopyNames.peer,
+              self: heroNames.self,
+              peer: heroNames.peer,
             })}
           </p>
 
@@ -76,8 +77,8 @@ export function TeacherViewSection({
           </div>
           <div className="mx-auto max-w-[92%] rotate-1 rounded-xl border border-border bg-card px-4 py-2.5 text-sm text-muted-foreground shadow-md">
             {t("teacherView.note", {
-              self: heroCopyNames.self,
-              seat: heroCopyNames.seat,
+              self: heroNames.self,
+              seat: heroNames.seat,
             })}
           </div>
         </div>

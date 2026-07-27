@@ -66,8 +66,11 @@ export const home: HebrewOf<HomeCatalog> = {
   "how.step1.body":
     "מקימים אחת לכל נושא שהכיתה לומדת: יחידה בהיסטוריה, מערכת השמש, מה שבא. לוקח בערך דקה.",
   "how.step2.title": "בוחרים את הדמויות",
+  // The one place the copy names the hero cast in prose rather than through
+  // an interpolation, so it follows the Hebrew recast: a lake and the man who
+  // measures it, where English keeps its Moon and astronaut.
   "how.step2.body":
-    "אתה מחליט את מי התלמידים מגלמים. דמויות מהספר שאתם קוראים, או ירח מסוים ואסטרונאוט.",
+    "אתה מחליט את מי התלמידים מגלמים. דמויות מהספר שאתם קוראים, או כנרת מסוימת ומי שמודד אותה.",
   "how.step3.title": "משתפים קוד בן 4 ספרות",
   "how.step3.body":
     "כותבים אותו על הלוח. התלמידים לוחצים על הצטרפות מכל מכשיר ומקלידים אותו.",

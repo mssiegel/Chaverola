@@ -23,9 +23,9 @@ import { TeacherViewSection } from "@/components/home/TeacherViewSection";
 import { LocaleLink } from "@/components/layout/LocaleLink";
 import { Button } from "@/components/ui/button";
 import { useChatDemo } from "@/components/chat/useChatDemo";
+import { useDemoContent } from "@/lib/demoContent";
 import { HERO_JOIN_CTA_ID } from "@/lib/useHeroCtaPassed";
 import { usePageMeta } from "@/lib/usePageMeta";
-import { heroChatScenario, heroCopyNames } from "@/mockData";
 
 /**
  * The homepage: hero (student-side live chat), the teacher's view of that
@@ -47,7 +47,8 @@ export function HomePage() {
   // navbar-grade strings this page reuses (the Join CTA).
   const { t } = useTranslation(["home", "common"]);
   usePageMeta(t("meta.title"), t("meta.description"));
-  const chat = useChatDemo(heroChatScenario);
+  const { heroNames, heroScenario } = useDemoContent();
+  const chat = useChatDemo(heroScenario);
 
   return (
     <div className="flex flex-1 flex-col">
@@ -100,17 +101,17 @@ export function HomePage() {
           </div>
         </div>
 
-        {/* Live sample chat. The cast's names come from `heroCopyNames`, so
+        {/* Live sample chat. The cast's names come from the demo content, so
             this copy can't drift from the chat rendered beside it. */}
         <div className="flex animate-in flex-col gap-3 duration-700 fade-in slide-in-from-bottom-6 motion-reduce:animate-none lg:col-start-2 lg:row-span-2 lg:row-start-1">
           <p className="text-center text-sm font-semibold text-brand-grape">
-            {t("hero.chatCaption", { self: heroCopyNames.self })}
+            {t("hero.chatCaption", { self: heroNames.self })}
           </p>
           <HeroChatbox chat={chat} />
           <div className="mx-auto max-w-[92%] -rotate-1 rounded-xl border border-border bg-card px-4 py-2.5 text-sm text-muted-foreground shadow-md">
             {t("hero.chatNote", {
-              self: heroCopyNames.self,
-              peerShort: heroCopyNames.peerShort,
+              self: heroNames.self,
+              peerShort: heroNames.peerShort,
             })}
           </div>
         </div>

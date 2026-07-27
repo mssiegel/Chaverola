@@ -6,12 +6,10 @@ import { useChatDemo } from "@/components/chat/useChatDemo";
 import { ChatDemoControls } from "@/components/demo/ChatDemoControls";
 import { EventButton } from "@/components/demo/DemoControls";
 import { Chatbox } from "@/components/Student/Chatbox";
+import { useDemoContent } from "@/lib/demoContent";
 import { scaledMs } from "@/lib/demoTime";
 import { useBackGuard } from "@/lib/useBackGuard";
-import {
-  activityChatScenarios,
-  type ActivityChatScenarioKey,
-} from "@/mockData";
+import type { ActivityChatScenarioKey } from "@/mockData";
 import { DEMO_WIFI_BLIP_MS } from "@/pages/student/join/stageTypes";
 
 interface ChatStageProps {
@@ -53,10 +51,11 @@ export function ChatStage({
   onActivityEnds,
 }: ChatStageProps) {
   const { t } = useTranslation("student");
+  const demo = useDemoContent();
   // Built once per mount: the scenario is this match's identity, with the
   // signed-in student's real name behind their character.
   const [scenario] = useState(() => {
-    const base = activityChatScenarios[scenarioKey];
+    const base = demo.chatScenarios[scenarioKey];
     return { ...base, self: { ...base.self, realName: studentName } };
   });
   // Both tabs stay independently mocked — there's no cross-tab sync with a

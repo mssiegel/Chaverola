@@ -19,6 +19,7 @@ import type { StudentWorldOutletContext } from "@/components/layout/StudentWorld
 import { ChatStage } from "@/components/Student/ChatStage";
 import { LiveChatStage } from "@/components/Student/LiveChatStage";
 import { WaitingLobby } from "@/components/Student/WaitingLobby";
+import { useDemoContent } from "@/lib/demoContent";
 import {
   isLocale,
   switchLocalePath,
@@ -30,7 +31,7 @@ import { useStudentSession } from "@/lib/studentSession";
 import { useActivityLookup } from "@/lib/useActivityLookup";
 import { usePageMeta } from "@/lib/usePageMeta";
 import { cn } from "@/lib/utils";
-import { DEMO_JOIN_CODE, DEMO_STUDENT_NAME } from "@/mockData";
+import { DEMO_JOIN_CODE } from "@/mockData";
 import type { Activity } from "@/types/activity";
 
 import { ActivityFullCard } from "./join/ActivityFullCard";
@@ -179,8 +180,9 @@ export function JoinActivityPage() {
 
   // The demo arrives with a name ready, so the lobby is one click away; it
   // stays editable, and real codes always start blank.
+  const demoStudentName = useDemoContent().studentName;
   const demoPrefillName =
-    activity?.joinCode === DEMO_JOIN_CODE ? DEMO_STUDENT_NAME : "";
+    activity?.joinCode === DEMO_JOIN_CODE ? demoStudentName : "";
   const [name, setName] = useState(demoPrefillName);
   // Why the gate is showing a removal notice, and how much of it to say:
   // "lobby" is a removal with nothing to wrap up, so the notice explains

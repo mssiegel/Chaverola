@@ -5,6 +5,44 @@ area. Entries are newest-first; add new ones at the top, and add a matching line
 to the index in the same change. Replaced decisions move to Superseded at the
 bottom of this file.
 
+### The Hebrew demo is re-cast, never translated
+
+_2026-07-27_
+
+**Decision:** `/he`'s demo is its own production. The homepage hero runs
+**הכנרת 🌊** arguing with **מד המים**, the man who reports its level every
+winter; the activity is **תל אביב, ה׳ באייר תש״ח**, the hours before the
+Declaration, cast as **הרוח של הרצל 👻 / בן־גוריון 📜 / גולדה 🕊️ / זאב שרף**.
+The pretend class is eighteen Israeli first names spanning Ashkenazi, Mizrahi,
+Russian-Israeli, Arab-Israeli and Ethiopian-Israeli, and the prefilled student
+is **נועה**, absent from every roster like Rachel is in English. English keeps
+Rome and the Moon, untouched. The two casts share no sentence, so they live in
+`mockData/` as a `Record<Locale, …>` rather than in the i18n catalogs.
+
+**Why:** Founder call (2026-07-27), and the reason the demo is the last prompt
+of the Hebrew plan: after the chrome around it reads Hebrew, the scripted lines
+are the only English left on a Hebrew student's screen, and a translated Roman
+demo would land as a foreign product with Hebrew labels. Herzl's ghost is the
+structural twin of Caesar's: the man whose absence set the scene, turning up
+fifty years after Basel to comment, and the documented secrecy of that day maps
+onto "a rumour is going around and nobody knows who to trust". Basel 1897 was
+rejected as the setting even though the email fixtures use it, because Golda
+Meir was born in 1898 and was not there. That is invisible in a test fixture
+and a howler on a page pitched to history teachers. The i18n catalogs were
+rejected as the home because i18next assumes key parity between locales, which
+is exactly backwards for two casts that are not translations of each other.
+
+_Implemented in [mockData/](../../client/src/mockData/) (one locale-keyed
+record per file, assembled into `DEMO_CONTENT` by
+[index.ts](../../client/src/mockData/index.ts)) and read through
+`useDemoContent()` in
+[lib/demoContent.ts](../../client/src/lib/demoContent.ts). Two constraints the
+Hebrew inherits and one it adds: `hostActivityDemo.ts`'s transcripts stay
+character-agnostic (host-page chats get their cast at pairing time), and in
+Hebrew they must not guess the speaker's or the listener's GENDER either, since
+the cast could be גולדה talking to בן־גוריון. Unvocalized second-person past
+is spelled the same for both, which is what those lines are built on._
+
 ### The name reveal is the student's moment, and the teacher's page stays silent
 
 _2026-07-26_

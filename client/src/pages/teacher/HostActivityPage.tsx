@@ -17,6 +17,7 @@ import { useHostActivityDemo } from "@/components/Teacher/HostActivity/useHostAc
 import { useHostActivityLive } from "@/components/Teacher/HostActivity/useHostActivityLive";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { useDemoContent } from "@/lib/demoContent";
 import { sameRoster } from "@/lib/hostActivity";
 import { usePageMeta } from "@/lib/usePageMeta";
 import { useHostedActivityLookup } from "@/lib/useHostedActivityLookup";
@@ -51,12 +52,7 @@ export function HostActivityPage() {
   const { lookup, retry } = useHostedActivityLookup(hostKey);
 
   if (hostKey === DEMO_JOIN_CODE) {
-    return (
-      <DemoHostActivityView
-        key={DEMO_JOIN_CODE}
-        initialActivity={demoHostedActivity()}
-      />
-    );
+    return <DemoHostActivityView key={DEMO_JOIN_CODE} />;
   }
 
   if (lookup.state === "loading") {
@@ -199,12 +195,13 @@ function HostActivityChrome({
   On the demo everything is local because the whole class is client-side.
 */
 
-function DemoHostActivityView({
-  initialActivity,
-}: {
-  initialActivity: HostedActivity;
-}) {
-  const [activity, setActivity] = useState(initialActivity);
+function DemoHostActivityView() {
+  // The demo activity is cast per language, so it's read here rather than
+  // passed down — `/activity/host/1234` opens Rome, `/he/...` opens Tel Aviv.
+  const demo = useDemoContent();
+  const [activity, setActivity] = useState(() =>
+    demoHostedActivity(demo.activity)
+  );
   const engine = useHostActivityDemo(activity);
 
   return (

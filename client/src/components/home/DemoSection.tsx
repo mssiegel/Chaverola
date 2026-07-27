@@ -7,7 +7,8 @@ import {
 } from "@/components/home/SectionHeading";
 import { LocaleLink } from "@/components/layout/LocaleLink";
 import { Button } from "@/components/ui/button";
-import { DEMO_JOIN_CODE, DEMO_STUDENT_NAME } from "@/mockData";
+import { useDemoContent } from "@/lib/demoContent";
+import { DEMO_JOIN_CODE } from "@/mockData";
 
 /**
  * "See it in action": the homepage's two demo doorways, straight into the
@@ -22,6 +23,7 @@ import { DEMO_JOIN_CODE, DEMO_STUDENT_NAME } from "@/mockData";
  */
 export function DemoSection() {
   const { t } = useTranslation("home");
+  const { studentName } = useDemoContent();
 
   return (
     <section className="mx-auto w-full max-w-6xl px-4 py-14 sm:py-16">
@@ -56,7 +58,7 @@ export function DemoSection() {
           <p className="text-[15px] text-pretty text-muted-foreground">
             {/* Read from the fixture, never spelled out — the demo's prefilled
                 name and this sentence have to agree. */}
-            {t("demo.studentBody", { studentName: DEMO_STUDENT_NAME })}
+            {t("demo.studentBody", { studentName })}
           </p>
           <Button asChild variant="secondary">
             <LocaleLink to={`/activity/join/${DEMO_JOIN_CODE}`}>

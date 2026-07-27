@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 
 import { getActivity } from "@/lib/api";
+import { useDemoContent } from "@/lib/demoContent";
 import { lookupRetryDelayMs } from "@/lib/lookupRetry";
-import { DEMO_JOIN_CODE, demoActivity } from "@/mockData";
+import { DEMO_JOIN_CODE } from "@/mockData";
 import type { Activity } from "@/types/activity";
 
 /**
@@ -63,6 +64,10 @@ export function useActivityLookup(joinCode: string | undefined): {
   deliver: (activity: Activity) => void;
   retryNow: () => void;
 } {
+  // Cast in the language on screen: `1234` is whatever locale you're reading
+  // it in, so the demo activity follows the URL rather than the other way
+  // round (JoinActivityPage's locale inheritance skips the demo entirely).
+  const demo = useDemoContent();
   const [settled, setSettled] = useState<{
     joinCode: string;
     lookup: ActivityLookup;
@@ -147,7 +152,7 @@ export function useActivityLookup(joinCode: string | undefined): {
   }
   if (joinCode === DEMO_JOIN_CODE) {
     return {
-      lookup: { state: "found", activity: demoActivity },
+      lookup: { state: "found", activity: demo.activity },
       deliver,
       retryNow,
     };

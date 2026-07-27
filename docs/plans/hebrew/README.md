@@ -1,7 +1,6 @@
 # Hebrew — the `/he` tree actually speaks Hebrew
 
-**State: In progress.** Prompts 1–6 shipped, 2026-07-27. One to go — prompt 7,
-the demo cast, which is client-only and gated on nothing.
+**State: Complete.** All seven prompts shipped, 2026-07-27.
 
 `/he` has existed since the routing work as a mirror of the whole route tree,
 rendering identical English text left to right. This plan makes it a Hebrew
@@ -63,7 +62,7 @@ the same commit as the work.
 - [x] Prompt 4 — `locale` on the record, `railNotice` beside `rematchNotice`
 - [x] Prompt 5 — The Hebrew transcript email
 - [x] Prompt 6 — Drop the deprecated prose
-- [ ] Prompt 7 — The Hebrew demo cast
+- [x] Prompt 7 — The Hebrew demo cast
 
 Prompts 2 and 3 are independent of each other; both must land before 4's client
 half, which needs `useTranslation` on the host page. 4 → 5 → 6 are sequential,
@@ -645,6 +644,41 @@ real deliverable of prompts 4 and 6; the deletion itself is nine lines.
 As this doc predicted, this commit touches `shared/` and `server/` but not
 `client/`, so Vercel will cancel its client build. That is correct here — the
 client's code is unchanged — and is not a build worth debugging.
+
+---
+
+## Pass record — 2026-07-27 (prompt 7)
+
+Green across all three workspaces (shared 1, client 92, server 77), and **no
+test changed**: TypeScript carried the whole refactor, because every
+locale-keyed record is a `Record<Locale, …>` and `hostWorld.test.ts` never
+touched `seedWorld`. The one real refactor landed as planned, except that the
+function kept its name — `seedWorld(activity, cast)` rather than a rename to
+`createInitialWorld`, since it has exactly one caller and the rename was
+churn without a payer.
+
+`scratch/he-demo.mjs`, **88/88** over both languages at 390 and 1440: both
+demos driven end to end, `document.dir` asserted per locale, the 1948 cast
+present on the host cards and the lobby chips with no Roman name surviving
+(and the reverse in English), the Herzl/Ben-Gurion beat played, and **zero
+`/socket.io/` requests** off any of the ten page loads. That last one is the
+assertion code review cannot make: the Hebrew demo is as structurally
+network-free as the English one. Zero missing i18n keys, zero horizontal
+overflow anywhere.
+
+Two things the plan didn't anticipate, both found by driving it:
+
+- **`home:how.step2.body` named the English cast in prose** ("או ירח מסוים
+  ואסטרונאוט"), the one place the homepage copy doesn't interpolate from
+  `heroCopyNames`. It now points at the Hebrew cast. Worth knowing that the
+  interpolation convention has exactly one hole in it.
+- **Character-agnostic is a harder constraint in Hebrew than in English.**
+  `hostActivityDemo.ts`'s transcripts must not name a character, and in Hebrew
+  they must not guess a GENDER either, since the cast at pairing time could be
+  גולדה talking to בן־גוריון. Unvocalized Hebrew spells second-person past
+  identically for both genders ("ענית", "השתנית"), which is what those
+  eighteen chatter lines and four seed transcripts are built on. The file
+  header says so, because it is the constraint a translator breaks first.
 
 ---
 

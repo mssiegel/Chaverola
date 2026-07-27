@@ -3,10 +3,10 @@ import { useTranslation } from "react-i18next";
 
 import { isExactRematchIn } from "@chaverola/shared";
 
+import { useDemoContent } from "@/lib/demoContent";
 import { scaledMs } from "@/lib/demoTime";
 import { nextId, randInt, randomFrom } from "@/lib/random";
 import { useLatestRef } from "@/lib/useLatestRef";
-import { HOST_CHATTER_LINES } from "@/mockData";
 import type { HostedActivity } from "@/types/activity";
 import { NOTICE_SENDER_ID } from "@/types/chat";
 
@@ -54,7 +54,12 @@ export function useHostActivityDemo(
   // `chat`, not `teacher`: this is a transcript notice, and the student side
   // posts the identical sentence from the same key.
   const { t } = useTranslation("chat");
-  const [world, setWorld] = useState<HostWorld>(() => seedWorld(activity));
+  // The pretend class, cast in the language on screen. Seeded once — a locale
+  // switch is a different <Route>, so the page remounts with a fresh world.
+  const demo = useDemoContent();
+  const [world, setWorld] = useState<HostWorld>(() =>
+    seedWorld(activity, demo.host)
+  );
   const [ended, setEnded] = useState<HostEnded | null>(null);
 
   // Refs so timers and actions always read the freshest state — same idiom
@@ -62,6 +67,7 @@ export function useHostActivityDemo(
   // tick can't stomp each other.
   const worldRef = useRef(world);
   const activityRef = useLatestRef(activity);
+  const chatterRef = useLatestRef(demo.host.chatterLines);
   const commit = (next: HostWorld) => {
     worldRef.current = next;
     setWorld(next);
@@ -94,7 +100,7 @@ export function useHostActivityDemo(
         target.messages[target.messages.length - 1]?.senderId;
       const speakers = members.filter((m) => m.id !== lastSenderId);
       const speaker = randomFrom(speakers.length > 0 ? speakers : members);
-      const text = randomFrom(HOST_CHATTER_LINES);
+      const text = randomFrom(chatterRef.current);
       commit({
         ...w,
         chats: w.chats.map((c) =>
@@ -111,7 +117,7 @@ export function useHostActivityDemo(
       });
     }, scaledMs(DRIP_INTERVAL_MS));
     return () => clearInterval(interval);
-  }, []);
+  }, [chatterRef]);
 
   const startChat = (studentIds: string[]) => {
     commit({
