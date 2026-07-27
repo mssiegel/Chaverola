@@ -5,6 +5,50 @@ area. Entries are newest-first; add new ones at the top, and add a matching line
 to the index in the same change. Replaced decisions move to Superseded at the
 bottom of this file.
 
+### The sitemap is generated from `PAGE_META`, and carries no `lastmod`
+
+_2026-07-28_
+
+**Decision:** `dist/sitemap.xml` is written at build time by
+`client/scripts/prerender-head.mjs` from the same array of pages it stamped the
+heads from — not hand-written into `client/public/`. Ten `<url>` entries, each
+with `xhtml:link` alternates for both locales plus `x-default`. No `lastmod`, no
+`changefreq`, no `priority`. `robots.txt` points at it with an absolute
+`Sitemap:` line.
+
+**Why generated:** a hand-written file would be a second home for the route
+list, and a sitemap that has quietly fallen behind the site is worse than none —
+it tells a crawler to keep fetching pages that moved. Coming out of the
+`PAGE_META` walk means a route added to that table appears in the sitemap and in
+the heads, or in neither.
+
+The map earns its keep on the two demo URLs above all. Nothing on the site links
+`/activity/host/1234` or `/activity/join/1234` — they go out in a pitch email —
+so either the sitemap names them or a crawler finds them by accident. The Hebrew
+tree is the other half: `hreflang` in a sitemap is a signal Google reads
+independently of the head links added by [The demo URLs redirect at the edge,
+and the React route is now its dev
+twin](#the-demo-urls-redirect-at-the-edge-and-the-react-route-is-now-its-dev-twin),
+and having both is cheap redundancy — but only while they agree. So both come
+out of one function, `pageUrls` in `client/src/lib/prerenderMeta.ts`. A `<loc>`
+that differs from its page's canonical by a trailing slash is a silent, classic
+defect, and it cannot arise when neither string is written twice.
+
+**Why no `lastmod`:** Google ignores `changefreq` and `priority` outright, so
+those are noise. `lastmod` is different — it is read, and it is only useful while
+it is true. A build timestamp would claim all ten pages changed on every deploy,
+which teaches the crawler to distrust the field and costs the one case it was
+meant to serve. If a real signal is ever wanted it has to come from git, not from
+the clock. Recorded here rather than left blank because a missing field looks
+identical to a forgotten one.
+
+The `Sitemap:` line is the only place the origin appears as a literal outside
+`SITE_ORIGIN` — the spec requires an absolute URL, and a `.txt` file cannot
+import. Both ends carry a comment naming the other. A build-time check that they
+match was considered and skipped: `client/index.html` mirrors the same constant
+under the same rule with only a comment, and a third mechanism guarding a
+two-line pair costs more than the drift it prevents.
+
 ### `robots.txt` fences the two capability path shapes, and carves the demo back out
 
 _2026-07-27_

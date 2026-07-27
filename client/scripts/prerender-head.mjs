@@ -3,7 +3,8 @@
   unfurler or an AI crawler — none of which run JavaScript — reads that page's
   title and description instead of the shell's all-purpose pair. The homepage
   also gets a <noscript> body block, so the same readers can find out what
-  Chaverola is and not only what it's called.
+  Chaverola is and not only what it's called. Then it writes dist/sitemap.xml
+  from the same list of pages, so the map and the heads cannot disagree.
 
   Runs after `vite build`, as the last step of `pnpm build`. It is a dumb file
   writer: every string comes from `src/lib/prerenderMeta.ts`, which is typed and
@@ -217,8 +218,17 @@ for (const page of pages) {
   }
 }
 
+/*
+  The map, from the SAME `pages` array the heads above came from — not a second
+  walk of PAGE_META. A route added to that table lands in both places or in
+  neither, which is the whole reason this is generated rather than a hand-written
+  file in public/. Vercel serves it from the filesystem phase, ahead of the
+  catch-all rewrite, exactly as it does robots.txt.
+*/
+await writeFile(path.join(DIST, "sitemap.xml"), meta.sitemapXml(pages), "utf8");
+
 console.log(
   `prerender-head: ${pages.length} pages in ${written} files + app.html + ${fallbacks
     .map((fallback) => fallback.file)
-    .join(", ")} — ${pages.map((page) => page.url).join(", ")}`
+    .join(", ")} + sitemap.xml — ${pages.map((page) => page.url).join(", ")}`
 );

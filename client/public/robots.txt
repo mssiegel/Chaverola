@@ -48,5 +48,13 @@ Disallow: /he-app.html
 # obeys the most specific matching group ONLY, so GPTBot would then ignore
 # every Disallow above and crawl live classrooms.
 
-# No Sitemap: line yet — doc 04's second prompt writes the sitemap and adds it.
-# Pointing at a 404 is worse than saying nothing.
+# The map. Group-independent — it applies to every crawler no matter where it
+# sits in the file — and it must be ABSOLUTE; a relative Sitemap: line is
+# ignored. sitemap.xml is generated at build time from PAGE_META by
+# client/scripts/prerender-head.mjs, so it is not a sibling of this file in
+# public/ and you will not find it there.
+#
+# THE ORIGIN IS A LITERAL HERE because a .txt file cannot import. Its one source
+# of truth is SITE_ORIGIN in client/src/lib/prerenderMeta.ts, which names this
+# line as a mirror. Change one, change the other.
+Sitemap: https://chaverola.com/sitemap.xml

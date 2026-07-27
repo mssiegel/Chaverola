@@ -1,6 +1,6 @@
 # 04 — Crawlers get a map and a fence
 
-State: **Not started**
+State: **Complete**
 
 **The problem.** There is no `robots.txt` and no `sitemap.xml` anywhere in
 the repo, so a crawler arriving at chaverola.com has no list of what exists
@@ -44,7 +44,7 @@ prompt, and deliberately runs after prompt 1 so `robots.txt` never
 advertises a sitemap that doesn't exist yet.
 
 - [x] Prompt 1 — The fence
-- [ ] Prompt 2 — The map
+- [x] Prompt 2 — The map
 
 ---
 

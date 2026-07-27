@@ -33,8 +33,11 @@ import { PAGE_META, pageMeta } from "@/lib/pageMeta";
  * The apex, no `www`, and no trailing slash so callers can append a path
  * straight from `switchLocalePath`. `www.chaverola.com` 308s here from Vercel
  * dashboard config, which is ungreppable from the repo — see
- * docs/decisions/branding.md. The one mirror is `client/index.html`, which is a
- * static shell and cannot import.
+ * docs/decisions/branding.md.
+ *
+ * Two files mirror it as a literal, both static and so unable to import:
+ * `client/index.html` and the `Sitemap:` line in `client/public/robots.txt`
+ * (which the spec requires to be absolute). Change this, change those.
  */
 export const SITE_ORIGIN = "https://chaverola.com";
 
@@ -99,8 +102,19 @@ function socialCard(
   ];
 }
 
+interface PageUrls {
+  canonical: string;
+  alternates: { hreflang: string; href: string }[];
+}
+
 /**
- * The page's canonical address and every language twin of it.
+ * The page's canonical address and every language twin of it, as DATA — because
+ * two formatters need the same set: `pageLinks` writes it as `<link>` tags into
+ * the head, and `sitemapXml` writes it as `<xhtml:link>` into the sitemap.
+ * Google reads them as two independent hreflang signals, which is only worth
+ * having if they agree; one function is what makes agreeing free rather than
+ * vigilant. A `<loc>` that differs from its page's canonical by a trailing slash
+ * is a silent, classic defect, and it cannot arise from here.
  *
  * `hreflang` takes the BARE language tags — `en` and `he`, never `en-US` /
  * `he-IL`. This is language targeting, not regional: a region subtag would
@@ -113,31 +127,45 @@ function socialCard(
  * Alternates come from `url` rather than from the unprefixed route so they are
  * built from the same string the canonical is, character for character.
  * `switchLocalePath` strips whatever prefix is already there, so it round-trips.
- * Doc 04's sitemap has to match these `href`s exactly, and deriving both from
- * one string is what makes that free rather than vigilant.
  *
  * Every page lists ITSELF as well as its twin. Reciprocity is the part that
  * fails silently: if `/he` names `/` and `/` doesn't name `/he`, Google discards
  * the pair and neither page is helped. One function emits both sides, so they
  * cannot drift.
  */
+function pageUrls(url: string): PageUrls {
+  return {
+    // Self-referencing, which is the right shape here: there is no
+    // duplicate-parameter problem to consolidate. The canonical's job is to name
+    // the hostname that won (the apex — see SITE_ORIGIN) and to pin the URL
+    // against whatever tracking parameter someone appends to it later.
+    canonical: `${SITE_ORIGIN}${url}`,
+    alternates: [
+      ...LOCALES.map((locale) => ({
+        hreflang: locale as string,
+        href: `${SITE_ORIGIN}${switchLocalePath(url, locale)}`,
+      })),
+      // Where to send a language we don't publish. English, because it is the
+      // unprefixed tree — a third language would add its own prefix rather than
+      // pushing English onto `/en` (see docs/decisions/routes.md).
+      {
+        hreflang: "x-default",
+        href: `${SITE_ORIGIN}${switchLocalePath(url, DEFAULT_LOCALE)}`,
+      },
+    ],
+  };
+}
+
+/** `pageUrls` as head tags. The sitemap's twin is `sitemapXml`. */
 function pageLinks(url: string): string[] {
-  const alternate = (hreflang: string, path: string) =>
-    `<link rel="alternate" hreflang="${hreflang}" href="${escapeHtml(`${SITE_ORIGIN}${path}`)}" />`;
+  const { canonical, alternates } = pageUrls(url);
 
   return [
-    // Self-referencing, which is the right shape here: there is no
-    // duplicate-parameter problem to consolidate. The tag's job is to name the
-    // hostname that won (the apex — see SITE_ORIGIN) and to pin the URL against
-    // whatever tracking parameter someone appends to it later.
-    `<link rel="canonical" href="${escapeHtml(`${SITE_ORIGIN}${url}`)}" />`,
-    ...LOCALES.map((locale) =>
-      alternate(locale, switchLocalePath(url, locale))
+    `<link rel="canonical" href="${escapeHtml(canonical)}" />`,
+    ...alternates.map(
+      ({ hreflang, href }) =>
+        `<link rel="alternate" hreflang="${hreflang}" href="${escapeHtml(href)}" />`
     ),
-    // Where to send a language we don't publish. English, because it is the
-    // unprefixed tree — a third language would add its own prefix rather than
-    // pushing English onto `/en` (see docs/decisions/routes.md).
-    alternate("x-default", switchLocalePath(url, DEFAULT_LOCALE)),
   ];
 }
 
@@ -330,6 +358,63 @@ export async function prerenderPages(): Promise<PrerenderPage[]> {
   }
 
   return pages;
+}
+
+/**
+ * `dist/sitemap.xml` — every public URL once, each naming its language twins.
+ *
+ * It takes the array `prerenderPages()` already returned rather than walking
+ * `PAGE_META` again, so a route added to that table appears in the sitemap and
+ * in the heads or in neither. A hand-written file in `public/` would be a second
+ * home for the route list, which is the drift this repo's process rules are most
+ * pointed about.
+ *
+ * The map matters most for the two demo URLs: nothing on the site links
+ * `/activity/host/1234` or `/activity/join/1234` — they go out in a pitch email
+ * — so either this names them or a crawler finds them by accident.
+ *
+ * The `xhtml` namespace on `<urlset>` is not decoration: without it the
+ * `<xhtml:link>` alternates are undefined markup and a validator rejects the
+ * file. They mirror `pageLinks`' head tags exactly, being the same `pageUrls`.
+ *
+ * NO `lastmod`, `changefreq` OR `priority`, and that is a decision rather than
+ * an oversight (docs/decisions/routes.md). Google ignores the last two outright.
+ * `lastmod` is only useful when it is true, and a build timestamp would claim
+ * every page changed on every deploy, which teaches the crawler to distrust the
+ * field. A real signal would have to come from git, not from the clock.
+ *
+ * The fallback shells are absent because `fallbackShells()` is a separate array
+ * — right, and not an omission to fix: `he-app.html` answers ten URLs and is not
+ * a page. Real host sessions and live join codes are absent for the same reason,
+ * and `robots.txt` fences them besides.
+ */
+export function sitemapXml(pages: PrerenderPage[]): string {
+  // `escapeHtml` despite the name: the four entities it writes — `&`, `<`, `>`,
+  // `"` — are exactly what XML needs in element text and in a double-quoted
+  // attribute. `&` is the one that will actually happen, the day a URL here
+  // carries a query parameter.
+  const entries = pages.map((page) => {
+    const { canonical, alternates } = pageUrls(page.url);
+
+    return [
+      `  <url>`,
+      `    <loc>${escapeHtml(canonical)}</loc>`,
+      ...alternates.map(
+        ({ hreflang, href }) =>
+          `    <xhtml:link rel="alternate" hreflang="${hreflang}" href="${escapeHtml(href)}" />`
+      ),
+      `  </url>`,
+    ].join("\n");
+  });
+
+  return [
+    `<?xml version="1.0" encoding="UTF-8"?>`,
+    `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"`,
+    `        xmlns:xhtml="http://www.w3.org/1999/xhtml">`,
+    ...entries,
+    `</urlset>`,
+    ``,
+  ].join("\n");
 }
 
 /**
