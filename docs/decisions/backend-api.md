@@ -69,7 +69,9 @@ _2026-07-27_
 **Decision:** The client uses `i18next` + `react-i18next`, overturning the
 standing "no i18n libraries in the client" line in the dependency policy. The
 server takes nothing: the transcript email, the only prose it ships, will be a
-hand-rolled `Record<Locale, EmailCopy>`.
+hand-rolled `Record<Locale, EmailCopy>` — now built, as
+[server/src/email/copy.ts](../../server/src/email/copy.ts)
+([the transcript email in the activity's language](teacher-live.md#the-transcript-email-is-written-in-the-activitys-language-and-lays-itself-out-right-to-left-without-css)).
 
 Catalogs are flat, typed, and split by namespace. Completeness is a **compile**
 check, not a test: English catalogs are `as const satisfies Catalog`, Hebrew

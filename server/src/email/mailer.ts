@@ -52,6 +52,12 @@ export function createMailer(config: Config, logger: Logger): Mailer {
   const log = logger.child({ module: "mail" });
 
   if (config.smtp) {
+    // Latin `Chaverola` in every language, and not an oversight: this runs
+    // once at boot from config, before any activity exists, so it has no
+    // record and no locale to read — a per-locale From would mean a transport
+    // per send. The brand call is in docs/decisions/branding.md ("the domain
+    // and the email From-name stay Latin"); the subject and both bodies are
+    // the parts that speak the teacher's language.
     const from = `Chaverola <${config.smtp.user}>`;
     const transport = createTransport({
       service: "gmail",
@@ -98,6 +104,10 @@ export function createMailer(config: Config, logger: Logger): Mailer {
           "transcript email not sent (log mode)"
         );
       } else {
+        // A Hebrew transcript's `text` opens every line with U+200F, so this
+        // log entry looks like it has a stray box or mojibake on each line.
+        // That is correct and load-bearing — see applyLinePrefix in
+        // transcript.ts before trying to clean it up.
         log.info(
           { to, subject, text },
           "transcript email (log mode — not actually sent)"

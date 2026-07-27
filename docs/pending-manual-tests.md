@@ -30,6 +30,52 @@ the next reader has the conversation you had.
 
 ---
 
+## Hebrew prompt 5 — the transcript email in a real Outlook
+
+_Asked 2026-07-27. The Gmail half ran the same day and is not pending: a real
+Hebrew transcript was sent through the live SMTP path to the founder's Gmail.
+Outlook was blocked for the ordinary reason — no Outlook account to hand._
+
+Outlook is the client that matters most here and the one least like a browser.
+Outlook for Windows renders mail through Word, which does not implement `<bdi>`
+and treats `dir` as a per-paragraph property rather than something a block
+inherits from an ancestor. Every other client we can reach implements both.
+
+**Steps** (3 minutes, once an Outlook account exists):
+
+1. Run `pnpm preview:email` and mail yourself the Hebrew file, or end a real
+   Hebrew activity with a teacher email set. Open it in **Outlook for Windows
+   (classic)** and in **outlook.com**.
+2. **The cast line is the whole test.** It reads
+   `Dana Fallback בתפקיד הרצל 🎩 · יונתן בתפקיד גולדה 🕊️`. Each student must be
+   paired with the character immediately after their own name. A line that
+   pairs Dana with `יונתן`, or `הרצל` with `גולדה`, is the failure.
+3. The body must be right-aligned and right-to-left throughout, not just the
+   first paragraph.
+4. The subject in the message list: `חברולה · הפעילות של רבקה לוי (קוד 4321)`,
+   with the parentheses around `קוד 4321` mirrored and the digits in order.
+5. If Outlook is set to show the plain-text alternative, check no line opens
+   with a visible box or question mark, and that each line reads right to left.
+
+**What it would mean if it fails:** step 2 is the one case where the email
+would show a teacher _wrong data_ rather than ugly data, and it can only happen
+in a renderer that honors `<bdi>` while dropping the container's `dir`. If it
+does happen, the fix is to stamp `dir` on every block the formatter emits
+rather than only the container — don't debug the Hebrew. Step 3 failing alone
+is a `dir`-inheritance problem with a visible, harmless symptom. Step 4 failing
+means the brand-first subject isn't doing its job and the client wants an
+explicit mark after all, which the entry in
+[teacher-live.md](decisions/teacher-live.md#the-transcript-email-is-written-in-the-activitys-language-and-lays-itself-out-right-to-left-without-css)
+explains was rejected on purpose. Step 5 failing means the per-line RLM didn't
+survive the transfer encoding.
+
+**Coverage in the meantime:** the Gmail send landed and renders. `pnpm test`
+asserts the mechanisms are present — a brand-first subject, `dir="rtl"` in the
+HTML, `<bdi>` around a Latin name, and U+200F on every non-empty plain-text
+line — which is not the same as a client honoring them. `pnpm preview:email`
+writes both locales for eyeballing in a browser, and a browser is exactly the
+engine Outlook for Windows does not use.
+
 ## Doc 27 — a pause landing mid-word on a real iPhone, keyboard up
 
 _Asked 2026-07-26; the founder said up front that no handset would be in the

@@ -5,6 +5,83 @@ area. Entries are newest-first; add new ones at the top, and add a matching line
 to the index in the same change. Replaced decisions move to Superseded at the
 bottom of this file.
 
+### The transcript email is written in the activity's language, and lays itself out right to left without CSS
+
+_2026-07-27_
+
+**Decision:** `formatTranscriptEmail` composes the subject and both bodies from
+`EMAIL_COPY[record.locale]` — the language the teacher set up in, frozen on the
+record at create. Nothing reads a header or a browser preference, so a class
+that ran in Hebrew gets a Hebrew transcript wherever it is opened. The catalog
+is a hand-rolled `Record<Locale, EmailCopy>` in `server/src/email/copy.ts`: a
+missing string is a compile error, and the server still takes no i18n
+dependency.
+
+Four calls make the Hebrew actually render, none of which is CSS:
+
+- **The subject leads with the brand** — `חברולה · הפעילות של {host} (קוד {code})`.
+  A subject line has no `dir` mechanism at all, so the client guesses direction
+  from the first strong character; opening with חברולה makes it right-to-left
+  even when the teacher's name is Latin, and the trailing `(קוד 5678)` then
+  comes out with mirrored parentheses and in-order digits with no control
+  characters. No RLM at position 0 — one there confuses the column-alignment
+  heuristics some clients use in the message list. **Do not move the brand off
+  the front.**
+- **The HTML part carries `dir` as an attribute**, with `text-align` alongside:
+  Gmail strips `<html>`, `<body>`, and much of a `<style>` block but keeps the
+  container and its attributes, and older Outlook honors `dir` for reordering
+  while ignoring it for block alignment. The three untrusted runs — character
+  label, real name (parentheses inside), message text — each sit in a `<bdi>`.
+  The font stack is system Hebrew faces, **not Rubik**: mail clients don't load
+  webfonts reliably.
+- **The plain-text part prefixes every non-empty line with U+200F RLM.** It has
+  no `dir` mechanism, a renderer judges each line's base direction separately,
+  and `\n` is a paragraph separator — so one mark at the top would not reach
+  line 2. Without it, `רחל בתפקיד ברוטוס 🔪 (יצא באמצע)` is fine until the
+  student's name is Latin, at which point the line is judged left-to-right, the
+  parentheses stop being mirrored, and the Hebrew lays out backwards. RLM rather
+  than an isolate because RLM is Unicode 1.0 and universally handled, while an
+  isolate can render as a visible box in a plain-text client.
+- **Grammar that dodges agreement.** `hostedBy` is `מנחה: {name}`, a label
+  rather than a verb, so it agrees with nothing whatever the teacher is called.
+  `participant` is `{name} בתפקיד {character}`, the playbill connective; בתור
+  was rejected because תור also means "queue" and the pairing rail owns that
+  word. Plurals are hand-written per noun (שיחה feminine, תלמיד masculine, 1 and
+  2 spelled out).
+
+The From-name stays Latin `Chaverola` in every language. `createMailer` runs
+once at boot from config, before any activity exists, so it has no record and
+no locale to read; a per-locale From would mean building a transport per send.
+This looks like an oversight next to a fully translated body, which is why
+`mailer.ts` says so in place.
+
+Every human-typed run is also folded to one line before either part reads it.
+A message may legally contain a newline (the composer lets Shift+Enter through
+and `chat:send` only trims), and the plain-text part joins on `\n` — so an
+unfolded message could forge a transcript line attributed to another student,
+with the two parts of the same email then disagreeing about who said what. The
+same pass drops bidi overrides and embeddings, which `<bdi>` contains in the
+HTML part but nothing contains in the plain-text one.
+
+**Why:** Founder calls, 2026-07-27, as prompt 5 of the Hebrew plan. A Hebrew
+teacher who ran a Hebrew lesson getting an English record of it was the last
+English surface in the product. Every mechanism above is chosen against what
+mail clients actually do rather than what a browser would do: `dir` attributes
+over CSS because Gmail sanitizes, system fonts over the app's Rubik because
+webfonts don't arrive, RLM over isolates because a 1991 control is safe
+everywhere. English is untouched throughout — `EMAIL_COPY.en` reproduces the
+previous constants exactly, and its plain-text part is byte-identical.
+
+_Implemented in [copy.ts](../../server/src/email/copy.ts) and
+[transcript.ts](../../server/src/email/transcript.ts); previewed in both
+languages by [emailPreview.ts](../../server/scripts/emailPreview.ts). Extends
+[The transcript email is HTML that reads like the app, with plain text riding along](#the-transcript-email-is-html-that-reads-like-the-app-with-plain-text-riding-along).
+The catalog mechanism is
+[react-i18next is the client's i18n layer; the server takes no i18n dependency](backend-api.md#react-i18next-is-the-clients-i18n-layer-the-server-takes-no-i18n-dependency);
+the Latin From-name is
+[The brand is חברולה in Hebrew, and the logo mark never mirrors](branding.md#the-brand-is-חברולה-in-hebrew-and-the-logo-mark-never-mirrors).
+Plan in [docs/plans/hebrew](../plans/hebrew/README.md)._
+
 ### Seat events stop re-shipping ended transcripts; full snapshots heal
 
 _2026-07-27_

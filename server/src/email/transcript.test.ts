@@ -220,6 +220,46 @@ describe("formatTranscriptEmail", () => {
     expect(seen.get("Caesar 👑")).toEqual(new Set([CHARACTER_EMAIL_COLORS[1]]));
   });
 
+  it("writes a Hebrew activity's transcript right to left", () => {
+    // One test for the whole Hebrew side, covering only what reading the
+    // catalog can't tell you. The catalog itself is compiler-checked, so
+    // running the ten assertions above a second time in Hebrew would be
+    // testing data rather than code.
+    const hebrew: StoredActivity = {
+      ...record([
+        chat({
+          members: [
+            member("s1", "רחל", "brutus"),
+            // A Latin name in a Hebrew line is the whole reason the RLM and
+            // the <bdi>s exist.
+            member("s2", "Dana", "caesar"),
+          ],
+          lines: [line("s2", "et tu")],
+        }),
+      ]),
+      locale: "he",
+      hostName: "Ms. Cohen", // Latin host name, Hebrew subject
+    };
+    const { subject, text, html } = formatTranscriptEmail(hebrew);
+
+    // The brand leads, so a client with no `dir` to read still lays the
+    // subject out right-to-left despite the Latin name inside it.
+    expect(subject.startsWith("חברולה")).toBe(true);
+    expect(subject).toContain("Ms. Cohen");
+    expect(subject).toContain("(קוד 5678)");
+
+    expect(html).toContain('dir="rtl"');
+    expect(html).toContain("<bdi>(Dana)</bdi>");
+
+    // Every non-empty plain-text line opens with U+200F — a renderer judges
+    // each line separately, so one mark at the top would not reach line 2.
+    const unmarked = text
+      .split("\n")
+      .filter((l) => l !== "" && !l.startsWith("\u200F"));
+    expect(unmarked).toEqual([]);
+    expect(text).toContain("רחל בתפקיד Brutus 🔪");
+  });
+
   it("numbers each chat against the total", () => {
     const twoMembers = {
       members: [
