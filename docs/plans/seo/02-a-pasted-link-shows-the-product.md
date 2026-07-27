@@ -1,6 +1,6 @@
 # 02 — A pasted link shows the product
 
-State: **In progress**
+State: **Complete**
 
 **The problem.** Chaverola has no social image and no Open Graph tags at
 all. A link pasted into Slack, WhatsApp, iMessage, LinkedIn or a Gmail
@@ -59,8 +59,8 @@ than each declaring their own, so run this doc before them.
 
 - [x] Prompt 1 — One card, one origin, one fallback (card seen rendering in
       WhatsApp, 2026-07-27)
-- [ ] Prompt 2 — Every URL gets its own card (code shipped and curled locally;
-      tick once the production `/demo` link has been pasted somewhere real)
+- [x] Prompt 2 — Every URL gets its own card (both demo links seen unfurling as
+      the demo in WhatsApp, 2026-07-27)
 
 ---
 
