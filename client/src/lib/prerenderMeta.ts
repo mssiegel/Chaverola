@@ -24,6 +24,20 @@ import {
 } from "@/lib/locale";
 import { PAGE_META, pageMeta } from "@/lib/pageMeta";
 
+/**
+ * The site's one address, and the only place in TypeScript that spells it.
+ * Docs 03 (canonical), 04 (sitemap) and 05 (structured data) import this rather
+ * than each declaring their own; `og:url` and `og:image` need it because a
+ * relative URL in either is ignored by most unfurlers.
+ *
+ * The apex, no `www`, and no trailing slash so callers can append a path
+ * straight from `switchLocalePath`. `www.chaverola.com` 308s here from Vercel
+ * dashboard config, which is ungreppable from the repo — see
+ * docs/decisions/branding.md. The one mirror is `client/index.html`, which is a
+ * static shell and cannot import.
+ */
+export const SITE_ORIGIN = "https://chaverola.com";
+
 export interface PrerenderPage {
   /** Path under `dist/`, e.g. `he/activity/join/1234.html`. */
   file: string;

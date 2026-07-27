@@ -212,6 +212,7 @@ git: `git log -- DECISIONS.md`.
   - [The navbar has one CTA: Join an Activity](docs/decisions/navbar.md#the-navbar-has-one-cta-join-an-activity)
   - [Navbar: CTA label shortens on phones; language switcher swaps in place](docs/decisions/navbar.md#navbar-cta-label-shortens-on-phones-language-switcher-swaps-in-place)
 - [Branding & page titles](docs/decisions/branding.md)
+  - [A pasted link shows a card, and it's one image and one tag set for the whole site](docs/decisions/branding.md#a-pasted-link-shows-a-card-and-its-one-image-and-one-tag-set-for-the-whole-site)
   - [No server-rendered body — the locale flash costs a Hebrew visitor more than a crawler gains](docs/decisions/branding.md#no-server-rendered-body--the-locale-flash-costs-a-hebrew-visitor-more-than-a-crawler-gains)
   - [The homepage ships its words in a `<noscript>` block, and the demo URLs get none](docs/decisions/branding.md#the-homepage-ships-its-words-in-a-noscript-block-and-the-demo-urls-get-none)
   - [The prerendered shell splits in two, and `app.html` is the one that keeps the generic pair](docs/decisions/branding.md#the-prerendered-shell-splits-in-two-and-apphtml-is-the-one-that-keeps-the-generic-pair)

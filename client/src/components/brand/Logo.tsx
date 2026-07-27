@@ -19,6 +19,13 @@ interface LogoProps {
  * gradient's canonical stops are the `--brand-gradient-*` tokens in index.css;
  * SVGs can't read CSS vars across files, so the literals here and in the
  * favicon are pinned mirrors — update all three together.
+ *
+ * A fourth mirror is baked rather than written: `public/og-card.png` (the
+ * unfurl card) and `public/logo-512.png` are browser screenshots of these same
+ * paths and stops, so moving the gradient means re-rendering both PNGs or the
+ * link preview keeps showing the old brand. The recipe is docs/plans/seo/02,
+ * prompt 1 — a scratch HTML page shot through the verify harness, no
+ * rasterizer.
  */
 export function LogoMark({ size = 36 }: { size?: number }) {
   const { t } = useTranslation();

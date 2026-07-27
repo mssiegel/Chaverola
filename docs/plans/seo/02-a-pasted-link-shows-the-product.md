@@ -1,6 +1,6 @@
 # 02 — A pasted link shows the product
 
-State: **Not started**
+State: **In progress**
 
 **The problem.** Chaverola has no social image and no Open Graph tags at
 all. A link pasted into Slack, WhatsApp, iMessage, LinkedIn or a Gmail
@@ -57,7 +57,8 @@ that needs to know its own address. Docs
 [05](05-the-search-result-says-what-this-is.md) import that constant rather
 than each declaring their own, so run this doc before them.
 
-- [ ] Prompt 1 — One card, one origin, one fallback
+- [ ] Prompt 1 — One card, one origin, one fallback (code shipped; tick once
+      the production link has been pasted into Slack and Gmail)
 - [ ] Prompt 2 — Every URL gets its own card
 
 ---

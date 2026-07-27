@@ -5,6 +5,54 @@ area. Entries are newest-first; add new ones at the top, and add a matching line
 to the index in the same change. Replaced decisions move to Superseded at the
 bottom of this file.
 
+### A pasted link shows a card, and it's one image and one tag set for the whole site
+
+_2026-07-27_
+
+**Decision:** `client/public/og-card.png` — 1200×630, the grape gradient, the
+logo mark, "Chaverola", and the line "A free classroom roleplay activity" — is
+the picture every Chaverola link unfurls with. `client/index.html` carries the
+Open Graph set that points at it, so a link pasted into Slack, WhatsApp,
+iMessage, LinkedIn or a Gmail compose window shows a branded card instead of a
+bare text row.
+
+`og:title` and `og:description` are the `<title>` and description already in
+that file, not a third set written for social. Nothing suggests a different
+sentence performs better, and a third set is a third thing to keep in sync. The
+title stays the bare brand for the reason it always has: this shell serves every
+unmatched URL, student sessions included.
+
+`twitter:card` is the only `twitter:*` tag, and the omission is the decision. X
+and the other consumers of those tags fall back to the `og:*` equivalents for
+title, description and image, so a parallel `twitter:title` / `twitter:description`
+/ `twitter:image` set would be three more strings to keep in sync for no change
+in what anyone sees.
+
+One card for both locales, and the mark inside it is not mirrored — the same
+call [the logo mark
+makes](#the-brand-is-חברולה-in-hebrew-and-the-logo-mark-never-mirrors). `/he`
+gets its Hebrew `og:site_name` in prompt 2, from the catalog.
+
+The PNG is a browser screenshot of the same inline SVG `LogoMark` draws, taken
+through the verify harness rather than by adding a rasterizer, which makes it a
+fourth pinned mirror of the brand gradient alongside `Logo.tsx`, `favicon.svg`
+and the `--brand-gradient-*` tokens. It is 244 KB, well under the 300 KB an
+unfurler should have to fetch; the 472 KB founder photo in the same directory is
+the cautionary example. `logo-512.png` ships in the same change, unused until
+doc 05's `Organization` node needs a raster logo that the SVG favicon can't be.
+
+**Why:** Product-owner call. `/demo` is the link that goes into an email to a
+principal, and it was unfurling as one word and one sentence with no picture,
+which reads as a URL somebody typed wrong.
+
+Card text is deliberately almost nothing. At Slack's thumbnail size a sentence
+is unreadable, so the card's job is recognition and the words are the `og:title`
+and `og:description` beside it.
+
+_Implemented in [index.html](../../client/index.html),
+[og-card.png](../../client/public/og-card.png), and the pinned-mirror note in
+[Logo.tsx](../../client/src/components/brand/Logo.tsx)._
+
 ### No server-rendered body — the locale flash costs a Hebrew visitor more than a crawler gains
 
 _2026-07-27_
@@ -196,14 +244,22 @@ The spoken and canonical forms were allowed to differ before — speech said
 `www.chaverola.com` while the site answered on both — and collapsing them is
 what stops the next person having to work out which one is authoritative.
 
-Only the spoken half has shipped. The `www` → apex redirect (Vercel dashboard
-config, ungreppable from the repo) and the `<link rel="canonical">` tags that
-make this true for machines are
-[docs/plans/seo/](../plans/seo/README.md) work and have not landed yet.
+**Update (2026-07-27):** the redirect is live. `www.chaverola.com` answers a 308
+to `https://chaverola.com/`, configured as a redirect on the `www` domain in the
+Vercel project dashboard. Nothing in the repo says so, which is why it says so
+here — `curl.exe -I https://www.chaverola.com` is how you check it, and a
+dashboard nobody remembers editing is how it disappears. The origin now also has
+a home in TypeScript, `SITE_ORIGIN` in
+[prerenderMeta.ts](../../client/src/lib/prerenderMeta.ts), which every later SEO
+doc imports instead of spelling the host again.
+
+Still outstanding: the `<link rel="canonical">` tags that make this true for
+machines, which are [docs/plans/seo/](../plans/seo/README.md) work.
 
 _Implemented in
 [JoiningInstructions](../../client/src/components/Teacher/HostActivity/JoiningInstructions.tsx)
-(`SPOKEN_DOMAIN`)._
+(`SPOKEN_DOMAIN`), [prerenderMeta.ts](../../client/src/lib/prerenderMeta.ts)
+(`SITE_ORIGIN`), and the Vercel dashboard._
 
 ### The meta title is written for a search result, not for the page, and the demo carries its own
 
