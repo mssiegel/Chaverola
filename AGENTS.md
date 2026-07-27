@@ -158,8 +158,16 @@ Load-bearing — trip over them before you break one:
 **Styling & tokens**
 
 - Files: `client/src/index.css` (the `@theme` token set), `client/src/components/ui/` (ShadCN primitives), `lib/characterColor.ts`.
-- Invariants: never hand-order Tailwind classes (`pnpm format` decides) · tokens are single-sourced.
-- Verify: the CSS-hash technique for style-neutral refactors ([docs/operations.md](docs/operations.md)); a full sweep for token changes.
+- Invariants: never hand-order Tailwind classes (`pnpm format` decides) · tokens are single-sourced · logical properties over physical, with three commented exceptions (safe-area paddings, dialog centering, decorative scatter).
+- Verify: the CSS-hash technique for style-neutral refactors ([docs/operations.md](docs/operations.md)); a full sweep for token changes. **The CSS-hash technique does not apply to RTL work** — the hash changes by design.
+
+**Copy & languages**
+
+- Files: [client/src/i18n/](client/src/i18n/) (`locales/{en,he}/<ns>.ts` catalogs, `ns/<ns>.ts` registrars, `i18next.d.ts`), `lib/locale.ts` (the locale list + URL helpers), `lib/localePreference.ts` + `lib/localeBoot.ts` (detection), `components/layout/LocaleEffects.tsx`.
+- Invariants: **teacher-authored free text is never translated, in any locale** (character names, host name, student instructions, student names, every message) · a namespace may only be read from modules that reach the chunk registering it · route → i18next → `<html lang/dir>`, one way.
+- Decisions: [routes.md](docs/decisions/routes.md) (precedence, the switcher), [branding.md](docs/decisions/branding.md) (חברולה, Rubik, masculine second person), [backend-api.md](docs/decisions/backend-api.md) (why react-i18next in the client and nothing on the server).
+- Plan: [docs/plans/hebrew/](docs/plans/hebrew/README.md) — the remaining prompts, one session each.
+- Verify: run the humanizer skill on new copy, then a browser pass over `/` **and** `/he` at desktop and phone widths, checking for horizontal overflow.
 
 **Deploy / infra**
 
