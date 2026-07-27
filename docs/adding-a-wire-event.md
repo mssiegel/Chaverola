@@ -117,3 +117,61 @@ client that already knows the new event meets a server that doesn't (or the
 reverse) — and the unhandled event is dropped silently. Poll `/healthz` for
 the new server commit before testing, and split a client-ahead-of-server
 window into separate pushes. See AGENTS.md → Working Rules.
+
+## Changing an existing field's type
+
+Adding an event is safe because an unknown event is dropped silently. Changing
+what an existing field _contains_ is not: the old client doesn't ignore the new
+value, it renders it. `rematchNotice: string` → `railNotice: RailNotice` (the
+Hebrew plan's prompts 4 and 6) is the worked example, and the reason it needed
+two pushes rather than one.
+
+**The ordering dance does not apply here.** The rule above — ship the server
+first, then the client — works only when a commit can be server-only.
+`shared/` is in both deploy triggers, so any commit touching the wire contract
+deploys both sides at once. There is no ordering that gives you a safe window;
+the only tool left is making both shapes valid at the same time.
+
+**What one push would have done.** A teacher's dashboard is mounted under a
+root `PageErrorBoundary`. An old client handed an object where it expects a
+string renders it as a React child, React throws, and the boundary swallows the
+_whole page_ — not the notice, the dashboard — mid-lesson. That is the failure
+mode to weigh: not "the notice looks wrong for five minutes" but "thirty
+students are waiting while the teacher stares at an error page."
+
+**The recipe. Two pushes, additive then subtractive.**
+
+1. **Additive.** Add the new field _beside_ the old one; keep the old one
+   populated. The server builds the old value from the new one, so there is one
+   source of truth and they cannot disagree — `legacyNoticeText` in
+   `lobbyContext.ts` was that adapter, mapping `RailNotice` back to the English
+   sentence. Move the client to the new field in the same push. Mark the old
+   field `@deprecated` at its declaration, in `docs/api.md`, and at the adapter,
+   each naming the commit or prompt that deletes it. Every reader of the new
+   field tolerates its absence (`?? null`) — that is what covers the new-client
+   / old-server order.
+
+   Both orders now degrade rather than break: old client + new server reads the
+   string that is still there; new client + old server gets no notice for a few
+   minutes.
+
+2. **Confirm it is actually live on _both_ sides.** `/healthz` reports the
+   server commit. It says nothing about the client, and Vercel's Ignored Build
+   Step can cancel a client build while both dashboards read green — this
+   happened, and the newest **Ready** build was sixteen hours stale. Check that
+   the latest production deployment is **Ready** (not Canceled) for the SHA you
+   expect, then grep the served bundle for the new field. Grep the _lazy chunk_,
+   not `index-*.js`: a page's code rides its own chunk, so the entry bundle
+   comes back clean and reads as a false negative.
+   ([operations.md](operations.md) → Recovering a skipped client build.)
+
+3. **Subtractive.** Only then delete the old field, the adapter, and any helper
+   that existed to feed it. Deleting on the strength of "I pushed it" rather
+   than "I grepped it" is how step 2's stale-build hazard turns into the
+   mid-lesson error page step 1 spent a whole deploy avoiding.
+
+**Do the same for a field you are removing outright**, minus the adapter: stop
+reading it, confirm live, then stop sending it. And for a field you are
+_adding_ to an existing payload, the deprecation half is unnecessary — an old
+client ignores a key it doesn't destructure — but the `?? null` on the new
+reader is still what carries the new-client / old-server minutes.

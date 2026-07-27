@@ -15,8 +15,9 @@ function isolate(value: string): string {
  *
  * Pinned to the app's `Locale`, never `navigator.language`: `en-GB` drops the
  * Oxford comma, which would make the rendered sentence depend on the machine
- * the browser happens to be running on. The English output reproduces
- * `shared`'s `listNames` exactly, plus the invisible isolates.
+ * the browser happens to be running on. The English output reproduces the
+ * `listNames` this replaced in `shared` (deleted with the rest of the rail
+ * notice's prose), plus the invisible isolates.
  */
 export function listNames(names: string[], locale: Locale): string {
   return new Intl.ListFormat(locale, {

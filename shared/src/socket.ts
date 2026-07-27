@@ -141,15 +141,6 @@ export interface ServerToClientEvents {
     // truth, so a second host device stays coherent. `?? null` on the client
     // tolerates an older server during a deploy.
     railNotice: RailNotice | null;
-    // DEPRECATED, one deploy only: the same notice as server-authored English
-    // prose, which is what made it untranslatable. Both fields ship together
-    // because an old client handed an object where it expects a string would
-    // render it as a React child, throw, and unwind to the root
-    // PageErrorBoundary — replacing the whole teacher dashboard with an error
-    // page, mid-lesson. `shared/` is in both deploy triggers, so no commit can
-    // be server-only and the usual server-then-client dance cannot help.
-    // Deleted once railNotice is live on both sides (Hebrew plan, prompt 6).
-    rematchNotice: string | null;
     // The stored settings, teacher-room only — so a host device that slept
     // through a settings:changed re-syncs from its connect-time snapshot
     // instead of committing its stale copy later. A presence check on the

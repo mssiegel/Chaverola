@@ -254,7 +254,6 @@ export interface ServerToClientEvents {
     paused: boolean; // the world-level pause — keeps a second host device coherent
     lastPartners: Record<string, string[]>; // waiting seats' previous partners — feeds the rematch heads-up (teacher room only)
     railNotice: RailNotice | null; // the dismissible rail notice as DATA — { kind: "stuckInLine", names } | { kind: "tooFewCharacters", characterCount, studentCount }. One slot, last write wins (teacher truth); the client words it from its own catalog
-    rematchNotice: string | null; // DEPRECATED, one deploy only: the same notice as English prose, so an old client isn't handed an object where it expects a string. Deleted by the Hebrew plan's prompt 6
     settings: ActivitySettings; // the stored settings — a woken host device re-syncs from its connect-time snapshot instead of committing its stale copy
   }) => void;
   /** Student only, targeted; re-sent on every resume while matched.

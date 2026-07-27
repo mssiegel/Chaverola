@@ -128,43 +128,14 @@ export function pickAutoMatchPair(
 }
 
 /*
-  The three prose helpers below are DEPRECATED and live on borrowed time. The
-  rail notice crosses the wire as a `RailNotice` now, and the client renders it
-  from its own catalog; these only still build the deprecated `rematchNotice`
-  string that `lobbyContext`'s `legacyNoticeText` ships for one deploy, so an
-  old client meeting a new server keeps rendering a string. They were always
-  the odd ones out in a file whose header claims pure matching primitives.
-  Deleted with that field (Hebrew plan, prompt 6). Nothing new may call them —
-  the client joins names with `lib/names.ts` (Intl.ListFormat, locale-pinned).
+  No prose lives here. Three notice-string builders did until the Hebrew work
+  (plan prompt 6) — the rail notice crosses the wire as a `RailNotice` now and
+  the client words it from its own catalog, which is the only way the sentence
+  can be Hebrew. Nothing may reintroduce a sentence to this file: the header's
+  claim about pure matching primitives is the rule, and those three were the
+  standing exception to it. Names are joined client-side by `lib/names.ts`
+  (Intl.ListFormat, pinned to the app's locale).
 */
-
-/** "A and B" / "A, B, and C". @deprecated see the note above. */
-export function listNames(names: string[]): string {
-  if (names.length <= 2) return names.join(" and ");
-  return `${names.slice(0, -1).join(", ")}, and ${names[names.length - 1]}`;
-}
-
-/** Pair-everyone's rail notice for an exact pair/trio it left in line. Unlike
- *  the heads-up this isn't gated on the rematchWarning setting — it explains
- *  why the button visibly skipped them. @deprecated see the note above. */
-export function stuckInLineNotice(names: string[]): string {
-  return `${listNames(names)} just chatted ${
-    names.length === 2 ? "with each other" : "together"
-  }, so they're still in line.`;
-}
-
-/** The rail notice for a manual start the cast can't seat. The teacher's own
- *  panel may still be showing the bigger roster, since a second host device
- *  never hears another one's edit, so the notice states the count the server
- *  has and points at the refresh that shows it. Both counts are always 2 or
- *  more: a chat needs two students, and the roster's first two rows can't be
- *  removed. @deprecated see the note above. */
-export function tooFewCharactersNotice(
-  characterCount: number,
-  studentCount: number
-): string {
-  return `You picked ${studentCount} students, but your cast only has ${characterCount} characters, so no chat started. Refresh this page to see the current cast.`;
-}
 
 /**
  * Pair-everyone's decision, ids only — the pure half both engines share.

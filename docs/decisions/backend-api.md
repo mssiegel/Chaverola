@@ -40,11 +40,19 @@ _2026-07-27_
 **Decision:** The teacher's dismissible rail notice is a discriminated union on
 `chats:snapshot` (`{ kind: "stuckInLine", names }` or
 `{ kind: "tooFewCharacters", characterCount, studentCount }`), and the client
-words it from its own catalog. `chats:snapshot` carries both the new
-`railNotice` and the old English `rematchNotice` for exactly one deploy; the
-prose is built from the structured value by `legacyNoticeText` in
-`lobbyContext.ts`, and prompt 6 of the Hebrew plan deletes it along with
-`shared`'s three prose helpers.
+words it from its own catalog. `chats:snapshot` carried both the new
+`railNotice` and the old English `rematchNotice` for exactly one deploy.
+
+**Closed 2026-07-27.** The deprecation window ran its course: `rematchNotice`,
+`legacyNoticeText`, and `shared`'s three prose helpers (`listNames`,
+`stuckInLineNotice`, `tooFewCharactersNotice`) are deleted, and the wire carries
+data only. The gate for deleting them was evidence, not elapsed time —
+`/healthz` on the new server commit, plus a grep of the served client chunk
+showing `railNotice` present and `rematchNotice` gone. The generalized recipe is
+written up in
+[adding-a-wire-event.md](../adding-a-wire-event.md#changing-an-existing-fields-type),
+because the next field to change type will face the same trap and none of this
+is guessable from the code left behind.
 
 A union, not a flat `{ kind, names?, … }` bag: the flat shape lets
 `{ kind: "stuckInLine" }` with no names typecheck, and the renderer then needs
@@ -190,9 +198,11 @@ too. What stays divergent is named, not drifted: id minting stays split
 STATE (the demo's `HostWorld.lastPartners`/`rematchNotice`, the server's
 `StoredActivity` fields) — the pairing DECISIONS themselves are all shared.
 (Feature 9 finished the job: the rematch predicates, `pickAutoMatchPair`, and
-the whole `pairEveryonePlan` — the swap-repair loop and the `stuckInLineNotice`
-string — moved here too, so `findAutoMatchPair` and `planPairEveryone` are both
-thin adapters mapping shared-rule ids back to their own seat shape.)
+the whole `pairEveryonePlan` — the swap-repair loop, and at the time the
+`stuckInLineNotice` string with it — moved here too, so `findAutoMatchPair` and
+`planPairEveryone` are both thin adapters mapping shared-rule ids back to their
+own seat shape. The notice strings have since left: the rail notice crosses the
+wire as data, so this module is pure decisions and holds no prose at all.)
 `tickWorld`, `seedWorld`, and the rest of the simulation stay in `hostWorld.ts`.
 
 **Why:** Speedup planning (2026-07-21). The "mirror, never import" rule guarded

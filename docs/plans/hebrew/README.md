@@ -1,7 +1,7 @@
 # Hebrew — the `/he` tree actually speaks Hebrew
 
-**State: In progress.** Prompts 1–5 shipped, 2026-07-27. Two to go, and
-**prompt 6 is gated on prompt 4 being live on both sides.**
+**State: In progress.** Prompts 1–6 shipped, 2026-07-27. One to go — prompt 7,
+the demo cast, which is client-only and gated on nothing.
 
 `/he` has existed since the routing work as a mirror of the whole route tree,
 rendering identical English text left to right. This plan makes it a Hebrew
@@ -62,7 +62,7 @@ the same commit as the work.
 - [x] Prompt 3 — Student surfaces
 - [x] Prompt 4 — `locale` on the record, `railNotice` beside `rematchNotice`
 - [x] Prompt 5 — The Hebrew transcript email
-- [ ] Prompt 6 — Drop the deprecated prose
+- [x] Prompt 6 — Drop the deprecated prose
 - [ ] Prompt 7 — The Hebrew demo cast
 
 Prompts 2 and 3 are independent of each other; both must land before 4's client
@@ -615,6 +615,36 @@ sides. One thing to carry into it: prompt 6 touches `shared/` and `server/` and
 **not** `client/`, so its own push will be canceled by Vercel the same way. That
 is harmless there (the client changes nothing), but it is not a build worth
 debugging.
+
+---
+
+## Pass record — 2026-07-27 (prompt 6)
+
+**The gate was checked rather than assumed**, which is the whole point of it:
+`/healthz` on `1f7b2c2` (prompt 4's `efa5c6e` is an ancestor), and the served
+host-page chunk grepped directly — `railNotice` 13 hits, `rematchNotice` **0**,
+`stuckInLine` and `tooFewCharacters` both present. Grep the lazy chunk, not
+`index-*.js`: the entry bundle has never carried any of these and reads as a
+false negative.
+
+Green across all three workspaces (shared 1, client 92, server 77; no test
+changed, because nothing asserted on the deleted prose). Both notice kinds
+driven on a real activity by `scratch/p6-notice-fields-gone.mjs`, 8/8 — the
+rail still words both sentences from the catalog, and `rematchNotice` appeared
+in **zero** of the eleven `chats:snapshot` frames read off the wire. The
+`tooFewCharacters` leg needs the stale-second-host tab: the panel clamps
+selection to the cast size, so a single tab can no longer ask for more seats
+than there are characters.
+
+The durable output is
+[adding-a-wire-event.md](../../adding-a-wire-event.md#changing-an-existing-fields-type)
+— the additive-then-subtractive recipe, and the reason the server-then-client
+ordering dance can't help when `shared/` is touched. That knowledge was the
+real deliverable of prompts 4 and 6; the deletion itself is nine lines.
+
+As this doc predicted, this commit touches `shared/` and `server/` but not
+`client/`, so Vercel will cancel its client build. That is correct here — the
+client's code is unchanged — and is not a build worth debugging.
 
 ---
 
