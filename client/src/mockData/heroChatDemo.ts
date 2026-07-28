@@ -3,18 +3,26 @@ import type { ChatScenario, Participant } from "@/types/chat";
 
 /*
   The homepage hero's live sample chat. A visitor lands mid-argument with a
-  partner who has feelings about being measured — short, funny,
+  partner who is very badly keeping a secret — short, funny,
   classroom-appropriate lines that show the roleplay format at a glance.
   Played by the same demo engine as the student chatbox demo (`useChatDemo`),
   so typing in the hero gets a reply.
 
-  English casts the Moon against Neil Armstrong; Hebrew casts the Kinneret
-  against the man who reports its level every winter. Same joke, same beat
-  structure, no shared sentence — see DECISIONS.md → "The Hebrew demo is
-  re-cast, never translated".
+  Both casts are people a teacher would actually assign: English casts
+  Cleopatra against Brutus the night before the Ides of March, Hebrew casts
+  גולדה against בן־גוריון in the hours before the Declaration. Same joke, same
+  beat structure, no shared sentence — see DECISIONS.md → "The hero demo is
+  cast from the lesson, and it shares the demo activity's world" and "The
+  Hebrew demo is re-cast, never translated".
+
+  Each language's hero plays inside the same setting as that language's demo
+  activity (`activityDemo.ts`), so the homepage promises the world the demo
+  then delivers. It is a different room, though, not a preview of the demo's
+  own chat: different students, a different moment, no shared line.
 
   Two deliberate limits, in both languages (see DECISIONS.md → "The hero demo
-  goes quiet after two Armstrong lines"):
+  goes quiet after two Armstrong lines", which named the old cast but caps
+  this one):
   - After the visitor's zinger, the partner sends exactly two one-sentence
     lines. The teacher preview mirrors this same feed and always shows its
     newest lines, so a longer script buries the zinger in both views.
@@ -35,9 +43,8 @@ import type { ChatScenario, Participant } from "@/types/chat";
 
 /**
  * The names the homepage prose interpolates. Emoji-free and short, because the
- * copy wants "Neil" and "the Moon" where the roster carries "Neil Armstrong 🚀"
- * and "the Moon 🌕" — hence a record of its own rather than reaching into the
- * participants below.
+ * copy wants "Cleopatra" where the roster carries "Cleopatra 👑" — hence a
+ * record of its own rather than reaching into the participants below.
  */
 export interface HeroCopyNames {
   /** The character the visitor plays. */
@@ -52,121 +59,132 @@ export interface HeroCopyNames {
 
 export const heroCopyNames: Record<Locale, HeroCopyNames> = {
   en: {
-    self: "the Moon",
-    peer: "Neil Armstrong",
-    peerShort: "Neil",
+    self: "Cleopatra",
+    peer: "Brutus",
+    // One-word names already: the short form and the full one are the same
+    // string in both languages, and the two slots stay separate anyway
+    // because a future cast may need them apart.
+    peerShort: "Brutus",
     seat: "Dana K",
   },
   he: {
-    self: "הכנרת",
-    peer: "מד המים",
-    // No shorter form in Hebrew: "המד" reads like a typo, so prose uses the
-    // whole name in both slots.
-    peerShort: "מד המים",
+    self: "גולדה",
+    peer: "בן־גוריון",
+    peerShort: "בן־גוריון",
     // Female on purpose — `home:teacherView.note` says "עם השם שלה".
     seat: "דנה",
   },
 };
 
-const moon: Participant = {
-  id: "self-moon",
-  character: { id: "moon", name: "the Moon 🌕" },
+const cleopatra: Participant = {
+  id: "self-cleopatra",
+  character: { id: "cleopatra", name: "Cleopatra 👑" },
   realName: "Dana K",
 };
 
-const armstrong: Participant = {
-  id: "peer-armstrong",
-  character: { id: "armstrong", name: "Neil Armstrong 🚀" },
+// No emoji, and no 🔪 in particular: the hero is the first roster a visitor
+// ever sees, so one plain name in it says a teacher doesn't have to add one,
+// and a knife is a poor first impression on a page pitched to schools. The
+// demo activity's own roster still carries "Brutus 🔪".
+const brutus: Participant = {
+  id: "peer-brutus",
+  character: { id: "brutus", name: "Brutus" },
   realName: "Sam A",
 };
 
-const kinneret: Participant = {
-  id: "self-kinneret",
-  character: { id: "kinneret", name: "הכנרת 🌊" },
+const golda: Participant = {
+  id: "self-golda",
+  character: { id: "golda", name: "גולדה 🕊️" },
   realName: "דנה",
 };
 
-// No emoji, unlike the English pair: the hero is the first roster a visitor
-// ever sees, and one plain name in it says a teacher doesn't have to add one.
-const waterGauge: Participant = {
-  id: "peer-water-gauge",
-  character: { id: "water-gauge", name: "מד המים" },
+// Plain for the same reason as Brutus above; the demo activity's roster
+// carries "בן־גוריון 📜".
+const benGurion: Participant = {
+  id: "peer-ben-gurion",
+  character: { id: "ben-gurion", name: "בן־גוריון" },
   realName: "יובל",
 };
 
 export const heroChatScenarios: Record<Locale, ChatScenario> = {
   en: {
     id: "hero",
-    self: moon,
-    peers: [armstrong],
+    self: cleopatra,
+    peers: [brutus],
     seedMessages: [
-      { senderId: armstrong.id, text: "that's one small step for man…" },
-      { senderId: moon.id, text: "HEY. watch where you're stepping" },
       {
-        senderId: armstrong.id,
-        text: "oh. sorry. kind of a big moment for me",
+        senderId: brutus.id,
+        text: "tomorrow's senate meeting is completely normal btw",
       },
-      { senderId: moon.id, text: "you could've knocked first 😤" },
+      {
+        senderId: cleopatra.id,
+        text: "nobody has ever said that about a normal meeting",
+      },
+      { senderId: brutus.id, text: "i'm saying it. that's how normal it is." },
+      {
+        senderId: cleopatra.id,
+        text: "you are the least subtle man in Rome 😤",
+      },
     ],
     script: [
       {
-        senderId: armstrong.id,
-        // No flag emoji here: Windows renders 🇺🇸 as the letters "US".
-        text: "i brought you a very nice flag tho",
+        senderId: brutus.id,
+        text: "i brought you dates from the market tho",
         delayMs: 4200,
       },
       {
-        senderId: armstrong.id,
-        text: "also like 600 million people are watching us rn, so maybe act natural 📺",
+        senderId: brutus.id,
+        text: "also half the forum is listening in rn, so maybe act natural 👀",
         delayMs: 4200,
       },
     ],
     ambientLines: [],
     replyLines: [
-      "haha ok fair",
-      "that's exactly what a moon would say",
-      "wait till mission control hears this 😂",
-      "noted. adding it to the mission report 📋",
-      "you're pretty chatty for a rock",
-      "10/10 would land here again",
+      "ok, that's fair",
+      "spoken like a queen",
+      "wait till the senate hears that one 😂",
+      "noted. and i'll deny you said it 📜",
+      "you're very calm for someone in Rome this week",
+      "you'd have made a terrifying senator",
     ],
   },
   he: {
     id: "hero",
-    self: kinneret,
-    peers: [waterGauge],
-    // The gauge addresses the Kinneret in the feminine throughout, because
-    // the lake is feminine. That is character dialogue, not app copy, so it
-    // sits outside the masculine-second-person house style.
+    self: golda,
+    peers: [benGurion],
+    // Ben-Gurion addresses Golda in the feminine throughout. That is
+    // character dialogue, not app copy, so it sits outside the
+    // masculine-second-person house style.
     seedMessages: [
       {
-        senderId: waterGauge.id,
-        text: "מפלס הכנרת עלה היום בשני סנטימטרים.",
+        senderId: benGurion.id,
+        text: "גולדה, ההזמנה אומרת ארבע. ואל תספרי לאף אחד.",
       },
-      { senderId: kinneret.id, text: "רגע. מדדת אותי בלי לשאול?" },
-      { senderId: waterGauge.id, text: "סליחה. זה רגע גדול בשבילי." },
-      { senderId: kinneret.id, text: "לפחות תגיד שלום קודם 😤" },
+      { senderId: golda.id, text: "רגע. הזמנת אנשים לטקס סודי בפתק?" },
+      { senderId: benGurion.id, text: "כתבתי עליו סודי. עם קו מתחת." },
+      { senderId: golda.id, text: "יופי. עכשיו כל תל אביב יודעת 😤" },
     ],
     script: [
       {
-        senderId: waterGauge.id,
-        text: "הבאתי לך גשם, אם זה עוזר",
+        senderId: benGurion.id,
+        text: "הבאתי לך את הנוסח לקרוא, אם זה עוזר",
         delayMs: 4200,
       },
       {
-        senderId: waterGauge.id,
-        text: "וגם, כל מהדורת החדשות מחכה למספר הזה, אז תיראי טוב 📺",
+        // Radio, not television: the ceremony went out live on קול ישראל.
+        senderId: benGurion.id,
+        text: "וגם, הרדיו מחכה לנו בארבע, אז תתנהגי רגיל 📻",
         delayMs: 4200,
       },
     ],
     ambientLines: [],
     replyLines: [
-      "חחח טוב, מקובל",
-      "בדיוק מה שאגם היה אומר",
-      "חכי שרשות המים תשמע על זה 😂",
-      "רשמתי. נכנס לדוח החורף 📋",
-      "את די פטפטנית בשביל גוף מים",
-      "עשר מתוך עשר, אחזור למדוד 💧",
+      "טוב, מקובל עליי",
+      "רק את יכולה להגיד דבר כזה",
+      "חכי שהוועד ישמע את זה 😂",
+      "רשמתי. ואני אכחיש שאמרת 📜",
+      "את רגועה מדי בשביל הערב הזה",
+      "היית מנהלת את הישיבה הזאת יותר טוב ממני",
     ],
   },
 };

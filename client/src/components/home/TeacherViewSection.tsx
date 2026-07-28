@@ -20,7 +20,7 @@ interface TeacherViewSectionProps {
  * (`ChatCard`) fed the same live chat as the hero chatbox above it. Real
  * names show next to characters here and nowhere else on the page — that
  * contrast is the whole pitch. Anything the visitor types up top lands in
- * this card too. The Moon's student is "Dana K", never "You": the teacher
+ * this card too. Cleopatra's student is "Dana K", never "You": the teacher
  * assigns chats and is not a player (see DECISIONS.md → "Demo students have
  * short names, and the teacher is never one of them"). No `onEndChat` is
  * passed, so the card hides its End chat button — a landing page shouldn't

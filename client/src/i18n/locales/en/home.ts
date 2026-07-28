@@ -71,7 +71,7 @@ export const home = {
     "Set one up for whatever your class is studying, like a history unit or the solar system. It takes about a minute.",
   "how.step2.title": "Choose the characters",
   "how.step2.body":
-    "Decide who your students get to be. Characters from the book you're reading, or a certain Moon and astronaut.",
+    "Decide who your students get to be. Characters from the book you're reading, or a certain queen and a very nervous senator.",
   "how.step3.title": "Share the 4-digit code",
   "how.step3.body":
     "Put it on the board. Students tap Join on any device and type it in.",

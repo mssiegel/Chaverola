@@ -19,6 +19,13 @@ is **נועה**, absent from every roster like Rachel is in English. English kee
 Rome and the Moon, untouched. The two casts share no sentence, so they live in
 `mockData/` as a `Record<Locale, …>` rather than in the i18n catalogs.
 
+**Update (2026-07-28):** the hero half of this is superseded on both sides. The
+hero now plays Cleopatra ↔ Brutus in English and גולדה ↔ בן־גוריון in Hebrew,
+so each language's hero sits inside that language's activity setting instead of
+alongside it. Everything else here stands, including the rule this entry exists
+for: the two casts are separate productions and still share no sentence. See
+[The hero demo is cast from the lesson, and it shares the demo activity's world](homepage.md#the-hero-demo-is-cast-from-the-lesson-and-it-shares-the-demo-activitys-world).
+
 **Why:** Founder call (2026-07-27), and the reason the demo is the last prompt
 of the Hebrew plan: after the chrome around it reads Hebrew, the scripted lines
 are the only English left on a Hebrew student's screen, and a translated Roman

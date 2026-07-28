@@ -62,7 +62,7 @@ helper over re-deriving the rule:
 - **Doodle motion:** `emulateMedia`/context `reducedMotion: "reduce"` freezes
   doodles into static transforms (`animation: none`) — assert on that, not on
   absence.
-- **Hero chatbox composer:** `getByPlaceholder(/Talk as the Moon/)`; press
+- **Hero chatbox composer:** `getByPlaceholder(/Talk as Cleopatra/)`; press
   Enter to send. The conversation feed scroll region has class `.scroll-soft`.
   Hero lines appear **twice** (the teacher preview card mirrors the hero chat
   live) — `.first()` to dodge strict mode.

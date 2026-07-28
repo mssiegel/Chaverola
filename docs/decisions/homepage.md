@@ -5,6 +5,50 @@ area. Entries are newest-first; add new ones at the top, and add a matching line
 to the index in the same change. Replaced decisions move to Superseded at the
 bottom of this file.
 
+### The hero demo is cast from the lesson, and it shares the demo activity's world
+
+_2026-07-28_
+
+**Decision:** The homepage hero plays **Cleopatra 👑 ↔ Brutus** in English and
+**גולדה 🕊️ ↔ בן־גוריון** in Hebrew, replacing the Moon/Neil Armstrong and
+הכנרת/מד המים pairs. The visitor plays Cleopatra and גולדה, the same seat the
+demo activity hands a student. Each hero now sits inside its own language's
+demo setting: Rome the night before the Ides of March, and Tel Aviv in the
+hours before the Declaration. It is a **different room in that world**, not a
+preview of the demo's own chat: different students, a different moment, no
+shared line, so a visitor who clicks through to `1234` gets something new.
+
+Everything else about the hero holds, and one convention widens:
+
+- The two-scripted-lines cap and the empty `ambientLines` pool stay exactly as
+  [The hero demo goes quiet after two Armstrong lines](#the-hero-demo-goes-quiet-after-two-armstrong-lines)
+  set them. That entry names a cast that is gone; the cap it records governs
+  this one.
+- The borrowed seats stay "Dana K" and "דנה" per
+  [Demo students have short names, and the teacher is never one of them](#demo-students-have-short-names-and-the-teacher-is-never-one-of-them),
+  and the partner's student stays "Sam A" / "יובל".
+- **The hero's partner carries no emoji in either language now.** Hebrew
+  already did this deliberately (the hero is the first roster a visitor sees,
+  and one plain name in it says a teacher doesn't have to add one); English
+  joins it, which also keeps 🔪 off the landing page. The demo activity's own
+  roster still ships "Brutus 🔪" and "בן־גוריון 📜".
+
+**Why:** Founder call (2026-07-28): an astronaut arguing with the Moon, and a
+lake arguing with the man who measures it, are funny but are not what a teacher
+would actually assign. The hero's job is to make a teacher picture their own
+lesson in it, so the cast should be the kind of characters a history or
+literature unit hands out. Reusing the demo activity's cast was the point
+rather than a side effect: the homepage now promises the world the demo then
+delivers. Writing a fresh scene inside that world (Brutus insisting tomorrow's
+senate meeting is normal; בן־גוריון admitting he invited people to a secret
+ceremony by note) keeps the two surfaces from reading as the same chat twice.
+
+_Implemented in [heroChatDemo.ts](../../client/src/mockData/heroChatDemo.ts).
+The homepage prose interpolates `heroCopyNames` and needed no change, except
+`home:how.step2.body` in both catalogs, which is the one place the copy names
+the cast in prose. Related:
+[The Hebrew demo is re-cast, never translated](demo-flows.md#the-hebrew-demo-is-re-cast-never-translated)._
+
 ### The homepage tells a machine it's free, and it will never carry a rating
 
 _2026-07-28_
