@@ -19,13 +19,22 @@ on every push regardless of what changed.
   silently (see AGENTS.md → Working Rules → the deploy race). `pid`
   identifies a stale instance; `timeScale` is present only when a dev
   server is scaled (production always omits it).
-- **Client build — confirm Vercel is Ready.** `vercel ls` lists recent
-  deployments; confirm the latest **production** deployment for the SHA
-  you expect is **Ready**, not Canceled or Building. `/healthz` does not
+- **Client build — confirm Vercel is Ready.** `vercel ls chaverola --prod`
+  lists recent production deployments; confirm the latest one is **Ready**,
+  not Canceled or Building, and `vercel inspect <url>` to see that
+  `https://chaverola.com` is among its aliases. `/healthz` does not
   catch a skipped client build — a code commit followed by a docs-only
   tip commit deploys the server and silently skips Vercel, leaving a new
   server against an old client indefinitely (see AGENTS.md → Working
   Rules → the tip commit must touch `client/`).
+  - **Name the project, or you will read the wrong dashboard.**
+    `client/.vercel/project.json` is a stale link to a **different** Vercel
+    project also called `client`, whose last production deployment is an
+    old **Error**. A bare `vercel ls --prod` run from `client/` reports
+    that one and looks exactly like a failed deploy of this site. The live
+    site is the `chaverola` project (`vercel project ls` shows both), so
+    pass the name explicitly. The stale link is local and gitignored;
+    deleting it is safe but nothing in the repo depends on it either way.
 
 ## Recovering a skipped client build
 
