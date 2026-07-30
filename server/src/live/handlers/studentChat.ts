@@ -11,13 +11,13 @@ import {
   toChatTranscriptLine,
   toPeerTyping,
 } from "../../store/projections";
-import { room } from "../lobbyContext";
+import { connectedMemberSockets, room } from "../lobbyContext";
 import type {
   LobbyContext,
   LobbySocket,
   StudentSocketData,
 } from "../lobbyContext";
-import { activeMembers, appendLine, findActiveChatOf } from "../matching";
+import { appendLine, findActiveChatOf } from "../matching";
 
 /* chat:send's sliding window now lives in @chaverola/shared — the composer
    holds sends against the same numbers, so a student gets a short wait
@@ -71,12 +71,8 @@ export function registerStudentChatHandlers(
     sendTimes.push(now);
     // One projection for every student — the line is character-only.
     const line = toChatLine(result.chat, result.line);
-    for (const member of activeMembers(result.chat)) {
-      const seat = current.seats.byId.get(member.studentId);
-      if (!seat?.connected) continue;
-      io.sockets.sockets
-        .get(seat.currentSocketId)
-        ?.emit("chat:line", { chatId: result.chat.id, line });
+    for (const [member] of connectedMemberSockets(io, current, result.chat)) {
+      member.emit("chat:line", { chatId: result.chat.id, line });
     }
     // The teacher room gets the same stored line with the real name
     // attached — the one delta on the teacher wire (a snapshot per
@@ -102,16 +98,16 @@ export function registerStudentChatHandlers(
     // No store touch, no teacher emit: typing is never a stored fact, and
     // the teacher deliberately never sees it (DECISIONS.md).
     const payload = toPeerTyping(chat, data.studentId);
-    for (const member of activeMembers(chat)) {
-      if (member.studentId === data.studentId) continue; // never the sender
-      const seat = current.seats.byId.get(member.studentId);
-      if (!seat?.connected) continue;
+    for (const [member, memberId] of connectedMemberSockets(
+      io,
+      current,
+      chat
+    )) {
+      if (memberId === data.studentId) continue; // never the sender
       // volatile: a heartbeat that can't go out now must die, not queue —
       // a buffered heartbeat flushing after a blip is the one way a ghost
       // indicator could outlive its moment.
-      io.sockets.sockets
-        .get(seat.currentSocketId)
-        ?.volatile.emit("chat:peer-typing", payload);
+      member.volatile.emit("chat:peer-typing", payload);
     }
   });
 }

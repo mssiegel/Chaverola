@@ -2,9 +2,8 @@ import { useTranslation } from "react-i18next";
 import { ArrowRight } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 
-import { STUDENT_CARD_CLASS } from "./stageTypes";
+import { StageCard } from "./StageCard";
 
 /**
  * The screen for an activity that died under a seated student — a deploy or
@@ -22,29 +21,23 @@ export function ActivityGoneCard({
 }) {
   const { t } = useTranslation("student");
   return (
-    <div className="flex w-full max-w-sm flex-1 flex-col items-center justify-start gap-4 pt-2 sm:justify-center sm:pt-0">
-      <div
-        className={cn(
-          STUDENT_CARD_CLASS,
-          "flex w-full animate-in flex-col gap-6 px-6 py-8 text-center duration-500 fade-in motion-reduce:animate-none sm:px-8"
-        )}
-      >
-        <div className="space-y-2">
-          <h1 className="text-3xl font-semibold text-foreground">
-            {t("gone.title")}
-          </h1>
-          <p className="text-muted-foreground">{t("gone.body")}</p>
-        </div>
-        <Button
-          size="lg"
-          onClick={onEnterNewCode}
-          className="w-full bg-linear-to-r from-brand-gradient-from to-brand-gradient-to hover:from-[#7d5cf5] hover:to-[#5f3fd6]"
-        >
-          {t("gone.cta")}
-          {/* flip-rtl: "onwards", so it follows the reading direction. */}
-          <ArrowRight className="flip-rtl size-4" />
-        </Button>
+    <StageCard>
+      <div className="space-y-2">
+        <h1 className="text-3xl font-semibold text-foreground">
+          {t("gone.title")}
+        </h1>
+        <p className="text-muted-foreground">{t("gone.body")}</p>
       </div>
-    </div>
+      <Button
+        variant="brand"
+        size="lg"
+        onClick={onEnterNewCode}
+        className="w-full"
+      >
+        {t("gone.cta")}
+        {/* flip-rtl: "onwards", so it follows the reading direction. */}
+        <ArrowRight className="flip-rtl size-4" />
+      </Button>
+    </StageCard>
   );
 }

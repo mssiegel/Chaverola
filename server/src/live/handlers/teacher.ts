@@ -8,9 +8,10 @@ import { getByHostKey, removeActivity } from "../../store/activityStore";
 import { armAutoMatch, clearAutoMatch, releaseAutoMatch } from "../autoMatch";
 import { onTeacherConnected, onTeacherDisconnected } from "../teacherPresence";
 import { armTranscriptFallback } from "../transcriptFallback";
-import { room } from "../lobbyContext";
+import { room, seatSocket } from "../lobbyContext";
 import type {
   LobbyContext,
+  LobbyServer,
   LobbySocket,
   TeacherSocketData,
 } from "../lobbyContext";
@@ -25,6 +26,8 @@ import {
   resumeChats,
 } from "../matching";
 import { removeSeat } from "../seats";
+import type { Seat } from "../seats";
+import type { StoredActivity } from "../../store/activityStore";
 
 /** While a teacher socket is connected, refresh the activity's TTL this
  *  often (getByHostKey is the refresh path). Student sockets never refresh
@@ -34,6 +37,26 @@ const TEACHER_KEEPALIVE_MS = 5 * 60 * 1000;
 /** The `email` field of `activity:end-result`, taken from the function that
  *  produces it on the happy path so the failure path can't drift from it. */
 type EndResultEmail = Awaited<ReturnType<typeof sendTranscriptEmail>>;
+
+/**
+ * The teacher's removal, whichever door it came through: tombstone the seat,
+ * tell the student why their screen is about to change, and drop the socket.
+ * Both `queue:remove` and `chat:remove` do exactly this — the chat one just
+ * settles the chat's membership first. Returns the removed seat, or undefined
+ * when it had already left (both commands are idempotent).
+ */
+function evictSeat(
+  io: LobbyServer,
+  record: StoredActivity,
+  studentId: string
+): Seat | undefined {
+  const seat = removeSeat(record, studentId);
+  if (!seat?.connected) return seat;
+  const target = seatSocket(io, seat);
+  target?.emit("lobby:removed");
+  target?.disconnect(true);
+  return seat;
+}
 
 /** Everything a teacher socket does: join the room, take initial snapshots,
  *  hold the TTL open, and serve the teacher commands. Registered on teacher
@@ -84,17 +107,12 @@ export function registerTeacherHandlers(
     // A stale queue:remove must never tombstone a chat member without
     // the chat bookkeeping — chat:remove is that path.
     if (matchedStudentIds(current).has(payload.studentId)) return;
-    const seat = removeSeat(current, payload.studentId);
+    const seat = evictSeat(io, current, payload.studentId);
     if (!seat) return; // idempotent — the seat already left
     log.info(
       { joinCode: data.joinCode, studentId: seat.studentId },
       "student removed by teacher"
     );
-    if (seat.connected) {
-      const target = io.sockets.sockets.get(seat.currentSocketId);
-      target?.emit("lobby:removed");
-      target?.disconnect(true);
-    }
     broadcastState(current);
   });
 
@@ -221,14 +239,8 @@ export function registerTeacherHandlers(
       },
       "student removed from chat by teacher"
     );
-    // The quiet exit drops the seat exactly like a queue remove:
-    // tombstone + lobby:removed + disconnect.
-    const seat = removeSeat(current, payload.studentId);
-    if (seat?.connected) {
-      const target = io.sockets.sockets.get(seat.currentSocketId);
-      target?.emit("lobby:removed");
-      target?.disconnect(true);
-    }
+    // The quiet exit drops the seat exactly like a queue remove.
+    evictSeat(io, current, payload.studentId);
     settleMembershipChange(current, result);
     broadcastState(current);
   });

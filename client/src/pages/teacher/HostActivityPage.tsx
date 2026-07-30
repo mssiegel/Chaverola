@@ -10,6 +10,7 @@ import "@/i18n/ns/teacher";
 import "@/i18n/ns/chat";
 
 import { DemoBanner } from "@/components/demo/DemoBanner";
+import { BrandGlow } from "@/components/layout/BrandGlow";
 import { LocaleLink } from "@/components/layout/LocaleLink";
 import { PlaceholderPage } from "@/components/layout/PlaceholderPage";
 import { HostActivityDashboard } from "@/components/Teacher/HostActivity";
@@ -158,16 +159,7 @@ function HostActivityChrome({
           demo so the two never fight over that band. */}
       {demo && <DemoBanner />}
 
-      {/* The setup page's sibling: same soft brand glow, clipped so it can
-          never cause sideways scroll on phones. */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 -z-10 overflow-hidden"
-      >
-        <div className="absolute -top-24 -left-20 size-72 rounded-full bg-brand-grape/10 blur-3xl" />
-        <div className="absolute -top-16 -right-16 size-64 rounded-full bg-brand-coral/10 blur-3xl" />
-        <div className="absolute top-72 right-1/4 size-56 rounded-full bg-brand-sun/10 blur-3xl" />
-      </div>
+      <BrandGlow />
 
       <div className="mx-auto w-full max-w-6xl px-4 pt-8 pb-16 sm:pt-10">
         <div className="mb-5">

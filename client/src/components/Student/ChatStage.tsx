@@ -6,6 +6,7 @@ import { useChatDemo } from "@/components/chat/useChatDemo";
 import { ChatDemoControls } from "@/components/demo/ChatDemoControls";
 import { EventButton } from "@/components/demo/DemoControls";
 import { Chatbox } from "@/components/Student/Chatbox";
+import { ChatStageFrame } from "@/components/Student/ChatStageFrame";
 import { useDemoContent } from "@/lib/demoContent";
 import { scaledMs } from "@/lib/demoTime";
 import { useBackGuard } from "@/lib/useBackGuard";
@@ -95,11 +96,7 @@ export function ChatStage({
 
   return (
     <>
-      {/* Phones: fill the world edge-to-edge (~8px margins) so the composer
-          sits on the keyboard; the min-h floor keeps the demo card from being
-          crushed by its sibling controls. sm+: today's fixed centered card.
-          self-stretch without a width lets -mx-2 actually widen the box. */}
-      <div className="-mx-2 flex min-h-[min(70dvh,620px)] flex-1 animate-in flex-col self-stretch duration-500 fade-in slide-in-from-bottom-4 motion-reduce:animate-none sm:mx-0 sm:h-[min(70dvh,620px)] sm:flex-none">
+      <ChatStageFrame>
         <Chatbox
           chat={{
             ...chat,
@@ -119,7 +116,7 @@ export function ChatStage({
           // chat, so it holds the keyboard for the next message.
           releaseKeyboardOnSend
         />
-      </div>
+      </ChatStageFrame>
 
       {/* Hidden on phones while the composer has focus. Not cosmetic: this
           panel is what sits BELOW the input, and as long as it's there the

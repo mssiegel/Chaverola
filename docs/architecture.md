@@ -67,7 +67,7 @@ pieces those surfaces share.
   chrome (`ChatFrame` / `CHAT_FRAME_CLASS`), the gradient "You're X … with
   Y" header (`ChatHeader`), the message-line renderer
   (`ConversationLines`), the conversation feed (`Conversation`, with
-  `PeerIsTyping` and `PeerReconnectBanner`), and the message input
+  `PeerIsTyping` and the three banners), and the message input
   (`MessageComposer`, with `LazyEmojiPicker` / `EmojiPickerBody` — shared with
   the setup form's character-name field) are shared by the student chatbox, the
   homepage hero chatbox, and the teacher chat cards
@@ -84,10 +84,38 @@ pieces those surfaces share.
   `EndChatConfirmationModal` is a thin wrapper over it, and the host page's
   remove/end-all confirmations use it directly (copy in
   `Teacher/HostActivity/confirmCopy.ts`).
-- **Demo-engine helpers** live in
-  [client/src/lib/random.ts](../client/src/lib/random.ts) (`nextId`,
-  `randInt`, `randomFrom`, `shuffled`) — both engines import them; don't
-  re-declare per-engine copies. The reserved notice sender id
+- **Shared shells.** Repeated chrome is a component, not a copied class
+  string — one change lands on every surface wearing it, and a
+  style-neutral refactor can be proved with the CSS-hash technique
+  ([operations.md](operations.md)). The set:
+  - `pages/student/join/StageCard.tsx` — the floating white card behind
+    every non-chat student stage (gate, loading, reconnecting, seat-cap,
+    activity-over), including the phones-anchor-high / `sm`-centers rule.
+  - `components/Student/ChatStageFrame.tsx` — the box `ChatStage` and
+    `LiveChatStage` both put the chatbox in. The two stages stay separate
+    components (an invariant); only the frame is shared.
+  - `components/chat/ChatBanner.tsx` — the floating pill over a
+    conversation (`ChatPausedBanner`, `SelfReconnectBanner`,
+    `PeerReconnectBanner`). Amber is trouble still running, emerald is it
+    resolving; they share one slot, so they share one shape.
+  - `components/ui/status-pill.tsx` — the student world's holding chip
+    (lobby waiting/paused/teacher-away, the reconnecting card). Two tones:
+    grape for a hold nobody needs to act on, amber for one that wants
+    attention.
+  - `components/Teacher/HostActivity/NoticeBanner.tsx` — the host page's
+    amber "here's why that didn't do what you expected" box (auto-match
+    hold, rematch heads-up, rail notice, paused round, teacher offline).
+  - `components/layout/BrandGlow.tsx` — the three blurred brand blobs
+    behind the setup and host pages.
+  - `ui/button.tsx`'s `brand` variant — the brand-mark gradient the
+    student flow's three forward CTAs wear (continue, join, try again).
+- **Shared id + random helpers** live in
+  [client/src/lib/random.ts](../client/src/lib/random.ts): the demo engines
+  take `nextId`, `randInt`, `randomFrom` and `shuffled` (don't re-declare
+  per-engine copies), and `randomId` is the one `crypto.randomUUID`
+  call-with-fallback in the client — the join nonce and a live-minted
+  character id both go through it, because `randomUUID` needs a secure
+  context and LAN-http dev is not one. The reserved notice sender id
   (`NOTICE_SENDER_ID`) lives in
   [client/src/types/chat.ts](../client/src/types/chat.ts).
 - **Navbar ↔ homepage contract:** `HERO_JOIN_CTA_ID`
@@ -293,6 +321,15 @@ How the layer is put together (`server/src/live/`):
   registers the `onActivityRemoved` cleanup. The split is by concern: an
   agent editing `chat:send` opens `handlers/studentChat.ts` and never
   reads the teacher commands.
+  - **Every server→student emit goes seat by seat, through three helpers
+    in `lobbyContext.ts`** — `seatSocket` (the one place that turns a seat
+    into a live socket), `connectedSeatSockets` (an activity's whole
+    connected roster), and `connectedMemberSockets` (one chat's active
+    members, paired with each `studentId`). That is structural, not an
+    optimization anyone skipped: students never join the socket.io room —
+    it belongs to the teacher's devices — and most student payloads are
+    projected per recipient anyway (the characterIds-only wire). Don't
+    hand-roll `io.sockets.sockets.get(seat.currentSocketId)` again.
 - **`seats.ts` is the pure, io-free seat lifecycle** — testable without
   sockets. Seats hang off the `StoredActivity` record (the activity's
   lifecycle owns the seats' lifecycle), and the module owns the tricky

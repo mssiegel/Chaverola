@@ -83,6 +83,55 @@ export function room(joinCode: string): string {
 }
 
 /**
+ * The one place that turns a seat into a live socket. Undefined when the seat
+ * is between sockets — a disconnected seat still exists (it's riding out its
+ * grace), so every caller has to tolerate the miss.
+ */
+export function seatSocket(
+  io: LobbyServer,
+  seat: Seat
+): LobbySocket | undefined {
+  return io.sockets.sockets.get(seat.currentSocketId);
+}
+
+/**
+ * Every connected seat in an activity, as sockets.
+ *
+ * Server→student events fan out one socket at a time rather than over the
+ * socket.io room, and that is structural, not an oversight: students never
+ * join the room — it belongs to the teacher's devices — and most student
+ * payloads are projected per recipient anyway (the characterIds-only wire).
+ */
+function* connectedSeatSockets(
+  io: LobbyServer,
+  record: StoredActivity
+): Generator<LobbySocket> {
+  for (const seat of record.seats.byId.values()) {
+    if (!seat.connected) continue;
+    const socket = seatSocket(io, seat);
+    if (socket) yield socket;
+  }
+}
+
+/**
+ * The same, narrowed to one chat's active members and paired with each
+ * member's studentId — which the caller needs, because a chat payload is
+ * projected for the seat that receives it.
+ */
+export function* connectedMemberSockets(
+  io: LobbyServer,
+  record: StoredActivity,
+  chat: StoredChat
+): Generator<[LobbySocket, string]> {
+  for (const member of activeMembers(chat)) {
+    const seat = record.seats.byId.get(member.studentId);
+    if (!seat?.connected) continue;
+    const socket = seatSocket(io, seat);
+    if (socket) yield [socket, member.studentId];
+  }
+}
+
+/**
  * How much of the class a `chats:snapshot` carries.
  *
  * **full** — every chat with its transcript. The healing snapshot: whatever a
@@ -220,13 +269,9 @@ export function createLobbyContext(
     secondsLeft: number | null
   ): void {
     const payload = toPeerConnection(chat, studentId, state, secondsLeft);
-    for (const member of activeMembers(chat)) {
-      if (member.studentId === studentId) continue; // never the affected seat
-      const seat = record.seats.byId.get(member.studentId);
-      if (!seat?.connected) continue;
-      io.sockets.sockets
-        .get(seat.currentSocketId)
-        ?.emit("chat:peer-connection", payload);
+    for (const [socket, memberId] of connectedMemberSockets(io, record, chat)) {
+      if (memberId === studentId) continue; // never the affected seat
+      socket.emit("chat:peer-connection", payload);
     }
   }
 
@@ -300,15 +345,8 @@ export function createLobbyContext(
    *  just-created chat is mid-drop). */
   function sendChatStarted(record: StoredActivity, chat: StoredChat): void {
     const now = Date.now();
-    for (const member of activeMembers(chat)) {
-      const seat = record.seats.byId.get(member.studentId);
-      if (!seat?.connected) continue;
-      io.sockets.sockets
-        .get(seat.currentSocketId)
-        ?.emit(
-          "chat:started",
-          toChatStarted(chat, record, member.studentId, now)
-        );
+    for (const [socket, memberId] of connectedMemberSockets(io, record, chat)) {
+      socket.emit("chat:started", toChatStarted(chat, record, memberId, now));
     }
   }
 
@@ -316,11 +354,8 @@ export function createLobbyContext(
    *  chat members, lobby waiters, and wrappingUp seats alike (the lobby
    *  shows its own paused pill). Connect-time state rides lobby:welcome. */
   function sendActivityPaused(record: StoredActivity, paused: boolean): void {
-    for (const seat of record.seats.byId.values()) {
-      if (!seat.connected) continue;
-      io.sockets.sockets
-        .get(seat.currentSocketId)
-        ?.emit("activity:paused", { paused });
+    for (const socket of connectedSeatSockets(io, record)) {
+      socket.emit("activity:paused", { paused });
     }
   }
 
@@ -331,11 +366,8 @@ export function createLobbyContext(
    *  refresh from flashing this lives in teacherPresence.ts; by the time it
    *  calls here, the flip is one the screens should show. */
   function sendTeacherPresence(record: StoredActivity, present: boolean): void {
-    for (const seat of record.seats.byId.values()) {
-      if (!seat.connected) continue;
-      io.sockets.sockets
-        .get(seat.currentSocketId)
-        ?.emit("activity:teacher-presence", { present });
+    for (const socket of connectedSeatSockets(io, record)) {
+      socket.emit("activity:teacher-presence", { present });
     }
   }
 
@@ -349,11 +381,8 @@ export function createLobbyContext(
    *  last-write-wins, like the email (founder call, 2026-07-26). */
   function sendActivityDetails(record: StoredActivity): void {
     const payload = toActivityDetails(record);
-    for (const seat of record.seats.byId.values()) {
-      if (!seat.connected) continue;
-      io.sockets.sockets
-        .get(seat.currentSocketId)
-        ?.emit("activity:details-changed", payload);
+    for (const socket of connectedSeatSockets(io, record)) {
+      socket.emit("activity:details-changed", payload);
     }
   }
 
@@ -375,17 +404,19 @@ export function createLobbyContext(
       if (ended) {
         markWrappingUp(seat);
         if (seat.connected) {
-          io.sockets.sockets
-            .get(seat.currentSocketId)
-            ?.emit("chat:ended", toChatEnded(chat, record, member.studentId));
+          seatSocket(io, seat)?.emit(
+            "chat:ended",
+            toChatEnded(chat, record, member.studentId)
+          );
         } else {
           clearSeatTimers(seat);
           armSeatTimers(record, seat, timing.graceMs);
         }
       } else if (seat.connected) {
-        io.sockets.sockets
-          .get(seat.currentSocketId)
-          ?.emit("chat:update", toChatUpdate(chat, member.studentId));
+        seatSocket(io, seat)?.emit(
+          "chat:update",
+          toChatUpdate(chat, member.studentId)
+        );
       }
     }
   }

@@ -1,9 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { Loader2 } from "lucide-react";
 
-import { cn } from "@/lib/utils";
-
-import { STUDENT_CARD_CLASS } from "./stageTypes";
+import { StageCard } from "./StageCard";
 
 /**
  * The URL names a code whose lookup is still in flight (a lobby refresh, a
@@ -13,22 +11,14 @@ import { STUDENT_CARD_CLASS } from "./stageTypes";
 export function LoadingCard() {
   const { t } = useTranslation("student");
   return (
-    <div className="flex w-full max-w-sm flex-1 flex-col items-center justify-start gap-4 pt-2 sm:justify-center sm:pt-0">
-      <div
-        role="status"
-        className={cn(
-          STUDENT_CARD_CLASS,
-          "flex w-full animate-in flex-col items-center gap-4 px-6 py-10 text-center duration-500 fade-in motion-reduce:animate-none sm:px-8"
-        )}
-      >
-        <Loader2
-          aria-hidden
-          className="size-8 animate-spin text-brand-grape motion-reduce:animate-none"
-        />
-        <p className="text-lg font-semibold text-foreground">
-          {t("gate.finding")}
-        </p>
-      </div>
-    </div>
+    <StageCard role="status" className="items-center gap-4 py-10">
+      <Loader2
+        aria-hidden
+        className="size-8 animate-spin text-brand-grape motion-reduce:animate-none"
+      />
+      <p className="text-lg font-semibold text-foreground">
+        {t("gate.finding")}
+      </p>
+    </StageCard>
   );
 }

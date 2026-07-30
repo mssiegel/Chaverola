@@ -5,8 +5,9 @@ import { Wifi, WifiOff } from "lucide-react";
 import { LOBBY_GRACE_SECONDS } from "@chaverola/shared";
 
 import { formatSecondsAsClock } from "@/lib/time";
-import { cn } from "@/lib/utils";
 import type { PeerConnectionState } from "@/types/chat";
+
+import { ChatBanner } from "./ChatBanner";
 
 interface PeerReconnectBannerProps {
   peerState: PeerConnectionState;
@@ -36,7 +37,7 @@ export function PeerReconnectBanner({
 
   const config: Record<
     Exclude<PeerConnectionState, "connected">,
-    { icon: ReactNode; text: ReactNode; className: string }
+    { icon: ReactNode; text: ReactNode; tone: "amber" | "emerald" }
   > = {
     disconnected: {
       icon: <WifiOff className="size-4" />,
@@ -64,28 +65,19 @@ export function PeerReconnectBanner({
             </span>
           </>
         ),
-      className: "bg-amber-50 text-amber-700 border-amber-200",
+      tone: "amber",
     },
     reconnected: {
       icon: <Wifi className="size-4" />,
       text: t("peer.back", { name }),
-      className: "bg-emerald-50 text-emerald-700 border-emerald-200",
+      tone: "emerald",
     },
   };
-  const { icon, text, className } = config[peerState];
+  const { icon, text, tone } = config[peerState];
 
   return (
-    <div
-      className={cn(
-        "mx-auto flex w-fit max-w-full animate-in items-center gap-2 rounded-full border px-3 py-1.5 text-sm font-medium shadow-sm fade-in slide-in-from-top-2",
-        className
-      )}
-      role="status"
-    >
-      {icon}
-      {/* Wraps rather than truncates: clipping would eat the countdown on
-          narrow phones ("Caesar's ghost 👻 lost connection… 2:00 to co…"). */}
-      <span className="min-w-0 text-center">{text}</span>
-    </div>
+    <ChatBanner tone={tone} icon={icon}>
+      {text}
+    </ChatBanner>
   );
 }

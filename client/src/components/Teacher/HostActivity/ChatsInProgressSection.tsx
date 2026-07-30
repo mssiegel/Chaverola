@@ -8,6 +8,7 @@ import type { Participant } from "@/types/chat";
 
 import { CollapsibleSection } from "./CollapsibleSection";
 import { EmptyState } from "./EmptyState";
+import { NoticeBanner } from "./NoticeBanner";
 import type { HostedChat } from "./hostWorld";
 
 interface ChatsInProgressSectionProps {
@@ -145,13 +146,9 @@ export function ChatsInProgressSection({
             </div>
           </div>
           {paused && (
-            <div
-              role="status"
-              className="mb-4 flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2.5 text-sm text-amber-800"
-            >
-              <Pause aria-hidden className="mt-0.5 size-4 shrink-0" />
-              <span>{t("chats.pausedNotice")}</span>
-            </div>
+            <NoticeBanner icon={Pause} className="mb-4">
+              {t("chats.pausedNotice")}
+            </NoticeBanner>
           )}
           <div className="grid items-start gap-4 md:grid-cols-2">
             {chats.map((chat) => (

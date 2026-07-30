@@ -1,5 +1,6 @@
 import { useState } from "react";
 
+import { randomId } from "./random";
 import {
   hasOptionalString,
   hasString,
@@ -35,16 +36,9 @@ export interface StudentSession {
 
 const STORAGE_KEY = "chaverola.studentSession";
 
-/**
- * Mint a join nonce. crypto.randomUUID needs a secure context, which
- * LAN-http dev (a phone pointed at the dev box) is not — fall back to a
- * random-enough string; it's an idempotency key, not a secret.
- */
+/** Mint a join nonce — see `randomId` for why it isn't always a UUID. */
 export function mintNonce(): string {
-  if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
-    return crypto.randomUUID();
-  }
-  return `n-${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+  return randomId();
 }
 
 /** Anything that isn't a well-formed session reads as signed out. */

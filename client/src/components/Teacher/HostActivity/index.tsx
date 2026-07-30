@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { Loader2, LogOut, UserPlus, UsersRound, WifiOff } from "lucide-react";
 
@@ -17,6 +17,7 @@ import { CompletedChatsSection } from "./CompletedChatsSection";
 import { confirmCopy, type PendingAction } from "./confirmCopy";
 import type { HostDemoTriggers, HostEngine } from "./hostEngine";
 import { HostHeader } from "./HostHeader";
+import { NoticeBanner } from "./NoticeBanner";
 import { JoiningInstructions } from "./JoiningInstructions";
 import { LiveSettingsPanel } from "./LiveSettingsPanel";
 import { PairingPanel } from "./PairingPanel";
@@ -272,23 +273,16 @@ export function HostActivityDashboard({
 
       {/* While the teacher's own connection is down, the banner says so and
           everything below it — the settings panel included — stays readable
-          but not actionable. `inert` on the wrappers, not pointer-events
-          alone: a focused switch would still toggle on Space. Unreachable on
-          the demo — its connection never drops. */}
+          but not actionable (see OfflineDim). Unreachable on the demo — its
+          connection never drops. */}
       {reconnecting && (
-        <div
-          role="status"
-          className="flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2.5 text-sm text-amber-800"
+        <NoticeBanner
+          icon={Loader2}
+          iconClassName="animate-spin motion-reduce:animate-none"
         >
-          <Loader2
-            aria-hidden
-            className="mt-0.5 size-4 shrink-0 animate-spin motion-reduce:animate-none"
-          />
-          <span className="min-w-0 flex-1">
-            <span className="font-semibold">{t("host.offline.title")}</span>{" "}
-            {t("host.offline.body")}
-          </span>
-        </div>
+          <span className="font-semibold">{t("host.offline.title")}</span>{" "}
+          {t("host.offline.body")}
+        </NoticeBanner>
       )}
 
       {/* On real activities too — founder call. Every edit here syncs to the
@@ -304,29 +298,19 @@ export function HostActivityDashboard({
           would actually land at reconnect (the socket buffers it), but a
           live switch next to the rail's identical dead one reads as two
           truths — founder call, feature 15. */}
-      <div
-        inert={reconnecting}
-        className={cn(
-          reconnecting && "pointer-events-none opacity-60 select-none"
-        )}
-      >
+      <OfflineDim offline={reconnecting}>
         <LiveSettingsPanel
           activity={activity}
           paused={engine.paused}
           onActivityChange={onActivityChange}
         />
-      </div>
+      </OfflineDim>
 
       {/* The full round, demo and live alike. Desktop: the pairing queue is
           a sticky rail beside the chats — the teacher watches the lobby
           refill while monitoring chats. It never disappears at zero;
           students come back to it. */}
-      <div
-        inert={reconnecting}
-        className={cn(
-          reconnecting && "pointer-events-none opacity-60 select-none"
-        )}
-      >
+      <OfflineDim offline={reconnecting}>
         <div className="lg:grid lg:grid-cols-[20rem_minmax(0,1fr)] lg:items-start lg:gap-6">
           {/* Sticky lives on the aside (a grid item sticks within its full-height
               grid area) and needs the grid's items-start — a stretched item has
@@ -450,7 +434,7 @@ export function HostActivityDashboard({
             </div>
           </div>
         </div>
-      </div>
+      </OfflineDim>
 
       <ConfirmDialog
         open={pendingAction !== null}
@@ -467,6 +451,28 @@ export function HostActivityDashboard({
           demo
         )}
       />
+    </div>
+  );
+}
+
+/**
+ * Everything below the offline banner stays readable but not actionable while
+ * the teacher's own socket is down. `inert`, not `pointer-events-none` alone:
+ * a focused switch would still toggle on Space.
+ */
+function OfflineDim({
+  offline,
+  children,
+}: {
+  offline: boolean;
+  children: ReactNode;
+}) {
+  return (
+    <div
+      inert={offline}
+      className={cn(offline && "pointer-events-none opacity-60 select-none")}
+    >
+      {children}
     </div>
   );
 }

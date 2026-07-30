@@ -8,6 +8,7 @@ import {
 } from "@chaverola/shared";
 
 import { Chatbox } from "@/components/Student/Chatbox";
+import { ChatStageFrame } from "@/components/Student/ChatStageFrame";
 import { useBackGuard } from "@/lib/useBackGuard";
 import type {
   ChatEndReason,
@@ -238,10 +239,7 @@ export function LiveChatStage({
   };
 
   return (
-    // Phones: fill the world edge-to-edge (~8px margins) so the composer sits
-    // on the keyboard (self-stretch without a width lets -mx-2 widen the box);
-    // sm+: today's fixed centered card.
-    <div className="-mx-2 flex min-h-[min(70dvh,620px)] flex-1 animate-in flex-col self-stretch duration-500 fade-in slide-in-from-bottom-4 motion-reduce:animate-none sm:mx-0 sm:h-[min(70dvh,620px)] sm:flex-none">
+    <ChatStageFrame>
       <Chatbox
         chat={chat}
         revealNames={revealNames}
@@ -257,6 +255,6 @@ export function LiveChatStage({
         endedSecretLine={t("ended.secretLive")}
         activityEnded={activityEnded}
       />
-    </div>
+    </ChatStageFrame>
   );
 }

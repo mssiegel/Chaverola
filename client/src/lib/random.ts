@@ -15,6 +15,23 @@ export function nextId(prefix: string): string {
   return `${prefix}-${idSeq}`;
 }
 
+/**
+ * An id unique beyond this tab — for the two values that outlive the module
+ * a counter lives in: the student's join nonce and a character row minted on
+ * the host page (both ride the wire and meet the server's stored copies).
+ *
+ * `crypto.randomUUID` needs a secure context, which LAN-http dev (a phone
+ * pointed at the dev box) is not, so the fallback is random enough and
+ * timestamped. Neither value is a secret — one is an idempotency key, the
+ * other an opaque roster key nothing renders.
+ */
+export function randomId(): string {
+  if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
+    return crypto.randomUUID();
+  }
+  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+}
+
 /** Random integer between min and max, inclusive on both ends. */
 export function randInt(min: number, max: number): number {
   return min + Math.floor(Math.random() * (max - min + 1));

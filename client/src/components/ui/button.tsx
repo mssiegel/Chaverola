@@ -11,6 +11,14 @@ const buttonVariants = cva(
       variant: {
         default:
           "bg-primary text-primary-foreground shadow-sm hover:bg-brand-grape-strong",
+        // The brand-mark gradient as a button: the student flow's three
+        // forward CTAs (continue, join, try again) wear it so the way in
+        // always looks the same. The hover stops are hand-tuned darker
+        // shades of the `--brand-gradient-*` tokens the base stops come
+        // from; the solid `bg-primary` sits under them so the button is
+        // never bare while the gradient paints.
+        brand:
+          "bg-primary bg-linear-to-r from-brand-gradient-from to-brand-gradient-to text-primary-foreground shadow-sm hover:bg-brand-grape-strong hover:from-[#7d5cf5] hover:to-[#5f3fd6]",
         destructive:
           "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90 focus-visible:ring-destructive/30",
         outline:

@@ -100,14 +100,14 @@ Load-bearing — trip over them before you break one:
 
 **Student join / lobby**
 
-- Files: [client/src/pages/student/JoinActivityPage.tsx](client/src/pages/student/JoinActivityPage.tsx) (the shell: stage machine + render dispatch, code → name → lobby → chatting → ended, one URL) over `pages/student/join/` (stage cards, `useActiveMatch`/`useDemoLobby`, and the pure `liveMatchState.ts` socket reducers), `pages/student/useLobbyPresence.ts` (the live seat), `components/Student/`, `lib/studentSession.ts`, `lib/useActivityLookup.ts`, `lib/useBackGuard.ts`.
+- Files: [client/src/pages/student/JoinActivityPage.tsx](client/src/pages/student/JoinActivityPage.tsx) (the shell: stage machine + render dispatch, code → name → lobby → chatting → ended, one URL) over `pages/student/join/` (stage cards on the shared `StageCard` shell, `useActiveMatch`/`useDemoLobby`, and the pure `liveMatchState.ts` socket reducers), `pages/student/useLobbyPresence.ts` (the live seat), `components/Student/`, `lib/studentSession.ts`, `lib/useActivityLookup.ts`, `lib/useBackGuard.ts`.
 - Invariants: characterIds-only wire · 120s grace · `LiveChatStage` is a split, not a hook · `scaledMs` is demo-only.
 - Decisions: [student-join.md](docs/decisions/student-join.md), [chat-behavior.md](docs/decisions/chat-behavior.md).
 - Verify: `verify:up --scale 10` + a two-tab live flow (or `?fast=10` for the demo), desktop and phone widths.
 
 **Host dashboard (live activity)**
 
-- Files: [client/src/components/Teacher/HostActivity/](client/src/components/Teacher/HostActivity/) — the dashboard takes an injected `HostEngine` (`hostEngine.ts`): `useHostActivityLive.ts` (real keys) and `useHostActivityDemo.ts` + `hostWorld.ts` (`1234`) are its two implementations; `lib/hostActivity.ts`, `lib/useHostedActivityLookup.ts`.
+- Files: [client/src/components/Teacher/HostActivity/](client/src/components/Teacher/HostActivity/) — the dashboard takes an injected `HostEngine` (`hostEngine.ts`): `useHostActivityLive.ts` (real keys) and `useHostActivityDemo.ts` + `hostWorld.ts` (`1234`) are its two implementations; `lib/hostActivity.ts`, `lib/useHostedActivityLookup.ts`. Every amber "here's why that didn't do what you expected" box on the page is one `NoticeBanner`.
 - Invariants: live engine imports only types from `hostWorld.ts` · teacher-gated auto-match · the host page is never projected (it's the teacher's private control room).
 - Decisions: [teacher-live.md](docs/decisions/teacher-live.md), [monitoring.md](docs/decisions/monitoring.md).
 - Verify: `verify:smoke` (host + two students), or the demo host at `/activity/host/1234`.
@@ -123,7 +123,7 @@ Load-bearing — trip over them before you break one:
 
 **Server lobby / matching / chat logic**
 
-- Files: `server/src/live/lobby.ts` (composition root — wires the pieces), `lobbyContext.ts` (shared io/broadcast/timer helpers), `auth.ts` (connection middleware + seating), `autoMatch.ts` (the auto-match timer), `handlers/teacher.ts` + `handlers/studentSession.ts` + `handlers/studentChat.ts` (the socket handlers), `seats.ts` (pure, io-free seat lifecycle), `matching.ts` (pure chat rules), `server/src/store/`.
+- Files: `server/src/live/lobby.ts` (composition root — wires the pieces), `lobbyContext.ts` (shared io/broadcast/timer helpers, plus the `seatSocket` / `connectedSeatSockets` / `connectedMemberSockets` fan-out every server→student emit goes through — never hand-roll `io.sockets.sockets.get(...)` again), `auth.ts` (connection middleware + seating), `autoMatch.ts` (the auto-match timer), `handlers/teacher.ts` + `handlers/studentSession.ts` + `handlers/studentChat.ts` (the socket handlers), `seats.ts` (pure, io-free seat lifecycle), `matching.ts` (pure chat rules), `server/src/store/`.
 - Invariants: characterIds-only projection · 120s grace incl. matched seats · teacher-gated auto-match · `pausedAt` dual role.
 - Decisions: [backend-api.md](docs/decisions/backend-api.md), [teacher-live.md](docs/decisions/teacher-live.md), [chat-behavior.md](docs/decisions/chat-behavior.md).
 - Verify: `pnpm --filter @chaverola/server test`; scratch `socket.io-client` drivers in `tools/verify/scratch/` (importing `../lib.mjs`) for behavior beyond the suite.
@@ -137,7 +137,7 @@ Load-bearing — trip over them before you break one:
 
 **Shared chat pieces**
 
-- Files: [client/src/components/chat/](client/src/components/chat/), `client/src/types/chat.ts` (the `ChatRoomState`/`ChatRoomActions` contract), `lib/characterColor.ts`. Geography: [architecture.md → Client component geography](docs/architecture.md#client-component-geography).
+- Files: [client/src/components/chat/](client/src/components/chat/), `client/src/types/chat.ts` (the `ChatRoomState`/`ChatRoomActions` contract), `lib/characterColor.ts`. Geography: [architecture.md → Client component geography](docs/architecture.md#client-component-geography). The three over-the-conversation pills (paused, your own drop, a peer's) are one `ChatBanner`; they share a slot, so they share a shape.
 - Invariants: the chatbox shell is presentational (props-only) and shared by the student chatbox, the homepage hero, and the teacher cards — one change ripples to all three.
 - Decisions: [chat-behavior.md](docs/decisions/chat-behavior.md), [monitoring.md](docs/decisions/monitoring.md).
 - Verify: a full cross-surface sweep (it's a shared piece), desktop and phone.
@@ -184,7 +184,8 @@ Load-bearing — trip over them before you break one:
 - **Prettier** (`.prettierrc` at the root): 2-space indent, double quotes, semicolons, 80-col, `es5` trailing commas. Run `pnpm format` before committing.
 - **Indexed access is checked** (`noUncheckedIndexedAccess`): `array[i]` / `record[key]` may be `undefined` — handle it, or assert with `!` plus a one-line comment stating why it can't miss.
 - **Path alias:** import app code via `@/…` (maps to `client/src/`).
-- **ShadCN** primitives live in `client/src/components/ui/` (new-york style). Prefer adding components there over hand-rolling equivalents. They're owned code and may be customized: our `ui/badge.tsx` IS the rounded "eyebrow pill", not the stock badge.
+- **ShadCN** primitives live in `client/src/components/ui/` (new-york style). Prefer adding components there over hand-rolling equivalents. They're owned code and may be customized: our `ui/badge.tsx` IS the rounded "eyebrow pill", not the stock badge, `ui/button.tsx` carries a `brand` variant (the gradient the student flow's forward CTAs wear), and a few app primitives with no ShadCN original live there too (`live-dot`, `section-label`, `status-pill`).
+- **Repeated chrome becomes a component, not a copied class string.** The shared shells and where they live are listed in [architecture.md → Client component geography](docs/architecture.md#client-component-geography) — reach for one before writing the same `rounded-full border border-amber-200 …` a second time. Prove the extraction changed no styling with the CSS-hash technique ([operations.md](docs/operations.md)); an identical `dist/assets/index-*.css` hash is the gate.
 - **Demo furniture** lives in `client/src/components/demo/` (`DemoControlsPanel` with `EventButton`/`DemoToggle`/`ChatDemoControls`, and `DemoBanner`). It is teacher-facing and permanent on the demo flows, NOT dev scaffolding (founder pitches use it); when a real backend arrives it leaves real activities only. The `onWorld` prop switches to the white/glass theme for the purple student world.
 - **Hooks have no dedicated directory:** a hook lives next to the components it drives; generic cross-cutting hooks live in `lib/`. The full inventory is in [architecture.md → Client component geography](docs/architecture.md#client-component-geography).
 - **All API calls go through `lib/api.ts`** — failures are `ApiResult` values, not exceptions; `VITE_API_URL` bakes the base URL at build time (dev falls back to `localhost:3001`; a prod build without it fails at startup).

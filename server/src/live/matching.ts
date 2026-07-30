@@ -97,6 +97,34 @@ export function matchedStudentIds(activity: StoredActivity): Set<string> {
   return ids;
 }
 
+/**
+ * The named chat, but only while it's still going. The opening line of every
+ * mutation below: an unknown id and an already-ended chat are the same answer
+ * (undefined), which is what makes each of them idempotent — a teacher's
+ * double-tap and a stale client event both land as silent no-ops.
+ */
+function findActiveChat(
+  activity: StoredActivity,
+  chatId: string
+): StoredChat | undefined {
+  const chat = activity.chats.find((c) => c.id === chatId);
+  return chat?.status === "active" ? chat : undefined;
+}
+
+/** The same, plus the caller's claim to be in it — a student can only be
+ *  removed from, or speak into, a room they're an active member of. */
+function findActiveChatWith(
+  activity: StoredActivity,
+  chatId: string,
+  studentId: string
+): StoredChat | undefined {
+  const chat = findActiveChat(activity, chatId);
+  if (!chat) return undefined;
+  return activeMembers(chat).some((m) => m.studentId === studentId)
+    ? chat
+    : undefined;
+}
+
 /** The chat a student is actively seated in right now, if any. */
 export function findActiveChatOf(
   record: StoredActivity,
@@ -275,11 +303,8 @@ export function markInactive(
   studentId: string,
   endReason: "teacher" | "peer" | "peer-timeout" = "teacher"
 ): { ended: boolean; chat: StoredChat } | undefined {
-  const chat = activity.chats.find((c) => c.id === chatId);
-  if (!chat || chat.status !== "active") return undefined;
-  if (!activeMembers(chat).some((m) => m.studentId === studentId)) {
-    return undefined;
-  }
+  const chat = findActiveChatWith(activity, chatId, studentId);
+  if (!chat) return undefined;
   chat.inactiveStudentIds.push(studentId);
   const ended = activeMembers(chat).length < 2;
   if (ended) {
@@ -306,8 +331,8 @@ export function endChat(
   endReason: "teacher" | "peer" = "teacher",
   endedBy: string | null = null
 ): { ended: true; chat: StoredChat } | undefined {
-  const chat = activity.chats.find((c) => c.id === chatId);
-  if (!chat || chat.status !== "active") return undefined;
+  const chat = findActiveChat(activity, chatId);
+  if (!chat) return undefined;
   chat.status = "ended";
   chat.endReason = endReason;
   chat.endedBy = endedBy;
@@ -360,11 +385,8 @@ export function appendLine(
   text: string,
   now: number
 ): { chat: StoredChat; line: StoredChatLine } | undefined {
-  const chat = activity.chats.find((c) => c.id === chatId);
-  if (!chat || chat.status !== "active") return undefined;
-  if (!activeMembers(chat).some((m) => m.studentId === studentId)) {
-    return undefined;
-  }
+  const chat = findActiveChatWith(activity, chatId, studentId);
+  if (!chat) return undefined;
   const line: StoredChatLine = {
     id: randomUUID(),
     studentId,

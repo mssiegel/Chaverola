@@ -1,5 +1,3 @@
-import type { Locale } from "@/lib/locale";
-
 /**
  * A namespace's strings: flat, key → string. Nesting is deliberately not used
  * — dotted keys ("hero.title") read the same at the call site and keep both
@@ -25,13 +23,4 @@ type PluralBase<K extends string> = K extends `${infer B}_other` ? B : never;
  */
 export type HebrewOf<T extends Catalog> = {
   [K in (keyof T & string) | `${PluralBase<keyof T & string>}_two`]: string;
-};
-
-/**
- * What `registerBundle` takes. Adding a language to LOCALES turns every call
- * site into a compile error until its catalog file exists.
- */
-export type Bundles<T extends Catalog> = Record<Locale, Catalog> & {
-  en: T;
-  he: HebrewOf<T>;
 };

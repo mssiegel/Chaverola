@@ -33,25 +33,31 @@ function rateLimited(_req: Request, res: Response): void {
   res.status(429).json(body);
 }
 
-// Rate limits are sized for one school NAT: 20 simultaneous classes × 30
-// students = 600 users on one IP.
-const postLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  // 20 teachers starting class at once, ×3 headroom.
-  limit: 60,
+/** Everything both limiters agree on: draft-8 `RateLimit` headers (the ones
+ *  the prod investigation read to catch a fragmented bucket), no legacy
+ *  `X-RateLimit-*` twins, and the envelope above instead of the default
+ *  plain-text 429. Shared so the two can't drift into reporting differently. */
+const LIMITER_DEFAULTS = {
   standardHeaders: "draft-8",
   legacyHeaders: false,
   handler: rateLimited,
+} as const;
+
+// Rate limits are sized for one school NAT: 20 simultaneous classes × 30
+// students = 600 users on one IP.
+const postLimiter = rateLimit({
+  ...LIMITER_DEFAULTS,
+  windowMs: 15 * 60 * 1000,
+  // 20 teachers starting class at once, ×3 headroom.
+  limit: 60,
 });
 const getLimiter = rateLimit({
+  ...LIMITER_DEFAULTS,
   windowMs: 5 * 60 * 1000,
   // 600 students × ~2 lookups in a join burst, ×2 headroom. Residual
   // exposure: a full 9,000-code sweep from one IP takes ~37 minutes —
   // accepted, since the student projection is public-by-assumption.
   limit: 1200,
-  standardHeaders: "draft-8",
-  legacyHeaders: false,
-  handler: rateLimited,
 });
 
 /** Body-parser failures mapped per the contract — never a mislabeled 500. */

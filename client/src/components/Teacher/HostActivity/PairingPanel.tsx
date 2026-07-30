@@ -21,6 +21,7 @@ import { splitWaitShort, type WaitUnit } from "@/lib/time";
 import { cn } from "@/lib/utils";
 
 import { EmptyState } from "./EmptyState";
+import { NoticeBanner } from "./NoticeBanner";
 import type { WaitingStudent } from "./hostWorld";
 
 /** The wait chip's unit → its catalog key. `as const satisfies` keeps the
@@ -158,37 +159,27 @@ export function PairingPanel({
           when the teacher needs to see the hold. The count is live — it
           climbs as students come back. */}
       {showHoldNotice && (
-        <div
-          role="status"
-          className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2.5 text-sm text-amber-800"
-        >
-          <div className="flex items-start gap-2">
-            <Zap aria-hidden className="mt-0.5 size-4 shrink-0" />
-            <span className="min-w-0 flex-1">
-              {connectedCount === 0
-                ? // Zero is its own sentence, not a plural form.
-                  t("pairing.hold.none")
-                : t("pairing.hold.waiting", { count: connectedCount })}
-            </span>
-            <button
-              type="button"
-              onClick={onDismissHoldNotice}
-              aria-label={t("common:dialog.dismiss")}
-              className="grid size-6 shrink-0 place-items-center rounded-full text-amber-700 transition-colors hover:bg-amber-100"
+        <NoticeBanner
+          icon={Zap}
+          onDismiss={onDismissHoldNotice}
+          dismissLabel={t("common:dialog.dismiss")}
+          footer={
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => onAutoMatchChange(true)}
+              className="mt-2 w-full border-amber-300 bg-white text-amber-900 hover:bg-amber-100 hover:text-amber-900"
             >
-              <X className="size-3.5" />
-            </button>
-          </div>
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => onAutoMatchChange(true)}
-            className="mt-2 w-full border-amber-300 bg-white text-amber-900 hover:bg-amber-100 hover:text-amber-900"
-          >
-            <Zap aria-hidden />
-            {t("pairing.hold.turnOn")}
-          </Button>
-        </div>
+              <Zap aria-hidden />
+              {t("pairing.hold.turnOn")}
+            </Button>
+          }
+        >
+          {connectedCount === 0
+            ? // Zero is its own sentence, not a plural form.
+              t("pairing.hold.none")
+            : t("pairing.hold.waiting", { count: connectedCount })}
+        </NoticeBanner>
       )}
 
       {waiting.length === 0 ? (
@@ -261,15 +252,9 @@ export function PairingPanel({
               : t("pairing.tapHint")}
           </p>
 
+          {/* No flip-rtl on Repeat2: it's a cycle, not a direction. */}
           {rematchWarning && (
-            <div
-              role="status"
-              className="flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2.5 text-sm text-amber-800"
-            >
-              {/* No flip-rtl: Repeat2 is a cycle, not a direction. */}
-              <Repeat2 aria-hidden className="mt-0.5 size-4 shrink-0" />
-              <span>{rematchWarning}</span>
-            </div>
+            <NoticeBanner icon={Repeat2}>{rematchWarning}</NoticeBanner>
           )}
 
           {/* One slot, two messages: why pair-everyone skipped a pair, and why
@@ -277,23 +262,13 @@ export function PairingPanel({
               the neutral icon — the box means "here's why that didn't do what
               you expected", and only the warning above is about a rematch. */}
           {railNotice && (
-            <div
-              role="status"
-              className="flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2.5 text-sm text-amber-800"
+            <NoticeBanner
+              icon={Info}
+              onDismiss={onDismissRailNotice}
+              dismissLabel={t("common:dialog.dismiss")}
             >
-              <Info aria-hidden className="mt-0.5 size-4 shrink-0" />
-              <span className="min-w-0 flex-1">
-                {railNoticeText(t, railNotice, locale)}
-              </span>
-              <button
-                type="button"
-                onClick={onDismissRailNotice}
-                aria-label={t("common:dialog.dismiss")}
-                className="grid size-6 shrink-0 place-items-center rounded-full text-amber-700 transition-colors hover:bg-amber-100"
-              >
-                <X className="size-3.5" />
-              </button>
-            </div>
+              {railNoticeText(t, railNotice, locale)}
+            </NoticeBanner>
           )}
 
           <ul className="flex flex-col gap-1.5">

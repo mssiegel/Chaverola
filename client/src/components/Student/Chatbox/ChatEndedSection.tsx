@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
 import { ArrowRight, EyeOff, RotateCcw } from "lucide-react";
@@ -31,6 +32,20 @@ interface ChatEndedSectionProps {
    */
   activityEnded?: boolean;
   onBackToLobby: () => void;
+}
+
+/**
+ * The dashed box that stands in for the reveal card when there is nothing to
+ * reveal — the teacher's setting is off, or this student walked out of a room
+ * that is still going and never earned the names.
+ */
+function SecretBox({ children }: { children: ReactNode }) {
+  return (
+    <div className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-border bg-card/60 p-3 text-sm text-muted-foreground">
+      <EyeOff className="size-4" />
+      <span>{children}</span>
+    </div>
+  );
 }
 
 /**
@@ -158,10 +173,7 @@ export function ChatEndedSection({
         </div>
 
         {chatGoesOnWithoutYou ? (
-          <div className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-border bg-card/60 p-3 text-sm text-muted-foreground">
-            <EyeOff className="size-4" />
-            <span>{t("ended.secretLeft")}</span>
-          </div>
+          <SecretBox>{t("ended.secretLeft")}</SecretBox>
         ) : revealNames && !removed ? (
           <div className="w-full rounded-xl border border-border bg-card p-3 text-start shadow-sm">
             <SectionLabel className="mb-2 text-center">
@@ -190,10 +202,7 @@ export function ChatEndedSection({
             </ul>
           </div>
         ) : (
-          <div className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-border bg-card/60 p-3 text-sm text-muted-foreground">
-            <EyeOff className="size-4" />
-            <span>{secretLine ?? t("ended.secretDefault")}</span>
-          </div>
+          <SecretBox>{secretLine ?? t("ended.secretDefault")}</SecretBox>
         )}
 
         <div className="w-full space-y-2 pt-1">

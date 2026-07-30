@@ -1,6 +1,7 @@
 import type { ActivitySettings, HostedActivity } from "@/types/activity";
 import type { Character } from "@/types/chat";
 
+import { randomId } from "./random";
 import {
   validateActivityDraft,
   type ActivityDraft,
@@ -42,14 +43,11 @@ export interface LiveActivityDraft extends ActivityDraftFields {
  * using — two characters sharing one id, and two chat members dealt the same
  * characterId, which is how a student's peer labels collapse into each
  * other. The `live-` prefix is only for reading logs; ids are opaque and
- * nothing renders them. crypto.randomUUID needs a secure context, so the
- * same fallback as mintNonce covers plain-http dev hosts.
+ * nothing renders them. `randomId` is the shared body — the same
+ * secure-context fallback the join nonce uses.
  */
 export function mintLiveCharacterId(): string {
-  if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
-    return `live-${crypto.randomUUID()}`;
-  }
-  return `live-${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+  return `live-${randomId()}`;
 }
 
 export function liveDraftFromActivity(

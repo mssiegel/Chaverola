@@ -6,7 +6,6 @@ import { STUDENT_NAME_MAX_CHARS } from "@chaverola/shared";
 
 import { Button } from "@/components/ui/button";
 import { getActivity } from "@/lib/api";
-import { cn } from "@/lib/utils";
 import { useLocaleNavigate } from "@/lib/locale";
 import type { Activity } from "@/types/activity";
 import {
@@ -15,11 +14,8 @@ import {
 } from "@/lib/useActivityLookup";
 import { DEMO_JOIN_CODE } from "@/mockData";
 
-import {
-  STUDENT_CARD_CLASS,
-  type CodeProblem,
-  type StudentStage,
-} from "./stageTypes";
+import { StageCard } from "./StageCard";
+import type { CodeProblem, StudentStage } from "./stageTypes";
 
 /**
  * The one form serving both gate stages — code entry and name entry — on one
@@ -136,131 +132,116 @@ export function JoinGateCard({
   };
 
   return (
-    // Phones anchor the card high so the form is visible without
-    // scrolling or hunting; from `sm` up it centers in the viewport.
-    <div className="flex w-full max-w-sm flex-1 flex-col items-center justify-start gap-4 pt-2 sm:justify-center sm:pt-0">
-      <div
-        className={cn(
-          STUDENT_CARD_CLASS,
-          "flex w-full animate-in flex-col gap-6 px-6 py-8 text-center duration-500 fade-in slide-in-from-bottom-4 motion-reduce:animate-none sm:px-8"
-        )}
-      >
-        <div className="space-y-2">
-          <h1 className="text-3xl font-semibold text-foreground">
-            {t("title.join")}
-          </h1>
-          {stage === "name" && activity ? (
-            <p className="animate-in text-muted-foreground duration-300 fade-in motion-reduce:animate-none">
-              {t("gate.hostedBy")}
-              {/* The teacher typed this name — isolate it so a Latin one
+    <StageCard className="slide-in-from-bottom-4">
+      <div className="space-y-2">
+        <h1 className="text-3xl font-semibold text-foreground">
+          {t("title.join")}
+        </h1>
+        {stage === "name" && activity ? (
+          <p className="animate-in text-muted-foreground duration-300 fade-in motion-reduce:animate-none">
+            {t("gate.hostedBy")}
+            {/* The teacher typed this name — isolate it so a Latin one
                   can't drag the "·" to the wrong side of a Hebrew line. */}
-              <bdi className="font-semibold text-foreground">
-                {activity.hostName}
-              </bdi>{" "}
-              · {t("gate.code")}{" "}
-              {/* Four digits beside a neutral: dir="ltr" or an RTL line
+            <bdi className="font-semibold text-foreground">
+              {activity.hostName}
+            </bdi>{" "}
+            · {t("gate.code")}{" "}
+            {/* Four digits beside a neutral: dir="ltr" or an RTL line
                   reorders them. */}
-              <span dir="ltr">{activity.joinCode}</span>
-            </p>
-          ) : (
-            <p className="text-muted-foreground">{t("gate.codePrompt")}</p>
-          )}
-        </div>
+            <span dir="ltr">{activity.joinCode}</span>
+          </p>
+        ) : (
+          <p className="text-muted-foreground">{t("gate.codePrompt")}</p>
+        )}
+      </div>
 
-        {removedNotice && (
-          <div
-            role="alert"
-            className="w-full rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm font-medium text-destructive"
-          >
-            {/* Arriving from a chat, the wrap-up screen already said what
+      {removedNotice && (
+        <div
+          role="alert"
+          className="w-full rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm font-medium text-destructive"
+        >
+          {/* Arriving from a chat, the wrap-up screen already said what
                 happened — repeating it here would just be the same sentence
                 twice, so this variant is only the instruction. */}
-            {removedNotice === "lobby" && t("gate.removed")}
-            {t("gate.reenterName")}
-          </div>
-        )}
+          {removedNotice === "lobby" && t("gate.removed")}
+          {t("gate.reenterName")}
+        </div>
+      )}
 
-        <form onSubmit={handleSubmit} className="flex w-full flex-col gap-4">
-          {stage === "name" ? (
+      <form onSubmit={handleSubmit} className="flex w-full flex-col gap-4">
+        {stage === "name" ? (
+          <input
+            value={name}
+            onChange={(event) => onNameChange(event.target.value)}
+            autoFocus={
+              isDesktopViewport || (name === "" && removedNotice === null)
+            }
+            maxLength={STUDENT_NAME_MAX_CHARS}
+            aria-label={t("gate.yourName")}
+            placeholder={t("gate.yourName")}
+            className="w-full animate-in rounded-2xl border-0 bg-brand-grape-soft px-4 py-4 text-center text-xl font-semibold duration-300 outline-none fade-in slide-in-from-bottom-2 focus:ring-2 focus:ring-brand-grape/40 motion-reduce:animate-none"
+          />
+        ) : (
+          <>
             <input
-              value={name}
-              onChange={(event) => onNameChange(event.target.value)}
-              autoFocus={
-                isDesktopViewport || (name === "" && removedNotice === null)
-              }
-              maxLength={STUDENT_NAME_MAX_CHARS}
-              aria-label={t("gate.yourName")}
-              placeholder={t("gate.yourName")}
-              className="w-full animate-in rounded-2xl border-0 bg-brand-grape-soft px-4 py-4 text-center text-xl font-semibold duration-300 outline-none fade-in slide-in-from-bottom-2 focus:ring-2 focus:ring-brand-grape/40 motion-reduce:animate-none"
+              value={code}
+              onChange={(event) => {
+                onCodeChange(event.target.value.replace(/\D/g, "").slice(0, 4));
+                setSubmitProblem(null);
+                setLookupProblemDismissed(true);
+              }}
+              // Read-only (not disabled) mid-lookup: edits mid-flight
+              // would make the answer about a different code, but a
+              // disabled input would drop focus and the phone keyboard.
+              readOnly={lookingUpCode}
+              inputMode="numeric"
+              autoFocus={isDesktopViewport}
+              aria-label={t("gate.joinCode")}
+              placeholder="1234"
+              // dir="ltr" on a four-digit field inside an RTL page:
+              // `tracking-[0.4em]` puts a letter-space after the last digit,
+              // and centred text lands that gap — and the caret — on the
+              // wrong edge without it. The "1234" placeholder pads backwards
+              // too.
+              dir="ltr"
+              className="w-full rounded-2xl border-0 bg-brand-grape-soft py-4 text-center text-3xl font-semibold tracking-[0.4em] outline-none focus:ring-2 focus:ring-brand-grape/40"
             />
+            {codeProblem && (
+              <p role="alert" className="text-sm font-medium text-destructive">
+                {codeProblem === "not-found"
+                  ? t("gate.notFound")
+                  : t("gate.unreachable")}
+              </p>
+            )}
+          </>
+        )}
+        <Button
+          variant="brand"
+          type="submit"
+          size="lg"
+          disabled={!canSubmit}
+          className="w-full"
+        >
+          {/* flip-rtl on both arrows: they mean "onwards", so they point
+                the way the page reads. */}
+          {stage === "name" ? (
+            <>
+              {t("gate.join")}
+              <ArrowRight className="flip-rtl size-4" />
+            </>
+          ) : lookingUpCode ? (
+            <>
+              {t("gate.finding")}
+              <Loader2 className="size-4 animate-spin motion-reduce:animate-none" />
+            </>
           ) : (
             <>
-              <input
-                value={code}
-                onChange={(event) => {
-                  onCodeChange(
-                    event.target.value.replace(/\D/g, "").slice(0, 4)
-                  );
-                  setSubmitProblem(null);
-                  setLookupProblemDismissed(true);
-                }}
-                // Read-only (not disabled) mid-lookup: edits mid-flight
-                // would make the answer about a different code, but a
-                // disabled input would drop focus and the phone keyboard.
-                readOnly={lookingUpCode}
-                inputMode="numeric"
-                autoFocus={isDesktopViewport}
-                aria-label={t("gate.joinCode")}
-                placeholder="1234"
-                // dir="ltr" on a four-digit field inside an RTL page:
-                // `tracking-[0.4em]` puts a letter-space after the last digit,
-                // and centred text lands that gap — and the caret — on the
-                // wrong edge without it. The "1234" placeholder pads backwards
-                // too.
-                dir="ltr"
-                className="w-full rounded-2xl border-0 bg-brand-grape-soft py-4 text-center text-3xl font-semibold tracking-[0.4em] outline-none focus:ring-2 focus:ring-brand-grape/40"
-              />
-              {codeProblem && (
-                <p
-                  role="alert"
-                  className="text-sm font-medium text-destructive"
-                >
-                  {codeProblem === "not-found"
-                    ? t("gate.notFound")
-                    : t("gate.unreachable")}
-                </p>
-              )}
+              {t("gate.continue")}
+              <ArrowRight className="flip-rtl size-4" />
             </>
           )}
-          {/* Hover stops are hand-tuned darker shades of the
-              `--brand-gradient-*` tokens the base stops come from. */}
-          <Button
-            type="submit"
-            size="lg"
-            disabled={!canSubmit}
-            className="w-full bg-linear-to-r from-brand-gradient-from to-brand-gradient-to hover:from-[#7d5cf5] hover:to-[#5f3fd6]"
-          >
-            {/* flip-rtl on both arrows: they mean "onwards", so they point
-                the way the page reads. */}
-            {stage === "name" ? (
-              <>
-                {t("gate.join")}
-                <ArrowRight className="flip-rtl size-4" />
-              </>
-            ) : lookingUpCode ? (
-              <>
-                {t("gate.finding")}
-                <Loader2 className="size-4 animate-spin motion-reduce:animate-none" />
-              </>
-            ) : (
-              <>
-                {t("gate.continue")}
-                <ArrowRight className="flip-rtl size-4" />
-              </>
-            )}
-          </Button>
-        </form>
-      </div>
-    </div>
+        </Button>
+      </form>
+    </StageCard>
   );
 }

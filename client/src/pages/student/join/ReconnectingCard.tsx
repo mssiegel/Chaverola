@@ -2,9 +2,9 @@ import { useTranslation } from "react-i18next";
 import { Loader2, RotateCw } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { StatusPill } from "@/components/ui/status-pill";
 
-import { STUDENT_CARD_CLASS } from "./stageTypes";
+import { StageCard } from "./StageCard";
 
 /**
  * A student who already has a seat, on a refresh (or a tab restore) the
@@ -22,42 +22,27 @@ export function ReconnectingCard({
 }) {
   const { t } = useTranslation("student");
   return (
-    <div className="flex w-full max-w-sm flex-1 flex-col items-center justify-start gap-4 pt-2 sm:justify-center sm:pt-0">
-      <div
-        className={cn(
-          STUDENT_CARD_CLASS,
-          "flex w-full animate-in flex-col items-center gap-6 px-6 py-8 text-center duration-500 fade-in motion-reduce:animate-none sm:px-8"
-        )}
-      >
-        <div className="space-y-2">
-          <h1 className="text-3xl font-semibold text-foreground">
-            {t("reconnecting.title", { name: studentName })}
-          </h1>
-          <p className="text-muted-foreground">{t("reconnecting.body")}</p>
-        </div>
-
-        <div
-          className="flex items-center gap-2.5 rounded-full border border-amber-200 bg-amber-50 px-4 py-2 text-sm font-semibold text-amber-800"
-          aria-live="polite"
-        >
-          <Loader2
-            aria-hidden
-            className="size-4 animate-spin motion-reduce:animate-none"
-          />
-          {t("reconnecting.pill")}
-        </div>
-
-        <Button
-          size="lg"
-          variant="outline"
-          onClick={onTryNow}
-          className="w-full"
-        >
-          {/* No flip-rtl: a cycle glyph turns the same way in every language. */}
-          <RotateCw aria-hidden className="size-4" />
-          {t("reconnecting.tryNow")}
-        </Button>
+    <StageCard className="items-center">
+      <div className="space-y-2">
+        <h1 className="text-3xl font-semibold text-foreground">
+          {t("reconnecting.title", { name: studentName })}
+        </h1>
+        <p className="text-muted-foreground">{t("reconnecting.body")}</p>
       </div>
-    </div>
+
+      <StatusPill tone="amber" aria-live="polite">
+        <Loader2
+          aria-hidden
+          className="size-4 animate-spin motion-reduce:animate-none"
+        />
+        {t("reconnecting.pill")}
+      </StatusPill>
+
+      <Button size="lg" variant="outline" onClick={onTryNow} className="w-full">
+        {/* No flip-rtl: a cycle glyph turns the same way in every language. */}
+        <RotateCw aria-hidden className="size-4" />
+        {t("reconnecting.tryNow")}
+      </Button>
+    </StageCard>
   );
 }

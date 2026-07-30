@@ -7,6 +7,7 @@ import type { LobbyConnectionState } from "@chaverola/shared";
 import { TypingDots } from "@/components/chat/TypingDots";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { SectionLabel } from "@/components/ui/section-label";
+import { StatusPill } from "@/components/ui/status-pill";
 import type { Activity } from "@/types/activity";
 
 interface WaitingLobbyProps {
@@ -109,42 +110,30 @@ export function WaitingLobby({
       </div>
 
       {hold === "reconnecting" ? (
-        <div
-          className="flex items-center gap-2.5 rounded-full border border-amber-200 bg-amber-50 px-4 py-2 text-sm font-semibold text-amber-800"
-          aria-live="polite"
-        >
+        <StatusPill tone="amber" aria-live="polite">
           <Loader2
             aria-hidden
             className="size-4 animate-spin motion-reduce:animate-none"
           />
           {t("reconnecting.pill")}
-        </div>
+        </StatusPill>
       ) : hold === "paused" ? (
-        <div
-          className="flex items-center gap-2.5 rounded-full border border-amber-200 bg-amber-50 px-4 py-2 text-sm font-semibold text-amber-800"
-          aria-live="polite"
-        >
+        <StatusPill tone="amber" aria-live="polite">
           <Pause aria-hidden className="size-4" />
           {t("lobby.pillPaused")}
-        </div>
+        </StatusPill>
       ) : hold === "teacher-away" ? (
         // The waiting pill's own colors, minus the dots. Amber would read as
         // a warning about something the student can't fix, and the dots would
         // keep promising a matchmaker that isn't running (founder call).
-        <div
-          className="flex items-center gap-2.5 rounded-full border border-brand-grape/25 bg-brand-grape-soft px-4 py-2 text-sm font-semibold text-brand-grape-strong"
-          aria-live="polite"
-        >
+        <StatusPill tone="grape" aria-live="polite">
           {t("lobby.pillTeacherAway")}
-        </div>
+        </StatusPill>
       ) : (
-        <div
-          className="flex items-center gap-2.5 rounded-full border border-brand-grape/25 bg-brand-grape-soft px-4 py-2 text-sm font-semibold text-brand-grape-strong"
-          aria-live="polite"
-        >
+        <StatusPill tone="grape" aria-live="polite">
           {t("lobby.pillWaiting")}
           <TypingDots dotClassName="bg-brand-mint" aria-hidden />
-        </div>
+        </StatusPill>
       )}
 
       <div className="w-full space-y-4 rounded-2xl border border-border bg-card p-5 text-start shadow-sm">
