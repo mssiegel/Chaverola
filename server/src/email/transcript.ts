@@ -199,7 +199,10 @@ function bdiHtml(value: string): string {
  *  and a shuffled deal can seat both of them in one chat — which would print
  *  two speakers of one transcript in the same ink. So when this chat's keys
  *  outrun the palette, its own cast seeds first and the color stops being
- *  stable across blocks. Per chat rather than per record for exactly that
+ *  stable across blocks. That branch fits with nothing to spare, which is the
+ *  point: MAX_CHAT_SEATS IS the palette's length, so this chat's cast takes
+ *  indices 0..n-1 and the wrap can only ever land on roster characters that
+ *  aren't in the room. Per chat rather than per record for exactly that
  *  reason: one map for the whole email has no cast to seed from. */
 function chatColorMap(
   record: StoredActivity,
@@ -238,23 +241,33 @@ function noteHtml(text: string, extraStyle = ""): string {
   return `<div style="font-size:13px;color:${MUTED};${extraStyle}">${escapeHtml(text)}</div>`;
 }
 
+/** One row per member rather than one dot-separated run: a chat at
+ *  MAX_CHAT_SEATS runs to a couple of hundred characters, and a teacher
+ *  scanning for who was in the room gets a wrapped smear instead of an
+ *  answer. Stacked, the HTML part answers the same question the same way
+ *  the plain-text part does — participantLine, one member per line.
+ *
+ *  No margin on the rows: the container's line-height already spaces them,
+ *  so a chat of two still reads as a pair rather than a bulleted list. */
 function castLineHtml(
   chat: StoredChat,
   colors: Map<string, string>,
   copy: EmailCopy
 ): string {
-  const parts = chat.members.map((member) => {
+  const rows = chat.members.map((member) => {
     const label = oneLine(member.character.name);
     const left = chat.inactiveStudentIds.includes(member.studentId)
       ? ` <span style="font-size:13px;color:${MUTED};">${escapeHtml(copy.leftNote)}</span>`
       : "";
     return (
+      `<div style="overflow-wrap:anywhere;">` +
       `<span style="color:${MUTED};">${bdiHtml(oneLine(member.name))} ${escapeHtml(copy.roleConnective)}</span> ` +
       characterHtml(label, colors.get(member.characterId) ?? INK) +
-      left
+      left +
+      `</div>`
     );
   });
-  return parts.join(` <span style="color:${MUTED};">·</span> `);
+  return rows.join("\n");
 }
 
 function transcriptLinesHtml(

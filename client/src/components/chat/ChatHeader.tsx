@@ -84,7 +84,14 @@ export function ChatHeader({
               <p className="text-xs font-semibold text-muted-foreground">
                 {t("header.roster")}
               </p>
-              <ul className="mt-2 space-y-1.5">
+              {/* A chat seats up to MAX_CHAT_SEATS people, and every name
+                  wraps rather than truncates, so on a phone the last few can
+                  sit below the screen with nothing to say they're there — the
+                  list scrolls instead. The cap belongs here and not on the
+                  popover so the "Who's in this chat" heading stays put while
+                  you scroll; pe-1 keeps the scrollbar off the names, the same
+                  way the lobby preview's chips do it. */}
+              <ul className="scroll-soft mt-2 max-h-[min(50vh,13rem)] space-y-1.5 overflow-y-auto pe-1">
                 {roster.map((participant) => {
                   const color = characterColors?.get(participant.character.id);
                   return (

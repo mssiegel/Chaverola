@@ -56,9 +56,10 @@ interface CharacterModeFieldProps {
  * Deliberately silent about two things, both decided against rather than
  * missed: a roster shorter than the class repeats characters across chats
  * (no warning, no block, and no copy anywhere may promise a chat's cast is
- * unique), and in order mode a roster longer than a chat's four seats
- * strands the names past the fourth. Don't add a hint, a badge, or a gate
- * for either.
+ * unique), and in order mode a roster longer than the chat it's dealing
+ * strands every name past that chat's last seat — MAX_CHAT_SEATS at the very
+ * biggest, and fewer for the pairs and trios most chats are. Don't add a
+ * hint, a badge, or a gate for either.
  */
 export function CharacterModeField({
   value,

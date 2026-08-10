@@ -28,6 +28,7 @@ import {
 import { removeSeat } from "../seats";
 import type { Seat } from "../seats";
 import type { StoredActivity } from "../../store/activityStore";
+import { MAX_CHAT_SEATS } from "@chaverola/shared";
 
 /** While a teacher socket is connected, refresh the activity's TTL this
  *  often (getByHostKey is the refresh path). Student sockets never refresh
@@ -118,10 +119,15 @@ export function registerTeacherHandlers(
 
   socket.on("chat:start", (payload) => {
     const ids = payload?.studentIds;
+    // Two different refusals, and the difference matters. More ids than seats
+    // is a hostile or broken caller — the dashboard clamps at min(seats,
+    // roster), so no real client can send it — and it dies here without a
+    // word. More students than CHARACTERS is an honest disagreement between
+    // two host devices, and it gets the notice below.
     if (
       !Array.isArray(ids) ||
       ids.length < 1 ||
-      ids.length > 8 ||
+      ids.length > MAX_CHAT_SEATS ||
       !ids.every((id) => typeof id === "string" && id.length <= 200)
     ) {
       return;
@@ -137,7 +143,7 @@ export function registerTeacherHandlers(
     // why. createChat enforces the same rule; this branch exists to tell the
     // teacher, since a refusal is otherwise indistinguishable from a dead
     // button.
-    const asked = requestedSeats(current, ids).slice(0, 4);
+    const asked = requestedSeats(current, ids).slice(0, MAX_CHAT_SEATS);
     if (asked.length > current.characters.length) {
       // Counts, not a sentence: the teacher's own page words it, in the
       // teacher's own language. Both are always 2 or more — a chat needs two

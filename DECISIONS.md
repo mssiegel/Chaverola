@@ -118,6 +118,7 @@ git: `git log -- DECISIONS.md`.
   - [Host the Activity docks to the bottom edge at every breakpoint](docs/decisions/teacher-setup.md#host-the-activity-docks-to-the-bottom-edge-at-every-breakpoint)
   - [Setup sections each carry one brand accent; settings stays the quiet one](docs/decisions/teacher-setup.md#setup-sections-each-carry-one-brand-accent-settings-stays-the-quiet-one)
 - [Teacher live activity page](docs/decisions/teacher-live.md)
+  - [A chat seats as many students as the palette has colors](docs/decisions/teacher-live.md#a-chat-seats-as-many-students-as-the-palette-has-colors)
   - [The transcript email is written in the activity's language, and lays itself out right to left without CSS](docs/decisions/teacher-live.md#the-transcript-email-is-written-in-the-activitys-language-and-lays-itself-out-right-to-left-without-css)
   - [Seat events stop re-shipping ended transcripts; full snapshots heal](docs/decisions/teacher-live.md#seat-events-stop-re-shipping-ended-transcripts-full-snapshots-heal)
   - [A selection survives a reconnect; only leaving the queue clears it](docs/decisions/teacher-live.md#a-selection-survives-a-reconnect-only-leaving-the-queue-clears-it)

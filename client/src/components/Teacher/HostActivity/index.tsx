@@ -2,6 +2,8 @@ import { useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { Loader2, LogOut, UserPlus, UsersRound, WifiOff } from "lucide-react";
 
+import { MAX_CHAT_SEATS } from "@chaverola/shared";
+
 import { DemoControlsPanel, EventButton } from "@/components/demo/DemoControls";
 import { AccentIconChip } from "@/components/Teacher/ActivitySetup/FormSection";
 import { Button } from "@/components/ui/button";
@@ -81,7 +83,9 @@ export function HostActivityDashboard({
     if (activity.settings.autoMatch) setAutoMatchHoldNotice(false);
   }
 
-  const maxGroupSize = Math.min(4, activity.characters.length);
+  // Both bounds are real: the palette decides how many speakers can wear
+  // distinct colors, and the roster decides how many parts there are to play.
+  const maxGroupSize = Math.min(MAX_CHAT_SEATS, activity.characters.length);
 
   // Every count and every pairing gate runs off this, not off the raw queue:
   // a dropped student keeps their seat and their row, but the server won't

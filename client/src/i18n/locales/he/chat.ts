@@ -7,8 +7,10 @@ import type { ChatCatalog } from "../en/chat";
 export const chat: HebrewOf<ChatCatalog> = {
   "header.youAre": "אתה ",
   "header.with": "עם ",
-  // Hebrew spells small numbers as words, and this count is 1 or 2 in
-  // practice — a chat holds four people at most.
+  // Hebrew spells small numbers as words, and this count — everyone in the
+  // chat but you — runs from 1 up to MAX_CHAT_SEATS minus two. These three
+  // forms cover the whole range: Hebrew's "many" category only starts at 20,
+  // which a chat can never reach, so no further key is needed.
   "header.others_one": "ועוד אחד",
   "header.others_two": "ועוד שניים",
   "header.others_other": "ועוד {{count}}",

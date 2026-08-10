@@ -47,11 +47,12 @@ export const demoActivities: Record<Locale, Activity> = {
       "nobody knows who to trust. Stay in character and ask nosy questions. " +
       "And don't tell anyone what you saw last night: someone in this chat " +
       "knows more than they're letting on.",
-    // Eight parts for a four-seat chat, because the demo runs on the shuffled
-    // mode (demoHostedActivity) and a roster the size of a chat would deal the
-    // same cast every time. At eight the host page's cards visibly differ, and
-    // eight is also where the character palette ends — one more and a card
-    // stops holding a character's color steady (rosterCharacterColors).
+    // Eight parts for chats of two to four, because the demo runs on the
+    // shuffled mode (demoHostedActivity) and a roster the size of a chat would
+    // deal the same cast every time. At roughly twice a chat's size the host
+    // page's cards visibly differ, and eight is also where the character
+    // palette ends — one more and a card stops holding a character's color
+    // steady (rosterCharacterColors).
     characters: [
       { id: "caesars-ghost", name: "Caesar's ghost 👻" },
       { id: "brutus", name: "Brutus 🔪" },

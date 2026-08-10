@@ -63,10 +63,10 @@ export interface HostDemoCast {
   studentNames: readonly string[];
   /**
    * Two in progress (a 1:1 and a group of 3, so the group paths are
-   * exercised) and two completed (a 1:1 and a group of 4, the biggest a chat
-   * ever gets). Four seed chats drawing from an eight-name roster is also how
-   * the shuffled mode shows itself: the four cards seat different casts, which
-   * is the whole point of a roster longer than a chat.
+   * exercised) and two completed (a 1:1 and a group of 4). Four seed chats
+   * drawing from an eight-name roster is also how the shuffled mode shows
+   * itself: the four cards seat different casts, which is the whole point of a
+   * roster longer than a chat.
    */
   seedChats: readonly HostSeedChat[];
   /**

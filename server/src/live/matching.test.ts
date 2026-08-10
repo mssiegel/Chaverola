@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   CHAT_TRANSCRIPT_MAX_LINES,
   DEFAULT_ACTIVITY_SETTINGS,
+  MAX_CHAT_SEATS,
 } from "@chaverola/shared";
 import type { ActivitySettings, Character } from "@chaverola/shared";
 
@@ -82,6 +83,17 @@ const ROSTER: Character[] = [
   { id: "cleopatra", name: "Cleopatra" },
 ];
 
+/** ROSTER, extended with stand-ins until it holds `size` characters — the
+ *  seat-cap tests below need a teacher who typed more than four names, and
+ *  every other test keeps sharing the four. */
+function makeRoster(size: number): Character[] {
+  return Array.from(
+    { length: size },
+    (_, index) =>
+      ROSTER[index] ?? { id: `extra-${index}`, name: `Extra ${index}` }
+  );
+}
+
 describe("createChat", () => {
   it("seats only eligible students and no-ops under 2", () => {
     const activity = makeActivity(ROSTER);
@@ -145,6 +157,48 @@ describe("createChat", () => {
     expect(activity.chats).toHaveLength(0);
     // The cast is the only thing refusing: two of the same three still start.
     expect(createChat(activity, ids.slice(0, 2), 10_000)).not.toBeNull();
+  });
+
+  it("seats MAX_CHAT_SEATS students when the roster has that many characters", () => {
+    const activity = makeActivity(makeRoster(MAX_CHAT_SEATS));
+    const seats = Array.from({ length: MAX_CHAT_SEATS }, () =>
+      addSeat(activity)
+    );
+
+    const chat = createChat(
+      activity,
+      seats.map((s) => s.studentId),
+      10_000
+    );
+    expect(chat).not.toBeNull();
+    expect(chat!.members).toHaveLength(MAX_CHAT_SEATS);
+    // Distinct characters is what the cap is FOR: the speaker colors run out
+    // at this many, so a room where two students share a character id is a
+    // room where two names are the same color.
+    expect(new Set(chat!.members.map((m) => m.characterId)).size).toBe(
+      MAX_CHAT_SEATS
+    );
+  });
+
+  it("refuses MAX_CHAT_SEATS students when the roster is smaller", () => {
+    const activity = makeActivity(makeRoster(5));
+    const seats = Array.from({ length: MAX_CHAT_SEATS }, () =>
+      addSeat(activity)
+    );
+
+    // Not a regression — this is the refusal rule finally reaching the top of
+    // its own range. The request used to be cut to 4 before the cast was
+    // checked, so a chat of four quietly started and the rest of the tapped
+    // students stayed in the queue with nothing said. A start the cast can't
+    // seat is refused whole, not trimmed to fit.
+    expect(
+      createChat(
+        activity,
+        seats.map((s) => s.studentId),
+        10_000
+      )
+    ).toBeNull();
+    expect(activity.chats).toHaveLength(0);
   });
 
   it("in inOrder mode, deals exactly the roster's first N characters, each once", () => {

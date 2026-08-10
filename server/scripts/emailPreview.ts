@@ -13,10 +13,12 @@ import type { StoredActivity } from "../src/store/activityStore";
 /*
   `pnpm preview:email` — render the transcript email over a fixture class and
   write the HTML part to a file, so the design gets eyeballed without sending
-  real mail. Each fixture walks the formatter's edges: a four-member chat (one
-  message full of markup that must come out inert), a pair where one student
-  left partway, and a silent room. Open the printed paths in a browser; a
-  print preview from there is the ink check.
+  real mail. Each fixture walks the formatter's edges: a chat filled to
+  MAX_CHAT_SEATS — every seat a different character, so the cast block and the
+  color palette both run to their end, and one message full of markup that must
+  come out inert — a pair where one student left partway, and a silent room.
+  Open the printed paths in a browser; a print preview from there is the ink
+  check.
 
   BOTH locales are written every run, deliberately — no flag to pass and
   nothing to remember. Whoever changes the formatter has to look at the
@@ -90,6 +92,10 @@ const EN_CAST = {
   golda: { id: "golda", name: "Golda 🕊️" },
   rivka: { id: "rivka", name: "Rivka 📜" },
   david: { id: "david", name: "David" }, // no emoji on purpose
+  nordau: { id: "nordau", name: "Nordau 🩺" },
+  wolffsohn: { id: "wolffsohn", name: "Wolffsohn 🏳️" },
+  ahad: { id: "ahad", name: "Ahad Ha'am ✒️" }, // apostrophe, so it must escape
+  miriam: { id: "miriam", name: "Miriam 🗝️" },
 };
 
 const english = activity({
@@ -104,6 +110,10 @@ const english = activity({
         member("s2", "Ben", EN_CAST.golda),
         member("s3", "Carmel", EN_CAST.rivka),
         member("s4", "Dov", EN_CAST.david),
+        member("s9", "Jonah", EN_CAST.nordau),
+        member("s10", "Keren", EN_CAST.wolffsohn),
+        member("s11", "Lior", EN_CAST.ahad),
+        member("s12", "Maya", EN_CAST.miriam),
       ],
       lines: [
         line("s1", "If you will it, it is no dream."),
@@ -115,6 +125,10 @@ const english = activity({
           "<script>alert('this must render as text')</script> & so on"
         ),
         line("s1", "That is not a real position, Dov."),
+        line("s9", "As a doctor: this hall needs air, not another vote."),
+        line("s10", "I sewed a flag. Blue and white. Nobody asked me to."),
+        line("s11", "A spirit first, a state after. Write that down, Carmel."),
+        line("s12", "I hold the key to this hall and you are all out by six."),
       ],
     }),
     chat({
@@ -145,6 +159,10 @@ const HE_CAST = {
   golda: { id: "golda", name: "גולדה 🕊️" },
   sharef: { id: "sharef", name: "שרף 📜" },
   david: { id: "david", name: "בן־גוריון" }, // no emoji on purpose
+  nordau: { id: "nordau", name: "נורדאו 🩺" },
+  wolffsohn: { id: "wolffsohn", name: "וולפסון 🏳️" },
+  ahad: { id: "ahad", name: "אחד העם ✒️" },
+  miriam: { id: "miriam", name: "מרים 🗝️" },
 };
 
 const hebrew = activity({
@@ -162,6 +180,10 @@ const hebrew = activity({
         member("s2", "יונתן", HE_CAST.golda),
         member("s3", "כרמל", HE_CAST.sharef),
         member("s4", "דב", HE_CAST.david),
+        member("s9", "יונה", HE_CAST.nordau),
+        member("s10", "קרן", HE_CAST.wolffsohn),
+        member("s11", "ליאור", HE_CAST.ahad),
+        member("s12", "מאיה", HE_CAST.miriam),
       ],
       lines: [
         line("s1", "אם תרצו, אין זו אגדה."),
@@ -173,6 +195,10 @@ const hebrew = activity({
           "<script>alert('this must render as text')</script> וכן הלאה"
         ),
         line("s1", "זאת לא עמדה, דב."),
+        line("s9", "כרופא אני אומר לכם: לאולם הזה חסר אוויר, לא עוד הצבעה."),
+        line("s10", "תפרתי דגל. כחול־לבן. אף אחד לא ביקש ממני."),
+        line("s11", "קודם רוח, אחר כך מדינה. תרשמי את זה, כרמל."),
+        line("s12", "המפתח של האולם אצלי, וכולכם יוצאים בשש."),
       ],
     }),
     chat({

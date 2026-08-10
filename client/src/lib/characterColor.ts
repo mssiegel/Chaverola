@@ -65,9 +65,15 @@ export function selfFirstCharacterColors(
  *   and a shuffled deal can drop both into one chat, which would print two
  *   speakers of one card in the same color. Distinct colors WITHIN a card beat
  *   a stable color ACROSS cards, and a stable per-character color was already
- *   unachievable at this length, so nothing is lost by dropping it. A chat is
- *   capped at four seats, well under the palette, so seeding the participants
- *   first always gives every speaker on a card its own color.
+ *   unachievable at this length, so nothing is lost by dropping it.
+ *
+ * Seeding the cast first works because `MAX_CHAT_SEATS` IS the palette length:
+ * the participants take indices 0..n-1 and the wrap only ever lands on roster
+ * characters that aren't in this chat. That bound is exact, not roomy — a
+ * ninth seat would put the ninth speaker on the first speaker's color. It
+ * holds because the cast is always n DISTINCT characters: the schema rejects
+ * duplicate character ids, and `dealCast` slices a roster rather than drawing
+ * with replacement.
  *
  * The test is the count of DISTINCT keys, not `roster.length`: a card also
  * carries any character a mid-activity removal left frozen on it, so a roster

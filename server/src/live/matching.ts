@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 
 import {
   CHAT_TRANSCRIPT_MAX_LINES,
+  MAX_CHAT_SEATS,
   activeMembersBy,
   dealCast,
   pairEveryonePlan,
@@ -187,18 +188,23 @@ export function requestedSeats(
 
 /**
  * Start a chat: filter to eligible students, refuse outright when the cast
- * can't seat all of them, and no-op under 2. Four seats is the hard chat size
- * and always was; the roster is the part two host devices can disagree about,
- * and a teacher whose local copy ran ahead gets nothing rather than a chat
- * that quietly drops a student in the queue (founder call, 2026-07-26 — this
- * used to clamp). Consuming the leftover clears the highlight.
+ * can't seat all of them, and no-op under 2. The roster is the part two host
+ * devices can disagree about, and a teacher whose local copy ran ahead gets
+ * nothing rather than a chat that quietly drops a student in the queue
+ * (founder call, 2026-07-26 — this used to clamp). Consuming the leftover
+ * clears the highlight.
+ *
+ * The MAX_CHAT_SEATS slice is a structural backstop, not behavior anyone can
+ * reach: the teacher handler drops a longer payload before it gets here, and
+ * pair-everyone only ever hands over a pair or a trio. Nothing is trimmed to
+ * fit any more — a request is seated whole or refused whole.
  */
 export function createChat(
   activity: StoredActivity,
   studentIds: string[],
   now: number
 ): StoredChat | null {
-  const seated = requestedSeats(activity, studentIds).slice(0, 4);
+  const seated = requestedSeats(activity, studentIds).slice(0, MAX_CHAT_SEATS);
   if (seated.length > activity.characters.length) return null;
   if (seated.length < 2) return null;
 

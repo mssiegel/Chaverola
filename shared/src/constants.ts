@@ -1,3 +1,4 @@
+import { CHARACTER_COLOR_VARS } from "./colors";
 import type { ActivitySettings } from "./types";
 
 /*
@@ -9,10 +10,22 @@ import type { ActivitySettings } from "./types";
 export const MIN_CHARACTERS = 2;
 /**
  * A safety valve, not a rule about the lesson: a shuffled roster is meant to
- * be long (a class of forty in pairs fills forty parts), and nothing about a
- * chat's size is derived from this. Four seats is still the hard chat size.
+ * be long (a class of forty in pairs fills forty parts). A chat's size is its
+ * own bound — see MAX_CHAT_SEATS.
  */
 export const MAX_CHARACTERS = 100;
+
+/**
+ * Students in one chat, and the palette is the reason for the number: every
+ * speaker's name is colored from CHARACTER_COLOR_VARS, and assignCharacterColors
+ * wraps once it runs out, so a 9th speaker would wear the 1st speaker's color in
+ * the same room. Derived rather than typed out, so adding a color is the only
+ * way to raise it and the two can never drift apart.
+ *
+ * The roster is the other bound: a chat seats min(roster length, this). A
+ * teacher with three characters still gets chats of three.
+ */
+export const MAX_CHAT_SEATS = CHARACTER_COLOR_VARS.length;
 
 /** Character names and the hosted-by name — both render in tight chrome. */
 export const NAME_MAX_CHARS = 30;

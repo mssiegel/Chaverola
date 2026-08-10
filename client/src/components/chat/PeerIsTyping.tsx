@@ -5,7 +5,8 @@ import { TypingDots } from "@/components/chat/TypingDots";
 interface PeerIsTypingProps {
   /** Character name of the peer who is typing, or null when nobody is. */
   characterName: string | null;
-  /** In group chats (3–4 people) we hide who it is and say "someone". */
+  /** In any group — three people or more — we hide who it is and say
+   *  "someone". */
   isGroup: boolean;
 }
 

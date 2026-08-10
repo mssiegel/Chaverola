@@ -20,7 +20,8 @@ export interface CharacterInput {
 export interface CreateActivityRequest {
   /** 1–30 chars after trim. */
   hostName: string;
-  /** 2–4 characters; names unique (trimmed, case-insensitive). */
+  /** MIN_CHARACTERS–MAX_CHARACTERS (2–100); names unique (trimmed,
+   *  case-insensitive). */
   characters: CharacterInput[];
   /** ≤ STUDENT_INSTRUCTIONS_MAX_CHARS; omit when blank. */
   studentInstructions?: string;

@@ -56,7 +56,7 @@ export interface CharacterInput {
 
 export interface CreateActivityRequest {
   hostName: string; // 1–30 after trim
-  characters: CharacterInput[]; // MIN_CHARACTERS–MAX_CHARACTERS (2–100); names unique (trimmed, case-insensitive). A chat is still 4 seats — the cap is a roster length, not a chat size
+  characters: CharacterInput[]; // MIN_CHARACTERS–MAX_CHARACTERS (2–100); names unique (trimmed, case-insensitive). A chat still seats min(MAX_CHAT_SEATS, roster length) — the cap here is a roster length, not a chat size
   studentInstructions?: string; // ≤ STUDENT_INSTRUCTIONS_MAX_CHARS (250, code points); omit when blank
   teacherEmail?: string; // EMAIL_PATTERN, ≤ EMAIL_MAX_CHARS; omit when blank
   locale?: Locale; // "en" | "he" — the language the form was in. OPTIONAL on the wire and defaulted to "en" server-side, so a deploy can't 400 an old client's create
@@ -581,15 +581,18 @@ below.
 - **Characters are dealt at random from the roster's first N.** A chat of
   N seats uses characters 1..N, shuffled — so a 2-person chat always uses
   the first two characters, and who gets which is chance.
-- **Starting a chat is all or nothing.** `chat:start` filters to eligible
-  students, takes at most four, and then refuses the whole start if the
-  roster has fewer characters than that: nobody is seated, and the teacher
-  gets the refusal on `railNotice` naming the cast size the server
-  actually holds. It used to clamp instead, which seated whoever fit and
-  left the rest in the queue with nothing to explain it (feature 18,
-  founder call 2026-07-26). Below 2 eligible it still does nothing
-  quietly — a student who got matched away or dropped is a cause the
-  teacher can see. Pair-everyone can't trip the refusal: its plan already
+- **Starting a chat is all or nothing.** A payload naming more than
+  `MAX_CHAT_SEATS` students dies at the wire without a word — no real client
+  can send one, since the dashboard can't select past that. Within the cap,
+  `chat:start` filters to eligible students and then refuses the whole start
+  if the roster has fewer characters than the number left: nobody is seated,
+  and the teacher gets the refusal on `railNotice` naming the cast size the
+  server actually holds. Nothing is trimmed to fit any more — a start is
+  seated whole or refused whole. It used to clamp instead, which seated
+  whoever fit and left the rest in the queue with nothing to explain it
+  (feature 18, founder call 2026-07-26). Below 2 eligible it still does
+  nothing quietly — a student who got matched away or dropped is a cause
+  the teacher can see. Pair-everyone can't trip the refusal: its plan already
   sizes every group against the roster.
 - **Every deal reads the roster it finds.** Both deal paths size and slice
   off `activity.characters` at the moment they run, so a character removed

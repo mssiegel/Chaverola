@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 
+import { MAX_CHAT_SEATS } from "@chaverola/shared";
+
 import type { Participant } from "@/types/chat";
 
 import {
@@ -81,6 +83,36 @@ describe("rosterCharacterColors", () => {
       participant("removed"),
     ]);
     expect(colors.get("c0")).not.toBe(colors.get("removed"));
+  });
+
+  it("gives every speaker on a full card its own color", () => {
+    // What a full chat rests on: no two names on the card share a color, so a
+    // teacher reading the busiest card can still tell who said what.
+    const roster = Array.from({ length: MAX_CHAT_SEATS }, (_, i) => ({
+      id: `c${i}`,
+      name: `c${i}`,
+    }));
+    const participants = roster.map((c) => participant(c.id));
+    const colors = rosterCharacterColors(roster, participants);
+    const used = new Set(participants.map((p) => colors.get(p.character.id)));
+    expect(used.size).toBe(participants.length);
+  });
+
+  it("gives a full card its own colors when the roster outruns the palette", () => {
+    // The same full card in the wrapping branch, where the card seeds first.
+    // It holds only because the cast fills tokens 1..MAX_CHAT_SEATS exactly and
+    // the wrap lands on roster characters seated elsewhere — that boundary is
+    // the whole reason a chat stops at MAX_CHAT_SEATS.
+    const roster = Array.from({ length: MAX_CHAT_SEATS + 4 }, (_, i) => ({
+      id: `c${i}`,
+      name: `c${i}`,
+    }));
+    const participants = roster
+      .slice(0, MAX_CHAT_SEATS)
+      .map((c) => participant(c.id));
+    const colors = rosterCharacterColors(roster, participants);
+    const used = new Set(participants.map((p) => colors.get(p.character.id)));
+    expect(used.size).toBe(participants.length);
   });
 });
 

@@ -313,6 +313,16 @@ _Implemented in [matching.ts](../../server/src/live/matching.ts) (`createChat`
 filters through `eligibleWaiting`, then slices to
 `min(4, roster length)`)._
 
+_Update (2026-08-10): the seat half moved as well. A chat now seats
+`min(MAX_CHAT_SEATS, roster length)` — `MAX_CHAT_SEATS` is the length of the
+character-name color palette (eight), because a ninth speaker would wear the
+first speaker's color in the same room. Nothing is trimmed to that number
+either: a `chat:start` payload naming more students than that dies at the
+wire without a word, and anything within the cap is seated whole or refused
+whole. Rooms bigger than three are the teacher tapping names by hand —
+pair-everyone and the auto-match timer still make pairs, plus one trio for
+an odd student._
+
 ### Sockets connect at lobby entry and host-page load, and never on the demo
 
 _2026-07-19_

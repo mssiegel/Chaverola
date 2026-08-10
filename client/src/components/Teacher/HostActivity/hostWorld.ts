@@ -86,8 +86,11 @@ export interface HostWorld {
   /** Pair-everyone had to repeat a pairing; shown in the rail, dismissible.
    *  Structured like the server's, so the panel renders one shape either way
    *  — the simulation only ever writes the "stuckInLine" kind, since the
-   *  dashboard caps a selection at the roster size and the demo's own
-   *  createChat can't be asked for more seats than it has. */
+   *  dashboard caps a selection at min(MAX_CHAT_SEATS, roster) and the demo's
+   *  own createChat can't be asked for more seats than it has. That cap is
+   *  the demo's ONLY seat limit, deliberately: createChat here clears the
+   *  queue by the request rather than by who got seated, so a slice of its
+   *  own would drop the extra students out of the world entirely. */
   railNotice: RailNotice | null;
   /**
    * The teacher paused the whole activity. World-level on purpose — there is

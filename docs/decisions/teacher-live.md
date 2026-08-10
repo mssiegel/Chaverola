@@ -5,6 +5,69 @@ area. Entries are newest-first; add new ones at the top, and add a matching line
 to the index in the same change. Replaced decisions move to Superseded at the
 bottom of this file.
 
+### A chat seats as many students as the palette has colors
+
+_2026-08-10_
+
+**Decision:** A chat is no longer capped at four students. It seats
+`min(MAX_CHAT_SEATS, roster length)`, and `MAX_CHAT_SEATS` is defined as
+`CHARACTER_COLOR_VARS.length` — currently eight — rather than typed out as a
+number. A teacher with fifteen characters can put eight students in one room; a
+teacher with three still gets chats of three. Three supporting calls:
+
+- **Big chats are made by hand.** "Pair everyone 1:1" and the auto-match timer
+  are untouched: they still produce pairs, plus one trio for an odd student.
+  `pairEveryonePlan` reads the roster size only to choose between a trailing
+  trio and a leftover, and `pickAutoMatchPair` returns a two-tuple by type. The
+  bigger room is reached by tapping students in the rail, which is the only
+  place the new ceiling is visible ("or up to 8 for a group").
+- **Nothing is trimmed to fit, at all.** A `chat:start` payload naming more
+  students than there are seats dies at the wire without a word — no real
+  client can send one, since the dashboard clamps the selection. Within the
+  cap, a start the roster can't seat is refused whole, as it already was. This
+  makes [A start the cast can't seat is refused whole, not trimmed to
+  fit](#a-start-the-cast-cant-seat-is-refused-whole-not-trimmed-to-fit) total:
+  the slice in `createChat` is now a structural backstop nobody can reach.
+- **The teacher's chat card just grows.** Eight students means eight name rows
+  above the transcript excerpt, with no collapse control and no scroller. A
+  card that hides who is in it would defeat the card.
+
+**Why:** A teacher asked for it, right after
+[the shuffled roster](teacher-setup.md#the-teacher-picks-how-characters-get-handed-out-and-a-roster-can-hold-a-hundred)
+shipped: once a roster can hold a hundred names, a four-person ceiling is the
+thing standing between her and a group scene. The number eight is not a product
+opinion, which is why it is derived rather than chosen. Every speaker's name is
+colored from the `--char-*` tokens, and `assignCharacterColors` wraps when it
+runs out, so a ninth speaker would wear the first speaker's color **in the same
+room** — the one thing the color scheme exists to prevent. Deriving the cap
+from the palette means the only way to seat more students is to add more
+colors, and the two can never drift apart.
+
+That bound is exact rather than roomy, and it holds for a reason worth writing
+down: a chat's cast is always N _distinct_ characters, because the schema
+rejects duplicate character ids and `dealCast` slices a roster instead of
+drawing with replacement. So seeding a card's own cast first (what
+`rosterCharacterColors` does past the palette) always gives every speaker on
+that card its own color, with nothing to spare.
+
+One consequence stays unfixed and is worth naming: the student's reconnect
+banner has a single slot, so when several peers drop at once only the
+soonest-to-expire is announced. That was already true of a trio; a room of
+eight on classroom wifi makes it likelier. Left alone rather than solved badly.
+
+_Implemented in [constants.ts](../../shared/src/constants.ts) (`MAX_CHAT_SEATS`),
+[matching.ts](../../server/src/live/matching.ts) and
+[teacher.ts](../../server/src/live/handlers/teacher.ts) (the seat slice and the
+wire guard),
+[HostActivity/index.tsx](../../client/src/components/Teacher/HostActivity/index.tsx)
+(`maxGroupSize`), and
+[characterColor.ts](../../client/src/lib/characterColor.ts) (the exactness
+argument). The cast block in
+[transcript.ts](../../server/src/email/transcript.ts) went to one member per
+line and the roster popover in
+[ChatHeader](../../client/src/components/chat/ChatHeader.tsx) learned to scroll,
+both because eight is where the old layouts stopped reading._
+
 ### The transcript email is written in the activity's language, and lays itself out right to left without CSS
 
 _2026-07-27_
@@ -290,6 +353,16 @@ _Implemented in [matching.ts](../../server/src/live/matching.ts)
 [PairingPanel](../../client/src/components/Teacher/HostActivity/PairingPanel.tsx)
 (the neutral icon); plan in
 [docs/plans/feature-18](../plans/feature-18-character-roster-syncs-live.md)._
+
+_Update (2026-08-10): the second consequence no longer holds. The chat size
+is `MAX_CHAT_SEATS`, eight — the length of the character-name color palette,
+since a ninth speaker would wear the first speaker's color in the same room.
+Nothing is trimmed down to it either: a `chat:start` payload naming more
+students than that dies at the wire without a word, and anything within the
+cap is seated whole or refused whole, exactly like the roster rule this entry
+records. A chat therefore seats `min(MAX_CHAT_SEATS, roster length)`, and the
+teacher fills the rooms past three by tapping names — pair-everyone and the
+auto-match timer still make pairs._
 
 ### Removing a character is never blocked, and its row carries no live marker
 
@@ -1256,16 +1329,16 @@ auto-end clock is the placeholder that remains. See
 [Pausing ships end to end; the grace window keeps running through it](#pausing-ships-end-to-end-the-grace-window-keeps-running-through-it)._
 
 **Decision:** Real host pages get the demo's full matching experience,
-working: tap-to-select (2 up to `min(4, roster)`), "Pair everyone 1:1", the
-auto-match switch, random character dealing, live "Chats in progress" cards,
-and each matched student's phone moving into a real chat room. **No messages
-travel yet.** The student's composer renders disabled with honest copy, and
-"End chat", "End all chats", and "Pause all chats" render disabled with a
-short hint; no auto-end clock runs. One structural exception: when a chat's
-active membership would drop below 2 — the teacher removed someone, or a
-student left — the chat ends with reason "teacher": the remaining peer gets
-the ended screen and can rejoin the queue, and the card moves to "Completed
-chats" (demo semantics kept).
+working: tap-to-select (2 up to `min(MAX_CHAT_SEATS, roster)`), "Pair
+everyone 1:1", the auto-match switch, random character dealing, live "Chats
+in progress" cards, and each matched student's phone moving into a real chat
+room. **No messages travel yet.** The student's composer renders disabled
+with honest copy, and "End chat", "End all chats", and "Pause all chats"
+render disabled with a short hint; no auto-end clock runs. One structural
+exception: when a chat's active membership would drop below 2 — the teacher
+removed someone, or a student left — the chat ends with reason "teacher":
+the remaining peer gets the ended screen and can rejoin the queue, and the
+card moves to "Completed chats" (demo semantics kept).
 
 **Why:** Founder call (feature-3 planning, 2026-07-19). Matching alone is a
 shippable slice that gets real classes off the placeholder; messaging is the
@@ -1644,11 +1717,11 @@ tapped is the "you can go now" signal, and its position doesn't change
 which button is primary.
 
 **Why:** Founder call (2026-07-18): the teacher's flow is scan the list,
-tap 2–4 names, then confirm — and with Start their chat on top, the button
-nearest the selecting finger was Pair everyone 1:1, a mis-click that throws
-away the selection and pairs the whole room. Rejected (tried, then pulled
-back the same day): moving Start below the queue and pinning it to the
-rail's bottom edge — closest possible to the names, but it split the two
+tap two to eight names, then confirm — and with Start their chat on top, the
+button nearest the selecting finger was Pair everyone 1:1, a mis-click that
+throws away the selection and pairs the whole room. Rejected (tried, then
+pulled back the same day): moving Start below the queue and pinning it to
+the rail's bottom edge — closest possible to the names, but it split the two
 pairing actions to opposite ends of the card, and they belong side by side
 as one "pair students" control group.
 

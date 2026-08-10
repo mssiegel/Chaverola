@@ -354,7 +354,8 @@ How the layer is put together (`server/src/live/`):
   `eligibleWaiting` is the single matchable pool (connected, unmatched,
   not wrapping up, in join order) and every path funnels through it, so
   "reconnecting students are unmatchable" is enforced once instead of at
-  four call sites. `createChat` filters, clamps, deals characters
+  four call sites. `createChat` filters, refuses a start the cast can't
+  seat, deals characters
   (the shared `dealCast` — one Fisher–Yates for both engines, in
   `@chaverola/shared` alongside `activeMembersBy` and the odd-count
   `splitOddPool`), `planPairEveryone` and `findAutoMatchPair` run the

@@ -70,7 +70,8 @@ export interface PairingPanelProps {
   /** The ticked students the server would actually pair right now. */
   actionableSelectedIds: string[];
   onToggleSelect: (studentId: string) => void;
-  /** min(4, characters on the roster) — how big a selection can get. */
+  /** min(MAX_CHAT_SEATS, characters on the roster) — how big a selection can
+   *  get. Only manual selection reaches it: pair-everyone still makes pairs. */
   maxGroupSize: number;
   onStartChat: () => void;
   onPairEveryone: () => void;

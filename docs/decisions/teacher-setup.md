@@ -38,6 +38,13 @@ size from it. A paste box was built and then removed — a teacher naming more
 than a handful is the rare case, and the simpler card was worth more than the
 shortcut.
 
+_Update (2026-08-10): the fourth of those omissions lasted a few hours. The
+same teacher asked for bigger rooms, and a chat now seats
+`min(MAX_CHAT_SEATS, roster length)` — see
+[A chat seats as many students as the palette has colors](teacher-live.md#a-chat-seats-as-many-students-as-the-palette-has-colors).
+The other three stand: no warning for a short roster, no hint when in-order
+mode strands the tail of a long one, and no paste box._
+
 **Consequence worth knowing:** a roster longer than the eight-slot character
 palette makes `assignCharacterColors` wrap, so two characters can share a
 color and a shuffled deal can seat both in one chat. Both the teacher's chat
