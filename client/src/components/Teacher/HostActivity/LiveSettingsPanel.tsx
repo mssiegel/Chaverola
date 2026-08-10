@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { SlidersHorizontal } from "lucide-react";
 
 import { AboutYouFields } from "@/components/Teacher/ActivitySetup/AboutYouFields";
+import { CharacterModeField } from "@/components/Teacher/ActivitySetup/CharacterModeField";
 import { CharacterRowsField } from "@/components/Teacher/ActivitySetup/CharacterRowsField";
 import { makeDraftPatches } from "@/components/Teacher/ActivitySetup/draftPatches";
 import { StudentInstructionsField } from "@/components/Teacher/ActivitySetup/StudentInstructionsField";
@@ -188,6 +189,16 @@ export function LiveSettingsPanel({
         <div>
           <SectionLabel>{t("setup.characters.title")}</SectionLabel>
           <div className="mt-3">
+            {/* Picking a mode is a click, so it takes changeSettings — the
+                immediate-commit path the settings switches use — not the
+                1-second typing debounce. The next chat to start deals by
+                the new rule; chats already running keep their frozen cast. */}
+            <CharacterModeField
+              className="mb-5"
+              idPrefix="host-edit"
+              value={draft.settings.characterMode}
+              onChange={(characterMode) => changeSettings({ characterMode })}
+            />
             <CharacterRowsField
               rows={draft.characters}
               onUpdate={updateCharacter}

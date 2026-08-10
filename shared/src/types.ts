@@ -52,10 +52,17 @@ export interface Activity {
 }
 
 /**
+ * How a chat's cast is drawn from the roster. "inOrder" is the original rule
+ * and the one a whole-class scene wants; "shuffled" is what a long roster is
+ * for.
+ */
+export type CharacterMode = "inOrder" | "shuffled";
+
+/**
  * The teacher's activity settings, chosen at setup and editable while the
  * activity runs (Chaverola is a series of activities with the same students,
- * so nothing is locked in). The defaults — everything on — are the
- * recommended state; see DEFAULT_ACTIVITY_SETTINGS in constants.ts.
+ * so nothing is locked in). The defaults are the recommended state; see
+ * DEFAULT_ACTIVITY_SETTINGS in constants.ts.
  */
 export interface ActivitySettings {
   /** Students learn who they were really chatting with once a chat ends. */
@@ -66,6 +73,13 @@ export interface ActivitySettings {
   autoMatch: boolean;
   /** Seconds, 5–120 in steps of 5. Kept (but inert) while `autoMatch` is off. */
   autoMatchSeconds: number;
+  /**
+   * "inOrder": every chat plays the same parts — a pair gets the roster's
+   * first two names, a trio the first three. "shuffled": each chat draws its
+   * own parts at random from the whole roster, so a class of thirty is
+   * running thirty different scenes rather than one.
+   */
+  characterMode: CharacterMode;
 }
 
 /**

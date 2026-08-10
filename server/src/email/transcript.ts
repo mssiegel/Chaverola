@@ -189,17 +189,31 @@ function bdiHtml(value: string): string {
   return `<bdi>${escapeHtml(value)}</bdi>`;
 }
 
-/** One color per character id for the whole email: roster ids claim colors
- *  in roster order, then any id seen only in the chats (a character removed
- *  from the roster mid-activity) takes the next free one. The same seeding
- *  rule as the client's rosterCharacterColors, so the email and the
- *  teacher's grid agree. */
-function emailColorMap(record: StoredActivity): Map<string, string> {
+/** Colors for ONE chat block, the same seeding rule as the client's
+ *  rosterCharacterColors so the email and the teacher's grid agree — including
+ *  the part that matters most here. Roster ids claim colors in roster order,
+ *  then any id seen only in the chats (a character removed from the roster
+ *  mid-activity) takes the next free one, so a character reads the same color
+ *  in every block. But the palette is eight and a roster now runs to a hundred:
+ *  past eight distinct keys the modulo wraps and two characters share a color,
+ *  and a shuffled deal can seat both of them in one chat — which would print
+ *  two speakers of one transcript in the same ink. So when this chat's keys
+ *  outrun the palette, its own cast seeds first and the color stops being
+ *  stable across blocks. Per chat rather than per record for exactly that
+ *  reason: one map for the whole email has no cast to seed from. */
+function chatColorMap(
+  record: StoredActivity,
+  chat: StoredChat
+): Map<string, string> {
+  const rosterIds = record.characters.map((c) => c.id);
+  const castIds = chat.members.map((m) => m.characterId);
+  const distinct = new Set([...rosterIds, ...castIds]).size;
+  const ids =
+    distinct > CHARACTER_EMAIL_COLORS.length
+      ? [...castIds, ...rosterIds]
+      : [...rosterIds, ...castIds];
+
   const colors = new Map<string, string>();
-  const ids = [
-    ...record.characters.map((c) => c.id),
-    ...record.chats.flatMap((chat) => chat.members.map((m) => m.characterId)),
-  ];
   for (const id of ids) {
     if (!colors.has(id)) {
       // The modulo keeps the index in range, so the lookup can't miss.
@@ -276,7 +290,6 @@ function transcriptLinesHtml(
 }
 
 function formatHtmlBody(record: StoredActivity, copy: EmailCopy): string {
-  const colors = emailColorMap(record);
   const total = record.chats.length;
 
   const header = [
@@ -296,8 +309,9 @@ function formatHtmlBody(record: StoredActivity, copy: EmailCopy): string {
   // container and its attributes, and older Outlook honors `dir` for
   // reordering while ignoring it for block alignment. Every block below
   // inherits both.
-  const chatBlocks = record.chats.map((chat, index) =>
-    [
+  const chatBlocks = record.chats.map((chat, index) => {
+    const colors = chatColorMap(record, chat);
+    return [
       `<div style="border-top:1px solid ${HAIRLINE};margin-top:28px;padding-top:14px;">`,
       `<div style="font-size:12px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:${MUTED};">${escapeHtml(copy.chatHeading(index + 1, total))}</div>`,
       `<div style="margin-top:6px;">${castLineHtml(chat, colors, copy)}</div>`,
@@ -305,8 +319,8 @@ function formatHtmlBody(record: StoredActivity, copy: EmailCopy): string {
       ...transcriptLinesHtml(chat, colors, copy),
       `</div>`,
       `</div>`,
-    ].join("\n")
-  );
+    ].join("\n");
+  });
 
   return [
     `<div dir="${copy.dir}" style="max-width:640px;margin:0 auto;text-align:${copy.align};font-family:${copy.fontFamily};font-size:15px;line-height:1.6;color:${INK};">`,

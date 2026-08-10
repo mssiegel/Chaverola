@@ -1,4 +1,5 @@
 import { shuffled } from "./random";
+import type { CharacterMode } from "./types";
 
 /*
   The genuinely-pure matching primitives — byte-identical on both sides, so
@@ -24,12 +25,26 @@ export function activeMembersBy<T>(
 }
 
 /**
- * Deal a cast for a chat of `count` seats: the roster's first `count`
- * characters, shuffled. This is the setup form's promise that a chat of N
- * always uses characters 1..N, and WHO gets WHICH is chance.
+ * Deal a cast for a chat of `count` seats. The teacher's characterMode picks
+ * which half of the same operation comes first: "inOrder" narrows to the
+ * roster's first `count` names and shuffles those (the original rule — a chat
+ * of N always uses characters 1..N, so the whole class plays one scene), while
+ * "shuffled" shuffles the whole roster and takes `count` off the top (any N of
+ * the list, which is what a long roster is for). WHO gets WHICH is chance
+ * either way; that never depended on the mode.
+ *
+ * Nothing here guarantees two chats differ — a roster shorter than the class
+ * repeats, deliberately and silently, and the form's copy is careful not to
+ * promise otherwise.
  */
-export function dealCast<T>(characters: readonly T[], count: number): T[] {
-  return shuffled(characters.slice(0, count));
+export function dealCast<T>(
+  characters: readonly T[],
+  count: number,
+  mode: CharacterMode
+): T[] {
+  return mode === "shuffled"
+    ? shuffled(characters).slice(0, count)
+    : shuffled(characters.slice(0, count));
 }
 
 /**

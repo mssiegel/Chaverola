@@ -52,6 +52,36 @@ describe("rosterCharacterColors", () => {
     expect(chatB.get("hero")).toBe("var(--char-1)");
     expect(chatB.get("rival")).toBe("var(--char-2)");
   });
+
+  it("keeps a card's speakers distinct when the roster outruns the palette", () => {
+    // Roster positions 0 and 8 wrap onto the same token, and a shuffled deal
+    // can seat both in one chat. Past the palette the card seeds first, so the
+    // card stays readable.
+    const roster = Array.from({ length: 100 }, (_, i) => ({
+      id: `c${i}`,
+      name: `c${i}`,
+    }));
+    const colors = rosterCharacterColors(roster, [
+      participant("c0"),
+      participant("c8"),
+    ]);
+    expect(colors.get("c0")).not.toBe(colors.get("c8"));
+  });
+
+  it("counts a removed character against the palette, not just the roster", () => {
+    // A roster of exactly eight fits, but the card also carries the character
+    // a mid-activity removal left frozen on it — nine keys, so it wraps. The
+    // test is distinct keys, not roster length.
+    const roster = Array.from({ length: 8 }, (_, i) => ({
+      id: `c${i}`,
+      name: `c${i}`,
+    }));
+    const colors = rosterCharacterColors(roster, [
+      participant("c0"),
+      participant("removed"),
+    ]);
+    expect(colors.get("c0")).not.toBe(colors.get("removed"));
+  });
 });
 
 describe("selfFirstCharacterColors", () => {

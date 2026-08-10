@@ -2,6 +2,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import {
   defaultActivityDraft,
+  DEFAULT_ACTIVITY_SETTINGS,
+  MAX_CHARACTERS,
   readActivityDraft,
   toCreateActivityRequest,
   validateActivityDraft,
@@ -68,19 +70,23 @@ describe("readActivityDraft (sessionStorage sanitizing)", () => {
         JSON.stringify({
           characters: [
             { name: "x".repeat(99) },
-            { name: "Brutus" },
-            { name: "Cleo" },
-            { name: "Antony" },
-            { name: "One row too many" },
+            // Overflowing the roster takes a hundred names now, not five.
+            ...Array.from({ length: MAX_CHARACTERS + 3 }, (_, i) => ({
+              name: `Extra ${i}`,
+            })),
           ],
-          settings: { autoMatchSeconds: 7 },
+          settings: { autoMatchSeconds: 7, characterMode: "sideways" },
         }),
     });
     const draft = readActivityDraft();
-    expect(draft.characters).toHaveLength(4);
+    expect(draft.characters).toHaveLength(MAX_CHARACTERS);
     expect(draft.characters[0]!.name).toHaveLength(30);
     // 7 snaps onto the 5-step grid that counts from 5.
     expect(draft.settings.autoMatchSeconds).toBe(5);
+    // A mode that isn't one heals rather than reaching a deal.
+    expect(draft.settings.characterMode).toBe(
+      DEFAULT_ACTIVITY_SETTINGS.characterMode
+    );
   });
 });
 

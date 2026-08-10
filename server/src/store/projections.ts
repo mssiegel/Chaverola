@@ -90,6 +90,7 @@ export function toActivitySettings(stored: StoredActivity): ActivitySettings {
     rematchWarning: stored.settings.rematchWarning,
     autoMatch: stored.settings.autoMatch,
     autoMatchSeconds: stored.settings.autoMatchSeconds,
+    characterMode: stored.settings.characterMode,
   };
 }
 

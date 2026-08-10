@@ -9,6 +9,7 @@ import {
 } from "@chaverola/shared";
 import type {
   CharacterInput,
+  CharacterMode,
   CreateActivityRequest,
   Locale,
   StepperBounds,
@@ -85,6 +86,22 @@ function asBoolean(value: unknown, fallback: boolean): boolean {
   return typeof value === "boolean" ? value : fallback;
 }
 
+/** Every mode, as a lookup. `satisfies Record<CharacterMode, true>` is what
+ *  makes a third mode a compile error here instead of a silent fallback. */
+const CHARACTER_MODES = {
+  inOrder: true,
+  shuffled: true,
+} as const satisfies Record<CharacterMode, true>;
+
+function asCharacterMode(
+  value: unknown,
+  fallback: CharacterMode
+): CharacterMode {
+  return typeof value === "string" && value in CHARACTER_MODES
+    ? (value as CharacterMode)
+    : fallback;
+}
+
 /** Keep a stepper value inside its bounds. */
 export function clampToBounds(value: number, bounds: StepperBounds): number {
   return Math.min(bounds.max, Math.max(bounds.min, value));
@@ -157,6 +174,10 @@ function sanitizeDraft(raw: unknown): ActivityDraft {
     autoMatchSeconds: snapToBounds(
       settings.autoMatchSeconds,
       AUTO_MATCH_SECONDS
+    ),
+    characterMode: asCharacterMode(
+      settings.characterMode,
+      DEFAULT_ACTIVITY_SETTINGS.characterMode
     ),
   };
 

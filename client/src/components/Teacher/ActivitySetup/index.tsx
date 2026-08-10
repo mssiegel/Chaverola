@@ -24,6 +24,7 @@ import { useLocale, useLocaleNavigate } from "@/lib/locale";
 import { primeHostedActivityLookup } from "@/lib/useHostedActivityLookup";
 
 import { AboutYouFields } from "./AboutYouFields";
+import { CharacterModeField } from "./CharacterModeField";
 import {
   CharacterRowsField,
   type CharacterRowState,
@@ -187,6 +188,14 @@ export function ActivitySetupForm() {
             accent="grape"
             hint={t("setup.characters.hint")}
           >
+            {/* How the cast gets dealt sits above the names it deals: the
+                teacher reads the rule, then fills the list it applies to. */}
+            <CharacterModeField
+              className="mb-5"
+              idPrefix="setup"
+              value={form.settings.characterMode}
+              onChange={(characterMode) => patchSettings({ characterMode })}
+            />
             <CharacterRowsField
               rows={form.characters}
               onUpdate={updateCharacter}

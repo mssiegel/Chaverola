@@ -8,8 +8,10 @@
 
   From the student's view the caller passes their own character first, so "you"
   are always green. The teacher's grid instead seeds the activity roster, so a
-  character holds one color across every chat card. See DECISIONS.md →
-  "Character-name colors" for the rules and the reasoning behind them.
+  character holds one color across every chat card — as far as the palette
+  reaches; past that `rosterCharacterColors` puts the card first (see its
+  docblock). See DECISIONS.md → "Character-name colors" for the rules and the
+  reasoning behind them.
 */
 
 import { CHARACTER_COLOR_VARS, type Character } from "@chaverola/shared";
@@ -51,18 +53,38 @@ export function selfFirstCharacterColors(
 }
 
 /**
- * Room colors from the teacher's seat: seeds the activity roster first, so a
- * character keeps one color across every chat card no matter how `dealCast`
- * shuffled it. A character removed from the roster mid-activity (whose
- * completed cards still render) picks up the next free color instead of
- * colliding with a roster color.
+ * Room colors from the teacher's seat. Which seeding it uses depends on
+ * whether this card's keys fit the palette:
+ *
+ * - They fit: the roster seeds first, so a character keeps one color across
+ *   every chat card no matter how `dealCast` shuffled it, and a character
+ *   removed from the roster mid-activity (whose completed cards still render)
+ *   picks up the next free color instead of colliding with a roster color.
+ * - They don't: this chat's participants seed first, then the roster. Past the
+ *   palette `assignCharacterColors` wraps, so two keys 8 apart share a color —
+ *   and a shuffled deal can drop both into one chat, which would print two
+ *   speakers of one card in the same color. Distinct colors WITHIN a card beat
+ *   a stable color ACROSS cards, and a stable per-character color was already
+ *   unachievable at this length, so nothing is lost by dropping it. A chat is
+ *   capped at four seats, well under the palette, so seeding the participants
+ *   first always gives every speaker on a card its own color.
+ *
+ * The test is the count of DISTINCT keys, not `roster.length`: a card also
+ * carries any character a mid-activity removal left frozen on it, so a roster
+ * of exactly eight plus one removed character wraps just as an oversized
+ * roster does.
  */
 export function rosterCharacterColors(
   roster: Character[],
   participants: Participant[]
 ): Map<string, string> {
-  return assignCharacterColors([
-    ...roster.map((c) => c.id),
-    ...participants.map((p) => p.character.id),
-  ]);
+  const rosterIds = roster.map((c) => c.id);
+  const participantIds = participants.map((p) => p.character.id);
+  const distinct = new Set([...rosterIds, ...participantIds]).size;
+
+  return assignCharacterColors(
+    distinct > CHARACTER_COLOR_VARS.length
+      ? [...participantIds, ...rosterIds]
+      : [...rosterIds, ...participantIds]
+  );
 }

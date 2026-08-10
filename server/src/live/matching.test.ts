@@ -4,7 +4,7 @@ import {
   CHAT_TRANSCRIPT_MAX_LINES,
   DEFAULT_ACTIVITY_SETTINGS,
 } from "@chaverola/shared";
-import type { Character } from "@chaverola/shared";
+import type { ActivitySettings, Character } from "@chaverola/shared";
 
 import type { StoredActivity } from "../store/activityStore";
 import {
@@ -29,14 +29,19 @@ import type { Seat } from "./seats";
   prompts' browser passes.
 */
 
-function makeActivity(characters: Character[]): StoredActivity {
+function makeActivity(
+  characters: Character[],
+  settings: Partial<ActivitySettings> = {}
+): StoredActivity {
   return {
     joinCode: "5678",
     hostKey: "AAAAAAAAAAAAAAAAAAAAAAAA",
     hostName: "Ms. Cohen",
     characters,
     locale: "en",
-    settings: { ...DEFAULT_ACTIVITY_SETTINGS },
+    // The defaults unless a test is about a setting — only the two cast-deal
+    // cases below name a characterMode, and they name it on purpose.
+    settings: { ...DEFAULT_ACTIVITY_SETTINGS, ...settings },
     createdAt: 0,
     lastSeenAt: 0,
     seats: createSeatState(),
@@ -142,8 +147,8 @@ describe("createChat", () => {
     expect(createChat(activity, ids.slice(0, 2), 10_000)).not.toBeNull();
   });
 
-  it("deals exactly the roster's first N characters, each once", () => {
-    const activity = makeActivity(ROSTER);
+  it("in inOrder mode, deals exactly the roster's first N characters, each once", () => {
+    const activity = makeActivity(ROSTER, { characterMode: "inOrder" });
     const seats = [addSeat(activity), addSeat(activity), addSeat(activity)];
 
     const chat = createChat(
@@ -157,6 +162,29 @@ describe("createChat", () => {
       "caesar",
       "cicero",
     ]);
+  });
+
+  it("in shuffled mode, reaches past the roster's first N", () => {
+    // No stub and no assertion about any one shuffle: a pair drawn from four
+    // names leaves any given character out half the time, so twenty deals
+    // that never once looked past Brutus and Caesar is a 2^-20 coincidence.
+    // What the union proves is the rule — the whole roster is in play, which
+    // is what makes a long one worth typing.
+    const dealt = new Set<string>();
+    for (let deal = 0; deal < 20; deal++) {
+      const activity = makeActivity(ROSTER, { characterMode: "shuffled" });
+      const seats = [addSeat(activity), addSeat(activity)];
+      const chat = createChat(
+        activity,
+        seats.map((s) => s.studentId),
+        10_000
+      );
+      expect(chat).not.toBeNull();
+      for (const member of chat!.members) dealt.add(member.characterId);
+    }
+    // Only Brutus and Caesar are the first two, so a third id can only have
+    // come from beyond them.
+    expect(dealt.size).toBeGreaterThan(2);
   });
 
   it("writes one-round lastPartners and overwrites on the next chat", () => {

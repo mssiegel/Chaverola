@@ -7,7 +7,12 @@ import type { ActivitySettings } from "./types";
 */
 
 export const MIN_CHARACTERS = 2;
-export const MAX_CHARACTERS = 4;
+/**
+ * A safety valve, not a rule about the lesson: a shuffled roster is meant to
+ * be long (a class of forty in pairs fills forty parts), and nothing about a
+ * chat's size is derived from this. Four seats is still the hard chat size.
+ */
+export const MAX_CHARACTERS = 100;
 
 /** Character names and the hosted-by name — both render in tight chrome. */
 export const NAME_MAX_CHARS = 30;
@@ -65,6 +70,11 @@ export const DEFAULT_ACTIVITY_SETTINGS: ActivitySettings = {
   rematchWarning: true,
   autoMatch: true,
   autoMatchSeconds: AUTO_MATCH_SECONDS.default,
+  // A fresh form recommends shuffled: a teacher who names two characters gets
+  // the same activity either way, and one who names more almost certainly
+  // wants them used. Not the same as the server's wire fallback, which is
+  // "inOrder" — see activitySettingsSchema.
+  characterMode: "shuffled",
 };
 
 /**

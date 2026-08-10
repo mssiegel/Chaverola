@@ -41,11 +41,17 @@ interface CharacterRowsFieldProps {
 }
 
 /**
- * The 2–4 character rows. Each is one name field, hard-capped at 30
- * characters — names prefix every chat line. An emoji, if the teacher wants
- * one, is simply part of that name. The first two rows are permanent (an
- * activity needs two characters anyway); rows 3–4 get a remove button, no
+ * The character rows. Each is one name field, hard-capped at 30 characters —
+ * names prefix every chat line. An emoji, if the teacher wants one, is simply
+ * part of that name. The first two rows are permanent (an activity needs two
+ * characters anyway); every row after them gets a remove button, no
  * confirmation — retyping a name is cheap.
+ *
+ * Rows are added one at a time, and a long roster is ordinary: shuffled mode
+ * deals each chat its own characters, so a class of forty can have forty
+ * names. The list scrolls with the page and never inside its own box — setup
+ * is one scrolling form, and a nested scroller on a phone is worse than a long
+ * page.
  *
  * The remove button is never gated, on the live host page either. A running
  * chat holds the cast it was dealt (feature 18), so removing a character it
@@ -110,8 +116,8 @@ export function CharacterRowsField({
                 <X className="size-4" />
               </button>
             ) : (
-              // Spacer where rows 3–4 show their remove button, so every
-              // name input ends on the same line.
+              // Spacer where the later rows show their remove button, so
+              // every name input ends on the same line.
               <div className="w-8 shrink-0" aria-hidden />
             )}
           </div>

@@ -23,7 +23,7 @@ export const teacher: HebrewOf<TeacherCatalog> = {
   // matching the source.
   "setup.meta.title": "הקמת פעילות כיתתית בצ׳אט",
   "setup.meta.description":
-    "נותנים שם ל־2 עד 4 דמויות שהתלמידים יגלמו וכותבים על מה הם ידברו. ההקמה לוקחת בערך דקה, ואז מקבלים קוד בן 4 ספרות לכיתה.",
+    "נותנים שם לדמויות שהתלמידים יגלמו וכותבים על מה הם ידברו. ההקמה לוקחת בערך דקה, ואז מקבלים קוד בן 4 ספרות לכיתה.",
 
   "setup.badge": "למורים",
   "setup.title": "מקימים את הפעילות",
@@ -32,7 +32,7 @@ export const teacher: HebrewOf<TeacherCatalog> = {
 
   "setup.characters.title": "דמויות",
   "setup.characters.hint":
-    "אלה התפקידים שהתלמידים מגלמים כשאתה משבץ אותם. שתיים מספיקות: כל שיחה של שניים משתמשת בשתי הראשונות. דמות שלישית נכנסת רק כששיבצת שלושה יחד, ורביעית רק כששיבצת ארבעה.",
+    "אלה הדמויות שהתלמידים מגלמים כשאתה משבץ אותם. שתיים מספיקות, אבל אפשר להוסיף כמה שתרצה.",
   "setup.aboutYou.title": "עליך",
   "setup.instructions.title": "הוראות לתלמידים",
   "setup.instructions.hint":
@@ -57,6 +57,17 @@ export const teacher: HebrewOf<TeacherCatalog> = {
   "characters.emojiLabel": "להוסיף אימוג׳י לדמות {{number}}",
   "characters.removeLabel": "להסיר את דמות {{number}}",
   "characters.add": "להוסיף דמות",
+
+  // "לפי הסדר" / "באקראי" rather than adjectives — both read as answers to
+  // the label's question, and the shipped `pairing.tapHint` already says
+  // "הדמויות מתחלקות אקראית", so the vocabulary is the teacher's already.
+  "characters.mode.label": "איך הדמויות מתחלקות",
+  "characters.mode.inOrder.title": "לפי הסדר",
+  "characters.mode.inOrder.body":
+    "זוג מקבל את שתי הדמויות הראשונות ברשימה, שלישייה את שלוש הדמויות הראשונות, וכן הלאה.",
+  "characters.mode.shuffled.title": "באקראי",
+  "characters.mode.shuffled.body":
+    "כל שיחה מקבלת דמויות משלה באקראי מתוך רשימת הדמויות שלך.",
 
   "aboutYou.name.label": "השם שלך",
   "aboutYou.name.placeholder": "המורה כהן",

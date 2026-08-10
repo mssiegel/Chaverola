@@ -5,6 +5,56 @@ area. Entries are newest-first; add new ones at the top, and add a matching line
 to the index in the same change. Replaced decisions move to Superseded at the
 bottom of this file.
 
+### The teacher picks how characters get handed out, and a roster can hold a hundred
+
+_2026-08-10_
+
+**Decision:** The Characters card opens with a two-option picker, **Shuffled**
+(the default) or **In order**, and `MAX_CHARACTERS` goes from 4 to **100**.
+Shuffled deals each chat its own cast drawn at random from the whole roster;
+in order keeps the original rule, where a pair plays the first two names and a
+trio the first three. The whole behavior is one line in `dealCast` — shuffle
+the roster then take N, versus take the first N then shuffle — so who gets
+which character stays chance in both. The picker is a real activity setting
+(`ActivitySettings.characterMode`), so it renders on the setup form and again
+in the host page's live panel, and a click there commits immediately down the
+same path the settings switches use. Four things were considered and
+deliberately left out: any warning when the roster is shorter than the class,
+any block or hint when in order mode strands the names past the fourth, a
+paste-a-list box for entering long rosters, and raising the four-seat chat cap.
+
+**Why:** A teacher asked for it. Thirty students in pairs all playing Caesar
+and Brutus is one scene fifteen times; she wanted a long list and a different
+pair in every chat. Both behaviors are wanted, though — a whole-class scene
+needs the first two names every time — and the two genuinely conflict at
+roster sizes 3 and 4, so the teacher picks rather than the app guessing.
+Shuffled is the default because a teacher who names two characters gets the
+same activity either way, and one who names more almost certainly wants them
+used. A roster shorter than the class repeats characters silently, by
+decision: the alternative is stranding students or nagging a teacher about
+arithmetic, and no copy anywhere may promise that chats are unique. The cap of
+100 is a safety valve, not a statement about lessons; nothing derives a chat's
+size from it. A paste box was built and then removed — a teacher naming more
+than a handful is the rare case, and the simpler card was worth more than the
+shortcut.
+
+**Consequence worth knowing:** a roster longer than the eight-slot character
+palette makes `assignCharacterColors` wrap, so two characters can share a
+color and a shuffled deal can seat both in one chat. Both the teacher's chat
+cards and the transcript email now seed that chat's own cast first once a
+card's distinct keys outrun the palette, trading a stable color across cards
+for distinct colors within one. The test is distinct keys rather than roster
+length, because a character removed mid-activity is still frozen onto the
+cards that already ran.
+
+_Implemented across
+[matchRules](../../shared/src/matchRules.ts),
+[constants](../../shared/src/constants.ts),
+[CharacterModeField](../../client/src/components/Teacher/ActivitySetup/CharacterModeField.tsx),
+[characterColor](../../client/src/lib/characterColor.ts),
+[schemas/activity.ts](../../server/src/schemas/activity.ts), and
+[transcript.ts](../../server/src/email/transcript.ts)._
+
 ### The scene field is now student instructions: 250 characters, after the characters
 
 _2026-07-26_

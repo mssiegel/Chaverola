@@ -63,7 +63,14 @@ export function LobbyPreview({
             <div>
               <SectionLabel>{t("preview.characters")}</SectionLabel>
               {cast.length > 0 ? (
-                <ul className="mt-2 flex flex-wrap gap-1.5">
+                /* A roster can hold up to MAX_CHARACTERS names, and every one
+                   of them is a chip. Unbounded, that block runs past the
+                   viewport and the rail this preview sits in stops being
+                   reachable, so the chips get their own scrollport — the one
+                   place the preview parts from the real student lobby, which
+                   shows its chips unbounded on purpose. Nothing is dropped or
+                   summarized: past ~5 rows you scroll. */
+                <ul className="scroll-soft mt-2 flex max-h-36 flex-wrap gap-1.5 overflow-y-auto pe-1">
                   {cast.map((character) => (
                     <li
                       key={character.id}

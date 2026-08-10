@@ -108,16 +108,21 @@ export function activeChatMembers(chat: HostedChat): Participant[] {
 }
 
 /**
- * Seat students on the activity's characters: a chat of N always uses the
- * roster's first N characters (that's the promise the setup form makes about
- * characters 3 and 4), and WHO gets WHICH is random — there's no assignment
- * step; the teacher sees who got whom on the chat card.
+ * Seat students on the activity's characters: `dealCast` reads the teacher's
+ * characterMode, so a chat either takes the roster's first N (one scene for
+ * the whole class) or N drawn at random from the whole list. WHO gets WHICH is
+ * random in both — there's no assignment step; the teacher sees who got whom
+ * on the chat card.
  */
 function assignCharacters(
   students: RosterStudent[],
   activity: HostedActivity
 ): Participant[] {
-  const cast = dealCast(activity.characters, students.length);
+  const cast = dealCast(
+    activity.characters,
+    students.length,
+    activity.settings.characterMode
+  );
   return students.map((student, index) => {
     // `cast` and `students` are the same length by construction.
     const character = cast[index]!;

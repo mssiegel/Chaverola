@@ -202,7 +202,11 @@ export function createChat(
   if (seated.length > activity.characters.length) return null;
   if (seated.length < 2) return null;
 
-  const cast = dealCast(activity.characters, seated.length);
+  const cast = dealCast(
+    activity.characters,
+    seated.length,
+    activity.settings.characterMode
+  );
   const chat: StoredChat = {
     id: randomUUID(),
     members: seated.map((seat, index) => {

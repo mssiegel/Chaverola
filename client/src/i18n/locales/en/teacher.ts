@@ -21,7 +21,7 @@ export const teacher = {
   // `setup.title` below, which is the page's own h1.
   "setup.meta.title": "Create a Classroom Roleplay Activity",
   "setup.meta.description":
-    "Name the 2 to 4 characters your students will play and write what they should talk about. Setup takes about a minute, then you get the 4-digit join code.",
+    "Name the characters your students will play and write what they should talk about. Setup takes about a minute, then you get the 4-digit join code.",
 
   "setup.badge": "For teachers",
   "setup.title": "Set up your activity",
@@ -30,7 +30,7 @@ export const teacher = {
 
   "setup.characters.title": "Characters",
   "setup.characters.hint":
-    "Students play these parts when you pair them up. Two is all you need: every 1:1 chat uses the first two. A 3rd character only gets used when you pair a group of 3, and a 4th when you pair a group of 4.",
+    "Students play these characters when you pair them up. Two is all you need, but you can add as many as you like.",
   "setup.aboutYou.title": "About you",
   "setup.instructions.title": "Student instructions",
   "setup.instructions.hint":
@@ -56,6 +56,16 @@ export const teacher = {
   "characters.emojiLabel": "Add an emoji to character {{number}}",
   "characters.removeLabel": "Remove character {{number}}",
   "characters.add": "Add a character",
+
+  // How the cast gets dealt into a chat. These two bodies carry the first-N
+  // rule, which is why the section hint above stays short.
+  "characters.mode.label": "How characters get handed out",
+  "characters.mode.inOrder.title": "In order",
+  "characters.mode.inOrder.body":
+    "A pair uses your first two character names, a trio the first three character names, etc.",
+  "characters.mode.shuffled.title": "Shuffled",
+  "characters.mode.shuffled.body":
+    "Each chat gets its own characters at random from your character list.",
 
   "aboutYou.name.label": "Your name",
   "aboutYou.name.placeholder": "Ms. Cohen",

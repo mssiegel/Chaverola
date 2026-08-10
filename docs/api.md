@@ -56,11 +56,11 @@ export interface CharacterInput {
 
 export interface CreateActivityRequest {
   hostName: string; // 1–30 after trim
-  characters: CharacterInput[]; // 2–4; names unique (trimmed, case-insensitive)
+  characters: CharacterInput[]; // MIN_CHARACTERS–MAX_CHARACTERS (2–100); names unique (trimmed, case-insensitive). A chat is still 4 seats — the cap is a roster length, not a chat size
   studentInstructions?: string; // ≤ STUDENT_INSTRUCTIONS_MAX_CHARS (250, code points); omit when blank
   teacherEmail?: string; // EMAIL_PATTERN, ≤ EMAIL_MAX_CHARS; omit when blank
   locale?: Locale; // "en" | "he" — the language the form was in. OPTIONAL on the wire and defaulted to "en" server-side, so a deploy can't 400 an old client's create
-  settings: ActivitySettings; // required in full; bounds REJECTED, not clamped
+  settings: ActivitySettings; // required in full, except characterMode — that one is optional on the wire and defaults to "inOrder" (the deploy-window reason locale is optional; a client that sends no mode was built when a cast was always the roster's first N). Bounds REJECTED, not clamped
 }
 export interface CreateActivityResponse {
   activity: HostedActivity;
@@ -688,8 +688,9 @@ below.
   teacher emptied the box, which means "no instructions", matching the
   teacher's own page. Validated against the same limits the create request
   uses (blank host names, blank instruction strings and duplicate
-  character names rejected, 2–4 characters), plus a duplicate-id rule the
-  create path can't need; invalid payloads are logged and dropped, and
+  character names rejected, MIN_CHARACTERS–MAX_CHARACTERS of them), plus a
+  duplicate-id rule the create path can't need; invalid payloads are
+  logged and dropped, and
   neither the instructions text nor the character names ever reach the log
   (a count does). The server fans `activity:details-changed` out to every
   **connected seat** — students render all three in the lobby — and never

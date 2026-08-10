@@ -562,9 +562,11 @@ the original plain-text part and an HTML alternative, sent as one multipart
 message through nodemailer's `text` + `html` fields (feature 22). The HTML
 mirrors the teacher's live cards: `(Ana) Herzl 🎩: text`, real name muted
 gray, character name bold in its roster color from `CHARACTER_EMAIL_COLORS`
-(`shared/src/colors.ts`), seeded roster-first by the same rule as the grid's
-`rosterCharacterColors` — so the email and the live page agree on every
-character's color. Chats sit under a hairline `border-top` with a small
+(`shared/src/colors.ts`), seeded by the same rule as the grid's
+`rosterCharacterColors` — roster-first, so the email and the live page agree
+on every character's color, falling back to that chat's own cast first when a
+roster long enough to outrun the eight-color palette would otherwise print two
+of its speakers in one color. Chats sit under a hairline `border-top` with a small
 uppercase gray `CHAT 1 OF 3` label where the plain text draws `──────────`;
 a summary line (`3 chats · 6 students` — distinct students across the chats)
 joins the header of **both** bodies so they can't disagree. The quiet notes
@@ -1872,10 +1874,15 @@ _2026-07-15_
 joiners append at the bottom, each with a subtle wait time. Tapping selects;
 with two selected the start-chat action activates, and a 3rd/4th can be
 selected only when the roster has that many characters. There is **no
-character-assignment step**: a chat of N uses the roster's first N
-characters (the promise the setup form makes about characters 3 and 4), and
-who gets which is random — the teacher sees who got whom on the chat card.
-Each row's remove control is separate from the select target.
+character-assignment step**: a chat of N is dealt N of the roster's
+characters, and who gets which is random — the teacher sees who got whom on
+the chat card. Each row's remove control is separate from the select target.
+
+_Amended 2026-08-10:_ which N the chat is dealt is now the teacher's
+`characterMode` — the roster's first N in order mode, or N drawn at random
+from the whole roster in shuffled mode (the default). See
+[teacher-setup → The teacher picks how characters get handed out](./teacher-setup.md#the-teacher-picks-how-characters-get-handed-out-and-a-roster-can-hold-a-hundred).
+Neither mode has an assignment step, which is what this entry is about.
 
 **Why:** Join order means the longest-waiting students sit on top and the
 list never reshuffles under the teacher's cursor. Assigning characters by

@@ -134,10 +134,11 @@ describe("toHostedActivity (teacher projection)", () => {
 });
 
 describe("toActivitySettings (settings on chats:snapshot, teacher room)", () => {
-  it("exposes exactly the four settings keys — a future server-only field stays private", () => {
+  it("exposes exactly the five settings keys — a future server-only field stays private", () => {
     expect(Object.keys(toActivitySettings(fullRecord)).sort()).toEqual([
       "autoMatch",
       "autoMatchSeconds",
+      "characterMode",
       "rematchWarning",
       "revealNames",
     ]);

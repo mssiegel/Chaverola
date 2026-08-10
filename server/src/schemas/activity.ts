@@ -59,6 +59,15 @@ export const activitySettingsSchema = z.object({
     // On the step grid too (min is itself a step multiple) — same
     // broken-caller reasoning as the bounds.
     .multipleOf(AUTO_MATCH_SECONDS.step),
+  // Defaulted rather than required, for the locale field's reason: a required
+  // field would 400 every create — and every settings:update — from the
+  // still-old client for the length of a Vercel deploy. The fallback is
+  // "inOrder" and NOT DEFAULT_ACTIVITY_SETTINGS.characterMode ("shuffled")
+  // on purpose: a client that sends no mode was built when a cast was always
+  // the roster's first N, so "inOrder" is what its payload already meant.
+  // This is only what a silent payload means; what a NEW draft starts as is
+  // the form's own decision, made in the shared defaults.
+  characterMode: z.enum(["inOrder", "shuffled"]).default("inOrder"),
 }) satisfies z.ZodType<ActivitySettings>;
 
 /** The socket's activity:update-email validator — the same limits the create

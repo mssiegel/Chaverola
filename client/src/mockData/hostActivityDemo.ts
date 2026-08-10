@@ -29,7 +29,15 @@ export function demoHostedActivity(activity: Activity): HostedActivity {
   return {
     ...activity,
     characters: activity.characters.map((c) => ({ ...c })),
-    settings: { ...DEFAULT_ACTIVITY_SETTINGS },
+    settings: {
+      ...DEFAULT_ACTIVITY_SETTINGS,
+      // Spelled out rather than left to the default it currently matches: the
+      // demo is what a teacher judges the mode by, so this is the one place
+      // that shouldn't quietly follow a change to the form's recommendation.
+      // Paired with the eight-name roster in activityDemo.ts — the two
+      // together are what make the chat cards carry different casts.
+      characterMode: "shuffled",
+    },
   };
 }
 
@@ -55,9 +63,10 @@ export interface HostDemoCast {
   studentNames: readonly string[];
   /**
    * Two in progress (a 1:1 and a group of 3, so the group paths are
-   * exercised) and two completed (a 1:1 and a group of 4 — the four-seat chat
-   * puts the whole cast on a card, the plain-named fourth character included,
-   * so names without an emoji stay visibly exercised).
+   * exercised) and two completed (a 1:1 and a group of 4, the biggest a chat
+   * ever gets). Four seed chats drawing from an eight-name roster is also how
+   * the shuffled mode shows itself: the four cards seat different casts, which
+   * is the whole point of a roster longer than a chat.
    */
   seedChats: readonly HostSeedChat[];
   /**
