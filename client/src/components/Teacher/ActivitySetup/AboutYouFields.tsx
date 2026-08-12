@@ -1,4 +1,3 @@
-import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
 import { EMAIL_MAX_CHARS } from "@chaverola/shared";
@@ -23,8 +22,6 @@ interface AboutYouFieldsProps {
   /** Input ids become `${idPrefix}-name` / `${idPrefix}-email`. */
   idPrefix: string;
   namePlaceholder?: string;
-  /** Shown under the name field while it has no error (setup's lobby echo). */
-  nameHint?: ReactNode;
   /** Setup only: lets a failed Host tap scroll to the field. */
   registerField?: (field: SetupField) => (el: HTMLElement | null) => void;
   className?: string;
@@ -42,7 +39,6 @@ export function AboutYouFields({
   emailError,
   idPrefix,
   namePlaceholder,
-  nameHint,
   registerField,
   className,
 }: AboutYouFieldsProps) {
@@ -72,10 +68,8 @@ export function AboutYouFields({
           placeholder={namePlaceholder}
           aria-invalid={hostNameError ? true : undefined}
         />
-        {hostNameError ? (
+        {hostNameError && (
           <FieldError message={hostNameError} className="mt-1.5" />
-        ) : (
-          nameHint
         )}
       </div>
 

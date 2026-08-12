@@ -229,13 +229,6 @@ export function ActivitySetupForm() {
               emailError={emailError}
               idPrefix="setup-host"
               namePlaceholder={t("aboutYou.name.placeholder")}
-              nameHint={
-                <p className="mt-1.5 text-sm text-muted-foreground">
-                  {t("aboutYou.name.hint", {
-                    name: form.hostName.trim() || "…",
-                  })}
-                </p>
-              }
               registerField={registerField}
             />
           </FormSection>

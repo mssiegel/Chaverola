@@ -27,8 +27,7 @@ export const teacher: HebrewOf<TeacherCatalog> = {
 
   "setup.badge": "למורים",
   "setup.title": "מקימים את הפעילות",
-  "setup.body":
-    "ההקמה לוקחת בערך דקה. תקים אותה ותקבל קוד בן 4 ספרות שהכיתה נכנסת איתו.",
+  "setup.body": "ההקמה לוקחת בערך דקה.",
 
   "setup.characters.title": "דמויות",
   "setup.characters.hint":
@@ -71,7 +70,6 @@ export const teacher: HebrewOf<TeacherCatalog> = {
 
   "aboutYou.name.label": "השם שלך",
   "aboutYou.name.placeholder": "המורה כהן",
-  "aboutYou.name.hint": "בלובי התלמידים רואים ״מנחה: {{name, bidi}}״.",
   "aboutYou.email.label": "המייל שלך",
   "aboutYou.email.placeholder": "you@school.org",
   "aboutYou.email.hint": "כשהפעילות נגמרת נשלח לך במייל את כל השיחות.",

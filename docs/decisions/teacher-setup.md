@@ -5,6 +5,37 @@ area. Entries are newest-first; add new ones at the top, and add a matching line
 to the index in the same change. Replaced decisions move to Superseded at the
 bottom of this file.
 
+### The setup form explains a field once, or not at all
+
+_2026-08-13_
+
+**Decision:** Two lines came off `/activity/create` as clutter (founder,
+2026-08-13): the page subtitle's second sentence ("Host it and you'll get the
+4-digit code your class joins with") and the hint under Your name ("Students see
+'Hosted by …' in the lobby"). The subtitle is now just "Setup takes about a
+minute." `AboutYouFields` lost its `nameHint` prop with the second one rather
+than keeping an option nobody passes.
+
+The Language Settings section follows the same rule from birth: one setting, so
+the heading carries the whole label and the switch sits on that row, with the
+body as the only prose. A separate section hint would have restated the heading.
+
+**Why:** Both lines described something the teacher can already see. The join
+code is the next screen, and the lobby preview beside the form renders the live
+"Hosted by …" as they type — a sentence describing the panel next to it earns
+nothing. Neither removal touches what students see: the lobby still says "Hosted
+by", and the homepage's "setup takes about a minute" promise still has its
+matching line here.
+
+**What this does not license:** deleting a hint that carries a rule the UI
+doesn't show. `setup.characters.hint` and the two character-mode bodies carry
+the first-N deal, and `settings.hint` carries the editable-while-running
+promise. Those are load-bearing.
+
+_Implemented in
+[teacher catalogs](../../client/src/i18n/locales/en/teacher.ts) and
+[AboutYouFields](../../client/src/components/Teacher/ActivitySetup/AboutYouFields.tsx)._
+
 ### Auto-match ships off; the other two settings still ship on
 
 _2026-08-12_

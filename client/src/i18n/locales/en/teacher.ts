@@ -25,8 +25,7 @@ export const teacher = {
 
   "setup.badge": "For teachers",
   "setup.title": "Set up your activity",
-  "setup.body":
-    "Setup takes about a minute. Host it and you'll get the 4-digit code your class joins with.",
+  "setup.body": "Setup takes about a minute.",
 
   "setup.characters.title": "Characters",
   "setup.characters.hint":
@@ -69,7 +68,6 @@ export const teacher = {
 
   "aboutYou.name.label": "Your name",
   "aboutYou.name.placeholder": "Ms. Cohen",
-  "aboutYou.name.hint": "Students see “Hosted by {{name, bidi}}” in the lobby.",
   "aboutYou.email.label": "Your email",
   "aboutYou.email.placeholder": "you@school.org",
   "aboutYou.email.hint":

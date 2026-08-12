@@ -105,6 +105,7 @@ git: `git log -- DECISIONS.md`.
 - [Characters & rosters](docs/decisions/characters.md)
   - [A character's emoji is part of its name](docs/decisions/characters.md#a-characters-emoji-is-part-of-its-name)
 - [Teacher activity setup](docs/decisions/teacher-setup.md)
+  - [The setup form explains a field once, or not at all](docs/decisions/teacher-setup.md#the-setup-form-explains-a-field-once-or-not-at-all)
   - [Auto-match ships off; the other two settings still ship on](docs/decisions/teacher-setup.md#auto-match-ships-off-the-other-two-settings-still-ship-on)
   - [The teacher picks how characters get handed out, and a roster can hold a hundred](docs/decisions/teacher-setup.md#the-teacher-picks-how-characters-get-handed-out-and-a-roster-can-hold-a-hundred)
   - [The scene field is now student instructions: 250 characters, after the characters](docs/decisions/teacher-setup.md#the-scene-field-is-now-student-instructions-250-characters-after-the-characters)
