@@ -88,8 +88,7 @@ export const teacher: HebrewOf<TeacherCatalog> = {
 
   // "עברית" is written out rather than interpolated — the preposition glues
   // onto it ("בעברית"), and a slot would take an endonym that doesn't inflect.
-  "language.title": "הגדרות שפה",
-  "language.lock.title": "להשאיר את התלמידים בעברית",
+  "language.title": "הגדרות שפה - להשאיר את התלמידים בעברית",
   "language.lock.body":
     "כל תלמיד שמצטרף קורא את האתר בעברית ואי אפשר להחליף שפה. כדאי להשאיר את זה דלוק אם אתה מלמד עברית כשפה שנייה.",
 

@@ -120,12 +120,7 @@ export function SettingsSection({
   );
 }
 
-/**
- * One toggle row: icon chip, label, switch, and the description hanging
- * below. Exported because the Language section renders the same row outside
- * this card — a switch row is repeated chrome, not a class string to copy.
- */
-export function SettingRow({
+function SettingRow({
   id,
   icon: Icon,
   title,

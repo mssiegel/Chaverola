@@ -55,12 +55,21 @@ interface FormSectionProps {
   optional?: boolean;
   hint?: string;
   /**
+   * A control pinned to the end of the title row — for a section whose whole
+   * content is one switch, so the header IS the row. Pair it with `titleId`
+   * so the control can name itself from the heading.
+   */
+  action?: ReactNode;
+  /** Put on the `<h2>`, for an `action`'s `aria-labelledby`. */
+  titleId?: string;
+  /**
    * Quieter card treatment (muted, no shadow) — used by the settings block,
    * whose defaults are already the recommended state and shouldn't compete
    * with the fields the teacher actually has to fill.
    */
   quiet?: boolean;
-  children: ReactNode;
+  /** Optional: a section can be nothing but its header and an `action`. */
+  children?: ReactNode;
 }
 
 /** One visual group of the single-scrolling setup form. */
@@ -70,6 +79,8 @@ export function FormSection({
   accent,
   optional,
   hint,
+  action,
+  titleId,
   quiet,
   children,
 }: FormSectionProps) {
@@ -83,10 +94,15 @@ export function FormSection({
           : "border-border bg-card shadow-sm"
       )}
     >
-      <div className="mb-5">
+      {/* No bottom margin when the section is only its header: the hint is
+          then the last thing in the card and brings its own spacing. */}
+      <div className={cn(children !== undefined && "mb-5")}>
         <div className="flex items-center gap-3">
           <AccentIconChip accent={accent} icon={Icon} />
-          <h2 className="text-lg font-semibold text-foreground">
+          <h2
+            id={titleId}
+            className="min-w-0 flex-1 text-lg font-semibold text-foreground"
+          >
             {title}
             {optional && (
               <span className="ms-2 text-sm font-normal text-muted-foreground">
@@ -94,6 +110,7 @@ export function FormSection({
               </span>
             )}
           </h2>
+          {action}
         </div>
         {hint && (
           <p className="mt-2.5 text-sm leading-relaxed text-muted-foreground">

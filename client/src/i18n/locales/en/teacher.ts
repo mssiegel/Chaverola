@@ -92,10 +92,10 @@ export const teacher = {
   // endonym dropped into a slot would read wrong. A third language writes its
   // own two strings.
   //
-  // No section hint: the switch's own title already names the language, so a
-  // line above it saying the same thing was only restating the heading.
-  "language.title": "Language Settings",
-  "language.lock.title": "Keep students in English",
+  // One setting in the section, so the heading carries both halves and the
+  // switch sits on that same row. No separate row title, and no hint above
+  // it — the body below is the only prose.
+  "language.title": "Language Settings - Keep students in English",
   "language.lock.body":
     "Every student who joins reads the website in English and they can't switch the language. It's worth keeping on if you teach English as a second language.",
 
