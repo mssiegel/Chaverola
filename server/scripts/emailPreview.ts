@@ -69,6 +69,7 @@ function activity(over: Partial<StoredActivity>): StoredActivity {
     characters: [],
     teacherEmail: "preview@example.com",
     locale: "en",
+    lockLocale: false,
     settings: { ...DEFAULT_ACTIVITY_SETTINGS },
     createdAt: 0,
     lastSeenAt: 0,

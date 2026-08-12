@@ -69,6 +69,7 @@ function makeRecord(over: Partial<StoredActivity> = {}): StoredActivity {
     characters: [{ id: "brutus", name: "Brutus" }],
     teacherEmail: "cohen@example.com",
     locale: "en",
+    lockLocale: false,
     settings: { ...DEFAULT_ACTIVITY_SETTINGS },
     createdAt: 0,
     lastSeenAt: 0,

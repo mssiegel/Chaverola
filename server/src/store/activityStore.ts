@@ -41,6 +41,10 @@ export interface StoredActivity {
    *  it at join, and (from prompt 5) the transcript email is written in it.
    *  Never edited: activity:update-details deliberately can't reach it. */
   locale: Locale;
+  /** Whether `locale` holds a joining student or merely defaults them. Frozen
+   *  beside `locale` and unreachable from activity:update-details for the
+   *  same reason — a lesson's language must not move under a live class. */
+  lockLocale: boolean;
   settings: ActivitySettings;
   createdAt: number;
   lastSeenAt: number;
@@ -89,6 +93,9 @@ export interface NewActivity {
   /** Absent from an older client during the deploy window — defaulted below,
    *  never rejected (see the schema). */
   locale?: Locale;
+  /** Absent from an older client too, and defaulted to false rather than to
+   *  the form's true — see the schema. */
+  lockLocale?: boolean;
   settings: ActivitySettings;
 }
 
@@ -192,6 +199,7 @@ export function createActivity(
     hostName: input.hostName,
     characters,
     locale: input.locale ?? DEFAULT_LOCALE,
+    lockLocale: input.lockLocale ?? false,
     settings: input.settings,
     createdAt: now,
     lastSeenAt: now,

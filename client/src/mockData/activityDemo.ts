@@ -36,8 +36,11 @@ export const demoActivities: Record<Locale, Activity> = {
     // simply says it is the one it was written in. The join page skips locale
     // inheritance for the demo entirely (JoinActivityPage), so this field is
     // never read to redirect anyone — it exists because Activity is the wire
-    // shape.
+    // shape. `lockLocale` is exempt for exactly the same reason: locking a
+    // visitor into a language nobody chose for them would either trap them or
+    // mean nothing, and the switcher stays up on both demo locales.
     locale: "en",
+    lockLocale: false,
     // 239 chars on purpose: the instructions counter appears at 200 and turns
     // red at the 250-char cap, so this sits between — the demo shows the
     // counter working instead of a seeded value that reads as an error. Keep
@@ -70,6 +73,7 @@ export const demoActivities: Record<Locale, Activity> = {
     joinCode: DEMO_JOIN_CODE,
     hostName: "רותי כהן",
     locale: "he",
+    lockLocale: false,
     // 212 characters by `Array.from(s).length`, the same 200-249 band the
     // English one sits in. Hebrew is denser than English, so this is measured
     // rather than translated — don't carry the English "239" over.

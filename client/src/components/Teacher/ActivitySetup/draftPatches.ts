@@ -18,12 +18,17 @@ interface PatchableDraft extends ActivityDraftFields {
  * The draft updaters the setup form and the live settings panel share —
  * same fields, same caps. Only the row-id minter differs: setup rows mint
  * throwaway React keys, live rows mint the character's permanent id.
+ *
+ * Generic over the draft rather than pinned to PatchableDraft: the setup form
+ * carries fields the live panel has no control for (`lockLocale`), and those
+ * have to survive a patch untouched. Widening PatchableDraft instead would
+ * hand the live panel a setter for a field frozen at create.
  */
-export function makeDraftPatches(
-  setDraft: Dispatch<SetStateAction<PatchableDraft>>,
+export function makeDraftPatches<D extends PatchableDraft>(
+  setDraft: Dispatch<SetStateAction<D>>,
   mintRowId: () => string
 ) {
-  const patch = (changes: Partial<PatchableDraft>) =>
+  const patch = (changes: Partial<ActivityDraftFields>) =>
     setDraft((prev) => ({ ...prev, ...changes }));
 
   const patchSettings = (changes: Partial<ActivitySettings>) =>

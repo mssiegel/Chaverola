@@ -216,6 +216,11 @@ export const createActivityRequestSchema = z.object({
   // value is a closed set the client picks from, so anything else is a broken
   // caller, the same reasoning as the settings bounds.
   locale: z.enum(LOCALES).optional(),
+  // Optional for the same deploy-window reason, but defaulted to FALSE while
+  // the form's own default is true. The asymmetry is deliberate: the only
+  // caller that omits this is a client with no such control on screen, and a
+  // teacher who never saw the switch shouldn't get a lock they can't undo.
+  lockLocale: z.boolean().optional(),
   settings: activitySettingsSchema,
 }) satisfies z.ZodType<CreateActivityRequest>;
 // ^ The drift pin: if the schema's output ever drifts from the shared wire

@@ -1,3 +1,4 @@
+import { readLocalePin } from "./activityLocalePin";
 import {
   DEFAULT_LOCALE,
   localeFromPathname,
@@ -10,6 +11,25 @@ import {
   preferredLocale,
   saveLocale,
 } from "./localePreference";
+
+/** `/activity/join/1234`, once the locale prefix is off the front. */
+const JOIN_PATH = /^\/activity\/join\/(\d{4})\/?$/;
+
+/**
+ * The locale a locked activity already pinned this tab to, if this load is a
+ * join URL for that same activity. Highest rung in the chain — above even an
+ * explicit prefix, because the teacher's lock is the whole point and a
+ * student who reloads must not be able to fall out of it.
+ *
+ * `switchLocalePath(…, DEFAULT_LOCALE)` rather than a hand-rolled `/he` strip:
+ * the locale list stays in one place.
+ */
+function pinnedLocale(pathname: string): Locale | null {
+  const pin = readLocalePin();
+  if (pin === null) return null;
+  const match = JOIN_PATH.exec(switchLocalePath(pathname, DEFAULT_LOCALE));
+  return match?.[1] === pin.joinCode ? pin.locale : null;
+}
 
 /**
  * Decides the page load's locale and, if the URL doesn't already say, rewrites
@@ -37,6 +57,23 @@ import {
 export function applyBootLocale(): Locale {
   if (typeof window === "undefined") return DEFAULT_LOCALE; // prerender-safe
   const { pathname, search, hash } = window.location;
+
+  // Above the URL prefix on purpose: a locked activity's language is the
+  // teacher's call for the length of the lesson, so a reload — or a
+  // hand-typed /he — can't step out of it. Deliberately writes NOTHING: this
+  // is one lesson's rule, and saving it would make joining an English class
+  // turn the whole site English for good, or mark a guess as a choice.
+  const pinned = pinnedLocale(pathname);
+  if (pinned !== null) {
+    if (localeFromPathname(pathname) !== pinned) {
+      window.history.replaceState(
+        null,
+        "",
+        `${switchLocalePath(pathname, pinned)}${search}${hash}`
+      );
+    }
+    return pinned;
+  }
 
   const urlLocale = localeFromPathname(pathname);
   if (urlLocale !== DEFAULT_LOCALE) {

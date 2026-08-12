@@ -57,9 +57,15 @@ export interface ActivityDraftFields {
   settings: ActivitySettings;
 }
 
-/** The whole setup form, exactly as typed so far. */
+/** The whole setup form, exactly as typed so far.
+ *
+ *  `lockLocale` sits here rather than on ActivityDraftFields on purpose: the
+ *  fields interface is shared with the host page's LiveActivityDraft, and the
+ *  live panel can't edit this one — it's frozen at create, like the locale it
+ *  locks. */
 export interface ActivityDraft extends ActivityDraftFields {
   characters: CharacterDraft[];
+  lockLocale: boolean;
 }
 
 export function defaultActivityDraft(): ActivityDraft {
@@ -68,6 +74,10 @@ export function defaultActivityDraft(): ActivityDraft {
     hostName: "",
     teacherEmail: "",
     studentInstructions: "",
+    // On, like every other recommended default. A class that reads the app in
+    // one language is the state a teacher wants without asking for it, and
+    // the one who doesn't can see the switch and turn it off.
+    lockLocale: true,
     settings: { ...DEFAULT_ACTIVITY_SETTINGS },
   };
 }
@@ -162,6 +172,12 @@ function sanitizeDraft(raw: unknown): ActivityDraft {
       STUDENT_INSTRUCTIONS_MAX_CHARS
     );
   }
+
+  // Not inside `settings` — a key this function forgets to copy is silently
+  // reset to its default on the next refresh, and a lock that quietly
+  // evaporates between typing and hosting is exactly the failure nobody
+  // notices.
+  draft.lockLocale = asBoolean(candidate.lockLocale, draft.lockLocale);
 
   const settings =
     typeof candidate.settings === "object" && candidate.settings !== null
@@ -286,7 +302,8 @@ export function validateActivityDraft(draft: ActivityDraft): SetupProblem[] {
  * `locale` is the language the form itself is in, and it is always sent —
  * optional on the wire only so a deploy can't 400 an old client's create.
  * The activity keeps it for good: it is what puts a student who types the
- * bare join link on the same language as the projector.
+ * bare join link on the same language as the projector. `lockLocale` travels
+ * the same way and says whether that's a suggestion or a rule.
  */
 export function toCreateActivityRequest(
   draft: ActivityDraft,
@@ -302,6 +319,7 @@ export function toCreateActivityRequest(
     hostName: draft.hostName.trim(),
     characters,
     locale,
+    lockLocale: draft.lockLocale,
     settings: { ...draft.settings },
   };
   if (instructions !== "") request.studentInstructions = instructions;

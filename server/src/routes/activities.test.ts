@@ -53,6 +53,9 @@ describe("GET /activities/:joinCode", () => {
       "hostName",
       "joinCode",
       "locale",
+      // Always present, unlike studentInstructions — a boolean has no
+      // omit-when-blank shape.
+      "lockLocale",
     ]);
   });
 

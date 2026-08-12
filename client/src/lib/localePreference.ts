@@ -52,8 +52,9 @@ export function localeFromNavigator(): Locale | null {
 
 /**
  * The precedence chain from DECISIONS.md → "Locale is detected once and
- * remembered". An explicit locale in the URL outranks all of this and never
- * reaches here — see `applyBootLocale`.
+ * remembered". Two rungs outrank all of this and never reach here — see
+ * `applyBootLocale`: a locked activity's pinned language, then an explicit
+ * locale in the URL.
  *
  * `activityLocale` is the language the teacher set the activity up in, so a
  * whole class matches the projector rather than splitting by phone settings.

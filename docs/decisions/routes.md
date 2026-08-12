@@ -5,6 +5,93 @@ area. Entries are newest-first; add new ones at the top, and add a matching line
 to the index in the same change. Replaced decisions move to Superseded at the
 bottom of this file.
 
+### A teacher can lock an activity to its language, and the lock outranks the student's own choice
+
+_2026-08-12_
+
+**Decision:** The setup form has a **Language** section, and its one switch —
+"Keep students in English" — ships **on**. While it's on, `Activity.lockLocale`
+turns the activity's language from a default into a rule: the join page applies
+it even to a student who explicitly asked for something else (a switcher pick,
+or a `/he` they typed themselves), and the student world shows no language pill
+for the rest of the flow. Turning it off restores exactly the old behavior,
+byte for byte — an explicit choice wins, and the pill stays.
+
+Frozen at create beside `locale`, and unreachable from
+`activity:update-details` for the same reason.
+
+**Why:** An English-as-a-second-language teacher reads a join code out loud and
+thirty phones decide the language by their own settings. The soft inheritance
+shipped with [Locale is detected once at boot and
+remembered](#locale-is-detected-once-at-boot-and-remembered-and-the-url-always-wins)
+already covered the student who has no preference — but the student who does
+have one is precisely the student who flips the lesson back into their first
+language, which is the thing the lesson is trying to prevent. A default the
+class can opt out of one phone at a time isn't a setting, it's a suggestion.
+
+**Why on by default,** matching [Settings ship
+on](teacher-setup.md#settings-ship-on-and-a-toggles-sub-control-disables-instead-of-hiding):
+a class reading the app in one language is the state nearly every teacher wants
+without knowing to ask, and the ESL teacher gets it without having to find a
+switch. Note what that costs, because it looks like a regression otherwise:
+**the student-side language pill is now absent from every real activity by
+default**, surviving only on the bare code gate and on the demo. This amends
+[The language switcher disappears once a student is
+seated](#the-language-switcher-disappears-once-a-student-is-seated) rather than
+replacing it — that entry's rule still holds, this adds a second, earlier
+reason. There is deliberately no student-side escape hatch: the escape hatch is
+the teacher turning the switch off.
+
+**The pill is still up while the lookup is in flight,** and that is correct
+rather than an oversight. The bare `/activity/join` gate has to be readable by
+whoever is typing a code, and before a code resolves nobody knows whose class
+it is. A student who taps the switcher inside that window (a few hundred ms on
+a cold lookup, zero frames on the primed hand-off) gets remounted, refetched,
+and bounced straight back by the rung. One wasted round trip, no seat lost.
+Don't "fix" this by hiding the pill during `stage === "loading"`; it makes the
+code gate flicker for everyone to tidy a case that already resolves itself.
+
+**The lock does not relax the seat guard, and must never be made to.** The rung
+still returns early on `session !== null`. `/` and `/he` are separate `<Route>`
+mounts, so a cross-locale navigate remounts the tree, and `useLobbyPresence`'s
+cleanup emits `lobby:leave` — mid-lobby that drops the seat, and mid-chat it is
+the intentional leave-the-chat path, so it would end the partner's chat to
+change a language. It even keeps retrying for 30 seconds over a dead socket to
+deliver that leave. This is the "obvious" one-line change a future reader will
+want to make.
+
+**Which leaves the reload, handled before React exists.** A student seated in a
+locked activity who reloads would otherwise get whatever `applyBootLocale`
+guesses from their saved language, with the rung now blocked and the pill
+already hidden: a dead end. So the decision is made once while they're still
+unseated and written to `chaverola.activityLocale` in **sessionStorage**, keyed
+to the join code. `applyBootLocale` reads it as the new top rung, above even an
+explicit URL prefix, and rewrites with `replaceState` — no remount, no socket,
+and frame 1 already correct. It writes nothing back: not `saveLocale` (joining
+one English class must not turn the whole site English for good) and not
+`markLocaleExplicit` (a teacher's rule is not the visitor's choice). Per tab,
+dying with the tab like the seat, and cleared at the bare gate.
+
+**The two defaults disagree on purpose.** The form ships `lockLocale: true`;
+the server defaults a missing field to `false`. `shared/` is in both deploy
+triggers, so for the length of a deploy an old client posts creates without the
+field, and a teacher who never saw the switch shouldn't get a frozen lock they
+can't undo. The current client always sends it explicitly, so the server
+default only ever covers that window and raw API callers.
+
+**The demo is exempt**, structurally (`isRealActivity &&`) as well as by data.
+Nobody authored `1234`, so it has no language to lock anyone into, and its cast
+is re-cast per locale rather than translated. This is a deliberate carve-out
+from "a feature isn't done until the demo shows it": the surface that
+demonstrates this one is `/activity/create`, which is real rather than
+simulated, so there is nothing to simulate.
+
+_Implemented in
+[LocaleLockField](../../client/src/components/Teacher/ActivitySetup/LocaleLockField.tsx),
+[JoinActivityPage](../../client/src/pages/student/JoinActivityPage.tsx),
+[StudentWorldLayout](../../client/src/components/layout/StudentWorldLayout.tsx),
+and [activityLocalePin](../../client/src/lib/activityLocalePin.ts)._
+
 ### The sitemap is generated from `PAGE_META`, and carries no `lastmod`
 
 _2026-07-28_

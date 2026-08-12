@@ -69,6 +69,10 @@
   --brand-grape-soft: #ece7fb;
   --brand-coral: #ff7a59;
   --brand-sun: #ffc53d;
+  /* Sun is a fill, not an ink: #ffc53d on its own 20% tint is about 1.6:1.
+     This is the readable twin, the same idiom as grape-strong — and the same
+     value the character palette already vetted for AA on white. */
+  --brand-sun-strong: #96690f;
   --brand-mint: #16c79a;
   --brand-sky: #3da5ff;
 
@@ -126,6 +130,9 @@
   --brand-grape: #8a6bff;
   --brand-grape-strong: #a48bff;
   --brand-grape-soft: #2c2743;
+  /* Flips the way grape-strong does: the readable ink on a dark card is the
+     brighter gold, not the darker one. */
+  --brand-sun-strong: #f2c94c;
 
   /* Character-name palette — brighter on the dark card. Same order as light:
      green (you), golden, bluish, purplish, then extras (no orange). */
@@ -170,6 +177,7 @@
   --color-brand-grape-soft: var(--brand-grape-soft);
   --color-brand-coral: var(--brand-coral);
   --color-brand-sun: var(--brand-sun);
+  --color-brand-sun-strong: var(--brand-sun-strong);
   --color-brand-mint: var(--brand-mint);
   --color-brand-sky: var(--brand-sky);
   --color-brand-gradient-from: var(--brand-gradient-from);

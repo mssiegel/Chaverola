@@ -87,6 +87,17 @@ export const teacher = {
   "preview.caption":
     "This is the lobby your class waits in. It fills in as you type.",
 
+  // The activity's language. Spelled out rather than interpolated from the
+  // locale list: Hebrew glues its preposition onto the word ("בעברית"), so an
+  // endonym dropped into a slot would read wrong. A third language writes its
+  // own three strings.
+  "language.title": "Language",
+  "language.hint":
+    "This activity is in English, the language you're setting it up in. You can't change it once you host.",
+  "language.lock.title": "Keep students in English",
+  "language.lock.body":
+    "Everyone who joins reads the app in English, whatever their phone is set to, and they can't switch it. Worth keeping on if you teach English as a second language. Turn it off and each student reads in their own language.",
+
   "settings.title": "Settings",
   "settings.hint":
     "These start out the way we recommend. You can change any of them while the activity runs.",

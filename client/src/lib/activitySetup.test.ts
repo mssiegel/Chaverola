@@ -75,10 +75,17 @@ describe("readActivityDraft (sessionStorage sanitizing)", () => {
               name: `Extra ${i}`,
             })),
           ],
+          // Off, against a default of on: the whole point is that
+          // sanitizeDraft READS this rather than rebuilding it. A key it
+          // forgets to copy resets on the next refresh, and a language lock
+          // that quietly flips back between typing and hosting is a failure
+          // nobody would see.
+          lockLocale: false,
           settings: { autoMatchSeconds: 7, characterMode: "sideways" },
         }),
     });
     const draft = readActivityDraft();
+    expect(draft.lockLocale).toBe(false);
     expect(draft.characters).toHaveLength(MAX_CHARACTERS);
     expect(draft.characters[0]!.name).toHaveLength(30);
     // 7 snaps onto the 5-step grid that counts from 5.

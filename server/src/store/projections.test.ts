@@ -35,6 +35,9 @@ const fullRecord: StoredActivity = {
   studentInstructions: "Rome, 44 BC, the night before the Ides of March.",
   teacherEmail: "cohen@example.com",
   locale: "en",
+  // `true`, not the store's default: a projector that hardcoded `false`
+  // instead of reading the record would still pass against the default.
+  lockLocale: true,
   settings: { ...DEFAULT_ACTIVITY_SETTINGS },
   createdAt: 1_000,
   lastSeenAt: 1_000,
@@ -104,13 +107,17 @@ describe("toActivity (student projection)", () => {
       "hostName",
       "joinCode",
       "locale",
+      "lockLocale",
       "studentInstructions",
     ]);
   });
 });
 
 describe("toActivityDetails (the details-changed payload, student-visible)", () => {
-  it("exposes exactly characters, hostName and studentInstructions — never teacherEmail, settings, or hostKey", () => {
+  // The absence of `locale` and `lockLocale` here IS the pin: both are frozen
+  // at create, and this list is what proves a details edit can never move the
+  // language under a seated class. Don't "complete" it.
+  it("exposes exactly characters, hostName and studentInstructions — never teacherEmail, settings, the hostKey, or either locale field", () => {
     expect(Object.keys(toActivityDetails(fullRecord)).sort()).toEqual([
       "characters",
       "hostName",
@@ -126,6 +133,7 @@ describe("toHostedActivity (teacher projection)", () => {
       "hostName",
       "joinCode",
       "locale",
+      "lockLocale",
       "settings",
       "studentInstructions",
       "teacherEmail",

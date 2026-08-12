@@ -68,6 +68,9 @@ function toActivityDraft(draft: LiveActivityDraft): ActivityDraft {
     hostName: draft.hostName,
     teacherEmail: draft.teacherEmail,
     studentInstructions: draft.studentInstructions,
+    // Not a field on the live panel, and nothing in validateActivityDraft
+    // reads it — this exists only to satisfy the shape borrowed from setup.
+    lockLocale: false,
     settings: draft.settings,
   };
 }
@@ -164,8 +167,10 @@ export function activityFromLiveDraft(
     hostName: draft.hostName.trim(),
     characters,
     // Frozen at create and not on this form: the panel edits what students
-    // see, never the language the activity runs in.
+    // see, never the language the activity runs in — nor whether students are
+    // held in it.
     locale: base.locale,
+    lockLocale: base.lockLocale,
     settings: { ...draft.settings },
   };
   const instructions = draft.studentInstructions.trim();

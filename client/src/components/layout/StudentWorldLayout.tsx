@@ -20,6 +20,12 @@ import { PageSpinner } from "./PageSpinner";
 export interface StudentWorldOutletContext {
   /** The signed-in student's name while a chat is on screen, else null. */
   setChatStudentName: (name: string | null) => void;
+  /**
+   * Whether the resolved activity holds students in its own language. The
+   * page owns this too, for the same reason: a join code resolves inside the
+   * page, long after this layout mounted.
+   */
+  setLocaleLocked: (locked: boolean) => void;
 }
 
 /**
@@ -42,6 +48,10 @@ export function StudentWorldLayout() {
   // would dump the student on the homepage and kill the chat) and the
   // student's name badge fills the vacated corner.
   const [chatStudentName, setChatStudentName] = useState<string | null>(null);
+  // Set by the join page once a code resolves onto a locked activity. Starts
+  // false so the code gate — which anyone may land on cold — always has its
+  // switcher.
+  const [localeLocked, setLocaleLocked] = useState(false);
   return (
     // `group` exists for one reason: the `group-has-[textarea:focus]` rules
     // below, which fire while the chat composer — the student world's only
@@ -86,8 +96,14 @@ export function StudentWorldLayout() {
             DECISIONS.md → "The language switcher disappears once a student is
             seated".
 
+            And it never appears at all once a LOCKED activity has resolved:
+            the teacher said the class reads one language, so a switch that
+            the join page would bounce straight back is worse than no switch.
+            See DECISIONS.md → "A teacher can lock an activity to its
+            language".
+
             `ms-auto` keeps it pinned end even with no start chrome. */}
-        {chatStudentName === null && (
+        {chatStudentName === null && !localeLocked && (
           <LanguageSwitcher className="pointer-events-auto ms-auto shrink-0 rounded-full bg-white/90 text-foreground shadow-md backdrop-blur-sm hover:bg-white hover:text-foreground" />
         )}
       </div>
@@ -114,7 +130,10 @@ export function StudentWorldLayout() {
           <Suspense fallback={<PageSpinner className="text-white" />}>
             <Outlet
               context={
-                { setChatStudentName } satisfies StudentWorldOutletContext
+                {
+                  setChatStudentName,
+                  setLocaleLocked,
+                } satisfies StudentWorldOutletContext
               }
             />
           </Suspense>

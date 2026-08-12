@@ -49,6 +49,20 @@ export interface Activity {
    * `activity:details-changed` deliberately doesn't carry it.
    */
   locale: Locale;
+  /**
+   * Whether `locale` is a lock rather than a default. Off, a student who
+   * deliberately picked a language keeps it and can switch back from the
+   * lobby; on, the activity's language wins over that choice and the student
+   * world offers no switcher at all. What an English-as-a-second-language
+   * teacher turns on so thirty phones can't quietly translate the lesson.
+   *
+   * Frozen at create beside `locale`, and for the same reason: the language
+   * must not be able to move under a class mid-lesson.
+   *
+   * An older server answers without this key for the length of a deploy, so
+   * every reader compares `=== true` — absent means unlocked.
+   */
+  lockLocale: boolean;
 }
 
 /**

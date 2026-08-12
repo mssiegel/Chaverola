@@ -62,6 +62,7 @@ function record(chats: StoredChat[]): StoredActivity {
     studentInstructions: "Rome, 44 BC, the night before the Ides of March.",
     teacherEmail: "cohen@example.com",
     locale: "en",
+    lockLocale: false,
     settings: { ...DEFAULT_ACTIVITY_SETTINGS },
     createdAt: 0,
     lastSeenAt: 0,

@@ -16,7 +16,6 @@ import {
   toCreateActivityRequest,
   validateActivityDraft,
   type ActivityDraft,
-  type ActivityDraftFields,
   type SetupField,
   type SetupProblem,
 } from "@/lib/activitySetup";
@@ -32,6 +31,7 @@ import {
 import { makeDraftPatches } from "./draftPatches";
 import { FormSection } from "./FormSection";
 import { LobbyPreview } from "./LobbyPreview";
+import { LocaleLockField } from "./LocaleLockField";
 import { SettingsSection } from "./SettingsSection";
 import { StudentInstructionsField } from "./StudentInstructionsField";
 
@@ -50,7 +50,11 @@ const FAILURE_KEYS = {
   server: "setup.failure.server",
 } as const satisfies Record<CreateFailure, `setup.failure.${string}`>;
 
-interface SetupFormState extends ActivityDraftFields {
+// `Omit<ActivityDraft, "characters">` rather than ActivityDraftFields: the
+// form owns every draft field, including the ones the host page's live panel
+// has no control for, and only `characters` changes shape (rows carry a
+// render id here).
+interface SetupFormState extends Omit<ActivityDraft, "characters"> {
   characters: CharacterRowState[];
 }
 
@@ -141,6 +145,12 @@ export function ActivitySetupForm() {
       characters: prev.characters.filter((row) => row.id !== id),
     }));
 
+  // Local rather than a `patch()` call: makeDraftPatches is shared with the
+  // host page's live panel, and widening its PatchableDraft would offer a
+  // field that panel must never be able to edit.
+  const patchLockLocale = (lockLocale: boolean) =>
+    setForm((prev) => ({ ...prev, lockLocale }));
+
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
     if (hosting) return;
@@ -229,6 +239,8 @@ export function ActivitySetupForm() {
               registerField={registerField}
             />
           </FormSection>
+
+          <LocaleLockField value={form.lockLocale} onChange={patchLockLocale} />
 
           <FormSection
             title={t("setup.instructions.title")}

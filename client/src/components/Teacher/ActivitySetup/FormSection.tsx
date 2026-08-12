@@ -5,21 +5,23 @@ import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 /**
- * Each section owns one brand accent (grape, coral, sky, mint) so the form
- * reads as a friendly sequence of stops rather than a wall of white boxes.
- * The accent only tints the small icon chip — the cards themselves stay calm.
+ * Each section owns one brand accent (grape, coral, sky, sun, mint) so the
+ * form reads as a friendly sequence of stops rather than a wall of white
+ * boxes. The accent only tints the small icon chip — the cards themselves
+ * stay calm.
  */
 const ACCENT_CHIP: Record<SectionAccent, string> = {
   grape: "bg-brand-grape-soft text-brand-grape-strong",
   coral: "bg-brand-coral/15 text-brand-coral",
   sky: "bg-brand-sky/15 text-brand-sky",
+  sun: "bg-brand-sun/20 text-brand-sun-strong",
   mint: "bg-brand-mint/15 text-brand-mint",
 };
 
 /** The bordered no-accent chip variant (the settings rows' quiet icons). */
 const NEUTRAL_CHIP = "border border-border/70 bg-card text-muted-foreground";
 
-export type SectionAccent = "grape" | "coral" | "sky" | "mint";
+export type SectionAccent = "grape" | "coral" | "sky" | "sun" | "mint";
 
 /**
  * The round section-icon chip — one idiom across the setup form, the host

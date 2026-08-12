@@ -86,6 +86,15 @@ export const teacher: HebrewOf<TeacherCatalog> = {
   "preview.instructions": "הוראות",
   "preview.caption": "זה הלובי שהכיתה מחכה בו. הוא מתמלא תוך כדי שאתה כותב.",
 
+  // "עברית" is written out rather than interpolated — the preposition glues
+  // onto it ("בעברית"), and a slot would take an endonym that doesn't inflect.
+  "language.title": "שפה",
+  "language.hint":
+    "הפעילות הזאת בעברית, השפה שאתה בונה בה. אי אפשר לשנות את זה אחרי שתתחיל לארח.",
+  "language.lock.title": "להשאיר את התלמידים בעברית",
+  "language.lock.body":
+    "כל מי שמצטרף קורא את האפליקציה בעברית, לא משנה על איזו שפה הטלפון שלו מוגדר, ואי אפשר להחליף. כדאי להשאיר את זה דלוק אם אתה מלמד עברית כשפה שנייה. כבה את זה וכל תלמיד יקרא בשפה שלו.",
+
   "settings.title": "הגדרות",
   "settings.hint":
     "אלה ההגדרות שאנחנו ממליצים עליהן. אפשר לשנות כל אחת מהן גם בזמן שהפעילות רצה.",

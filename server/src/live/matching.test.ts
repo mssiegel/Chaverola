@@ -40,6 +40,7 @@ function makeActivity(
     hostName: "Ms. Cohen",
     characters,
     locale: "en",
+    lockLocale: false,
     // The defaults unless a test is about a setting — only the two cast-deal
     // cases below name a characterMode, and they name it on purpose.
     settings: { ...DEFAULT_ACTIVITY_SETTINGS, ...settings },

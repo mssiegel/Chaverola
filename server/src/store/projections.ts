@@ -33,6 +33,10 @@ export function toActivity(stored: StoredActivity): Activity {
     // The one field a student's own screen needs before they've typed
     // anything: it's what puts a Hebrew class on a Hebrew page.
     locale: stored.locale,
+    // And whether that's a floor or a ceiling. The student world reads this
+    // to decide between "inherit unless you asked otherwise" and "inherit,
+    // and here is no switcher".
+    lockLocale: stored.lockLocale,
   };
   if (stored.studentInstructions !== undefined)
     activity.studentInstructions = stored.studentInstructions;
@@ -47,9 +51,11 @@ export function toActivity(stored: StoredActivity): Activity {
  *  omitted key, for the instructions: a clear must be expressible on the
  *  wire (toActivity keeps its omit-when-undefined shape).
  *
- *  Deliberately NO `locale`: it is frozen at create, so a details edit can't
- *  move it — and this allowlist is what proves it never leaks into the
- *  details channel by accident. */
+ *  Deliberately NO `locale` and no `lockLocale`: both are frozen at create,
+ *  so a details edit can't move them — and this allowlist is what proves
+ *  neither leaks into the details channel by accident. Between them they
+ *  decide what language a seated student's page is in, and swapping that
+ *  under a live lobby would remount the page and drop the seat. */
 export function toActivityDetails(stored: StoredActivity): {
   characters: Character[];
   hostName: string;
@@ -70,6 +76,7 @@ export function toHostedActivity(stored: StoredActivity): HostedActivity {
     hostName: stored.hostName,
     characters: stored.characters,
     locale: stored.locale,
+    lockLocale: stored.lockLocale,
     settings: stored.settings,
   };
   if (stored.studentInstructions !== undefined)

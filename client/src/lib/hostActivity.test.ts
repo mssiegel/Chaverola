@@ -13,6 +13,7 @@ import {
 const baseActivity: HostedActivity = {
   joinCode: "4321",
   locale: "en",
+  lockLocale: false,
   hostName: "Ms. Cohen",
   characters: [
     { id: "caesar", name: "Caesar's ghost 👻" },

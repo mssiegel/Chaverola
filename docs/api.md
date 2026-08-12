@@ -60,6 +60,7 @@ export interface CreateActivityRequest {
   studentInstructions?: string; // ≤ STUDENT_INSTRUCTIONS_MAX_CHARS (250, code points); omit when blank
   teacherEmail?: string; // EMAIL_PATTERN, ≤ EMAIL_MAX_CHARS; omit when blank
   locale?: Locale; // "en" | "he" — the language the form was in. OPTIONAL on the wire and defaulted to "en" server-side, so a deploy can't 400 an old client's create
+  lockLocale?: boolean; // hold joining students in `locale` instead of merely defaulting them to it. Optional for the same deploy reason, but defaulted to FALSE while the form's own default is true — an old client has no such control, so its teacher never chose a lock
   settings: ActivitySettings; // required in full, except characterMode — that one is optional on the wire and defaults to "inOrder" (the deploy-window reason locale is optional; a client that sends no mode was built when a cast was always the roster's first N). Bounds REJECTED, not clamped
 }
 export interface CreateActivityResponse {
@@ -85,7 +86,7 @@ export interface ApiErrorResponse {
 ```
 
 `Activity` is the **student projection**: `joinCode`, `hostName`,
-`characters`, `locale`, and optionally `studentInstructions`.
+`characters`, `locale`, `lockLocale`, and optionally `studentInstructions`.
 `HostedActivity` extends it with `settings` and optionally `teacherEmail`.
 **Neither ever contains the hostKey** — it appears only as the top-level
 `hostKey` member of the create response.
@@ -93,7 +94,14 @@ export interface ApiErrorResponse {
 `locale` is frozen at create and reaches students on purpose: the join page
 switches the URL to it the moment a code resolves, so a class joining from a
 plain link matches the projector instead of splitting by phone settings.
-`activity:update-details` deliberately can't carry it.
+`lockLocale` says whether that switch also beats a student's own explicit
+choice, and whether the student world offers a language switcher at all.
+`activity:update-details` deliberately can't carry either one, which is what
+stops a details edit from moving a seated class's language.
+
+A client reading `lockLocale` must compare it `=== true`: an older server
+answers without the key for the length of a deploy, and absence has to read as
+unlocked.
 
 ## Endpoints
 

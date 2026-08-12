@@ -26,6 +26,7 @@ import {
   useLocale,
   useLocaleNavigate,
 } from "@/lib/locale";
+import { clearLocalePin, writeLocalePin } from "@/lib/activityLocalePin";
 import { localeIsExplicit } from "@/lib/localePreference";
 import { useStudentSession } from "@/lib/studentSession";
 import { useActivityLookup } from "@/lib/useActivityLookup";
@@ -82,7 +83,8 @@ export function JoinActivityPage() {
   const { t } = useTranslation("student");
   const { joinCode: joinCodeParam } = useParams();
   const navigate = useLocaleNavigate();
-  const { setChatStudentName } = useOutletContext<StudentWorldOutletContext>();
+  const { setChatStudentName, setLocaleLocked } =
+    useOutletContext<StudentWorldOutletContext>();
   const { session, signIn, signOut, updateSession } = useStudentSession();
 
   const {
@@ -123,14 +125,29 @@ export function JoinActivityPage() {
   // even once applyBootLocale has rewritten it from navigator.language, and
   // that is exactly the rung this implements (DECISIONS.md → "Locale is
   // detected once at boot and remembered").
+  //
+  // UNLESS the teacher locked the activity, which is the one thing that beats
+  // an explicit choice: the class reads one language, and a student can't
+  // pick their way out of an English lesson. See DECISIONS.md → "A teacher
+  // can lock an activity to its language".
   const locale = useLocale();
   const { pathname, search, hash } = useLocation();
   const navigateAcrossLocales = useNavigate();
-  // The demo is exempt: nobody set `1234` up, so it has no authored language
-  // — it's whatever you're reading it in.
+  // The demo is exempt from both: nobody set `1234` up, so it has no authored
+  // language — it's whatever you're reading it in.
   const inheritedLocale = isRealActivity ? activity.locale : undefined;
+  // `=== true`, never truthy: an older server answers without the field for
+  // the length of a deploy, and absence has to read as unlocked.
+  const localeLocked = isRealActivity && activity.lockLocale === true;
   useEffect(() => {
-    if (session !== null || localeIsExplicit()) return;
+    // NOT relaxed by the lock, ever. `/` and `/he` are separate <Route>
+    // mounts, so this navigate remounts the tree — and useLobbyPresence's
+    // cleanup emits `lobby:leave`, which mid-lobby drops the seat and
+    // mid-chat IS the leave-the-chat path, ending the partner's chat. A
+    // language is not worth that. The seated case is covered instead by the
+    // pin below, which decides before React mounts.
+    if (session !== null) return;
+    if (!localeLocked && localeIsExplicit()) return;
     // Guarded, not trusted: an older server during a deploy answers without
     // the field, and `/undefined/activity/join/1234` is a worse bug than not
     // inheriting at all.
@@ -141,6 +158,7 @@ export function JoinActivityPage() {
     );
   }, [
     session,
+    localeLocked,
     inheritedLocale,
     locale,
     pathname,
@@ -148,6 +166,17 @@ export function JoinActivityPage() {
     hash,
     navigateAcrossLocales,
   ]);
+
+  // Written while the student is still unseated, so a later reload can be
+  // answered before React exists rather than by the blocked effect above.
+  // Unconditional on a locked activity, redirect or not: the pin has to exist
+  // even when the locale already matched, or the first reload from a phone
+  // set to another language walks straight out of the lock.
+  useEffect(() => {
+    if (!localeLocked || !isLocale(inheritedLocale)) return;
+    if (joinCodeParam === undefined) return;
+    writeLocalePin({ joinCode: joinCodeParam, locale: inheritedLocale });
+  }, [localeLocked, inheritedLocale, joinCodeParam]);
 
   // Which real join code the socket said died under us. Latched into state
   // by the presence hook's onEnded callback (the presence value itself
@@ -272,9 +301,12 @@ export function JoinActivityPage() {
         joinCode: activity.joinCode,
         hostName: payload.hostName,
         characters: payload.characters ?? activity.characters,
-        // Carried, not re-read: the locale is frozen at create, and the
-        // details channel deliberately doesn't carry it.
+        // Carried, not re-read: both are frozen at create, and the details
+        // channel deliberately doesn't carry them. Dropping `lockLocale` here
+        // would quietly unlock the activity for every seated student the
+        // moment the teacher renamed a character.
         locale: activity.locale,
+        lockLocale: activity.lockLocale,
       };
       if (payload.studentInstructions !== null) {
         next.studentInstructions = payload.studentInstructions;
@@ -347,6 +379,9 @@ export function JoinActivityPage() {
   // thing here that must not run twice.
   useEffect(() => {
     if (!resolvedToCodeEntry) return;
+    // The pin goes with the seat: back at the bare gate this tab belongs to
+    // no activity, so it shouldn't still be answering to one lesson's rule.
+    clearLocalePin();
     if (session && !activityGoneFromLookup) signOut();
   }, [resolvedToCodeEntry, session, signOut, activityGoneFromLookup]);
 
@@ -359,6 +394,16 @@ export function JoinActivityPage() {
     setChatStudentName(chatStudentName);
     return () => setChatStudentName(null);
   }, [chatStudentName, setChatStudentName]);
+
+  // And a locked activity takes the language pill away for the rest of the
+  // flow — offering a switch that the rung above would immediately undo is
+  // worse than offering none. It stays up until the code resolves: the gate
+  // has to be readable to whoever is typing a code, and before a lookup
+  // answers we genuinely don't know whose class this is.
+  useEffect(() => {
+    setLocaleLocked(localeLocked);
+    return () => setLocaleLocked(false);
+  }, [localeLocked, setLocaleLocked]);
 
   // Which meta this screen carries. Two stages sit behind a URL someone can
   // open cold: bare /activity/join, where a student holding a code arrives,

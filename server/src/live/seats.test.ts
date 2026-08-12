@@ -22,6 +22,7 @@ function makeActivity(): StoredActivity {
     hostName: "Ms. Cohen",
     characters: [{ id: "brutus", name: "Brutus" }],
     locale: "en",
+    lockLocale: false,
     settings: { ...DEFAULT_ACTIVITY_SETTINGS },
     createdAt: 0,
     lastSeenAt: 0,

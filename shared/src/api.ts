@@ -35,6 +35,15 @@ export interface CreateActivityRequest {
    * of the Vercel deploy — on the one surface a teacher hits at class start.
    */
   locale?: Locale;
+  /**
+   * Whether joining students are held in `locale` or merely defaulted to it.
+   * Optional on the wire for the same deploy-race reason, and defaulted
+   * server-side to **false** rather than to the form's own default of true:
+   * an old client during the deploy window has no such control, and a teacher
+   * who never saw the switch shouldn't get a lock they can't undo. The
+   * current client always sends the field.
+   */
+  lockLocale?: boolean;
   /** Required in full; out-of-bounds values are rejected, not clamped. */
   settings: ActivitySettings;
 }
