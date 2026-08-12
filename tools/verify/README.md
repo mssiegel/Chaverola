@@ -67,6 +67,15 @@ helper over re-deriving the rule:
   Hero lines appear **twice** (the teacher preview card mirrors the hero chat
   live) — `.first()` to dodge strict mode.
 - **Locale checks:** `waitForURL` with exact URLs (`/he`, `/he/activity/join`).
+- **RTL needs per-component geometry, not just page-level checks.** The Hebrew
+  run was 34/34 on lang, dir, fonts, meta and overflow while every switch in
+  the app had its thumb hanging outside its track under `/he` — a mirrored
+  control breaks _inside_ its own box, so nothing page-level notices. For
+  anything wearing `rtl:-scale-x-100` or `.flip-rtl`, compare the inner part's
+  `getBoundingClientRect()` against its container's in both locales (it accounts
+  for transforms). `[data-slot="switch"]` / `[data-slot="switch-thumb"]` are the
+  handles; the two gutters must stay non-negative and swap sides between `/` and
+  `/he`.
 - **Setup form** (`/activity/create`): character inputs by placeholder
   (`Caesar's ghost`, `Brutus`, …), host name is `#setup-host-name`. Two "Host
   the Activity" buttons exist (desktop rail + mobile dock) — click the visible

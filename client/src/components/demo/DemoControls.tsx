@@ -113,6 +113,10 @@ export function DemoToggle({
       className={cn(
         // Mirrored whole, like ui/switch.tsx — the thumb's travel is a
         // physical translate and this control holds no text or asymmetric art.
+        // The thumb below is deliberately `absolute left-0.5` and not a flex
+        // child: a flex thumb follows `direction`, so it would start at the
+        // far end under /he and the mirror would flip it a second time, off
+        // the track. Don't "simplify" this into a flex row.
         "relative h-6 w-11 shrink-0 rounded-full transition-colors rtl:-scale-x-100",
         checked ? "bg-primary" : "bg-input"
       )}
