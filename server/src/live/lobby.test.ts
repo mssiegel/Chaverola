@@ -423,7 +423,7 @@ describe("the live lobby", () => {
       studentIds: [welcomeA.studentId, welcomeB.studentId],
     });
     studentA.emit("settings:update", {
-      settings: { ...DEFAULT_ACTIVITY_SETTINGS, autoMatch: false },
+      settings: { ...DEFAULT_ACTIVITY_SETTINGS, autoMatch: true },
     });
     // Feature 11 makes this one bite: the stored email is where every
     // transcript gets mailed, so a student who could rewrite it would have
@@ -997,10 +997,9 @@ describe("the live lobby", () => {
     // 500ms and grace is a 15s window, so waiting out the gate costs half a
     // second instead of four AND the scaling mechanism itself stays pinned
     // in the automated suite. The scale deliberately does NOT go in the
-    // shared beforeEach config: at scale 8 the default 20s auto-match
-    // threshold compresses to 2.5s and would quietly auto-pair waiting
-    // students mid-test across the rest of the suite. (Both lobbies share
-    // the store, so the shared `activity` record works here too.)
+    // shared beforeEach config: every other timer in the suite would compress
+    // with it. (Both lobbies share the store, so the shared `activity` record
+    // works here too.)
     const scaledHttp = http.createServer();
     const scaledIo = attachLobby(
       scaledHttp,

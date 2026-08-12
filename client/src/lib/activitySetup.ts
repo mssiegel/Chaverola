@@ -168,9 +168,18 @@ function sanitizeDraft(raw: unknown): ActivityDraft {
       ? (candidate.settings as Record<string, unknown>)
       : {};
   draft.settings = {
-    revealNames: asBoolean(settings.revealNames, true),
-    rematchWarning: asBoolean(settings.rematchWarning, true),
-    autoMatch: asBoolean(settings.autoMatch, true),
+    revealNames: asBoolean(
+      settings.revealNames,
+      DEFAULT_ACTIVITY_SETTINGS.revealNames
+    ),
+    rematchWarning: asBoolean(
+      settings.rematchWarning,
+      DEFAULT_ACTIVITY_SETTINGS.rematchWarning
+    ),
+    autoMatch: asBoolean(
+      settings.autoMatch,
+      DEFAULT_ACTIVITY_SETTINGS.autoMatch
+    ),
     autoMatchSeconds: snapToBounds(
       settings.autoMatchSeconds,
       AUTO_MATCH_SECONDS

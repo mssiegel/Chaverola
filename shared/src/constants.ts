@@ -81,7 +81,11 @@ export const AUTO_MATCH_SECONDS: StepperBounds = {
 export const DEFAULT_ACTIVITY_SETTINGS: ActivitySettings = {
   revealNames: true,
   rematchWarning: true,
-  autoMatch: true,
+  // Off, unlike the other two: an activity shouldn't open with a clock
+  // already running. The teacher needs a beat to take attendance and explain
+  // the task, and auto-match firing 20 seconds in takes the first pairing out
+  // of their hands. The seconds below still apply the moment they switch it on.
+  autoMatch: false,
   autoMatchSeconds: AUTO_MATCH_SECONDS.default,
   // A fresh form recommends shuffled: a teacher who names two characters gets
   // the same activity either way, and one who names more almost certainly

@@ -34,10 +34,11 @@ interface SettingsSectionProps {
 }
 
 /**
- * The three activity toggles. Everything defaults to on (the recommended
- * state), and a toggle's sub-control stays visible but disabled while it's
- * off — the teacher can see what turning it on will do, and nothing jumps
- * around. All of it stays editable while the activity runs.
+ * The three activity toggles. Reveal names and the rematch warning ship on;
+ * auto-match ships off, so nothing pairs until the teacher says so. A
+ * toggle's sub-control stays visible but disabled while it's off — the
+ * teacher can see what turning it on will do, and nothing jumps around. All
+ * of it stays editable while the activity runs.
  */
 export function SettingsSection({
   settings,

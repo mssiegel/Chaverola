@@ -421,9 +421,9 @@ export function seedWorld(
     }
   }
 
-  // Longest-waiting on top, staggered so the wait times read naturally —
-  // and all below the default auto-match threshold, so the teacher gets a
-  // beat to look around before the simulation starts pairing on its own.
+  // Longest-waiting on top, staggered so the wait times read naturally — and
+  // all below the auto-match threshold, so switching auto-match on gives the
+  // teacher a beat to look around before the simulation starts pairing.
   queue.forEach((entry, index) => {
     entry.waitSeconds = Math.max(3, 14 - index * 2);
   });

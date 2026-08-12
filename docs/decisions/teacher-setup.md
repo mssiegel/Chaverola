@@ -5,6 +5,37 @@ area. Entries are newest-first; add new ones at the top, and add a matching line
 to the index in the same change. Replaced decisions move to Superseded at the
 bottom of this file.
 
+### Auto-match ships off; the other two settings still ship on
+
+_2026-08-12_
+
+**Decision:** A fresh `/activity/create` opens with **auto-match off**. Reveal
+names on chat end and the rematch warning still open on. The 20-second wait
+is unchanged and still shows in the stepper, which stays visible-but-disabled
+until the teacher flips the switch — as does everything else in
+[Settings ship on, and a toggle's sub-control disables instead of hiding](#settings-ship-on-and-a-toggles-sub-control-disables-instead-of-hiding),
+which this replaces: the quieter settings card, the section hint, and the
+disable-don't-hide rule all still hold. The hint still says these are the
+recommendation, because off is now the recommendation. The demo activity at
+`/activity/host/1234` follows the same default rather than pinning itself on,
+so a visitor sees what a real teacher sees and flips the switch to watch
+auto-match work.
+
+**Why:** An activity shouldn't open with a clock already running. Auto-match
+on by default meant chats started forming twenty seconds after the first two
+students arrived — before the teacher had taken attendance, explained the
+task, or looked at who was in the room. The first pairing is the one a teacher
+most wants to control, and the old default took it out of their hands to save
+them a single tap. Auto-match is still a first-class feature and still lives
+in two places (the setup form and the pairing rail); it's just something the
+teacher turns on when the class is ready.
+
+_The default lives in
+[DEFAULT_ACTIVITY_SETTINGS](../../shared/src/constants.ts); the form reads it
+through [activitySetup](../../client/src/lib/activitySetup.ts) and renders it
+in
+[SettingsSection](../../client/src/components/Teacher/ActivitySetup/SettingsSection.tsx)._
+
 ### The teacher picks how characters get handed out, and a roster can hold a hundred
 
 _2026-08-10_
@@ -261,30 +292,6 @@ _Update (2026-07-26): the scene became
 and its cap is now a flat 250 characters (code points, counter from 200) —
 the word cap and `clampWords` are gone. The name caps are unchanged._
 
-### Settings ship on, and a toggle's sub-control disables instead of hiding
-
-_2026-07-14_
-
-**Decision:** All three setup toggles — reveal names on chat end, rematch
-warning, auto-match 1:1 (20 seconds, 5–120 in 5-second steps) — default to
-**on**, and the section hint says out loud that these defaults are the
-recommendation and that everything stays editable while the activity runs.
-When a toggle with a stepper is off, the stepper stays visible but disabled.
-The whole settings block gets a quieter card than the field sections.
-
-**Why:** Recommended defaults make the fastest path (touch nothing) also the
-best one. A visible-but-disabled stepper shows what turning the toggle on
-will do, and nothing jumps around when toggling — hiding it would resize the
-row and shift the page under the teacher's thumb. The quieter card ranks the
-sections by required attention: fields need input, settings are already in
-their recommended state.
-
-_Implemented in
-[SettingsSection](../../client/src/components/Teacher/ActivitySetup/SettingsSection.tsx)
-with
-[NumberStepper](../../client/src/components/Teacher/ActivitySetup/NumberStepper.tsx);
-defaults live in [activitySetup](../../client/src/lib/activitySetup.ts)._
-
 ### The setup form's submit is solid grape
 
 _2026-07-14_
@@ -428,3 +435,27 @@ optional; the empty slot was an invitation, not a requirement.
 miss, which turned out to be the problem rather than the fix. Teachers saw a
 prominent field without being able to tell what one emoji was for or where it
 would appear. The row is now a single name input.
+
+### Settings ship on, and a toggle's sub-control disables instead of hiding
+
+_2026-07-14, superseded by
+[Auto-match ships off; the other two settings still ship on](#auto-match-ships-off-the-other-two-settings-still-ship-on)_
+
+**Decision:** All three setup toggles — reveal names on chat end, rematch
+warning, auto-match 1:1 (20 seconds, 5–120 in 5-second steps) — default to
+**on**, and the section hint says out loud that these defaults are the
+recommendation and that everything stays editable while the activity runs.
+When a toggle with a stepper is off, the stepper stays visible but disabled.
+The whole settings block gets a quieter card than the field sections.
+
+**Why:** Recommended defaults make the fastest path (touch nothing) also the
+best one. A visible-but-disabled stepper shows what turning the toggle on
+will do, and nothing jumps around when toggling — hiding it would resize the
+row and shift the page under the teacher's thumb. The quieter card ranks the
+sections by required attention: fields need input, settings are already in
+their recommended state.
+
+**Why it went:** only the auto-match half was replaced — an activity that
+starts pairing on its own twenty seconds in isn't a recommended default, it's
+a clock the teacher never started. The stepper and quiet-card rulings carry
+forward unchanged into the entry that replaced this one.

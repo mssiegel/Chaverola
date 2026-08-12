@@ -81,19 +81,19 @@ describe("mergeExternalSettings", () => {
 
   it("merges a key that changed outside the panel", () => {
     const prev = settings();
-    const next = { ...settings(), autoMatch: false };
+    const next = { ...settings(), autoMatch: true };
     const draft = settings();
     expect(mergeExternalSettings(prev, next, draft)).toEqual({
       ...settings(),
-      autoMatch: false,
+      autoMatch: true,
     });
   });
 
   it("returns null for the panel's own commit echoing back", () => {
-    // The panel committed autoMatch: false itself — the draft already agrees.
+    // The panel committed autoMatch: true itself — the draft already agrees.
     const prev = settings();
-    const next = { ...settings(), autoMatch: false };
-    const draft = { ...settings(), autoMatch: false };
+    const next = { ...settings(), autoMatch: true };
+    const draft = { ...settings(), autoMatch: true };
     expect(mergeExternalSettings(prev, next, draft)).toBeNull();
   });
 
@@ -105,22 +105,22 @@ describe("mergeExternalSettings", () => {
 
   it("keeps a pending draft edit on a different key", () => {
     const prev = settings();
-    const next = { ...settings(), autoMatch: false };
+    const next = { ...settings(), autoMatch: true };
     const draft = { ...settings(), rematchWarning: false };
     expect(mergeExternalSettings(prev, next, draft)).toEqual({
       ...settings(),
-      autoMatch: false,
+      autoMatch: true,
       rematchWarning: false,
     });
   });
 
   it("merges every externally changed key at once", () => {
     const prev = settings();
-    const next = { ...settings(), autoMatch: false, revealNames: false };
+    const next = { ...settings(), autoMatch: true, revealNames: false };
     const draft = settings();
     expect(mergeExternalSettings(prev, next, draft)).toEqual({
       ...settings(),
-      autoMatch: false,
+      autoMatch: true,
       revealNames: false,
     });
   });
