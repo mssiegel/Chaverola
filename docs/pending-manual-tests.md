@@ -235,6 +235,49 @@ and `verify:smoke --prod` 7/7). What headless can't imitate is a phone's radio,
 its background/foreground cycle, and a small viewport rendering the notice on a
 real device rather than an emulated 390px one.
 
+## The language lock, on a phone whose system language really is Hebrew
+
+_Asked 2026-08-13; blocked because the only Hebrew-set handset wasn't to hand.
+Headless Chrome can emulate `navigator.language`, and did (16/16 locally, 6/6
+on production), but it can't reproduce what a real device reports or how a real
+mobile browser treats a backgrounded tab's sessionStorage._
+
+**Steps** (3 minutes, on production chaverola.com), on a phone whose **system
+language is Hebrew**:
+
+1. On a laptop, create an activity at `chaverola.com/activity/create` with
+   **Language Settings - Keep students in English** left **on** (its default).
+   Note the join code.
+2. On the phone, open `chaverola.com` and confirm it comes up in **Hebrew**
+   (right-to-left). This is the check that the handset's language actually
+   reaches the app.
+3. Type the join code. The phone should flip to **English, left-to-right** at
+   the moment the code resolves, and the floating **language pill should be
+   gone**.
+4. Enter a name and land in the lobby. **Reload the page.** It must come back
+   in English, with no Hebrew flash on the first frame, and the student must
+   still be seated — the teacher's queue on the laptop must not lose and
+   regain the row.
+5. Background the browser for a minute or two (open another app, lock the
+   screen), come back, and reload again. Same result.
+
+**What it would mean if it fails:** step 2 showing English means the device
+reports a tag `localeFromNavigator` doesn't recognize — some Android builds
+still send the retired `iw` for Hebrew, which is normalized in
+`lib/localePreference.ts`, and that normalization has never run on real
+hardware. Step 3 leaving the pill up, or step 4 coming back Hebrew, means the
+per-tab pin (`chaverola.activityLocale`) didn't survive — mobile browsers
+discard backgrounded tabs aggressively, and sessionStorage going with one is
+exactly the case step 5 is for. A student stranded in the wrong language with
+no switcher is the failure this feature has to not have; see DECISIONS.md →
+"A teacher can lock an activity to its language".
+
+**Coverage in the meantime:** `tools/verify/scratch/locale-lock.mjs` (16/16,
+including the seated reload with the teacher's queue as witness),
+`locale-lock-midchat.mjs` (7/7, a mid-chat reload leaving the partner's chat
+open), and `prod-lock.mjs` (6/6 against the deployed build) — all with an
+emulated `he-IL` context rather than a real handset.
+
 ## Feature 14 — the two-device settings wake, with a real phone as the sleeper
 
 _Asked 2026-07-24; blocked because the founder's laptop was running on the
