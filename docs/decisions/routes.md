@@ -9,8 +9,12 @@ bottom of this file.
 
 _2026-08-12_
 
-**Decision:** The setup form has a **Language** section, and its one switch —
-"Keep students in English" — ships **on**. While it's on, `Activity.lockLocale`
+**Decision:** The setup form ends with a **Language Settings** section, below
+Settings, and its one switch — "Keep students in English" — ships **on**. A
+section of its own rather than a fourth Settings row, even sitting right under
+it: `SettingsSection` is shared with the host page's live panel, and its hint
+promises everything in it stays editable while the activity runs, which this
+one is not. While it's on, `Activity.lockLocale`
 turns the activity's language from a default into a rule: the join page applies
 it even to a student who explicitly asked for something else (a switcher pick,
 or a `/he` they typed themselves), and the student world shows no language pill

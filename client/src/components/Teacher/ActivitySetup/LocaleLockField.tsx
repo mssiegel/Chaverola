@@ -12,11 +12,12 @@ import { SettingRow } from "./SettingsSection";
  * already chosen by the time a teacher reaches this section. The only
  * decision left is whether it binds the class.
  *
- * Deliberately NOT a fourth row inside SettingsSection. That component is
- * shared with the host page's live panel, and its section hint promises
- * everything in it stays editable while the activity runs — which this one
- * isn't. It's frozen at create, like the locale it locks, so it gets its own
- * card and says so in its hint.
+ * Deliberately NOT a fourth row inside SettingsSection, even though it now
+ * sits directly below it. That component is shared with the host page's live
+ * panel, which can't edit this, and its section hint promises everything in
+ * it stays editable while the activity runs. This one is frozen at create,
+ * like the locale it locks, so the separate card is what keeps that promise
+ * honest — the adjacency makes it matter more, not less.
  */
 export function LocaleLockField({
   value,
@@ -32,7 +33,6 @@ export function LocaleLockField({
       title={t("language.title")}
       icon={Languages}
       accent="sun"
-      hint={t("language.hint")}
     >
       <SettingRow
         id="setting-lock-locale"

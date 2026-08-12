@@ -240,8 +240,6 @@ export function ActivitySetupForm() {
             />
           </FormSection>
 
-          <LocaleLockField value={form.lockLocale} onChange={patchLockLocale} />
-
           <FormSection
             title={t("setup.instructions.title")}
             icon={ClipboardList}
@@ -256,6 +254,8 @@ export function ActivitySetupForm() {
           </FormSection>
 
           <SettingsSection settings={form.settings} onChange={patchSettings} />
+
+          <LocaleLockField value={form.lockLocale} onChange={patchLockLocale} />
         </div>
 
         {/* Desktop rail: the live lobby preview — fill on the left, watch it

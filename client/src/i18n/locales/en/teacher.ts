@@ -90,13 +90,14 @@ export const teacher = {
   // The activity's language. Spelled out rather than interpolated from the
   // locale list: Hebrew glues its preposition onto the word ("בעברית"), so an
   // endonym dropped into a slot would read wrong. A third language writes its
-  // own three strings.
-  "language.title": "Language",
-  "language.hint":
-    "This activity is in English, the language you're setting it up in. You can't change it once you host.",
+  // own two strings.
+  //
+  // No section hint: the switch's own title already names the language, so a
+  // line above it saying the same thing was only restating the heading.
+  "language.title": "Language Settings",
   "language.lock.title": "Keep students in English",
   "language.lock.body":
-    "Everyone who joins reads the app in English, whatever their phone is set to, and they can't switch it. Worth keeping on if you teach English as a second language. Turn it off and each student reads in their own language.",
+    "Every student who joins reads the website in English and they can't switch the language. It's worth keeping on if you teach English as a second language.",
 
   "settings.title": "Settings",
   "settings.hint":
