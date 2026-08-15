@@ -14,8 +14,15 @@ and is `DEFAULT_ACTIVITY_SETTINGS.characterMode`; Shuffled is second. The rule
 that the leading option is the selected one is unchanged, so the swap is one
 decision, not two. Shuffled's body is rewritten to say what it does in plainer
 words and to answer the question the word "random" raises: "Each chat gets its
-characters at random from your character list. Two students in the same chat
-always get different characters."
+characters at random from your character list. No two students in a chat get the
+same character."
+
+That second sentence went through "two students in the same chat always get
+different characters" first and was rejected (founder, 2026-08-15): "different"
+is under-specified, and a teacher can read it as different **from the other
+chats'**, which is the one promise this app must never make. "No two X get the
+same Y" is the standard English form for distinctness and carries only the
+within-a-chat reading.
 
 **Why:** A teacher can guess what "In order" does from the name alone. "Shuffled"
 has to be read to be understood, and a default nobody understands is a default

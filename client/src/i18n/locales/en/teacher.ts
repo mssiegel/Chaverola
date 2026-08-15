@@ -64,7 +64,7 @@ export const teacher = {
     "A pair uses your first two character names, a trio the first three character names, etc.",
   "characters.mode.shuffled.title": "Shuffled",
   "characters.mode.shuffled.body":
-    "Each chat gets its characters at random from your character list. Two students in the same chat always get different characters.",
+    "Each chat gets its characters at random from your character list. No two students in a chat get the same character.",
 
   "aboutYou.name.label": "Your name",
   "aboutYou.name.placeholder": "Ms. Cohen",
