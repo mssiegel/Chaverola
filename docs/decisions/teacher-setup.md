@@ -5,6 +5,52 @@ area. Entries are newest-first; add new ones at the top, and add a matching line
 to the index in the same change. Replaced decisions move to Superseded at the
 bottom of this file.
 
+### How characters get handed out moves under the list, and waits for a third name
+
+_2026-08-15_
+
+**Decision:** The Shuffled / In order picker now closes the Characters card
+instead of opening it — under the Add a character button, after the list it
+describes — and it renders only from three character rows up
+(`CHARACTER_MODE_FROM`). Removing the third row hides it again; the rule runs in
+both directions, on the setup form and in the host page's live settings panel.
+Rows, not filled names, so the control follows the list the teacher can see
+rather than flickering while a name is typed or cleared. Hiding never touches
+the value: a teacher who picked In order and then deleted down to two names
+still hosts in order, and still finds In order selected when a third name comes
+back.
+
+**Why:** At two characters the two modes are the same operation. `dealCast`
+either shuffles the roster and takes N or takes N and shuffles them, and with
+two names those are the same two names — and `splitOddPool` won't form a trio
+below three characters either, so every chat is a pair. A fresh form opens with
+two blank rows, so the card's first question was one that could not have an
+effect, asked before anything existed for it to apply to. Three is where the
+modes first diverge: a pair drawn from three names is either the first two or
+any two. Putting the picker last also puts it after its subject — both option
+bodies name the roster ("from your character list", "your first two character
+names"), which was a forward reference above the list and reads straight below
+it.
+
+**What this does not license:** hiding a control that sits above the point of
+interaction. The disable-don't-hide rule carried forward by
+[Auto-match ships off; the other two settings still ship on](#auto-match-ships-off-the-other-two-settings-still-ship-on)
+still holds — the auto-match stepper stays visible-but-disabled because it lives
+inside a row the teacher is already looking at, and hiding it would resize that
+row under their thumb. This reveal is the opposite shape: it lands below the Add
+button, so every row, the button, and everything above them stay exactly where
+they were. Nor does it license resetting `characterMode` when the picker hides,
+gating on filled names instead of rows, or adding a hint that explains why the
+control comes and goes — the card
+[explains a field once or not at all](#the-setup-form-explains-a-field-once-or-not-at-all).
+
+_Implemented in
+[CharacterModeField](../../client/src/components/Teacher/ActivitySetup/CharacterModeField.tsx),
+[activitySetup](../../client/src/lib/activitySetup.ts) (`CHARACTER_MODE_FROM`),
+and its two call sites —
+[ActivitySetup](../../client/src/components/Teacher/ActivitySetup/index.tsx) and
+[LiveSettingsPanel](../../client/src/components/Teacher/HostActivity/LiveSettingsPanel.tsx)._
+
 ### The setup form explains a field once, or not at all
 
 _2026-08-13_
@@ -106,6 +152,11 @@ same teacher asked for bigger rooms, and a chat now seats
 [A chat seats as many students as the palette has colors](teacher-live.md#a-chat-seats-as-many-students-as-the-palette-has-colors).
 The other three stand: no warning for a short roster, no hint when in-order
 mode strands the tail of a long one, and no paste box._
+
+_Update (2026-08-15): the card no longer opens with the picker — it closes with
+it, and only from three characters up. See
+[How characters get handed out moves under the list, and waits for a third name](#how-characters-get-handed-out-moves-under-the-list-and-waits-for-a-third-name).
+Everything else here stands._
 
 **Consequence worth knowing:** a roster longer than the eight-slot character
 palette makes `assignCharacterColors` wrap, so two characters can share a

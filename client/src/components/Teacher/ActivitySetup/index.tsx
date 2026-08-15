@@ -198,14 +198,6 @@ export function ActivitySetupForm() {
             accent="grape"
             hint={t("setup.characters.hint")}
           >
-            {/* How the cast gets dealt sits above the names it deals: the
-                teacher reads the rule, then fills the list it applies to. */}
-            <CharacterModeField
-              className="mb-5"
-              idPrefix="setup"
-              value={form.settings.characterMode}
-              onChange={(characterMode) => patchSettings({ characterMode })}
-            />
             <CharacterRowsField
               rows={form.characters}
               onUpdate={updateCharacter}
@@ -213,6 +205,17 @@ export function ActivitySetupForm() {
               onRemove={removeCharacter}
               problemFor={problemFor}
               registerField={registerField}
+            />
+            {/* How the cast gets dealt comes after the cast: both options name
+                the list, so they read as a question about something already on
+                screen. It shows itself from the third row up — see
+                CharacterModeField. */}
+            <CharacterModeField
+              className="mt-5"
+              idPrefix="setup"
+              value={form.settings.characterMode}
+              onChange={(characterMode) => patchSettings({ characterMode })}
+              characterCount={form.characters.length}
             />
           </FormSection>
 

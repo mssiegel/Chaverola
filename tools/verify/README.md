@@ -77,7 +77,10 @@ helper over re-deriving the rule:
   handles; the two gutters must stay non-negative and swap sides between `/` and
   `/he`.
 - **Setup form** (`/activity/create`): character inputs by placeholder
-  (`Caesar's ghost`, `Brutus`, …), host name is `#setup-host-name`. Two "Host
+  (`Caesar's ghost`, `Brutus`, …), host name is `#setup-host-name`. The
+  character-mode fieldset ("How characters get handed out") is **absent** on a
+  fresh form — it renders from the third character row up and sits below the
+  Add a character button, so add a row before asserting on it. Two "Host
   the Activity" buttons exist (desktop rail + mobile dock) — click the visible
   one (`.last()` at phone width). Submitting POSTs to the API. Success =
   `waitForURL(/\/activity\/host\/[A-Za-z0-9_-]{24}$/)`; the button disables

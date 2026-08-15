@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next";
 import type { CharacterMode } from "@chaverola/shared";
 
+import { CHARACTER_MODE_FROM } from "@/lib/activitySetup";
 import { cn } from "@/lib/utils";
 
 /**
@@ -40,6 +41,11 @@ interface CharacterModeFieldProps {
    * never merge into one.
    */
   idPrefix: string;
+  /**
+   * Rows in the roster the picker is dealing, not filled names — the count the
+   * teacher can see. Under CHARACTER_MODE_FROM nothing renders.
+   */
+  characterCount: number;
   className?: string;
 }
 
@@ -49,9 +55,15 @@ interface CharacterModeFieldProps {
  * visually-hidden peer, so arrow-key navigation, roving focus and the group
  * itself come from the browser rather than a hand-rolled `role="radiogroup"`.
  *
- * Always rendered, even with a two-name roster where the two modes deal the
- * same cast — a control that comes and goes is worse than one that sometimes
- * does nothing, so there is no conditional rendering here on purpose.
+ * Renders from CHARACTER_MODE_FROM rows up, and nothing at all below that: a
+ * two-name roster deals the same cast either way, so the question can't have
+ * an answer that changes anything. Both call sites put it last in the card,
+ * under the Add a character button, which is what makes hiding it safe — the
+ * reveal lands below the button the teacher just tapped, so no row above it
+ * moves. Rows, not filled names, so it can't flicker while a name is typed or
+ * cleared. Hiding never touches the value: delete the third row and the mode
+ * the teacher picked is still the mode they host with, and still selected when
+ * a third row comes back.
  *
  * Deliberately silent about two things, both decided against rather than
  * missed: a roster shorter than the class repeats characters across chats
@@ -65,11 +77,25 @@ export function CharacterModeField({
   value,
   onChange,
   idPrefix,
+  characterCount,
   className,
 }: CharacterModeFieldProps) {
   const { t } = useTranslation("teacher");
+  // After useTranslation, never above it: an early return over a hook is a
+  // conditional hook call, and the compiler bails on the whole component.
+  if (characterCount < CHARACTER_MODE_FROM) return null;
   return (
-    <fieldset className={cn("min-w-0", className)}>
+    // The entrance lives here rather than in either call site's className: the
+    // reveal is this component's own behavior now. A restored draft that
+    // already has three rows plays it once on first paint, which is what the
+    // rest of the app does too, and it animates opacity and transform only —
+    // the card is full height from the first frame.
+    <fieldset
+      className={cn(
+        "min-w-0 animate-in duration-200 fade-in slide-in-from-top-2 motion-reduce:animate-none",
+        className
+      )}
+    >
       <legend className="mb-2 text-sm font-medium text-foreground">
         {t("characters.mode.label")}
       </legend>

@@ -189,16 +189,6 @@ export function LiveSettingsPanel({
         <div>
           <SectionLabel>{t("setup.characters.title")}</SectionLabel>
           <div className="mt-3">
-            {/* Picking a mode is a click, so it takes changeSettings — the
-                immediate-commit path the settings switches use — not the
-                1-second typing debounce. The next chat to start deals by
-                the new rule; chats already running keep their frozen cast. */}
-            <CharacterModeField
-              className="mb-5"
-              idPrefix="host-edit"
-              value={draft.settings.characterMode}
-              onChange={(characterMode) => changeSettings({ characterMode })}
-            />
             <CharacterRowsField
               rows={draft.characters}
               onUpdate={updateCharacter}
@@ -206,6 +196,20 @@ export function LiveSettingsPanel({
               onRemove={removeCharacter}
               problemFor={problemFor}
               registerField={() => () => undefined}
+            />
+            {/* Picking a mode is a click, so it takes changeSettings — the
+                immediate-commit path the settings switches use — not the
+                1-second typing debounce. The next chat to start deals by
+                the new rule; chats already running keep their frozen cast.
+                Counted off the draft, not the activity: a just-added row is
+                still nameless, and activityFromLiveDraft filters those out,
+                so the activity's roster would lag the list right above it. */}
+            <CharacterModeField
+              className="mt-5"
+              idPrefix="host-edit"
+              value={draft.settings.characterMode}
+              onChange={(characterMode) => changeSettings({ characterMode })}
+              characterCount={draft.characters.length}
             />
           </div>
         </div>

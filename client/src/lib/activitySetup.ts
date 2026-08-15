@@ -45,6 +45,14 @@ export type { StepperBounds };
 export const NAME_COUNTER_FROM = 25;
 export const STUDENT_INSTRUCTIONS_COUNTER_FROM = 200;
 
+/**
+ * The character-mode picker appears from this many rows up. Below it the two
+ * modes are the same operation — dealCast either shuffles the roster and takes
+ * N or takes N and shuffles them, and with two names those are the same two
+ * names — so the question can't have an answer that changes anything.
+ */
+export const CHARACTER_MODE_FROM = MIN_CHARACTERS + 1;
+
 /** One character row as drafted — may be empty while typing. Just a name:
  *  an emoji, if the teacher wants one, is part of that name. */
 export type CharacterDraft = Pick<Character, "name">;
