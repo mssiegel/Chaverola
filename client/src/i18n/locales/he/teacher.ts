@@ -66,7 +66,7 @@ export const teacher: HebrewOf<TeacherCatalog> = {
     "זוג מקבל את שתי הדמויות הראשונות ברשימה, שלישייה את שלוש הדמויות הראשונות, וכן הלאה.",
   "characters.mode.shuffled.title": "באקראי",
   "characters.mode.shuffled.body":
-    "כל שיחה מקבלת דמויות משלה באקראי מתוך רשימת הדמויות שלך.",
+    "כל שיחה מקבלת דמויות באקראי מתוך רשימת הדמויות שלך. שני תלמידים באותה שיחה תמיד מקבלים דמויות שונות.",
 
   "aboutYou.name.label": "השם שלך",
   "aboutYou.name.placeholder": "המורה כהן",

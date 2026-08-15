@@ -1952,8 +1952,8 @@ characters, and who gets which is random — the teacher sees who got whom on
 the chat card. Each row's remove control is separate from the select target.
 
 _Amended 2026-08-10:_ which N the chat is dealt is now the teacher's
-`characterMode` — the roster's first N in order mode, or N drawn at random
-from the whole roster in shuffled mode (the default). See
+`characterMode` — the roster's first N in order mode (the default), or N drawn
+at random from the whole roster in shuffled mode. See
 [teacher-setup → The teacher picks how characters get handed out](./teacher-setup.md#the-teacher-picks-how-characters-get-handed-out-and-a-roster-can-hold-a-hundred).
 Neither mode has an assignment step, which is what this entry is about.
 

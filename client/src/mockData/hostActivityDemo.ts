@@ -31,11 +31,11 @@ export function demoHostedActivity(activity: Activity): HostedActivity {
     characters: activity.characters.map((c) => ({ ...c })),
     settings: {
       ...DEFAULT_ACTIVITY_SETTINGS,
-      // Spelled out rather than left to the default it currently matches: the
-      // demo is what a teacher judges the mode by, so this is the one place
-      // that shouldn't quietly follow a change to the form's recommendation.
-      // Paired with the eight-name roster in activityDemo.ts — the two
-      // together are what make the chat cards carry different casts.
+      // Deliberately NOT the form's default, which is "inOrder": the demo is
+      // what a teacher judges the mode by, and in order on this roster would
+      // put Caesar's ghost and Brutus in every single chat. Paired with the
+      // eight-name roster in activityDemo.ts — the two together are what make
+      // the chat cards carry different casts.
       characterMode: "shuffled",
     },
   };

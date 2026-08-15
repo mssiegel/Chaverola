@@ -5,6 +5,49 @@ area. Entries are newest-first; add new ones at the top, and add a matching line
 to the index in the same change. Replaced decisions move to Superseded at the
 bottom of this file.
 
+### In order leads the character-mode picker and is the default
+
+_2026-08-15_
+
+**Decision:** The picker's two options swap places: **In order** is now first
+and is `DEFAULT_ACTIVITY_SETTINGS.characterMode`; Shuffled is second. The rule
+that the leading option is the selected one is unchanged, so the swap is one
+decision, not two. Shuffled's body is rewritten to say what it does in plainer
+words and to answer the question the word "random" raises: "Each chat gets its
+characters at random from your character list. Two students in the same chat
+always get different characters."
+
+**Why:** A teacher can guess what "In order" does from the name alone. "Shuffled"
+has to be read to be understood, and a default nobody understands is a default
+nobody chose (founder, 2026-08-15). The old rationale — that shuffled is the
+better guess because a teacher who names more than two characters probably wants
+them all used — assumed the teacher had read far enough to be making a guess at
+all. The predictable mode is the better thing to land on without reading.
+
+Two things fall out of it for free. The client default and the server's wire
+fallback now agree, where before they deliberately differed, so a request that
+omits `characterMode` lands where the form would have put it. And the old
+Shuffled body said each chat gets "its own characters", which reads as a promise
+that two chats never share a cast; that promise is one this app must never make.
+Dropping the word fixes it.
+
+**What this does not license:** promising that different chats get different
+casts. A roster shorter than the class repeats characters silently, by decision,
+and the new sentence is scoped to students **in the same chat** for exactly that
+reason. That guarantee is real and worth stating — `dealCast` slices a shuffled
+roster, and `createChat` refuses a chat with more students than characters
+rather than seating two on one name — but it stops at the edge of one chat. Nor
+does it license changing the demo: `hostActivityDemo` pins shuffled on purpose,
+because in order on that eight-name roster would put Caesar's ghost and Brutus
+in every chat and the chat cards would stop showing what a roster is for.
+
+_The default lives in
+[DEFAULT_ACTIVITY_SETTINGS](../../shared/src/constants.ts); the order lives in
+`MODES` in
+[CharacterModeField](../../client/src/components/Teacher/ActivitySetup/CharacterModeField.tsx),
+and the copy in the
+[teacher catalogs](../../client/src/i18n/locales/en/teacher.ts)._
+
 ### How characters get handed out moves under the list, and waits for a third name
 
 _2026-08-15_
@@ -157,6 +200,12 @@ _Update (2026-08-15): the card no longer opens with the picker — it closes wit
 it, and only from three characters up. See
 [How characters get handed out moves under the list, and waits for a third name](#how-characters-get-handed-out-moves-under-the-list-and-waits-for-a-third-name).
 Everything else here stands._
+
+_Update (2026-08-15): **shuffled is no longer the default and no longer leads** —
+in order took both, and the paragraph above arguing for shuffled is superseded.
+See
+[In order leads the character-mode picker and is the default](#in-order-leads-the-character-mode-picker-and-is-the-default).
+The rest of this entry, including the three omissions, still stands._
 
 **Consequence worth knowing:** a roster longer than the eight-slot character
 palette makes `assignCharacterColors` wrap, so two characters can share a

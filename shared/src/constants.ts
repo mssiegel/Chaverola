@@ -87,11 +87,13 @@ export const DEFAULT_ACTIVITY_SETTINGS: ActivitySettings = {
   // of their hands. The seconds below still apply the moment they switch it on.
   autoMatch: false,
   autoMatchSeconds: AUTO_MATCH_SECONDS.default,
-  // A fresh form recommends shuffled: a teacher who names two characters gets
-  // the same activity either way, and one who names more almost certainly
-  // wants them used. Not the same as the server's wire fallback, which is
-  // "inOrder" — see activitySettingsSchema.
-  characterMode: "shuffled",
+  // A fresh form recommends in order, the mode a teacher can predict from its
+  // name alone: a pair plays the first two names on the list. Shuffled has to
+  // be read to be understood, and a default nobody understands is a default
+  // nobody chose. Same value as the server's wire fallback, so a request that
+  // omits the field lands where the form would have put it anyway — see
+  // activitySettingsSchema.
+  characterMode: "inOrder",
 };
 
 /**

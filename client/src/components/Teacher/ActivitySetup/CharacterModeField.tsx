@@ -5,14 +5,16 @@ import { CHARACTER_MODE_FROM } from "@/lib/activitySetup";
 import { cn } from "@/lib/utils";
 
 /**
- * Reading order of the two options, and the only place it's decided. Shuffled
- * leads because it's the default (DEFAULT_ACTIVITY_SETTINGS), and a teacher
- * who reads no further than the first option should be reading the one that's
- * already selected.
+ * Reading order of the two options, and the only place it's decided. The rule
+ * is that the leading option is the default (DEFAULT_ACTIVITY_SETTINGS), so a
+ * teacher who reads no further than the first one is reading the one already
+ * selected. In order leads because it's now that default, and because it's the
+ * option whose name explains it: a teacher can guess what it does before
+ * reading a word of the body, which makes it the better thing to meet first.
  */
 const MODES = [
-  "shuffled",
   "inOrder",
+  "shuffled",
 ] as const satisfies readonly CharacterMode[];
 
 /** Catalog keys as a plain module map, the `FAILURE_KEYS` idiom — `as const

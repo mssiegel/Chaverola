@@ -586,9 +586,12 @@ below.
   connected, not already in a chat, and not sitting on the ended screen,
   ordered by join time. A student marked `reconnecting` is therefore
   unmatchable server-side, not merely dimmed on the teacher's screen.
-- **Characters are dealt at random from the roster's first N.** A chat of
-  N seats uses characters 1..N, shuffled — so a 2-person chat always uses
-  the first two characters, and who gets which is chance.
+- **Which characters a chat is dealt is the activity's `characterMode`.** In
+  order (the default, and the wire fallback when the field is absent) gives a
+  chat of N seats characters 1..N, so a 2-person chat always uses the first
+  two. Shuffled draws N at random from the whole roster instead. Both then
+  shuffle among the seats, so who gets which is chance either way, and within
+  one chat the N are always distinct.
 - **Starting a chat is all or nothing.** A payload naming more than
   `MAX_CHAT_SEATS` students dies at the wire without a word — no real client
   can send one, since the dashboard can't select past that. Within the cap,
